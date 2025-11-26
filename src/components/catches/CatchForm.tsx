@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import type { CatchFormInput } from '../../types'
+import { LocationPicker } from '../map/LocationPicker'
 
 const speciesOptions = [
   'Bass',
@@ -79,6 +80,8 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CatchFormValues>({
     resolver: zodResolver(catchFormSchema),
@@ -86,6 +89,24 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
       caught_at: new Date().toISOString().slice(0, 16),
     },
   })
+
+  const watchedLat = watch('latitude')
+  const watchedLng = watch('longitude')
+
+  const latNumber =
+    watchedLat === undefined || watchedLat === null || watchedLat === ''
+      ? null
+      : Number(watchedLat)
+
+  const lngNumber =
+    watchedLng === undefined || watchedLng === null || watchedLng === ''
+      ? null
+      : Number(watchedLng)
+
+  const pickerValue = {
+    lat: Number.isNaN(latNumber ?? NaN) ? null : latNumber,
+    lng: Number.isNaN(lngNumber ?? NaN) ? null : lngNumber,
+  }
 
   const onSubmit = async (values: CatchFormValues) => {
     if (!user) {
@@ -181,31 +202,48 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
           ) : null}
         </div>
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="latitude">
-            Latitude
-          </label>
-          <input
-            id="latitude"
-            type="text"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            {...register('latitude')}
+        <div className="sm:col-span-2 space-y-1">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-medium text-slate-700">Pick location on map</p>
+            <button
+              type="button"
+              className="rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
+              onClick={() => {
+                if (!navigator.geolocation) {
+                  setFormError('Geolocation is not available in this browser.')
+                  return
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => {
+                    const { latitude, longitude } = pos.coords
+                    setValue('latitude', latitude.toString(), { shouldValidate: true })
+                    setValue('longitude', longitude.toString(), { shouldValidate: true })
+                  },
+                  () => {
+                    setFormError('Could not get your location. Please drag or tap on the map.')
+                  },
+                  { enableHighAccuracy: true, timeout: 10000 },
+                )
+              }}
+            >
+              Use my current location
+            </button>
+          </div>
+
+          <LocationPicker
+            value={pickerValue}
+            onChange={({ lat, lng }) => {
+              setValue('latitude', lat.toString(), { shouldValidate: true })
+              setValue('longitude', lng.toString(), { shouldValidate: true })
+            }}
           />
+          <p className="mt-1 text-[11px] text-slate-500">
+            Tap or drag the pin to your fishing spot. Coordinates are saved automatically.
+          </p>
           {errors.latitude ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.latitude.message}</p>
           ) : null}
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="longitude">
-            Longitude
-          </label>
-          <input
-            id="longitude"
-            type="text"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            {...register('longitude')}
-          />
           {errors.longitude ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.longitude.message}</p>
           ) : null}

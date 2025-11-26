@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,6 +14,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
@@ -31,7 +33,10 @@ export function LoginForm() {
 
     if (error) {
       setFormError(error.message)
+      return
     }
+
+    navigate('/dashboard', { replace: true })
   }
 
   return (
