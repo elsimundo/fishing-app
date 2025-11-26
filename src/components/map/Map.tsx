@@ -7,9 +7,10 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string
 
 type MapProps = {
   catches: Catch[]
+  variant?: 'full' | 'mini'
 }
 
-export function Map({ catches }: MapProps) {
+export function Map({ catches, variant = 'full' }: MapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
 
@@ -69,6 +70,27 @@ export function Map({ catches }: MapProps) {
     })
 
     ;(map as any)._catchMarkers = markers
+
+    // Adjust view: if we have catches, center/fit to them
+    if (markers.length === 1) {
+      const lngLat = markers[0].getLngLat()
+      const isMini = variant === 'mini'
+      const options: mapboxgl.EaseToOptions = {
+        center: lngLat,
+        zoom: isMini ? 11 : 10,
+      }
+
+      if (isMini) {
+        // Push the map center slightly down so the marker appears higher in the mini map
+        ;(options as any).offset = [0, -200]
+      }
+
+      map.easeTo(options)
+    } else if (markers.length > 1) {
+      const bounds = new mapboxgl.LngLatBounds()
+      markers.forEach((m) => bounds.extend(m.getLngLat()))
+      map.fitBounds(bounds, { padding: 40, maxZoom: 10 })
+    }
   }, [catches])
 
   return <div ref={mapContainerRef} className="h-[70vh] w-full rounded-lg" />
