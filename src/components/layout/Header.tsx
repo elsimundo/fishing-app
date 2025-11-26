@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth'
+import { Link } from 'react-router-dom'
 
 export function Header() {
   const { user, signOut } = useAuth()
@@ -15,9 +16,13 @@ export function Header() {
         </div>
       </div>
       <div className="flex items-center gap-3 text-xs text-slate-600">
-        <span className="hidden sm:inline truncate max-w-[140px]" title={user?.email ?? ''}>
+        <Link
+          to="/profile"
+          className="hidden sm:inline truncate max-w-[140px] text-secondary hover:underline"
+          title={user?.email ?? ''}
+        >
           {user?.email}
-        </span>
+        </Link>
         <button
           type="button"
           onClick={() => void signOut()}
