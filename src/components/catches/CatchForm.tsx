@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
-import type { CatchFormInput } from '../../types'
+import type { Catch, CatchFormInput } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 
@@ -72,12 +72,35 @@ type CatchFormValues = z.infer<typeof catchFormSchema>
 
 type CatchFormProps = {
   onSuccess: () => void
+  mode?: 'create' | 'edit'
+  catchId?: string
+  initialCatch?: Catch
 }
 
-export function CatchForm({ onSuccess }: CatchFormProps) {
+export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }: CatchFormProps) {
   const { user } = useAuth()
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
+
+  const defaultNow = new Date().toISOString().slice(0, 16)
+
+  const defaultValues: Partial<CatchFormValues> = initialCatch
+    ? {
+        species: initialCatch.species,
+        caught_at: new Date(initialCatch.caught_at).toISOString().slice(0, 16),
+        location_name: initialCatch.location_name,
+        latitude: initialCatch.latitude.toString(),
+        longitude: initialCatch.longitude.toString(),
+        weight_kg: initialCatch.weight_kg != null ? initialCatch.weight_kg.toString() : undefined,
+        length_cm: initialCatch.length_cm != null ? initialCatch.length_cm.toString() : undefined,
+        bait: initialCatch.bait ?? undefined,
+        rig: initialCatch.rig ?? undefined,
+        fishing_style: initialCatch.fishing_style ?? undefined,
+        notes: initialCatch.notes ?? undefined,
+      }
+    : {
+        caught_at: defaultNow,
+      }
 
   const {
     register,
@@ -87,9 +110,7 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<CatchFormValues>({
     resolver: zodResolver(catchFormSchema),
-    defaultValues: {
-      caught_at: new Date().toISOString().slice(0, 16),
-    },
+    defaultValues,
   })
 
   const watchedLat = watch('latitude')
@@ -118,7 +139,7 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
 
     setFormError(null)
 
-    let photoUrl: string | null = null
+    let photoUrl: string | null = initialCatch?.photo_url ?? null
 
     if (photoFile) {
       try {
@@ -147,7 +168,11 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
       notes: values.notes ?? null,
     }
 
-    const { error } = await supabase.from('catches').insert(payload)
+    const isEdit = mode === 'edit' && catchId
+
+    const { error } = isEdit
+      ? await supabase.from('catches').update(payload).eq('id', catchId)
+      : await supabase.from('catches').insert(payload)
 
     if (error) {
       setFormError(error.message)

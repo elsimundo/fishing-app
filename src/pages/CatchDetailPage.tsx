@@ -56,15 +56,27 @@ export function CatchDetailPage() {
           <Link to="/dashboard" className="text-secondary hover:underline">
             804 Back to dashboard
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              void handleDelete()
-            }}
-            className="rounded-md border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-medium text-red-700 hover:bg-red-100"
-          >
-            Delete
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (!id) return
+                navigate(`/catches/${id}/edit`)
+              }}
+              className="rounded-md border border-slate-200 bg-surface px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void handleDelete()
+              }}
+              className="rounded-md border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-medium text-red-700 hover:bg-red-100"
+            >
+              Delete
+            </button>
+          </div>
         </div>
 
         <section className="overflow-hidden rounded-xl bg-surface shadow">

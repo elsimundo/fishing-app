@@ -3,6 +3,7 @@ import { Login } from './pages/Login'
 import { Signup } from './pages/Signup'
 import { Dashboard } from './pages/Dashboard'
 import { CatchDetailPage } from './pages/CatchDetailPage'
+import { CatchEditPage } from './pages/CatchEditPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/catches/:id" element={<CatchDetailPage />} />
+        <Route path="/catches/:id/edit" element={<CatchEditPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
