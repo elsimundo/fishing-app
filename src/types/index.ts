@@ -48,5 +48,6 @@ export type CatchFormInput = {
   bait?: string | null
   rig?: string | null
   fishing_style?: string | null
+  photo_url?: string | null
   notes?: string | null
 }

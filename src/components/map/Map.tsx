@@ -50,11 +50,15 @@ export function Map({ catches }: MapProps) {
       el.className =
         'flex h-4 w-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white bg-accent shadow'
 
+      const photoHtml = catchItem.photo_url
+        ? `<div style="margin-bottom:4px;"><img src="${catchItem.photo_url}" alt="${catchItem.species}" style="width:80px;height:50px;object-fit:cover;border-radius:4px;" /></div>`
+        : ''
+
       const marker = new mapboxgl.Marker({ element: el })
         .setLngLat([catchItem.longitude, catchItem.latitude])
         .setPopup(
           new mapboxgl.Popup({ offset: 12 }).setHTML(
-            `<div style="font-size:12px;"><strong>${catchItem.species}</strong><br/>${
+            `<div style="font-size:12px;">${photoHtml}<strong>${catchItem.species}</strong><br/>${
               catchItem.weight_kg ? `${catchItem.weight_kg.toFixed(1)} kg<br/>` : ''
             }${catchItem.location_name}</div>`,
           ),

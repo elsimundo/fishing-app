@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import type { CatchFormInput } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
+import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 
 const speciesOptions = [
   'Bass',
@@ -76,6 +77,7 @@ type CatchFormProps = {
 export function CatchForm({ onSuccess }: CatchFormProps) {
   const { user } = useAuth()
   const [formError, setFormError] = useState<string | null>(null)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
 
   const {
     register,
@@ -116,6 +118,19 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
 
     setFormError(null)
 
+    let photoUrl: string | null = null
+
+    if (photoFile) {
+      try {
+        const { url } = await uploadCatchPhoto({ file: photoFile, userId: user.id })
+        photoUrl = url
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to upload photo.'
+        setFormError(message)
+        return
+      }
+    }
+
     const payload: CatchFormInput & { user_id: string } = {
       user_id: user.id,
       species: values.species,
@@ -128,6 +143,7 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
       bait: values.bait ?? null,
       rig: values.rig ?? null,
       fishing_style: values.fishing_style ?? null,
+      photo_url: photoUrl,
       notes: values.notes ?? null,
     }
 
@@ -247,6 +263,31 @@ export function CatchForm({ onSuccess }: CatchFormProps) {
           {errors.longitude ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.longitude.message}</p>
           ) : null}
+        </div>
+
+        <div className="sm:col-span-2 space-y-1">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="photo">
+            Photo (optional)
+          </label>
+          <input
+            id="photo"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="block w-full text-[11px] text-slate-600 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-slate-50 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-slate-700 hover:file:bg-slate-100"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              setPhotoFile(file ?? null)
+            }}
+          />
+          {photoFile ? (
+            <div className="mt-1 inline-flex items-center gap-2">
+              <span className="text-[11px] text-slate-600">Selected:</span>
+              <span className="truncate text-[11px] text-slate-700 max-w-[160px]">
+                {photoFile.name}
+              </span>
+            </div>
+          ) : null}
+          <p className="mt-1 text-[11px] text-slate-500">JPG, PNG, or WebP up to 5MB.</p>
         </div>
 
         <div>
