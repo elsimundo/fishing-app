@@ -3,6 +3,7 @@ import { Layout } from '../components/layout/Layout'
 import { Navigation } from '../components/layout/Navigation'
 import { BottomSheet } from '../components/ui/BottomSheet'
 import { CatchForm } from '../components/catches/CatchForm'
+import { CatchList } from '../components/catches/CatchList'
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<'map' | 'list'>('map')
@@ -18,10 +19,8 @@ export function Dashboard() {
           </section>
         ) : (
           <section className="space-y-2">
-            <p className="text-sm font-medium text-slate-700">List View</p>
-            <div className="rounded-lg border border-dashed border-slate-300 bg-surface p-4 text-sm text-slate-500">
-              Catch list, filters, and sorting will be implemented here.
-            </div>
+            <p className="text-sm font-medium text-slate-700">Your catches</p>
+            <CatchList />
           </section>
         )}
 
