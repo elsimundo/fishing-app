@@ -4,18 +4,32 @@ import { Navigation } from '../components/layout/Navigation'
 import { BottomSheet } from '../components/ui/BottomSheet'
 import { CatchForm } from '../components/catches/CatchForm'
 import { CatchList } from '../components/catches/CatchList'
+import { Map } from '../components/map'
+import { useCatches } from '../hooks/useCatches'
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<'map' | 'list'>('map')
   const [isCatchSheetOpen, setIsCatchSheetOpen] = useState(false)
+  const { catches, isLoading, isError, error } = useCatches()
 
   return (
     <Layout>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="relative flex-1 bg-background px-4 py-4">
         {activeTab === 'map' ? (
-          <section className="flex h-[70vh] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-surface text-sm text-slate-500">
-            Map View placeholder. Interactive Mapbox map and catch markers will appear here.
+          <section className="space-y-2">
+            <p className="text-sm font-medium text-slate-700">Map view</p>
+            {isLoading ? (
+              <div className="flex h-[70vh] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-surface text-sm text-slate-500">
+                Loading map
+              </div>
+            ) : isError ? (
+              <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+                Failed to load catches: {error?.message}
+              </div>
+            ) : (
+              <Map catches={catches} />
+            )}
           </section>
         ) : (
           <section className="space-y-2">

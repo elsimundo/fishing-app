@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './hooks/useAuth'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 const queryClient = new QueryClient()
 
