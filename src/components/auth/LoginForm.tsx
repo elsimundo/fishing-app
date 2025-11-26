@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { APP_NAME } from '../../lib/constants'
 
@@ -33,9 +34,11 @@ export function LoginForm() {
 
     if (error) {
       setFormError(error.message)
+      toast.error(error.message)
       return
     }
 
+    toast.success('Signed in')
     navigate('/dashboard', { replace: true })
   }
 

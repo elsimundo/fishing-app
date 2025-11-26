@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import type { Catch, CatchFormInput } from '../../types'
@@ -134,6 +135,7 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
   const onSubmit = async (values: CatchFormValues) => {
     if (!user) {
       setFormError('You must be logged in to add a catch.')
+      toast.error('You must be logged in to add a catch.')
       return
     }
 
@@ -148,6 +150,7 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to upload photo.'
         setFormError(message)
+        toast.error(message)
         return
       }
     }
@@ -176,9 +179,11 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
 
     if (error) {
       setFormError(error.message)
+      toast.error(error.message)
       return
     }
 
+    toast.success(isEdit ? 'Catch updated' : 'Catch added')
     onSuccess()
   }
 

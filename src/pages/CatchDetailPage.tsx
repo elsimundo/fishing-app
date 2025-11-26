@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
+import { toast } from 'react-hot-toast'
 import { useCatch } from '../hooks/useCatch'
 import { Map } from '../components/map'
 
@@ -41,11 +42,11 @@ export function CatchDetailPage() {
     const { error: deleteError } = await supabase.from('catches').delete().eq('id', id)
 
     if (deleteError) {
-      // eslint-disable-next-line no-alert
-      alert(`Failed to delete catch: ${deleteError.message}`)
+      toast.error(deleteError.message)
       return
     }
 
+    toast.success('Catch deleted')
     navigate('/dashboard')
   }
 
@@ -54,7 +55,7 @@ export function CatchDetailPage() {
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-slate-600">
           <Link to="/dashboard" className="text-secondary hover:underline">
-            804 Back to dashboard
+            ← Back to dashboard
           </Link>
           <div className="flex items-center gap-2">
             <button

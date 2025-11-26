@@ -19,7 +19,7 @@ export function CatchEditPage() {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
         <Link to="/dashboard" className="mb-4 inline-block text-xs text-secondary hover:underline">
-          804 Back to dashboard
+          ← Back to dashboard
         </Link>
         <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
           Failed to load catch for editing: {error instanceof Error ? error.message : 'Unknown error'}
@@ -33,7 +33,7 @@ export function CatchEditPage() {
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-slate-600">
           <Link to={`/catches/${id}`} className="text-secondary hover:underline">
-            804 Back to catch
+            ← Back to catch
           </Link>
         </div>
 
