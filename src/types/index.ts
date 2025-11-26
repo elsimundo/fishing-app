@@ -36,3 +36,17 @@ export type AuthUser = {
 export type ApiError = {
   message: string
 }
+
+export type CatchFormInput = {
+  species: string
+  caught_at: string
+  location_name: string
+  latitude: number
+  longitude: number
+  weight_kg?: number | null
+  length_cm?: number | null
+  bait?: string | null
+  rig?: string | null
+  fishing_style?: string | null
+  notes?: string | null
+}
