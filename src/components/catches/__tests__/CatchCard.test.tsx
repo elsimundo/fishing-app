@@ -6,6 +6,7 @@ import type { Catch } from '../../../types'
 const baseCatch: Catch = {
   id: '1',
   user_id: 'u1',
+  session_id: null,
   species: 'Bass',
   weight_kg: 2.5,
   length_cm: 55,
