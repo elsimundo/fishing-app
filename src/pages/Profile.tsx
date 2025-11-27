@@ -7,7 +7,9 @@ export function Profile() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
-        <p className="text-sm text-slate-600">Loading profile</p>
+        <div className="flex h-full items-center justify-center">
+          <p className="text-sm text-slate-600">Loading profile</p>
+        </div>
       </main>
     )
   }
@@ -15,8 +17,13 @@ export function Profile() {
   if (isError || !profile) {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
-        <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-          Failed to load profile: {error instanceof Error ? error.message : 'Unknown error'}
+        <div className="flex h-full items-center justify-center">
+          <div className="max-w-xs rounded-md bg-red-50 px-3 py-2 text-center text-xs text-red-700">
+            <p className="font-medium">Failed to load profile.</p>
+            <p className="mt-1 text-[11px] text-red-600">
+              {error instanceof Error ? error.message : 'Please try again in a moment.'}
+            </p>
+          </div>
         </div>
       </main>
     )

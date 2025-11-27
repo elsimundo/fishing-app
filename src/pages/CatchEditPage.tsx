@@ -10,7 +10,9 @@ export function CatchEditPage() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
-        <p className="text-sm text-slate-600">Loading catch</p>
+        <div className="flex h-full items-center justify-center">
+          <p className="text-sm text-slate-600">Loading catch</p>
+        </div>
       </main>
     )
   }
@@ -21,8 +23,11 @@ export function CatchEditPage() {
         <Link to="/dashboard" className="mb-4 inline-block text-xs text-secondary hover:underline">
           ← Back to dashboard
         </Link>
-        <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-          Failed to load catch for editing: {error instanceof Error ? error.message : 'Unknown error'}
+        <div className="max-w-xs rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+          <p className="font-medium">Failed to load catch for editing.</p>
+          <p className="mt-1 text-[11px] text-red-600">
+            {error instanceof Error ? error.message : 'Please try again in a moment.'}
+          </p>
         </div>
       </main>
     )
