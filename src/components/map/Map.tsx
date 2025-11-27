@@ -93,5 +93,5 @@ export function Map({ catches, variant = 'full' }: MapProps) {
     }
   }, [catches])
 
-  return <div ref={mapContainerRef} className="h-[70vh] w-full rounded-lg" />
+  return <div ref={mapContainerRef} className="h-[60vh] w-full rounded-lg sm:h-[70vh]" />
 }
