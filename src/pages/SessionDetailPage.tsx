@@ -6,6 +6,7 @@ import { Map } from '../components/map'
 import { CatchCard } from '../components/catches/CatchCard'
 import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
+import { getLocationPrivacyLabel } from '../lib/privacy'
 
 export function SessionDetailPage() {
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false)
@@ -40,6 +41,7 @@ export function SessionDetailPage() {
   }
 
   const title = session.title || session.location_name
+  const privacyLabel = getLocationPrivacyLabel(session)
 
   const handleEndSession = async () => {
     if (!session || session.ended_at) return
@@ -62,7 +64,7 @@ export function SessionDetailPage() {
 
         <section className="overflow-hidden rounded-xl bg-surface p-4 text-xs text-slate-700 shadow">
           <h1 className="text-base font-semibold text-slate-900">{title}</h1>
-          <p className="mt-1 text-[11px] text-slate-500">Session overview</p>
+          <p className="mt-1 text-[11px] text-slate-500">Session overview · {privacyLabel}</p>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-[11px] text-slate-500">Catch location and details below.</p>
             <div className="flex items-center gap-2">
@@ -83,6 +85,28 @@ export function SessionDetailPage() {
               >
                 {session.ended_at ? 'Session ended' : isEnding ? 'Ending…' : 'End session'}
               </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Session stats</p>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4 sm:text-xs">
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Catches</p>
+              <p className="text-sm font-semibold text-slate-900">{session.stats.total_catches}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Total weight</p>
+              <p className="text-sm font-semibold text-slate-900">{session.stats.total_weight_kg.toFixed(1)} kg</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Species</p>
+              <p className="text-sm font-semibold text-slate-900">{Object.keys(session.stats.species_breakdown).length}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Duration</p>
+              <p className="text-sm font-semibold text-slate-900">{session.stats.duration_hours.toFixed(1)} h</p>
             </div>
           </div>
         </section>

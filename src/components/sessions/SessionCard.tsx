@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import type { SessionWithCatches } from '../../types'
+import { getLocationPrivacyLabel } from '../../lib/privacy'
 
 type SessionCardProps = {
   session: SessionWithCatches
@@ -47,6 +48,7 @@ export function SessionCard({ session }: SessionCardProps) {
   const rangeLabel = formatRange(session.started_at, session.ended_at)
   const durationLabel = formatDurationHours(session.stats.duration_hours)
   const waterBadge = getWaterTypeBadgeLabel(session.water_type)
+  const privacyLabel = getLocationPrivacyLabel(session)
 
   const totalCatches = session.stats.total_catches
   const biggest = session.stats.biggest_catch
@@ -77,6 +79,7 @@ export function SessionCard({ session }: SessionCardProps) {
               {biggest.weight_kg != null ? ` · ${biggest.weight_kg.toFixed(1)} kg` : ''}
             </p>
           ) : null}
+          <p className="mt-1 text-[10px] text-slate-500">{privacyLabel}</p>
         </div>
         <div className="ml-2 flex flex-col items-end gap-1">
           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">

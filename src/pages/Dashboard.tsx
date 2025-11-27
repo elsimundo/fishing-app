@@ -6,6 +6,7 @@ import { CatchForm } from '../components/catches/CatchForm'
 import { CatchList } from '../components/catches/CatchList'
 import { Map } from '../components/map'
 import { useCatches } from '../hooks/useCatches'
+import { useSessions } from '../hooks/useSessions'
 import { SessionForm } from '../components/sessions/SessionForm'
 import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
 import { SessionsList } from '../components/sessions/SessionsList'
@@ -15,11 +16,80 @@ export function Dashboard() {
   const [isCatchSheetOpen, setIsCatchSheetOpen] = useState(false)
   const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false)
   const { catches, isLoading, isError, error } = useCatches()
+  const { data: sessions } = useSessions()
+
+  const completedSessions = sessions ?? []
+  const totalSessions = completedSessions.length
+  const totalCatches = completedSessions.reduce((sum, s) => sum + s.stats.total_catches, 0)
+  const totalWeight = completedSessions.reduce((sum, s) => sum + s.stats.total_weight_kg, 0)
+
+  let personalBestLabel = '—'
+  let topSpeciesLabel = '—'
+
+  if (completedSessions.length > 0) {
+    // Personal best: heaviest catch across all sessions
+    const allCatches = completedSessions.flatMap((s) => s.catches)
+    const heaviest = allCatches.reduce<null | typeof allCatches[number]>((best, c) => {
+      if (c.weight_kg == null) return best
+      if (!best || (best.weight_kg ?? 0) < c.weight_kg) return c
+      return best
+    }, null)
+
+    if (heaviest && heaviest.weight_kg != null) {
+      const lengthPart = heaviest.length_cm != null ? ` · ${heaviest.length_cm.toFixed(0)} cm` : ''
+      personalBestLabel = `${heaviest.weight_kg.toFixed(1)} kg · ${heaviest.species}${lengthPart}`
+    }
+
+    // Top species by total count across sessions
+    const speciesCounts: Record<string, number> = {}
+    for (const session of completedSessions) {
+      for (const [species, count] of Object.entries(session.stats.species_breakdown)) {
+        speciesCounts[species] = (speciesCounts[species] ?? 0) + count
+      }
+    }
+
+    const sortedSpecies = Object.entries(speciesCounts).sort((a, b) => b[1] - a[1])
+    if (sortedSpecies.length > 0) {
+      const [name, count] = sortedSpecies[0]
+      topSpeciesLabel = `${name} (${count})`
+    }
+  }
 
   return (
     <Layout>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="relative flex-1 bg-background px-4 py-4">
+      <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-24 pt-3">
+        <ActiveSessionBanner />
+
+        <section className="rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Lifetime stats</p>
+          <div className="mt-2 grid grid-cols-3 gap-2 text-[11px] sm:text-xs">
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Sessions</p>
+              <p className="text-sm font-semibold text-slate-900">{totalSessions}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Catches</p>
+              <p className="text-sm font-semibold text-slate-900">{totalCatches}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Total weight</p>
+              <p className="text-sm font-semibold text-slate-900">{totalWeight.toFixed(1)} kg</p>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 text-[11px] sm:grid-cols-2 sm:text-xs">
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Personal best</p>
+              <p className="text-[11px] font-semibold text-slate-900 sm:text-xs">{personalBestLabel}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-2 py-2">
+              <p className="text-[10px] text-slate-500">Top species</p>
+              <p className="text-[11px] font-semibold text-slate-900 sm:text-xs">{topSpeciesLabel}</p>
+            </div>
+          </div>
+        </section>
+
         <div className="mb-3 flex items-center justify-between text-xs text-slate-700">
           <p className="font-medium">Sessions</p>
           <button
