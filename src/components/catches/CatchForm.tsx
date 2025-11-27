@@ -8,18 +8,7 @@ import { useAuth } from '../../hooks/useAuth'
 import type { Catch, CatchFormInput } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
-
-const speciesOptions = [
-  'Bass',
-  'Cod',
-  'Mackerel',
-  'Pollock',
-  'Wrasse',
-  'Plaice',
-  'Sole',
-  'Dogfish',
-  'Other',
-] as const
+import { FISH_SPECIES } from '../../lib/constants'
 
 const fishingStyles = [
   'Shore fishing',
@@ -206,11 +195,28 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
             {...register('species')}
           >
             <option value="">Select species</option>
-            {speciesOptions.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
+            <optgroup label="Saltwater">
+              {FISH_SPECIES.SALTWATER.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Coarse">
+              {FISH_SPECIES.COARSE.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Game">
+              {FISH_SPECIES.GAME.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </optgroup>
+            <option value="Other">Other / not listed</option>
           </select>
           {errors.species ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.species.message}</p>

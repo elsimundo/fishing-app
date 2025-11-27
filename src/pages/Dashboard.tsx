@@ -6,16 +6,33 @@ import { CatchForm } from '../components/catches/CatchForm'
 import { CatchList } from '../components/catches/CatchList'
 import { Map } from '../components/map'
 import { useCatches } from '../hooks/useCatches'
+import { SessionForm } from '../components/sessions/SessionForm'
+import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
+import { SessionsList } from '../components/sessions/SessionsList'
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<'map' | 'list'>('map')
   const [isCatchSheetOpen, setIsCatchSheetOpen] = useState(false)
+  const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false)
   const { catches, isLoading, isError, error } = useCatches()
 
   return (
     <Layout>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="relative flex-1 bg-background px-4 py-4">
+        <div className="mb-3 flex items-center justify-between text-xs text-slate-700">
+          <p className="font-medium">Sessions</p>
+          <button
+            type="button"
+            onClick={() => setIsSessionSheetOpen(true)}
+            className="rounded-md bg-primary px-3 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-primary/90"
+          >
+            Start session
+          </button>
+        </div>
+
+        <ActiveSessionBanner />
+
         {activeTab === 'map' ? (
           <section className="space-y-2">
             <p className="text-sm font-medium text-slate-700">Map view</p>
@@ -38,6 +55,11 @@ export function Dashboard() {
           </section>
         )}
 
+        <section className="mt-5 space-y-2">
+          <p className="text-sm font-medium text-slate-700">Recent sessions</p>
+          <SessionsList />
+        </section>
+
         <button
           type="button"
           onClick={() => setIsCatchSheetOpen(true)}
@@ -53,6 +75,14 @@ export function Dashboard() {
           onClose={() => setIsCatchSheetOpen(false)}
         >
           <CatchForm onSuccess={() => setIsCatchSheetOpen(false)} />
+        </BottomSheet>
+
+        <BottomSheet
+          open={isSessionSheetOpen}
+          title="Start session"
+          onClose={() => setIsSessionSheetOpen(false)}
+        >
+          <SessionForm onSuccess={() => setIsSessionSheetOpen(false)} />
         </BottomSheet>
       </main>
     </Layout>

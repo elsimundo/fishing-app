@@ -16,6 +16,9 @@ export function Header() {
         </div>
       </div>
       <div className="flex items-center gap-3 text-xs text-slate-600">
+        <Link to="/sessions" className="text-[11px] text-secondary hover:underline">
+          Sessions
+        </Link>
         <Link
           to="/profile"
           className="hidden sm:inline truncate max-w-[140px] text-secondary hover:underline"
