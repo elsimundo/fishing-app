@@ -332,7 +332,9 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
           </label>
           <input
             id="weight_kg"
-            type="text"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
             className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('weight_kg')}
           />
@@ -347,7 +349,9 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
           </label>
           <input
             id="length_cm"
-            type="text"
+            type="number"
+            inputMode="decimal"
+            step="0.1"
             className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('length_cm')}
           />

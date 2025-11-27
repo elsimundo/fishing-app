@@ -7,7 +7,7 @@ export function Login() {
       <div className="w-full max-w-md space-y-4">
         <LoginForm />
         <p className="text-center text-xs text-slate-600">
-          Dont have an account?{' '}
+          Don't have an account?{' '}
           <Link to="/signup" className="font-medium text-secondary hover:underline">
             Sign up
           </Link>
