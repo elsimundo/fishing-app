@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
+import { useActiveSession } from '../../hooks/useActiveSession'
 import type { Catch, CatchFormInput } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
@@ -69,6 +70,7 @@ type CatchFormProps = {
 
 export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }: CatchFormProps) {
   const { user } = useAuth()
+  const { data: activeSession } = useActiveSession()
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
 
@@ -78,9 +80,15 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
     ? {
         species: initialCatch.species,
         caught_at: new Date(initialCatch.caught_at).toISOString().slice(0, 16),
-        location_name: initialCatch.location_name,
-        latitude: initialCatch.latitude.toString(),
-        longitude: initialCatch.longitude.toString(),
+        location_name: initialCatch.location_name ?? undefined,
+        latitude:
+          initialCatch.latitude != null && !Number.isNaN(initialCatch.latitude)
+            ? initialCatch.latitude.toString()
+            : undefined,
+        longitude:
+          initialCatch.longitude != null && !Number.isNaN(initialCatch.longitude)
+            ? initialCatch.longitude.toString()
+            : undefined,
         weight_kg: initialCatch.weight_kg != null ? initialCatch.weight_kg.toString() : undefined,
         length_cm: initialCatch.length_cm != null ? initialCatch.length_cm.toString() : undefined,
         bait: initialCatch.bait ?? undefined,
@@ -90,6 +98,16 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       }
     : {
         caught_at: defaultNow,
+        // When creating a brand new catch, prefill from active session if available
+        location_name: activeSession?.location_name ?? undefined,
+        latitude:
+          activeSession?.latitude != null && !Number.isNaN(activeSession.latitude)
+            ? activeSession.latitude.toString()
+            : undefined,
+        longitude:
+          activeSession?.longitude != null && !Number.isNaN(activeSession.longitude)
+            ? activeSession.longitude.toString()
+            : undefined,
       }
 
   const {
@@ -158,6 +176,8 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       fishing_style: values.fishing_style ?? null,
       photo_url: photoUrl,
       notes: values.notes ?? null,
+      // Attach to active session if creating a new catch and one exists
+      session_id: mode === 'create' && !catchId && activeSession ? activeSession.id : undefined,
     }
 
     const isEdit = mode === 'edit' && catchId
@@ -181,6 +201,13 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       {formError ? (
         <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
           {formError}
+        </div>
+      ) : null}
+
+      {mode === 'create' && activeSession ? (
+        <div className="rounded-md bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
+          This catch will be added to your active session:{' '}
+          <span className="font-semibold">{activeSession.title || activeSession.location_name}</span>.
         </div>
       ) : null}
 

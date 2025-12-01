@@ -4,9 +4,12 @@ import { Signup } from './pages/Signup'
 import { Dashboard } from './pages/Dashboard'
 import { CatchDetailPage } from './pages/CatchDetailPage'
 import { CatchEditPage } from './pages/CatchEditPage'
+import LogCatchPage from './pages/LogCatchPage'
 import { Profile } from './pages/Profile'
+import ProfilePage from './pages/ProfilePage'
+import UserProfilePage from './pages/UserProfilePage'
+import StartSessionPage from './pages/StartSessionPage'
 import { SessionDetailPage } from './pages/SessionDetailPage'
-import { SessionsPage } from './pages/SessionsPage'
 import FeedView from './pages/FeedView'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
@@ -26,16 +29,24 @@ function App() {
           path="/compete"
           element={<div className="p-8 text-center text-sm text-gray-600">Compete coming soon</div>}
         />
+        <Route path="/sessions/new" element={<StartSessionPage />} />
+        <Route path="/catches/new" element={<LogCatchPage />} />
         <Route
-          path="/sessions/new"
-          element={<div className="p-8 text-center text-sm text-gray-600">Start session coming soon</div>}
+          path="/posts/new"
+          element={
+            <div className="p-8 text-center">
+              <p className="mb-2 text-lg font-semibold">Share Photo</p>
+              <p className="text-sm text-gray-600">Coming in Phase 2C.</p>
+            </div>
+          }
         />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/catches/:id" element={<CatchDetailPage />} />
         <Route path="/catches/:id/edit" element={<CatchEditPage />} />
-        <Route path="/sessions" element={<SessionsPage />} />
+        <Route path="/sessions" element={<Dashboard />} />
         <Route path="/sessions/:id" element={<SessionDetailPage />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/:userId" element={<UserProfilePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

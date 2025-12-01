@@ -1,4 +1,5 @@
 import { isToday, isYesterday } from 'date-fns'
+import { Link } from 'react-router-dom'
 import { useSessions } from '../../hooks/useSessions'
 import { SessionCard } from './SessionCard'
 
@@ -52,7 +53,22 @@ export function SessionsList() {
         <section className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Today</p>
           {today.map((session) => (
-            <SessionCard key={session.id} session={session} />
+            <div
+              key={session.id}
+              className="flex items-start justify-between gap-2 rounded-xl bg-surface p-2 text-xs text-slate-700 shadow-sm"
+            >
+              <div className="flex-1">
+                <SessionCard session={session} />
+              </div>
+              <div className="pl-1 pt-1">
+                <Link
+                  to={`/sessions/${session.id}?share=1`}
+                  className="rounded-md border border-slate-200 px-2 py-1 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  Share
+                </Link>
+              </div>
+            </div>
           ))}
         </section>
       )}
@@ -61,7 +77,22 @@ export function SessionsList() {
         <section className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Yesterday</p>
           {yesterday.map((session) => (
-            <SessionCard key={session.id} session={session} />
+            <div
+              key={session.id}
+              className="flex items-start justify-between gap-2 rounded-xl bg-surface p-2 text-xs text-slate-700 shadow-sm"
+            >
+              <div className="flex-1">
+                <SessionCard session={session} />
+              </div>
+              <div className="pl-1 pt-1">
+                <Link
+                  to={`/sessions/${session.id}?share=1`}
+                  className="rounded-md border border-slate-200 px-2 py-1 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  Share
+                </Link>
+              </div>
+            </div>
           ))}
         </section>
       )}
@@ -70,7 +101,22 @@ export function SessionsList() {
         <section className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Earlier</p>
           {earlier.map((session) => (
-            <SessionCard key={session.id} session={session} />
+            <div
+              key={session.id}
+              className="flex items-start justify-between gap-2 rounded-xl bg-surface p-2 text-xs text-slate-700 shadow-sm"
+            >
+              <div className="flex-1">
+                <SessionCard session={session} />
+              </div>
+              <div className="pl-1 pt-1">
+                <Link
+                  to={`/sessions/${session.id}?share=1`}
+                  className="rounded-md border border-slate-200 px-2 py-1 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  Share
+                </Link>
+              </div>
+            </div>
           ))}
         </section>
       )}

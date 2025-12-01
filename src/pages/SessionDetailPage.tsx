@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
 import { useSessionShares, useAddSessionShare, useDeleteSessionShare } from '../hooks/useSessionShares'
@@ -17,6 +17,7 @@ export function SessionDetailPage() {
   const [showShareModal, setShowShareModal] = useState(false)
 
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
   const { data: session, isLoading, isError, error, refetch } = useSession(id)
   const { mutateAsync: updateSession, isPending: isEnding } = useUpdateSession()
   const { data: shares } = useSessionShares(id)
@@ -39,6 +40,19 @@ export function SessionDetailPage() {
 
     void loadUser()
   }, [])
+
+  // Auto-open share modal when arriving with ?share=1 or ?share=true and viewer is owner
+  useEffect(() => {
+    const wantShare = searchParams.get('share')
+    if (!wantShare) return
+    const normalized = wantShare.toLowerCase()
+    if (normalized !== '1' && normalized !== 'true') return
+
+    if (!session || !currentUserId) return
+    if (session.user_id !== currentUserId) return
+
+    setShowShareModal(true)
+  }, [searchParams, session, currentUserId])
 
   useEffect(() => {
     async function loadViewerEmails() {
@@ -129,7 +143,7 @@ export function SessionDetailPage() {
   if (isError || !session) {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
-        <Link to="/dashboard" className="mb-4 inline-block text-xs text-secondary hover:underline">
+        <Link to="/sessions" className="mb-4 inline-block text-xs text-secondary hover:underline">
           ← Back to dashboard
         </Link>
         <div className="max-w-xs rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
@@ -162,7 +176,7 @@ export function SessionDetailPage() {
     <main className="min-h-screen bg-background px-4 py-4">
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-slate-600">
-          <Link to="/dashboard" className="text-secondary hover:underline">
+          <Link to="/sessions" className="text-secondary hover:underline">
             ← Back to dashboard
           </Link>
         </div>
