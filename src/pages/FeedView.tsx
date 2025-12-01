@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -7,6 +8,8 @@ import { FeedPostCard } from '../components/feed/FeedPostCard'
 export default function FeedView() {
   const { user } = useAuth()
   const userId = user?.id ?? ''
+  const [activeTab, setActiveTab] = useState<'my' | 'friends' | 'global'>('friends')
+
   const {
     data: posts,
     isLoading,
@@ -56,16 +59,54 @@ export default function FeedView() {
     )
   }
 
+  // Filter posts for the active tab. For now, Friends and Global share the same list;
+  // My only shows posts authored by the current user.
+  const filteredPosts =
+    activeTab === 'my' && userId
+      ? posts.filter((post) => post.user_id === userId)
+      : posts
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-5 py-4">
+      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-5 pt-4 pb-3">
         <h1 className="text-xl font-bold text-gray-900">Feed</h1>
+
+        {/* Tabs: Me / Friends / Global */}
+        <div className="mt-3 inline-flex rounded-full bg-gray-100 p-1 text-xs font-medium text-gray-600">
+          <button
+            type="button"
+            onClick={() => setActiveTab('my')}
+            className={`rounded-full px-3 py-1 transition-colors ${
+              activeTab === 'my' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+            }`}
+          >
+            Me
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('friends')}
+            className={`rounded-full px-3 py-1 transition-colors ${
+              activeTab === 'friends' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+            }`}
+          >
+            Friends
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('global')}
+            className={`rounded-full px-3 py-1 transition-colors ${
+              activeTab === 'global' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+            }`}
+          >
+            Global
+          </button>
+        </div>
       </div>
 
       {/* Feed Posts */}
       <div className="divide-y divide-gray-200">
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <FeedPostCard key={post.id} post={post} />
         ))}
       </div>
