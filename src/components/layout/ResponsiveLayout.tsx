@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { BottomNav } from '@/components/navigation/BottomNav'
-import { Sidebar } from '@/components/navigation/Sidebar'
-import { MobileHeader } from '@/components/navigation/MobileHeader'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { BottomNav } from '../navigation/BottomNav'
+import { Sidebar } from '../navigation/Sidebar'
+import { MobileHeader } from '../navigation/MobileHeader'
 
 interface ResponsiveLayoutProps {
   children: ReactNode

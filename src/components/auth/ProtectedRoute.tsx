@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { ResponsiveLayout } from '../../components/layout/ResponsiveLayout'
 
 export function ProtectedRoute() {
   const { user, loading } = useAuth()
@@ -16,5 +17,9 @@ export function ProtectedRoute() {
     return <Navigate to="/login" replace />
   }
 
-  return <Outlet />
+  return (
+    <ResponsiveLayout>
+      <Outlet />
+    </ResponsiveLayout>
+  )
 }

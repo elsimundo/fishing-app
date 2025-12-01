@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, Map, Plus, Trophy, User } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '../../hooks/useAuth'
 
 export function Sidebar() {
   const navigate = useNavigate()

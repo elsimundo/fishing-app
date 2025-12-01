@@ -7,15 +7,29 @@ import { CatchEditPage } from './pages/CatchEditPage'
 import { Profile } from './pages/Profile'
 import { SessionDetailPage } from './pages/SessionDetailPage'
 import { SessionsPage } from './pages/SessionsPage'
+import FeedView from './pages/FeedView'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Navigate to="/feed" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route element={<ProtectedRoute />}>
+        <Route path="/feed" element={<FeedView />} />
+        <Route
+          path="/explore"
+          element={<div className="p-8 text-center text-sm text-gray-600">Explore coming soon</div>}
+        />
+        <Route
+          path="/compete"
+          element={<div className="p-8 text-center text-sm text-gray-600">Compete coming soon</div>}
+        />
+        <Route
+          path="/sessions/new"
+          element={<div className="p-8 text-center text-sm text-gray-600">Start session coming soon</div>}
+        />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/catches/:id" element={<CatchDetailPage />} />
         <Route path="/catches/:id/edit" element={<CatchEditPage />} />
