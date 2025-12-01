@@ -9,9 +9,13 @@ import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
+import { Share2 } from 'lucide-react'
+import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 
 export function SessionDetailPage() {
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+
   const { id } = useParams<{ id: string }>()
   const { data: session, isLoading, isError, error, refetch } = useSession(id)
   const { mutateAsync: updateSession, isPending: isEnding } = useUpdateSession()
@@ -100,7 +104,7 @@ export function SessionDetailPage() {
       await addShare({
         session_id: session.id,
         shared_with_user_id: newShareUserId.trim(),
-        can_view_exact_location: true, // can be toggled later
+        can_view_exact_location: true,
         owner_id: session.user_id,
       })
       setNewShareUserId('')
@@ -163,6 +167,7 @@ export function SessionDetailPage() {
           </Link>
         </div>
 
+        {/* Overview + main actions */}
         <section className="overflow-hidden rounded-xl bg-surface p-4 text-xs text-slate-700 shadow">
           <h1 className="text-base font-semibold text-slate-900">{title}</h1>
           <p className="mt-1 text-[11px] text-slate-500">Session overview · {privacyLabel}</p>
@@ -170,6 +175,14 @@ export function SessionDetailPage() {
             <p className="text-[11px] text-slate-500">Catch location and details below.</p>
             {viewerRole === 'owner' ? (
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowShareModal(true)}
+                  className="flex items-center gap-1 rounded-md border border-slate-300 bg-surface px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <Share2 size={14} />
+                  Share to feed
+                </button>
                 <button
                   type="button"
                   onClick={() => setIsQuickLogOpen(true)}
@@ -196,6 +209,7 @@ export function SessionDetailPage() {
           </div>
         </section>
 
+        {/* Share session (viewer-level sharing) */}
         {viewerRole === 'owner' ? (
           <section className="rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Share session</p>
@@ -288,6 +302,7 @@ export function SessionDetailPage() {
           </section>
         ) : null}
 
+        {/* Session stats */}
         <section className="rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Session stats</p>
           <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4 sm:text-xs">
@@ -312,6 +327,7 @@ export function SessionDetailPage() {
           </div>
         </section>
 
+        {/* Location */}
         <section className="overflow-hidden rounded-xl bg-surface p-3 shadow">
           <h2 className="mb-2 text-xs font-semibold text-slate-800">Location</h2>
           {canSeeExactLocation ? (
@@ -323,6 +339,7 @@ export function SessionDetailPage() {
           )}
         </section>
 
+        {/* Catches */}
         <section className="overflow-hidden rounded-xl bg-surface p-3 shadow">
           <h2 className="mb-2 text-xs font-semibold text-slate-800">
             Catches ({session.catches.length})
@@ -338,6 +355,7 @@ export function SessionDetailPage() {
           )}
         </section>
 
+        {/* Quick log bottom sheet */}
         {viewerRole === 'owner' ? (
           <BottomSheet
             open={isQuickLogOpen}
@@ -352,6 +370,17 @@ export function SessionDetailPage() {
               onClose={() => setIsQuickLogOpen(false)}
             />
           </BottomSheet>
+        ) : null}
+
+        {/* Share to feed modal */}
+        {viewerRole === 'owner' && showShareModal ? (
+          <ShareToFeedModal
+            session={session}
+            onClose={() => setShowShareModal(false)}
+            onSuccess={() => {
+              window.alert('Session shared to your feed!')
+            }}
+          />
         ) : null}
       </div>
     </main>

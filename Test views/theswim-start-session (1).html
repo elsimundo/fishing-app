@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheSwim - Start Session</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Mobile container */
+        .phone-frame {
+            max-width: 430px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status bar */
+        .status-bar {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        /* Header */
+        .page-header {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .page-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+            text-align: center;
+        }
+
+        .next-btn {
+            background: none;
+            border: none;
+            color: #1e3a8a;
+            cursor: pointer;
+            padding: 8px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .next-btn:disabled {
+            color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Progress indicator */
+        .progress-container {
+            padding: 16px 20px;
+            background: white;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1e3a8a;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Form groups */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: #ef4444;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #0f172a;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        /* Location picker */
+        .location-picker {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .location-picker:hover {
+            border-color: #1e3a8a;
+        }
+
+        .location-picker.selected {
+            border-color: #1e3a8a;
+            background: #f8fafc;
+        }
+
+        .location-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .location-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dbeafe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e40af;
+            font-size: 20px;
+        }
+
+        .location-info {
+            flex: 1;
+        }
+
+        .location-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .location-address {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .location-action {
+            color: #1e3a8a;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Choice buttons */
+        .choice-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .choice-button {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .choice-button:hover {
+            border-color: #1e3a8a;
+        }
+
+        .choice-button.selected {
+            border-color: #1e3a8a;
+            background: #f8fafc;
+        }
+
+        .choice-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .choice-icon.saltwater {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .choice-icon.freshwater {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .choice-icon.private {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .choice-icon.general {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .choice-icon.exact {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .choice-content {
+            flex: 1;
+        }
+
+        .choice-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+
+        .choice-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .choice-check {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .choice-button.selected .choice-check {
+            background: #1e3a8a;
+            border-color: #1e3a8a;
+        }
+
+        .choice-check svg {
+            width: 14px;
+            height: 14px;
+            stroke: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .choice-button.selected .choice-check svg {
+            opacity: 1;
+        }
+
+        /* Map preview */
+        .map-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #0284c7 100%);
+            margin-top: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border: 3px solid white;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            top: 50%;
+            left: 50%;
+            margin-left: -16px;
+            margin-top: -16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Bottom action */
+        .bottom-action {
+            padding: 16px 20px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Success screen */
+        .success-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            height: 100%;
+        }
+
+        .success-screen.active {
+            display: flex;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 24px;
+            animation: successPop 0.5s ease-out;
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .success-desc {
+            font-size: 16px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        /* Helper text */
+        .helper-text {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .helper-icon {
+            font-size: 16px;
+            margin-top: 1px;
+        }
+
+        /* Scrollbar */
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* Hide steps */
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 5G 🔋</span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <button class="back-btn" onclick="goBack()">Cancel</button>
+            <div class="page-title">Start Session</div>
+            <button class="next-btn" id="nextBtn" onclick="nextStep()" style="visibility: hidden;">Next</button>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 25%;"></div>
+            </div>
+            <div class="progress-text" id="progressText">Step 1 of 4</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content" id="content">
+            <!-- Step 0: Choose flow -->
+            <div class="step active" id="step0">
+                <div class="form-section">
+                    <h2 class="section-title">Start your session</h2>
+                    <p class="section-subtitle">Choose how you'd like to begin your fishing session.</p>
+
+                    <div class="choice-grid">
+                        <div class="choice-button" onclick="quickStart()" style="border: 2px solid #1e3a8a; background: #f8fafc;">
+                            <div class="choice-icon" style="background: #1e3a8a; color: white;">⚡</div>
+                            <div class="choice-content">
+                                <div class="choice-title">Quick Start</div>
+                                <div class="choice-desc">Use current location & smart defaults</div>
+                            </div>
+                            <div style="color: #1e3a8a; font-size: 20px;">→</div>
+                        </div>
+
+                        <div class="choice-button" onclick="fullSetup()">
+                            <div class="choice-icon" style="background: #dbeafe; color: #1e40af;">⚙️</div>
+                            <div class="choice-content">
+                                <div class="choice-title">Full Setup</div>
+                                <div class="choice-desc">Customize location, privacy, and details</div>
+                            </div>
+                            <div style="color: #64748b; font-size: 20px;">→</div>
+                        </div>
+                    </div>
+
+                    <div class="helper-text" style="margin-top: 20px;">
+                        <span class="helper-icon">💡</span>
+                        <span><strong>Quick Start defaults:</strong> Uses your current GPS location, general area privacy, and auto-detects water type. You can edit everything later.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Location -->
+            <div class="step active" id="step1">
+                <div class="form-section">
+                    <h2 class="section-title">Where are you fishing?</h2>
+                    <p class="section-subtitle">Set your location so we can show relevant data and help other anglers discover great spots.</p>
+
+                    <div class="form-group">
+                        <div class="location-picker" id="locationPicker" onclick="selectLocation()">
+                            <div class="location-header">
+                                <div class="location-icon">📍</div>
+                                <div class="location-info">
+                                    <div class="location-name" id="locationName">Choose location</div>
+                                    <div class="location-address" id="locationAddress">Tap to set your fishing spot</div>
+                                </div>
+                                <div class="location-action">Set</div>
+                            </div>
+                        </div>
+                        <div class="map-preview" id="mapPreview" style="display: none;">
+                            <div class="map-marker"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Session Title <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="sessionTitle" placeholder="e.g., Morning Bass Session" onkeyup="validateStep1()">
+                        <div class="helper-text">
+                            <span class="helper-icon">💡</span>
+                            <span>Give your session a memorable name</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Water Type -->
+            <div class="step" id="step2">
+                <div class="form-section">
+                    <h2 class="section-title">What type of water?</h2>
+                    <p class="section-subtitle">This helps us show you the right species and fishing data.</p>
+
+                    <div class="choice-grid">
+                        <div class="choice-button" onclick="selectWaterType('saltwater')">
+                            <div class="choice-icon saltwater">🌊</div>
+                            <div class="choice-content">
+                                <div class="choice-title">Saltwater</div>
+                                <div class="choice-desc">Sea, ocean, coastal fishing</div>
+                            </div>
+                            <div class="choice-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="choice-button" onclick="selectWaterType('freshwater')">
+                            <div class="choice-icon freshwater">🏞️</div>
+                            <div class="choice-content">
+                                <div class="choice-title">Freshwater</div>
+                                <div class="choice-desc">Lakes, rivers, ponds, canals</div>
+                            </div>
+                            <div class="choice-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Privacy -->
+            <div class="step" id="step3">
+                <div class="form-section">
+                    <h2 class="section-title">Location privacy</h2>
+                    <p class="section-subtitle">Control how much location detail you share with others.</p>
+
+                    <div class="choice-grid">
+                        <div class="choice-button" onclick="selectPrivacy('private')">
+                            <div class="choice-icon private">🔒</div>
+                            <div class="choice-content">
+                                <div class="choice-title">Private</div>
+                                <div class="choice-desc">Location completely hidden</div>
+                            </div>
+                            <div class="choice-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="choice-button selected" onclick="selectPrivacy('general')">
+                            <div class="choice-icon general">📍</div>
+                            <div class="choice-content">
+                                <div class="choice-title">General Area</div>
+                                <div class="choice-desc">Show approximate location (±5km)</div>
+                            </div>
+                            <div class="choice-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="choice-button" onclick="selectPrivacy('exact')">
+                            <div class="choice-icon exact">🎯</div>
+                            <div class="choice-content">
+                                <div class="choice-title">Exact Location</div>
+                                <div class="choice-desc">Share precise GPS coordinates</div>
+                            </div>
+                            <div class="choice-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="helper-text" style="margin-top: 16px;">
+                        <span class="helper-icon">💡</span>
+                        <span>You can always change this later. We recommend "General Area" to protect your fishing spots while still helping the community.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Notes (Optional) -->
+            <div class="step" id="step4">
+                <div class="form-section">
+                    <h2 class="section-title">Add session details</h2>
+                    <p class="section-subtitle">Tell your story! What are you hoping to catch? What's the weather like?</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-input" id="sessionNotes" placeholder="e.g., Perfect conditions today! Clear skies, light wind, incoming tide. Targeting bass with live sandeel..."></textarea>
+                        <div class="helper-text">
+                            <span class="helper-icon">📝</span>
+                            <span>You can add photos and catches once your session starts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Screen -->
+            <div class="success-screen" id="successScreen">
+                <div class="success-icon">🎣</div>
+                <h2 class="success-title">Session Started!</h2>
+                <p class="success-desc">Your fishing session is now active. Start logging catches and share your adventure!</p>
+                <button class="action-btn btn-primary" onclick="goToSession()">View Active Session</button>
+            </div>
+
+            <!-- Quick Start Loading -->
+            <div class="success-screen" id="quickStartLoading">
+                <div class="success-icon" style="background: #dbeafe; animation: spin 1s linear infinite;">⚡</div>
+                <h2 class="success-title">Starting session...</h2>
+                <p class="success-desc" id="loadingText">Getting your location...</p>
+            </div>
+        </div>
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        <!-- Bottom Action -->
+        <div class="bottom-action" id="bottomAction" style="display: none;">
+            <button class="action-btn btn-primary" id="actionBtn" onclick="nextStep()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const totalSteps = 4;
+        let formData = {
+            location: null,
+            title: '',
+            waterType: null,
+            privacy: 'general',
+            notes: ''
+        };
+
+        function quickStart() {
+            // Show loading screen
+            document.getElementById('step0').style.display = 'none';
+            document.getElementById('quickStartLoading').classList.add('active');
+            
+            // Simulate GPS and setup
+            setTimeout(() => {
+                document.getElementById('loadingText').textContent = 'Detecting water type...';
+            }, 1000);
+            
+            setTimeout(() => {
+                document.getElementById('loadingText').textContent = 'Setting up your session...';
+            }, 2000);
+            
+            setTimeout(() => {
+                // Auto-populate with smart defaults
+                formData.location = {
+                    name: 'Current Location',
+                    address: 'Brighton, East Sussex BN2 5WA',
+                    coords: { lat: 50.8225, lng: -0.1372 }
+                };
+                formData.title = 'Fishing Session';
+                formData.waterType = 'saltwater'; // Auto-detected based on location
+                formData.privacy = 'general';
+                formData.notes = '';
+                
+                // Show success
+                document.getElementById('quickStartLoading').classList.remove('active');
+                document.getElementById('successScreen').classList.add('active');
+            }, 3000);
+        }
+
+        function fullSetup() {
+            // Hide step 0, show step 1
+            document.getElementById('step0').classList.remove('active');
+            currentStep = 1;
+            document.getElementById('step1').classList.add('active');
+            
+            // Show progress and nav
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('nextBtn').style.visibility = 'visible';
+            document.getElementById('bottomAction').style.display = 'block';
+            
+            updateProgress();
+            validateStep1();
+        }
+
+        function validateStep1() {
+            const title = document.getElementById('sessionTitle').value;
+            const hasLocation = formData.location !== null;
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (title.trim() !== '' && hasLocation) {
+                nextBtn.disabled = false;
+            } else {
+                nextBtn.disabled = true;
+            }
+        }
+
+        function selectLocation() {
+            // Simulate location selection
+            formData.location = {
+                name: 'Brighton Marina',
+                address: 'Brighton, East Sussex BN2 5WA'
+            };
+            
+            document.getElementById('locationName').textContent = formData.location.name;
+            document.getElementById('locationAddress').textContent = formData.location.address;
+            document.getElementById('locationPicker').classList.add('selected');
+            document.getElementById('mapPreview').style.display = 'block';
+            
+            validateStep1();
+        }
+
+        function selectWaterType(type) {
+            formData.waterType = type;
+            
+            // Update UI
+            document.querySelectorAll('#step2 .choice-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function selectPrivacy(type) {
+            formData.privacy = type;
+            
+            // Update UI
+            document.querySelectorAll('#step3 .choice-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        function nextStep() {
+            // Validate and save current step data
+            if (currentStep === 1) {
+                formData.title = document.getElementById('sessionTitle').value;
+            } else if (currentStep === 4) {
+                formData.notes = document.getElementById('sessionNotes').value;
+                startSession();
+                return;
+            }
+
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            
+            // Move to next step
+            currentStep++;
+            
+            // Show next step
+            if (currentStep <= totalSteps) {
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgress();
+                updateButtons();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `Step ${currentStep} of ${totalSteps}`;
+        }
+
+        function updateButtons() {
+            const nextBtn = document.getElementById('nextBtn');
+            const actionBtn = document.getElementById('actionBtn');
+            
+            if (currentStep === 2) {
+                nextBtn.disabled = formData.waterType === null;
+                actionBtn.textContent = 'Continue';
+            } else if (currentStep === 3) {
+                nextBtn.disabled = false;
+                actionBtn.textContent = 'Continue';
+            } else if (currentStep === 4) {
+                nextBtn.textContent = 'Start';
+                nextBtn.disabled = false;
+                actionBtn.textContent = 'Start Session';
+            }
+        }
+
+        function startSession() {
+            console.log('Starting session with data:', formData);
+            
+            // Hide form, show success
+            document.getElementById('content').querySelectorAll('.step').forEach(step => {
+                step.style.display = 'none';
+            });
+            document.getElementById('successScreen').classList.add('active');
+            document.getElementById('bottomAction').style.display = 'none';
+            document.querySelector('.progress-container').style.display = 'none';
+            document.querySelector('.page-header').style.display = 'none';
+        }
+
+        function goToSession() {
+            alert('Navigating to active session...\n\nIn the real app, this would take you to your live session where you can:\n• Log catches quickly\n• Add photos\n• End session when done\n\nQuick Start used:\n📍 ' + formData.location.name + '\n🌊 ' + (formData.waterType === 'saltwater' ? 'Saltwater' : 'Freshwater') + '\n🔒 General Area privacy');
+        }
+
+        function goBack() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgress();
+                updateButtons();
+            } else if (currentStep === 1) {
+                // Go back to step 0
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step0').classList.add('active');
+                currentStep = 0;
+                document.getElementById('progressContainer').style.display = 'none';
+                document.getElementById('nextBtn').style.visibility = 'hidden';
+                document.getElementById('bottomAction').style.display = 'none';
+            } else {
+                if (confirm('Are you sure you want to cancel?')) {
+                    window.history.back();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

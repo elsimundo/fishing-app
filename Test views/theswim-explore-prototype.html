@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheSwim - Explore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Mobile container */
+        .phone-frame {
+            max-width: 430px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status bar */
+        .status-bar {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        /* App header */
+        .app-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        /* Search bar */
+        .search-container {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 12px 16px;
+            gap: 12px;
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            color: #64748b;
+        }
+
+        .search-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: currentColor;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #0f172a;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Map container */
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #0284c7 100%);
+            overflow: hidden;
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Map markers */
+        .map-marker {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border: 3px solid white;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: markerPop 0.3s ease-out;
+        }
+
+        @keyframes markerPop {
+            0% { transform: rotate(-45deg) scale(0); }
+            50% { transform: rotate(-45deg) scale(1.2); }
+            100% { transform: rotate(-45deg) scale(1); }
+        }
+
+        .map-marker.active {
+            background: #1e3a8a;
+            width: 40px;
+            height: 40px;
+            z-index: 10;
+        }
+
+        /* Center crosshair */
+        .map-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+        }
+
+        .crosshair-circle {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #1e3a8a;
+            border-radius: 50%;
+            background: rgba(30, 58, 138, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+
+        /* Search radius indicator */
+        .radius-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px dashed rgba(30, 58, 138, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Map controls */
+        .map-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .map-control-btn {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #1e3a8a;
+        }
+
+        .map-control-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Search this area button */
+        .search-area-btn {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .search-area-btn:hover {
+            background: #1e40af;
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 16px rgba(30, 58, 138, 0.4);
+        }
+
+        .search-area-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+
+        /* Bottom sheet */
+        .bottom-sheet-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            max-height: 50%;
+            overflow: hidden;
+            transition: transform 0.3s ease-out;
+        }
+
+        .bottom-sheet-container.collapsed {
+            transform: translateY(calc(100% - 80px));
+        }
+
+        .sheet-handle-area {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .sheet-preview {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sheet-preview-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .sheet-preview-count {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .sheet-content {
+            overflow-y: auto;
+            max-height: calc(50vh - 80px);
+            padding: 0 20px 20px;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+
+        /* Result cards */
+        .result-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .result-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .result-icon.catch {
+            background: #d1fae5;
+            color: #065f46;
+            font-size: 24px;
+        }
+
+        .result-icon.business {
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 24px;
+        }
+
+        .result-icon.club {
+            background: #e0e7ff;
+            color: #3730a3;
+            font-size: 24px;
+        }
+
+        .result-icon.charter {
+            background: #dbeafe;
+            color: #1e40af;
+            font-size: 24px;
+        }
+
+        .result-info {
+            flex: 1;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .result-meta {
+            font-size: 13px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .result-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .result-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Environmental data card */
+        .env-card {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .env-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .env-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .env-icon {
+            font-size: 24px;
+        }
+
+        .env-data {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .env-value {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .env-label {
+            font-size: 11px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 8px 0 12px 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            color: #64748b;
+        }
+
+        .nav-item.active {
+            color: #1e3a8a;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .nav-item.center {
+            background: #1e3a8a;
+            color: white;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            padding: 0;
+            margin-top: -28px;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item.center .nav-icon {
+            margin: 0;
+        }
+
+        .nav-item.center .nav-label {
+            display: none;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .empty-desc {
+            font-size: 14px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 5G 🔋</span>
+        </div>
+
+        <!-- App Header -->
+        <div class="app-header">
+            <h1>Explore</h1>
+            <div class="header-icons">
+                <button class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-bar">
+                <div class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </div>
+                <input type="text" class="search-input" placeholder="Search location or postcode...">
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div class="map-placeholder">
+                <!-- Map would be Mapbox here -->
+                
+                <!-- Center crosshair -->
+                <div class="map-crosshair">
+                    <div class="crosshair-circle"></div>
+                </div>
+
+                <!-- Search radius -->
+                <div class="radius-indicator"></div>
+
+                <!-- Sample markers -->
+                <div class="map-marker" style="top: 30%; left: 40%;"></div>
+                <div class="map-marker" style="top: 45%; left: 60%;"></div>
+                <div class="map-marker active" style="top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);"></div>
+                <div class="map-marker" style="top: 65%; left: 35%;"></div>
+                <div class="map-marker" style="top: 55%; left: 70%;"></div>
+
+                <!-- Map controls -->
+                <div class="map-controls">
+                    <button class="map-control-btn" title="Zoom in">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"></line>
+                            <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"></line>
+                        </svg>
+                    </button>
+                    <button class="map-control-btn" title="Zoom out">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"></line>
+                        </svg>
+                    </button>
+                    <button class="map-control-btn" title="My location">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Search this area button -->
+                <button class="search-area-btn" onclick="searchArea()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    Search this area
+                </button>
+            </div>
+
+            <!-- Bottom Sheet -->
+            <div class="bottom-sheet-container" id="bottomSheet">
+                <div class="sheet-handle-area" onclick="toggleSheet()">
+                    <div class="sheet-handle"></div>
+                    <div class="sheet-preview">
+                        <span class="sheet-preview-text">Recent Activity</span>
+                        <span class="sheet-preview-count">24 results</span>
+                    </div>
+                </div>
+
+                <div class="sheet-content">
+                    <!-- Tabs -->
+                    <div class="tabs-container">
+                        <button class="tab-btn active">All</button>
+                        <button class="tab-btn">Catches</button>
+                        <button class="tab-btn">Sessions</button>
+                        <button class="tab-btn">Tackle Shops</button>
+                        <button class="tab-btn">Clubs</button>
+                        <button class="tab-btn">Charters</button>
+                    </div>
+
+                    <!-- Environmental data card -->
+                    <div class="env-card">
+                        <div class="env-title">Current Conditions</div>
+                        <div class="env-grid">
+                            <div class="env-item">
+                                <div class="env-icon">🌊</div>
+                                <div class="env-data">
+                                    <div class="env-value">High Tide</div>
+                                    <div class="env-label">in 2h 15m</div>
+                                </div>
+                            </div>
+                            <div class="env-item">
+                                <div class="env-icon">🌙</div>
+                                <div class="env-data">
+                                    <div class="env-value">Waning</div>
+                                    <div class="env-label">Moon Phase</div>
+                                </div>
+                            </div>
+                            <div class="env-item">
+                                <div class="env-icon">💧</div>
+                                <div class="env-data">
+                                    <div class="env-value">Good</div>
+                                    <div class="env-label">Water Quality</div>
+                                </div>
+                            </div>
+                            <div class="env-item">
+                                <div class="env-icon">🌡️</div>
+                                <div class="env-data">
+                                    <div class="env-value">14°C</div>
+                                    <div class="env-label">Water Temp</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent catches -->
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-icon catch">🐟</div>
+                            <div class="result-info">
+                                <div class="result-title">Sea Bass</div>
+                                <div class="result-meta">
+                                    <span class="result-badge">Saltwater</span>
+                                    <span>Caught 2 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-stats">
+                            <div class="result-stat">
+                                <div class="stat-value">2.8kg</div>
+                                <div class="stat-label">Weight</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-value">58cm</div>
+                                <div class="stat-label">Length</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-value">Live Bait</div>
+                                <div class="stat-label">Method</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-icon catch">🐟</div>
+                            <div class="result-info">
+                                <div class="result-title">Mackerel</div>
+                                <div class="result-meta">
+                                    <span class="result-badge">Saltwater</span>
+                                    <span>Caught 5 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-stats">
+                            <div class="result-stat">
+                                <div class="stat-value">0.8kg</div>
+                                <div class="stat-label">Weight</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-value">35cm</div>
+                                <div class="stat-label">Length</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-value">Feathers</div>
+                                <div class="stat-label">Method</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business listings -->
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-icon business">🎣</div>
+                            <div class="result-info">
+                                <div class="result-title">Brighton Tackle Shop</div>
+                                <div class="result-meta">
+                                    <span class="result-badge">Tackle Shop</span>
+                                    <span>0.8 miles • Open now</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-meta" style="margin-top: 8px; color: #64748b;">
+                            📍 123 Marina Way, Brighton BN2 5WA
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-icon club">👥</div>
+                            <div class="result-info">
+                                <div class="result-title">Sussex Sea Anglers Club</div>
+                                <div class="result-meta">
+                                    <span class="result-badge">Fishing Club</span>
+                                    <span>1.2 miles away</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-meta" style="margin-top: 8px; color: #64748b;">
+                            📧 contact@sussexanglers.co.uk • 245 members
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-icon charter">⛵</div>
+                            <div class="result-info">
+                                <div class="result-title">Deep Sea Fishing Charters</div>
+                                <div class="result-meta">
+                                    <span class="result-badge">Charter Boat</span>
+                                    <span>Marina berth 12</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-meta" style="margin-top: 8px; color: #64748b;">
+                            📞 07700 900123 • £80/person • Book online
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-icon catch">🐟</div>
+                            <div class="result-info">
+                                <div class="result-title">Cod</div>
+                                <div class="result-meta">
+                                    <span class="result-badge">Saltwater</span>
+                                    <span>Caught yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-stats">
+                            <div class="result-stat">
+                                <div class="stat-value">3.2kg</div>
+                                <div class="stat-label">Weight</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-value">62cm</div>
+                                <div class="stat-label">Length</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-value">Worm</div>
+                                <div class="stat-label">Method</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item" onclick="navigateTo('feed')">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </span>
+                <span class="nav-label">Feed</span>
+            </button>
+            <button class="nav-item active">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                        <line x1="8" y1="2" x2="8" y2="18"></line>
+                        <line x1="16" y1="6" x2="16" y2="22"></line>
+                    </svg>
+                </span>
+                <span class="nav-label">Explore</span>
+            </button>
+            <button class="nav-item center" onclick="openPostModal()">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('compete')">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="7"></circle>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                    </svg>
+                </span>
+                <span class="nav-label">Compete</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('profile')">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </span>
+                <span class="nav-label">Profile</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        function toggleSheet() {
+            const sheet = document.getElementById('bottomSheet');
+            sheet.classList.toggle('collapsed');
+        }
+
+        function searchArea() {
+            alert('Searching this area...\n\nIn the real app, this would:\n• Query catches within the visible map bounds\n• Update the bottom sheet with results\n• Show aggregate stats for the area');
+        }
+
+        function navigateTo(view) {
+            if (view === 'feed') {
+                window.location.href = 'theswim-feed-prototype.html';
+            } else {
+                alert(`${view.charAt(0).toUpperCase() + view.slice(1)} view coming soon!`);
+            }
+        }
+
+        function openPostModal() {
+            alert('Post creation modal would open here!');
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Start with sheet collapsed on mobile
+        if (window.innerWidth < 768) {
+            document.getElementById('bottomSheet').classList.add('collapsed');
+        }
+    </script>
+</body>
+</html>

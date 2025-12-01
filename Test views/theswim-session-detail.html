@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheSwim - Session Detail</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Mobile container */
+        .phone-frame {
+            max-width: 430px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status bar */
+        .status-bar {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        /* Header with back button */
+        .page-header {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #1e3a8a;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+        }
+
+        .page-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Content container */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f1f5f9;
+        }
+
+        /* Hero image */
+        .hero-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+
+        /* Session header */
+        .session-header {
+            background: white;
+            padding: 20px;
+        }
+
+        .session-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0891b2, #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 16px;
+            color: #0f172a;
+        }
+
+        .session-time {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .session-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .session-location {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .session-description {
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* Map preview */
+        .map-preview {
+            background: white;
+            margin-top: 8px;
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .mini-map {
+            width: 100%;
+            height: 150px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #0284c7 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #ef4444;
+            border: 2px solid white;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            top: 50%;
+            left: 50%;
+            margin-left: -12px;
+            margin-top: -12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .map-overlay {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #0f172a;
+        }
+
+        /* Catches section */
+        .catches-section {
+            background: white;
+            margin-top: 8px;
+            padding: 16px;
+        }
+
+        .catches-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .catches-count {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .sort-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Catch card */
+        .catch-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .catch-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .catch-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+
+        .catch-info {
+            flex: 1;
+        }
+
+        .catch-species {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .catch-time {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .catch-stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .catch-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .catch-stat-icon {
+            font-size: 14px;
+        }
+
+        .catch-details {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .catch-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #0f172a;
+            font-weight: 500;
+        }
+
+        .catch-notes {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* Engagement bar */
+        .engagement-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .engagement-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .engagement-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .engagement-btn.liked {
+            color: #ef4444;
+        }
+
+        .engagement-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .engagement-count {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Scrollbar styling */
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* Privacy badge */
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #64748b;
+            margin-left: 8px;
+        }
+
+        .privacy-badge svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Session badge */
+        .session-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .water-type {
+            background: #ecfeff;
+            color: #0e7490;
+        }
+
+        .session-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 5G 🔋</span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <button class="back-btn" onclick="goBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <div class="page-title">Session</div>
+            <div class="header-actions">
+                <button class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+                <button class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="1.5"/>
+                        <circle cx="12" cy="5" r="1.5"/>
+                        <circle cx="12" cy="19" r="1.5"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Hero Image -->
+            <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&h=600&fit=crop" 
+                 alt="Session cover" class="hero-image">
+
+            <!-- Session Header -->
+            <div class="session-header">
+                <div class="session-user">
+                    <div class="avatar">JD</div>
+                    <div class="user-info">
+                        <div class="username">john_angler</div>
+                        <div class="session-time">Started 6 hours ago • Ended 3 hours ago</div>
+                    </div>
+                </div>
+
+                <div class="session-badges">
+                    <span class="session-badge">Session</span>
+                    <span class="session-badge water-type">🌊 Saltwater</span>
+                </div>
+
+                <h1 class="session-title">Epic Morning Session</h1>
+                
+                <div class="session-location">
+                    📍 Brighton Marina, East Sussex
+                    <span class="privacy-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        General Area
+                    </span>
+                </div>
+
+                <p class="session-description">
+                    Fantastic morning at Brighton Marina! Got there just before sunrise and the conditions were perfect. Light wind, incoming tide, couldn't ask for better. Landed 3 bass and a monster mackerel. The bass were hitting live sandeel like crazy around the pier supports. Water was crystal clear. Best session I've had in months! 🎣
+                </p>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">4</div>
+                        <div class="stat-label">Catches</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">2.8kg</div>
+                        <div class="stat-label">Biggest</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">3h</div>
+                        <div class="stat-label">Duration</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Engagement Bar -->
+            <div class="engagement-bar">
+                <button class="engagement-btn liked" onclick="toggleLike(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span class="engagement-count">24</span>
+                </button>
+                <button class="engagement-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span class="engagement-count">5</span>
+                </button>
+                <button class="engagement-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    <span class="engagement-count">Share</span>
+                </button>
+            </div>
+
+            <!-- Map Preview -->
+            <div class="map-preview">
+                <h2 class="section-title">Location</h2>
+                <div class="mini-map">
+                    <div class="map-marker"></div>
+                    <div class="map-overlay">
+                        📍 General area shown for privacy (±5km radius)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catches Section -->
+            <div class="catches-section">
+                <div class="catches-header">
+                    <h2 class="section-title" style="margin: 0;">
+                        All Catches <span class="catches-count">(4)</span>
+                    </h2>
+                    <button class="sort-btn">
+                        <span>Newest</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Catch 1 -->
+                <div class="catch-card">
+                    <div class="catch-header">
+                        <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=200&h=200&fit=crop" 
+                             alt="Sea Bass" class="catch-image">
+                        <div class="catch-info">
+                            <div class="catch-species">Sea Bass</div>
+                            <div class="catch-time">Caught 3 hours ago</div>
+                            <div class="catch-stats">
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">⚖️</span>
+                                    <span>2.8kg</span>
+                                </div>
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">📏</span>
+                                    <span>58cm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="catch-details">
+                        <div class="catch-detail">
+                            <div class="detail-label">Bait</div>
+                            <div class="detail-value">Live Sandeel</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Rig</div>
+                            <div class="detail-value">Running Leger</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Method</div>
+                            <div class="detail-value">Bottom Fishing</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Released</div>
+                            <div class="detail-value">Yes ✓</div>
+                        </div>
+                    </div>
+                    <div class="catch-notes">
+                        "Absolute unit! Put up a great fight on 15lb line. Caught near the pier supports at high tide."
+                    </div>
+                </div>
+
+                <!-- Catch 2 -->
+                <div class="catch-card">
+                    <div class="catch-header">
+                        <img src="https://images.unsplash.com/photo-1534043464124-3be32fe000c9?w=200&h=200&fit=crop" 
+                             alt="Mackerel" class="catch-image">
+                        <div class="catch-info">
+                            <div class="catch-species">Mackerel</div>
+                            <div class="catch-time">Caught 4 hours ago</div>
+                            <div class="catch-stats">
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">⚖️</span>
+                                    <span>1.2kg</span>
+                                </div>
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">📏</span>
+                                    <span>42cm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="catch-details">
+                        <div class="catch-detail">
+                            <div class="detail-label">Bait</div>
+                            <div class="detail-value">Feathers</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Rig</div>
+                            <div class="detail-value">5-Hook Feathers</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Method</div>
+                            <div class="detail-value">Float Fishing</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Released</div>
+                            <div class="detail-value">No</div>
+                        </div>
+                    </div>
+                    <div class="catch-notes">
+                        "Monster mackerel! Biggest I've ever caught. Took it home for dinner 🍽️"
+                    </div>
+                </div>
+
+                <!-- Catch 3 -->
+                <div class="catch-card">
+                    <div class="catch-header">
+                        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=200&h=200&fit=crop" 
+                             alt="Sea Bass" class="catch-image">
+                        <div class="catch-info">
+                            <div class="catch-species">Sea Bass</div>
+                            <div class="catch-time">Caught 5 hours ago</div>
+                            <div class="catch-stats">
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">⚖️</span>
+                                    <span>1.8kg</span>
+                                </div>
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">📏</span>
+                                    <span>48cm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="catch-details">
+                        <div class="catch-detail">
+                            <div class="detail-label">Bait</div>
+                            <div class="detail-value">Live Sandeel</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Rig</div>
+                            <div class="detail-value">Running Leger</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Method</div>
+                            <div class="detail-value">Bottom Fishing</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Released</div>
+                            <div class="detail-value">Yes ✓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catch 4 -->
+                <div class="catch-card">
+                    <div class="catch-header">
+                        <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=200&h=200&fit=crop" 
+                             alt="Sea Bass" class="catch-image">
+                        <div class="catch-info">
+                            <div class="catch-species">Sea Bass</div>
+                            <div class="catch-time">Caught 6 hours ago</div>
+                            <div class="catch-stats">
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">⚖️</span>
+                                    <span>1.5kg</span>
+                                </div>
+                                <div class="catch-stat">
+                                    <span class="catch-stat-icon">📏</span>
+                                    <span>45cm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="catch-details">
+                        <div class="catch-detail">
+                            <div class="detail-label">Bait</div>
+                            <div class="detail-value">Live Sandeel</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Rig</div>
+                            <div class="detail-value">Running Leger</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Method</div>
+                            <div class="detail-value">Bottom Fishing</div>
+                        </div>
+                        <div class="catch-detail">
+                            <div class="detail-label">Released</div>
+                            <div class="detail-value">Yes ✓</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons (for owner only) -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                    </svg>
+                    Edit
+                </button>
+                <button class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    Share with Friends
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        function toggleLike(button) {
+            button.classList.toggle('liked');
+            const count = button.querySelector('.engagement-count');
+            const currentCount = parseInt(count.textContent);
+            count.textContent = button.classList.contains('liked') ? currentCount + 1 : currentCount - 1;
+            
+            const svg = button.querySelector('svg');
+            if (button.classList.contains('liked')) {
+                svg.setAttribute('fill', 'currentColor');
+            } else {
+                svg.setAttribute('fill', 'none');
+            }
+        }
+    </script>
+</body>
+</html>

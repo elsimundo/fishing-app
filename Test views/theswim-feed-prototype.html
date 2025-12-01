@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheSwim - Feed Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Mobile container */
+        .phone-frame {
+            max-width: 430px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status bar */
+        .status-bar {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        /* App header */
+        .app-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        /* Feed container */
+        .feed-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #f1f5f9;
+        }
+
+        /* Post card */
+        .post-card {
+            background: white;
+            margin-bottom: 8px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .post-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0891b2, #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .post-user-info {
+            flex: 1;
+        }
+
+        .post-username {
+            font-weight: 600;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .post-meta {
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .post-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-session {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-catch {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-photo {
+            background: #fae8ff;
+            color: #86198f;
+        }
+
+        .post-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            cursor: pointer;
+            background: #e2e8f0;
+        }
+
+        .post-actions {
+            padding: 12px 16px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #475569;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: #1e3a8a;
+        }
+
+        .action-btn.liked {
+            color: #ef4444;
+        }
+
+        .post-content {
+            padding: 0 16px 12px 16px;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 16px;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .post-caption {
+            font-size: 14px;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+
+        .post-caption .username {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .post-location {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        .session-preview {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+        }
+
+        .session-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .view-session {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #0891b2;
+            font-weight: 600;
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 8px 0 12px 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            color: #64748b;
+        }
+
+        .nav-item.active {
+            color: #1e3a8a;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .nav-item.center {
+            background: #1e3a8a;
+            color: white;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            padding: 0;
+            margin-top: -28px;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item.center .nav-icon {
+            margin: 0;
+        }
+
+        .nav-item.center .nav-icon {
+            font-size: 28px;
+        }
+
+        .nav-item.center .nav-label {
+            display: none;
+        }
+
+        /* Post creation modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            z-index: 1000;
+            animation: fadeInOverlay 0.2s ease-in;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .bottom-sheet {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 20px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: #cbd5e1;
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .sheet-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 20px;
+        }
+
+        .post-type-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .post-type-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .post-type-option:hover {
+            border-color: #1e3a8a;
+            background: #f8fafc;
+        }
+
+        .option-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .option-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
+        .option-icon.session {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .option-icon.catch {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .option-icon.photo {
+            background: #fae8ff;
+            color: #86198f;
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .option-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* Filters */
+        .feed-filters {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            overflow-x: auto;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            background: white;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-chip.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+
+        /* Loading skeleton */
+        .loading-skeleton {
+            padding: 16px;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .time-indicator {
+            padding: 8px 16px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Scrollbar styling */
+        .feed-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .feed-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .feed-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 5G 🔋</span>
+        </div>
+
+        <!-- App Header -->
+        <div class="app-header">
+            <h1>TheSwim</h1>
+            <div class="header-icons">
+                <button class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                </button>
+                <button class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Feed Filters -->
+        <div class="feed-filters">
+            <button class="filter-chip active">Following</button>
+            <button class="filter-chip">Nearby</button>
+            <button class="filter-chip">Trending</button>
+            <button class="filter-chip">Sea</button>
+            <button class="filter-chip">Freshwater</button>
+        </div>
+
+        <!-- Feed Container -->
+        <div class="feed-container" id="feedContainer">
+            <div class="time-indicator">Today</div>
+
+            <!-- Session Post -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="avatar">JD</div>
+                    <div class="post-user-info">
+                        <div class="post-username">john_angler</div>
+                        <div class="post-meta">
+                            <span class="post-type-badge badge-session">Session</span>
+                            <span>2 hours ago</span>
+                        </div>
+                    </div>
+                    <button class="icon-btn" style="color: #64748b; font-size: 20px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+                
+                <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&h=600&fit=crop" 
+                     alt="Fishing session" class="post-image">
+                
+                <div class="post-actions">
+                    <button class="action-btn" onclick="toggleLike(this)">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </span>
+                        <span>24</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </span>
+                        <span>5</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="post-content">
+                    <div class="post-caption">
+                        <span class="username">john_angler</span>
+                        Epic morning session at Brighton Marina! Landed 3 bass and a monster mackerel 🎣
+                    </div>
+                    <div class="post-location">
+                        📍 Brighton Marina, East Sussex
+                    </div>
+
+                    <div class="session-preview">
+                        <div class="session-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">3</div>
+                                <div class="stat-label">Catches</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">2.5h</div>
+                                <div class="stat-label">Duration</div>
+                            </div>
+                        </div>
+                        <div class="view-session">Tap to view all catches →</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catch Post -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="avatar">SM</div>
+                    <div class="post-user-info">
+                        <div class="post-username">sarah_fisherwoman</div>
+                        <div class="post-meta">
+                            <span class="post-type-badge badge-catch">Catch</span>
+                            <span>4 hours ago</span>
+                        </div>
+                    </div>
+                    <button class="icon-btn" style="color: #64748b; font-size: 20px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+                
+                <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop" 
+                     alt="Caught fish" class="post-image">
+                
+                <div class="post-actions">
+                    <button class="action-btn liked" onclick="toggleLike(this)">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </span>
+                        <span>89</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </span>
+                        <span>12</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="post-content">
+                    <div class="post-stats">
+                        <span>🐟 Sea Bass</span>
+                        <span>⚖️ 2.8kg</span>
+                        <span>📏 58cm</span>
+                    </div>
+                    <div class="post-caption">
+                        <span class="username">sarah_fisherwoman</span>
+                        Personal best bass! Caught on live sandeel at high tide. What a fight! 💪
+                    </div>
+                    <div class="post-location">
+                        📍 Studland Bay (General Area)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo Post -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="avatar">MJ</div>
+                    <div class="post-user-info">
+                        <div class="post-username">mike_outdoors</div>
+                        <div class="post-meta">
+                            <span class="post-type-badge badge-photo">Photo</span>
+                            <span>6 hours ago</span>
+                        </div>
+                    </div>
+                    <button class="icon-btn" style="color: #64748b; font-size: 20px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+                
+                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop" 
+                     alt="Sunset fishing" class="post-image">
+                
+                <div class="post-actions">
+                    <button class="action-btn" onclick="toggleLike(this)">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </span>
+                        <span>156</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </span>
+                        <span>23</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="post-content">
+                    <div class="post-caption">
+                        <span class="username">mike_outdoors</span>
+                        Doesn't get much better than this. Golden hour at the lake 🌅
+                    </div>
+                    <div class="post-location">
+                        📍 Lake District National Park
+                    </div>
+                </div>
+            </div>
+
+            <div class="time-indicator">Yesterday</div>
+
+            <!-- Session Post 2 -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="avatar">TR</div>
+                    <div class="post-user-info">
+                        <div class="post-username">tom_carpking</div>
+                        <div class="post-meta">
+                            <span class="post-type-badge badge-session">Session</span>
+                            <span>Yesterday at 18:45</span>
+                        </div>
+                    </div>
+                    <button class="icon-btn" style="color: #64748b; font-size: 20px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+                
+                <img src="https://images.unsplash.com/photo-1545450660-4a59d2ad5d9e?w=800&h=600&fit=crop" 
+                     alt="Carp fishing" class="post-image">
+                
+                <div class="post-actions">
+                    <button class="action-btn" onclick="toggleLike(this)">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </span>
+                        <span>67</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </span>
+                        <span>8</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="post-content">
+                    <div class="post-caption">
+                        <span class="username">tom_carpking</span>
+                        48-hour session paid off! Two mirrors over 20lb 🎉
+                    </div>
+                    <div class="post-location">
+                        📍 Private Lake (Location Hidden)
+                    </div>
+
+                    <div class="session-preview">
+                        <div class="session-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">5</div>
+                                <div class="stat-label">Catches</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">48h</div>
+                                <div class="stat-label">Duration</div>
+                            </div>
+                        </div>
+                        <div class="view-session">Tap to view all catches →</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading skeleton -->
+            <div class="loading-skeleton">
+                <div class="skeleton-line" style="width: 60%;"></div>
+                <div class="skeleton-line" style="width: 90%;"></div>
+                <div class="skeleton-line" style="width: 70%;"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="setActiveNav(this, 'feed')">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </span>
+                <span class="nav-label">Feed</span>
+            </button>
+            <button class="nav-item" onclick="setActiveNav(this, 'explore')">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                        <line x1="8" y1="2" x2="8" y2="18"></line>
+                        <line x1="16" y1="6" x2="16" y2="22"></line>
+                    </svg>
+                </span>
+                <span class="nav-label">Explore</span>
+            </button>
+            <button class="nav-item center" onclick="openPostModal()">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </span>
+            </button>
+            <button class="nav-item" onclick="setActiveNav(this, 'compete')">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="7"></circle>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                    </svg>
+                </span>
+                <span class="nav-label">Compete</span>
+            </button>
+            <button class="nav-item" onclick="setActiveNav(this, 'profile')">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </span>
+                <span class="nav-label">Profile</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Post Creation Modal -->
+    <div class="modal-overlay" id="postModal" onclick="closePostModal(event)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <h2 class="sheet-title">Create Post</h2>
+            
+            <div class="post-type-options">
+                <div class="post-type-option">
+                    <div class="option-icon session">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">Start Session</div>
+                        <div class="option-desc">Begin a fishing trip and log catches</div>
+                    </div>
+                    <span style="font-size: 20px; color: #cbd5e1;">›</span>
+                </div>
+
+                <div class="post-type-option">
+                    <div class="option-icon catch">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-1 3.46-3.44 6-7 6s-8.56-2.54-9.5-6z"/>
+                            <path d="M18 5L22 9"/>
+                            <path d="M2 9L6 5"/>
+                            <path d="M3 19L8 14"/>
+                            <path d="M16 14L21 19"/>
+                        </svg>
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">Log a Catch</div>
+                        <div class="option-desc">Quick share a single fish</div>
+                    </div>
+                    <span style="font-size: 20px; color: #cbd5e1;">›</span>
+                </div>
+
+                <div class="post-type-option">
+                    <div class="option-icon photo">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">Share Photo</div>
+                        <div class="option-desc">Post a moment from the water</div>
+                    </div>
+                    <span style="font-size: 20px; color: #cbd5e1;">›</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setActiveNav(element, view) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            element.classList.add('active');
+            
+            // Show appropriate view (placeholder for now)
+            console.log('Navigating to:', view);
+            
+            // In real app, this would switch views
+            if (view !== 'feed') {
+                alert(`${view.charAt(0).toUpperCase() + view.slice(1)} view coming soon! This prototype focuses on the Feed.`);
+            }
+        }
+
+        function openPostModal() {
+            document.getElementById('postModal').classList.add('active');
+        }
+
+        function closePostModal(event) {
+            if (event.target === event.currentTarget) {
+                document.getElementById('postModal').classList.remove('active');
+            }
+        }
+
+        function toggleLike(button) {
+            button.classList.toggle('liked');
+            const count = button.querySelector('span:last-child');
+            const currentCount = parseInt(count.textContent);
+            count.textContent = button.classList.contains('liked') ? currentCount + 1 : currentCount - 1;
+            
+            const svg = button.querySelector('.nav-icon svg');
+            if (button.classList.contains('liked')) {
+                svg.setAttribute('fill', 'currentColor');
+            } else {
+                svg.setAttribute('fill', 'none');
+            }
+        }
+
+        // Simulate infinite scroll
+        let page = 1;
+        const feedContainer = document.getElementById('feedContainer');
+        
+        feedContainer.addEventListener('scroll', () => {
+            if (feedContainer.scrollHeight - feedContainer.scrollTop <= feedContainer.clientHeight + 100) {
+                // Load more posts (simulated)
+                console.log('Loading more posts...');
+            }
+        });
+
+        // Filter chip interaction
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

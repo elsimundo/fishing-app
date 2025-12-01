@@ -4,6 +4,9 @@ export type Profile = {
   full_name: string | null
   avatar_url: string | null
   email?: string | null
+  bio?: string | null
+  cover_photo_url?: string | null
+  location?: string | null
   created_at: string
 }
 
@@ -55,6 +58,7 @@ export type Catch = {
   weather_temp: number | null
   weather_condition: string | null
   wind_speed: number | null
+  released?: boolean | null
   created_at: string
   updated_at: string
 }
@@ -118,4 +122,88 @@ export type SessionShare = {
   owner_id: string
   can_view_exact_location: boolean
   created_at: string
+}
+
+// ============================================================================
+// Social Features Types
+// ============================================================================
+
+export interface Post {
+  id: string
+  user_id: string
+  type: 'session' | 'catch' | 'photo'
+  session_id?: string
+  catch_id?: string
+  caption?: string
+  photo_url?: string
+  location_privacy?: LocationPrivacy
+  is_public: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface PostLike {
+  id: string
+  post_id: string
+  user_id: string
+  created_at: string
+}
+
+export interface PostComment {
+  id: string
+  post_id: string
+  user_id: string
+  text: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Follow {
+  id: string
+  follower_id: string
+  following_id: string
+  created_at: string
+}
+
+export interface Business {
+  id: string
+  name: string
+  type: 'tackle_shop' | 'fishing_club' | 'charter_boat'
+  latitude: number
+  longitude: number
+  address?: string
+  postcode?: string
+  phone?: string
+  email?: string
+  website?: string
+  description?: string
+  hours?: Record<string, string>
+  verified: boolean
+  claimed_by_owner?: string
+  created_at: string
+  updated_at: string
+}
+
+// ============================================================================
+// Enriched Types for UI
+// ============================================================================
+
+export interface PostWithUser extends Post {
+  user: {
+    id: string
+    username: string
+    full_name: string
+    avatar_url?: string | null
+  }
+  session?: Session
+  catch?: Catch
+  like_count: number
+  comment_count: number
+  is_liked_by_user: boolean
+}
+
+export interface ProfileWithCounts extends Profile {
+  follower_count: number
+  following_count: number
+  post_count: number
 }
