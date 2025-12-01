@@ -40,6 +40,7 @@ export function SessionDetailPage() {
         session_id: session.id,
         shared_with_user_id: newShareUserId.trim(),
         can_view_exact_location: true,
+        owner_id: session.user_id,
       })
       setNewShareUserId('')
     } catch (err) {

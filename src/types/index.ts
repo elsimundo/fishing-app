@@ -109,3 +109,12 @@ export type CatchFormInput = {
   photo_url?: string | null
   notes?: string | null
 }
+
+export type SessionShare = {
+  id: string
+  session_id: string
+  shared_with_user_id: string
+  owner_id: string
+  can_view_exact_location: boolean
+  created_at: string
+}

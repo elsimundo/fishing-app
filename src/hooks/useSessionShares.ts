@@ -1,13 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-
-export type SessionShare = {
-  id: string
-  session_id: string
-  shared_with_user_id: string
-  can_view_exact_location: boolean
-  created_at: string
-}
+import type { SessionShare } from '../types'
 
 async function fetchSessionShares(sessionId: string): Promise<SessionShare[]> {
   const { data, error } = await supabase
@@ -36,6 +29,7 @@ export function useAddSessionShare() {
       session_id: string
       shared_with_user_id: string
       can_view_exact_location: boolean
+      owner_id: string
     }) => {
       const { data, error } = await supabase
         .from('session_shares')
