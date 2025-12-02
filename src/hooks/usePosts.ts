@@ -38,6 +38,18 @@ export function useFeed(userId: string) {
             sessionData = session as Session & { catches: Catch[] | null }
           }
 
+          let catchData: Catch | null = null
+          if (post.catch_id) {
+            const { data: catchRow, error: catchError } = await supabase
+              .from('catches')
+              .select('*')
+              .eq('id', post.catch_id)
+              .single()
+
+            if (catchError) throw new Error(catchError.message)
+            catchData = catchRow as Catch
+          }
+
           return {
             ...post,
             user: {
@@ -47,7 +59,7 @@ export function useFeed(userId: string) {
               avatar_url: userData.avatar_url ?? null,
             },
             session: sessionData ?? undefined,
-            catch: undefined,
+            catch: catchData ?? undefined,
             like_count: 0,
             comment_count: 0,
             is_liked_by_user: false,
@@ -140,6 +152,55 @@ export function useDeletePost() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
+// Repost an existing post into the user's feed
+export function useRepost() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ postId, caption }: { postId: string; caption?: string }) => {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
+      if (authError) throw new Error(authError.message)
+      if (!user) throw new Error('Not authenticated')
+
+      const { data: original, error: fetchError } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', postId)
+        .single()
+
+      if (fetchError) throw new Error(fetchError.message)
+      if (!original) throw new Error('Original post not found')
+
+      const base = original as Post
+
+      const { data, error } = await supabase
+        .from('posts')
+        .insert({
+          user_id: user.id,
+          type: base.type,
+          session_id: base.session_id,
+          catch_id: base.catch_id,
+          photo_url: base.photo_url,
+          location_privacy: base.location_privacy,
+          caption: caption?.trim() || base.caption || null,
+          is_public: true,
+        })
+        .select()
+        .single()
+
+      if (error) throw new Error(error.message)
+      return data as Post
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
+      queryClient.invalidateQueries({ queryKey: ['posts', 'user'] })
     },
   })
 }

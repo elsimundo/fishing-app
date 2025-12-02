@@ -55,36 +55,51 @@ export function SessionCard({ session }: SessionCardProps) {
 
   const isCompleted = Boolean(session.ended_at)
 
+   const coverPhotoUrl = session.cover_photo_url || (biggest && (biggest as any).photo_url) || null
+
   return (
     <Link
       to={`/sessions/${session.id}`}
-      className="block overflow-hidden rounded-xl bg-surface p-3 text-xs text-slate-700 shadow hover:bg-surface/90"
+      className="block"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold text-slate-900">{title}</p>
-          <p className="text-[11px] text-slate-500">{rangeLabel}</p>
-          <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-slate-600">
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">⏱ {durationLabel}</span>
-            {waterBadge ? (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5">{waterBadge}</span>
+      <div className="flex items-start gap-3">
+        {coverPhotoUrl ? (
+          <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
+            <img
+              src={coverPhotoUrl}
+              alt={title}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        ) : null}
+
+        <div className="flex flex-1 items-start justify-between gap-2">
+          <div className="space-y-1.5">
+            <p className="text-sm font-semibold text-slate-900">{title}</p>
+            <p className="text-[11px] text-slate-500">{rangeLabel}</p>
+            <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-600">
+              <span className="rounded-full bg-slate-100 px-2 py-0.5">⏱ {durationLabel}</span>
+              {waterBadge ? (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5">{waterBadge}</span>
+              ) : null}
+              <span className="rounded-full bg-slate-100 px-2 py-0.5">
+                {totalCatches} {totalCatches === 1 ? 'catch' : 'catches'}
+              </span>
+            </div>
+            {biggest ? (
+              <p className="mt-1 text-[11px] text-slate-600">
+                Biggest: <span className="font-medium">{biggest.species}</span>
+                {biggest.weight_kg != null ? ` · ${biggest.weight_kg.toFixed(1)} kg` : ''}
+              </p>
             ) : null}
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">
-              {totalCatches} {totalCatches === 1 ? 'catch' : 'catches'}
+            <p className="mt-1 text-[10px] text-slate-500">{privacyLabel}</p>
+          </div>
+          <div className="ml-2 flex flex-col items-end gap-1">
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+              {isCompleted ? 'Completed' : 'Active'}
             </span>
           </div>
-          {biggest ? (
-            <p className="mt-1 text-[11px] text-slate-600">
-              Biggest: <span className="font-medium">{biggest.species}</span>
-              {biggest.weight_kg != null ? ` · ${biggest.weight_kg.toFixed(1)} kg` : ''}
-            </p>
-          ) : null}
-          <p className="mt-1 text-[10px] text-slate-500">{privacyLabel}</p>
-        </div>
-        <div className="ml-2 flex flex-col items-end gap-1">
-          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-            {isCompleted ? 'Completed' : 'Active'}
-          </span>
         </div>
       </div>
     </Link>

@@ -11,9 +11,9 @@ export function CatchCard({ item }: CatchCardProps) {
 
   return (
     <Link to={`/catches/${item.id}`} className="block">
-      <article className="flex items-start gap-3 rounded-lg border border-slate-200 bg-surface p-3 text-xs shadow-sm hover:bg-slate-50">
+      <article className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-xs shadow-sm transition-shadow hover:shadow-md">
         {item.photo_url ? (
-          <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-slate-100">
+          <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
             <img
               src={item.photo_url}
               alt={item.species}

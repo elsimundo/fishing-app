@@ -9,12 +9,12 @@ import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { Share2 } from 'lucide-react'
+import { Share2, User2 } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 
 export function SessionDetailPage() {
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false)
-  const [showShareModal, setShowShareModal] = useState(false)
+  const [shareMode, setShareMode] = useState<'feed' | 'profile' | null>(null)
 
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
@@ -51,7 +51,7 @@ export function SessionDetailPage() {
     if (!session || !currentUserId) return
     if (session.user_id !== currentUserId) return
 
-    setShowShareModal(true)
+    setShareMode('feed')
   }, [searchParams, session, currentUserId])
 
   useEffect(() => {
@@ -191,11 +191,19 @@ export function SessionDetailPage() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowShareModal(true)}
+                  onClick={() => setShareMode('feed')}
                   className="flex items-center gap-1 rounded-md border border-slate-300 bg-surface px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
                 >
                   <Share2 size={14} />
                   Share to feed
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShareMode('profile')}
+                  className="flex items-center gap-1 rounded-md border border-slate-300 bg-surface px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <User2 size={14} />
+                  Share to profile
                 </button>
                 <button
                   type="button"
@@ -386,13 +394,18 @@ export function SessionDetailPage() {
           </BottomSheet>
         ) : null}
 
-        {/* Share to feed modal */}
-        {viewerRole === 'owner' && showShareModal ? (
+        {/* Share to feed/profile modal */}
+        {viewerRole === 'owner' && shareMode ? (
           <ShareToFeedModal
             session={session}
-            onClose={() => setShowShareModal(false)}
+            mode={shareMode}
+            onClose={() => setShareMode(null)}
             onSuccess={() => {
-              window.alert('Session shared to your feed!')
+              if (shareMode === 'profile') {
+                window.alert('Session shared to your profile!')
+              } else {
+                window.alert('Session shared to your feed!')
+              }
             }}
           />
         ) : null}

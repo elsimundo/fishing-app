@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useCatch } from '../hooks/useCatch'
 import type { Catch } from '../types'
-import { Share2 } from 'lucide-react'
+import { Share2, User2 } from 'lucide-react'
 import { ShareCatchToFeedModal } from '../components/catch/ShareCatchToFeedModal'
 
 export function CatchDetailPage() {
@@ -10,7 +10,7 @@ export function CatchDetailPage() {
   const [searchParams] = useSearchParams()
   const { data, isLoading, isError, error } = useCatch(id)
   const [catchItem, setCatchItem] = useState<Catch | null>(null)
-  const [showShareModal, setShowShareModal] = useState(false)
+  const [shareMode, setShareMode] = useState<'feed' | 'profile' | null>(null)
 
   useEffect(() => {
     if (data) setCatchItem(data)
@@ -24,7 +24,7 @@ export function CatchDetailPage() {
     if (normalized !== '1' && normalized !== 'true') return
     if (!data) return
 
-    setShowShareModal(true)
+    setShareMode('feed')
   }, [searchParams, data])
 
   if (isLoading) {
@@ -70,14 +70,24 @@ export function CatchDetailPage() {
                 {catchItem.location_name || 'Unknown location'}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowShareModal(true)}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-surface px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
-            >
-              <Share2 size={14} />
-              Share to feed
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShareMode('feed')}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-surface px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <Share2 size={14} />
+                Share to feed
+              </button>
+              <button
+                type="button"
+                onClick={() => setShareMode('profile')}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-surface px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <User2 size={14} />
+                Share to profile
+              </button>
+            </div>
           </div>
 
           {catchItem.photo_url ? (
@@ -121,12 +131,17 @@ export function CatchDetailPage() {
           ) : null}
         </section>
 
-        {showShareModal ? (
+        {shareMode && catchItem ? (
           <ShareCatchToFeedModal
             catchItem={catchItem}
-            onClose={() => setShowShareModal(false)}
+            mode={shareMode}
+            onClose={() => setShareMode(null)}
             onSuccess={() => {
-              window.alert('Catch shared to your feed!')
+              if (shareMode === 'profile') {
+                window.alert('Catch shared to your profile!')
+              } else {
+                window.alert('Catch shared to your feed!')
+              }
             }}
           />
         ) : null}

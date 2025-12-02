@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, Share2, User2, X } from 'lucide-react'
 import { useCreatePost } from '../../hooks/usePosts'
 import type { Catch } from '../../types'
 
@@ -7,9 +7,10 @@ interface ShareCatchToFeedModalProps {
   catchItem: Catch
   onClose: () => void
   onSuccess: () => void
+  mode?: 'feed' | 'profile'
 }
 
-export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess }: ShareCatchToFeedModalProps) {
+export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess, mode = 'feed' }: ShareCatchToFeedModalProps) {
   const [caption, setCaption] = useState('')
   const { mutate: createPost, isPending } = useCreatePost()
 
@@ -20,6 +21,7 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess }: ShareCa
       {
         type: 'catch',
         catch_id: catchItem.id,
+        photo_url: catchItem.photo_url || undefined,
         caption: caption.trim() || undefined,
       },
       {
@@ -31,12 +33,15 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess }: ShareCa
     )
   }
 
+  const title = mode === 'profile' ? 'Share catch to profile' : 'Share catch to feed'
+  const primaryLabel = mode === 'profile' ? 'Share to Profile' : 'Share to Feed'
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center">
       <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white md:max-w-lg md:rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-          <h2 className="text-lg font-bold text-gray-900">Share catch to feed</h2>
+          <h2 className="text-lg font-bold text-gray-900">{title}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -106,7 +111,14 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess }: ShareCa
                 Sharing...
               </>
             ) : (
-              'Share to Feed'
+              <>
+                {mode === 'profile' ? (
+                  <User2 className="h-4 w-4" />
+                ) : (
+                  <Share2 className="h-4 w-4" />
+                )}
+                <span>{primaryLabel}</span>
+              </>
             )}
           </button>
         </div>

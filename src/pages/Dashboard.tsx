@@ -1,21 +1,24 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { Navigation } from '../components/layout/Navigation'
 import { BottomSheet } from '../components/ui/BottomSheet'
 import { CatchForm } from '../components/catches/CatchForm'
 import { CatchList } from '../components/catches/CatchList'
+import { CatchCard } from '../components/catches/CatchCard'
 import { Map } from '../components/map'
 import { useCatches } from '../hooks/useCatches'
 import { useSessions } from '../hooks/useSessions'
 import { SessionForm } from '../components/sessions/SessionForm'
 import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
-import { SessionsList } from '../components/sessions/SessionsList'
+import { SessionCard } from '../components/sessions/SessionCard'
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<'map' | 'list'>('map')
   const [isMapExpanded, setIsMapExpanded] = useState(false)
   const [isCatchSheetOpen, setIsCatchSheetOpen] = useState(false)
   const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false)
+  const navigate = useNavigate()
   const { catches, isLoading, isError, error } = useCatches()
   const { data: sessions } = useSessions()
 
@@ -56,53 +59,62 @@ export function Dashboard() {
     }
   }
 
+  const recentSessions = completedSessions.slice(0, 3)
+  const hasMoreSessions = completedSessions.length > recentSessions.length
+  const recentCatches = catches.slice(0, 3)
+  const hasMoreCatches = catches.length > recentCatches.length
+
   return (
     <Layout>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-24 pt-3">
         <ActiveSessionBanner />
 
-        <section className="rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Lifetime stats</p>
-          <div className="mt-2 grid grid-cols-3 gap-2 text-[11px] sm:text-xs">
-            <div className="rounded-lg bg-slate-50 px-2 py-2">
-              <p className="text-[10px] text-slate-500">Sessions</p>
-              <p className="text-sm font-semibold text-slate-900">{totalSessions}</p>
+        <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 text-xs text-slate-100 shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Lifetime stats</p>
+              <p className="mt-1 text-sm font-semibold text-white">Your fishing at a glance</p>
             </div>
-            <div className="rounded-lg bg-slate-50 px-2 py-2">
-              <p className="text-[10px] text-slate-500">Catches</p>
-              <p className="text-sm font-semibold text-slate-900">{totalCatches}</p>
+          </div>
+
+          <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] sm:text-xs">
+            <div className="rounded-xl bg-white/5 px-2 py-2">
+              <p className="text-[10px] text-slate-300">Sessions</p>
+              <p className="text-base font-semibold text-white">{totalSessions}</p>
             </div>
-            <div className="rounded-lg bg-slate-50 px-2 py-2">
-              <p className="text-[10px] text-slate-500">Total weight</p>
-              <p className="text-sm font-semibold text-slate-900">{totalWeight.toFixed(1)} kg</p>
+            <div className="rounded-xl bg-white/5 px-2 py-2">
+              <p className="text-[10px] text-slate-300">Catches</p>
+              <p className="text-base font-semibold text-white">{totalCatches}</p>
+            </div>
+            <div className="rounded-xl bg-white/5 px-2 py-2">
+              <p className="text-[10px] text-slate-300">Total weight</p>
+              <p className="text-base font-semibold text-white">{totalWeight.toFixed(1)} kg</p>
             </div>
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-2 text-[11px] sm:grid-cols-2 sm:text-xs">
-            <div className="rounded-lg bg-slate-50 px-2 py-2">
-              <p className="text-[10px] text-slate-500">Personal best</p>
-              <p className="text-[11px] font-semibold text-slate-900 sm:text-xs">{personalBestLabel}</p>
+            <div className="rounded-xl bg-white/5 px-2 py-2">
+              <p className="text-[10px] text-slate-300">Personal best</p>
+              <p className="text-[11px] font-semibold text-white sm:text-xs">{personalBestLabel}</p>
             </div>
-            <div className="rounded-lg bg-slate-50 px-2 py-2">
-              <p className="text-[10px] text-slate-500">Top species</p>
-              <p className="text-[11px] font-semibold text-slate-900 sm:text-xs">{topSpeciesLabel}</p>
+            <div className="rounded-xl bg-white/5 px-2 py-2">
+              <p className="text-[10px] text-slate-300">Top species</p>
+              <p className="text-[11px] font-semibold text-white sm:text-xs">{topSpeciesLabel}</p>
             </div>
           </div>
         </section>
 
-        <div className="mb-3 flex items-center justify-between text-xs text-slate-700">
-          <p className="font-medium">Sessions</p>
+        <div className="mb-1 mt-1 flex items-center justify-between text-xs text-slate-700">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Sessions</p>
           <button
             type="button"
             onClick={() => setIsSessionSheetOpen(true)}
-            className="rounded-md bg-primary px-3 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-primary/90"
+            className="rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-primary/90"
           >
             Start session
           </button>
         </div>
-
-        <ActiveSessionBanner />
 
         {activeTab === 'map' ? (
           <section className="space-y-2">
@@ -133,6 +145,35 @@ export function Dashboard() {
                 <Map catches={catches} variant={isMapExpanded ? 'full' : 'mini'} />
               )}
             </div>
+
+            {recentCatches.length > 0 ? (
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between text-xs text-slate-700">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    Recent catches
+                  </p>
+                  {hasMoreCatches ? (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('list')}
+                      className="text-[11px] font-medium text-primary hover:underline"
+                    >
+                      View all
+                    </button>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  {recentCatches.map((item) => (
+                    <CatchCard key={item.id} item={item} />
+                  ))}
+                  {hasMoreCatches ? (
+                    <p className="pt-1 text-[11px] text-slate-500">
+                      Showing {recentCatches.length} of {catches.length} catches
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
           </section>
         ) : (
           <section className="space-y-2">
@@ -142,8 +183,37 @@ export function Dashboard() {
         )}
 
         <section className="mt-5 space-y-2">
-          <p className="text-sm font-medium text-slate-700">Recent sessions</p>
-          <SessionsList />
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-slate-700">Recent sessions</p>
+            {hasMoreSessions ? (
+              <button
+                type="button"
+                onClick={() => navigate('/sessions')}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                View all
+              </button>
+            ) : null}
+          </div>
+
+          {recentSessions.length === 0 ? (
+            <p className="text-xs text-slate-500">
+              No sessions yet — start your first fishing session to see it here.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {recentSessions.map((session) => (
+                <div key={session.id} className="rounded-2xl bg-white p-3 text-xs text-slate-700 shadow-sm">
+                  <SessionCard session={session} />
+                </div>
+              ))}
+              {hasMoreSessions ? (
+                <p className="pt-1 text-[11px] text-slate-500">
+                  Showing {recentSessions.length} of {completedSessions.length} sessions
+                </p>
+              ) : null}
+            </div>
+          )}
         </section>
 
         <button
