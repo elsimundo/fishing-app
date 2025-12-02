@@ -13,6 +13,7 @@ import { SessionsList } from '../components/sessions/SessionsList'
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<'map' | 'list'>('map')
+  const [isMapExpanded, setIsMapExpanded] = useState(false)
   const [isCatchSheetOpen, setIsCatchSheetOpen] = useState(false)
   const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false)
   const { catches, isLoading, isError, error } = useCatches()
@@ -105,18 +106,33 @@ export function Dashboard() {
 
         {activeTab === 'map' ? (
           <section className="space-y-2">
-            <p className="text-sm font-medium text-slate-700">Map view</p>
-            {isLoading ? (
-              <div className="flex h-[70vh] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-surface text-sm text-slate-500">
-                Loading map
-              </div>
-            ) : isError ? (
-              <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-                Failed to load catches: {error?.message}
-              </div>
-            ) : (
-              <Map catches={catches} />
-            )}
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-700">Map view</p>
+              <button
+                type="button"
+                onClick={() => setIsMapExpanded((prev) => !prev)}
+                className="text-[11px] font-medium text-primary hover:underline"
+              >
+                {isMapExpanded ? 'Collapse map' : 'Expand map'}
+              </button>
+            </div>
+            <div
+              className={`overflow-hidden rounded-xl bg-surface shadow ${
+                isMapExpanded ? 'h-[70vh]' : 'h-64'
+              }`}
+            >
+              {isLoading ? (
+                <div className="flex h-full items-center justify-center border border-dashed border-slate-300 text-sm text-slate-500">
+                  Loading map...
+                </div>
+              ) : isError ? (
+                <div className="flex h-full items-center rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+                  Failed to load catches: {error?.message}
+                </div>
+              ) : (
+                <Map catches={catches} variant={isMapExpanded ? 'full' : 'mini'} />
+              )}
+            </div>
           </section>
         ) : (
           <section className="space-y-2">

@@ -36,6 +36,19 @@ export function Map({ catches, variant = 'full' }: MapProps) {
 
   useEffect(() => {
     const map = mapRef.current
+    const container = mapContainerRef.current
+    if (!map || !container || typeof ResizeObserver === 'undefined') return
+
+    const observer = new ResizeObserver(() => {
+      map.resize()
+    })
+
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
     if (!map) return
 
     // Clear existing markers by storing them on the map instance
@@ -91,7 +104,11 @@ export function Map({ catches, variant = 'full' }: MapProps) {
       markers.forEach((m) => bounds.extend(m.getLngLat()))
       map.fitBounds(bounds, { padding: 40, maxZoom: 10 })
     }
-  }, [catches])
+  }, [catches, variant])
 
-  return <div ref={mapContainerRef} className="h-[60vh] w-full rounded-lg sm:h-[70vh]" />
+  useEffect(() => {
+    mapRef.current?.resize()
+  }, [variant])
+
+  return <div ref={mapContainerRef} className="h-full w-full rounded-lg" />
 }
