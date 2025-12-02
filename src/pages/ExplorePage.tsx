@@ -34,6 +34,34 @@ const STATIC_POIS = {
 
 type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters'
 
+const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; className: string }> = {
+  session: {
+    label: 'Session',
+    icon: '🎣',
+    className: 'bg-emerald-100 text-emerald-700',
+  },
+  catch: {
+    label: 'Catch',
+    icon: '🐟',
+    className: 'bg-sky-100 text-sky-700',
+  },
+  shop: {
+    label: 'Tackle shop',
+    icon: '🛒',
+    className: 'bg-amber-100 text-amber-800',
+  },
+  club: {
+    label: 'Club',
+    icon: '👥',
+    className: 'bg-indigo-100 text-indigo-700',
+  },
+  charter: {
+    label: 'Charter boat',
+    icon: '⛵',
+    className: 'bg-rose-100 text-rose-700',
+  },
+}
+
 export default function ExplorePage() {
   const navigate = useNavigate()
   const [view, setView] = useState<'map' | 'list'>('map')
@@ -283,7 +311,12 @@ export default function ExplorePage() {
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <div>
                     <p className="text-[12px] font-semibold text-slate-900">{selectedMarker.title}</p>
-                    <p className="text-[11px] capitalize text-slate-500">{selectedMarker.type}</p>
+                    <span
+                      className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_META[selectedMarker.type].className}`}
+                    >
+                      <span>{TYPE_META[selectedMarker.type].icon}</span>
+                      <span>{TYPE_META[selectedMarker.type].label}</span>
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -344,7 +377,12 @@ export default function ExplorePage() {
                           >
                             <div>
                               <p className="text-[11px] font-medium text-slate-900">{m.title}</p>
-                              <p className="text-[10px] capitalize text-slate-500">{m.type}</p>
+                              <span
+                                className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_META[m.type].className}`}
+                              >
+                                <span>{TYPE_META[m.type].icon}</span>
+                                <span>{TYPE_META[m.type].label}</span>
+                              </span>
                             </div>
                           </li>
                         ))}
