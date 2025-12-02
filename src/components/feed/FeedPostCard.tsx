@@ -5,9 +5,11 @@ import { PostActions } from './PostActions'
 
 interface FeedPostCardProps {
   post: PostWithUser
+  showVisibility?: boolean
+  onToggleVisibility?: (postId: string, nextIsPublic: boolean) => void
 }
 
-export function FeedPostCard({ post }: FeedPostCardProps) {
+export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedPostCardProps) {
   const navigate = useNavigate()
 
   const getCoverImage = () => {
@@ -40,6 +42,30 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
         createdAt={post.created_at}
         onUserClick={() => navigate(`/profile/${post.user.id}`)}
       />
+
+      {showVisibility ? (
+        <div className="mt-1 flex justify-end">
+          {onToggleVisibility ? (
+            <button
+              type="button"
+              onClick={() => onToggleVisibility(post.id, !post.is_public)}
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                post.is_public ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              {post.is_public ? 'Public' : 'Private'}
+            </button>
+          ) : (
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                post.is_public ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              {post.is_public ? 'Public' : 'Private'}
+            </span>
+          )}
+        </div>
+      ) : null}
 
       {coverImage && (
         <div className="my-3 cursor-pointer" onClick={handleCardClick}>

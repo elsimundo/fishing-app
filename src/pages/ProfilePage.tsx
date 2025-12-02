@@ -3,10 +3,10 @@ import { Loader2, Settings, Share2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
-import { useUserPosts } from '../hooks/usePosts'
+import { useOwnPosts, useTogglePostVisibility } from '../hooks/usePosts'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { ProfileStats } from '../components/profile/ProfileStats'
-import { PostsGrid } from '../components/profile/PostsGrid'
+import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { EditProfileModal } from '../components/profile/EditProfileModal'
 
 export default function ProfilePage() {
@@ -16,7 +16,8 @@ export default function ProfilePage() {
 
   const userId = user?.id ?? ''
   const { data: followCounts } = useFollowCounts(userId)
-  const { data: posts, isLoading: postsLoading } = useUserPosts(userId)
+  const { data: posts, isLoading: postsLoading } = useOwnPosts(userId)
+  const { mutate: toggleVisibility } = useTogglePostVisibility()
 
   if (!user || profileLoading || !profile) {
     return (
@@ -71,8 +72,23 @@ export default function ProfilePage() {
           <div className="flex justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
           </div>
+        ) : !posts || (posts as any[]).length === 0 ? (
+          <div className="py-8 text-center text-sm text-gray-500">
+            Nothing shared yet. Share a great session, catch, or photo from your dashboard.
+          </div>
         ) : (
-          <PostsGrid posts={(posts as any[]) ?? []} />
+          <div className="space-y-3">
+            {(posts as any[]).map((post) => (
+              <FeedPostCard
+                key={post.id}
+                post={post as any}
+                showVisibility
+                onToggleVisibility={(postId, nextIsPublic) =>
+                  toggleVisibility({ postId, isPublic: nextIsPublic })
+                }
+              />
+            ))}
+          </div>
         )}
       </div>
 

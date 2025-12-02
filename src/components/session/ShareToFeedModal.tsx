@@ -24,6 +24,7 @@ export function ShareToFeedModal({ session, onClose, onSuccess, mode = 'feed' }:
         photo_url: session.cover_photo_url || undefined,
         caption: caption.trim() || undefined,
         location_privacy: session.location_privacy || 'general',
+        isPublic: mode === 'profile' ? false : true,
       },
       {
         onSuccess: () => {

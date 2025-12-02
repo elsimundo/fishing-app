@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useFollowCounts, useIsFollowing } from '../hooks/useFollows'
 import { useUserPosts } from '../hooks/usePosts'
+import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { ProfileStats } from '../components/profile/ProfileStats'
 import { PostsGrid } from '../components/profile/PostsGrid'
@@ -79,8 +80,14 @@ export default function UserProfilePage() {
           <div className="flex justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
           </div>
+        ) : !posts || (posts as any[]).length === 0 ? (
+          <div className="py-8 text-center text-sm text-gray-500">No posts yet.</div>
         ) : (
-          <PostsGrid posts={(posts as any[]) ?? []} />
+          <div className="space-y-3">
+            {(posts as any[]).map((post) => (
+              <FeedPostCard key={post.id} post={post as any} showVisibility />
+            ))}
+          </div>
         )}
       </div>
     </div>

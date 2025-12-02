@@ -73,28 +73,166 @@ export function useFeed(userId: string) {
   })
 }
 
-// Fetch posts by a specific user (for their profile page)
+// Fetch posts by a specific user (for viewing someone else's profile)
 export function useUserPosts(userId: string) {
   return useQuery({
     queryKey: ['posts', 'user', userId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('posts')
-        .select(
-          `*,
-          profiles:user_id (
-            id,
-            username,
-            full_name,
-            avatar_url
-          )`,
-        )
+        .select('*')
         .eq('user_id', userId)
         .eq('is_public', true)
         .order('created_at', { ascending: false })
 
       if (error) throw new Error(error.message)
-      return data as unknown[]
+
+      const basePosts = (data ?? []) as Post[]
+
+      const enrichedPosts: PostWithUser[] = await Promise.all(
+        basePosts.map(async (post) => {
+          const { data: userData, error: userError } = await supabase
+            .from('profiles')
+            .select('id, username, full_name, avatar_url')
+            .eq('id', post.user_id)
+            .single()
+
+          if (userError) throw new Error(userError.message)
+
+          let sessionData: (Session & { catches: Catch[] | null }) | null = null
+          if (post.session_id) {
+            const { data: session, error: sessionError } = await supabase
+              .from('sessions')
+              .select('*, catches(*)')
+              .eq('id', post.session_id)
+              .single()
+
+            if (sessionError) throw new Error(sessionError.message)
+            sessionData = session as Session & { catches: Catch[] | null }
+          }
+
+          let catchData: Catch | null = null
+          if (post.catch_id) {
+            const { data: catchRow, error: catchError } = await supabase
+              .from('catches')
+              .select('*')
+              .eq('id', post.catch_id)
+              .single()
+
+            if (catchError) throw new Error(catchError.message)
+            catchData = catchRow as Catch
+          }
+
+          return {
+            ...post,
+            user: {
+              id: userData.id,
+              username: userData.username,
+              full_name: userData.full_name,
+              avatar_url: userData.avatar_url ?? null,
+            },
+            session: sessionData ?? undefined,
+            catch: catchData ?? undefined,
+            like_count: 0,
+            comment_count: 0,
+            is_liked_by_user: false,
+          }
+        }),
+      )
+
+      return enrichedPosts
+    },
+    enabled: Boolean(userId),
+  })
+}
+
+// Toggle post visibility (public/private)
+export function useTogglePostVisibility() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ postId, isPublic }: { postId: string; isPublic: boolean }) => {
+      const { error } = await supabase
+        .from('posts')
+        .update({ is_public: isPublic })
+        .eq('id', postId)
+
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
+// Fetch posts by the current user (own profile), including public and private
+export function useOwnPosts(userId: string) {
+  return useQuery({
+    queryKey: ['posts', 'own', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw new Error(error.message)
+
+      const basePosts = (data ?? []) as Post[]
+
+      const enrichedPosts: PostWithUser[] = await Promise.all(
+        basePosts.map(async (post) => {
+          const { data: userData, error: userError } = await supabase
+            .from('profiles')
+            .select('id, username, full_name, avatar_url')
+            .eq('id', post.user_id)
+            .single()
+
+          if (userError) throw new Error(userError.message)
+
+          let sessionData: (Session & { catches: Catch[] | null }) | null = null
+          if (post.session_id) {
+            const { data: session, error: sessionError } = await supabase
+              .from('sessions')
+              .select('*, catches(*)')
+              .eq('id', post.session_id)
+              .single()
+
+            if (sessionError) throw new Error(sessionError.message)
+            sessionData = session as Session & { catches: Catch[] | null }
+          }
+
+          let catchData: Catch | null = null
+          if (post.catch_id) {
+            const { data: catchRow, error: catchError } = await supabase
+              .from('catches')
+              .select('*')
+              .eq('id', post.catch_id)
+              .single()
+
+            if (catchError) throw new Error(catchError.message)
+            catchData = catchRow as Catch
+          }
+
+          return {
+            ...post,
+            user: {
+              id: userData.id,
+              username: userData.username,
+              full_name: userData.full_name,
+              avatar_url: userData.avatar_url ?? null,
+            },
+            session: sessionData ?? undefined,
+            catch: catchData ?? undefined,
+            like_count: 0,
+            comment_count: 0,
+            is_liked_by_user: false,
+          }
+        }),
+      )
+
+      return enrichedPosts
     },
     enabled: Boolean(userId),
   })
@@ -112,6 +250,7 @@ export function useCreatePost() {
       photo_url?: string
       caption?: string
       location_privacy?: 'private' | 'general' | 'exact'
+      isPublic?: boolean
     }) => {
       const {
         data: { user },
@@ -125,7 +264,7 @@ export function useCreatePost() {
         .insert({
           user_id: user.id,
           ...newPost,
-          is_public: true,
+          is_public: newPost.isPublic ?? true,
         })
         .select()
         .single()

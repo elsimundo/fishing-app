@@ -23,6 +23,7 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess, mode = 'f
         catch_id: catchItem.id,
         photo_url: catchItem.photo_url || undefined,
         caption: caption.trim() || undefined,
+        isPublic: mode === 'profile' ? false : true,
       },
       {
         onSuccess: () => {
