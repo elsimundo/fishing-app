@@ -1,0 +1,362 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Layout } from '../components/layout/Layout'
+import { useSessions } from '../hooks/useSessions'
+import { useCatches } from '../hooks/useCatches'
+import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
+
+const STATIC_POIS = {
+  shops: [
+    {
+      id: 'shop-1',
+      name: 'Brighton Angling Centre',
+      lat: 50.8205,
+      lng: -0.1372,
+    },
+  ],
+  clubs: [
+    {
+      id: 'club-1',
+      name: 'Brighton Sea Anglers',
+      lat: 50.8175,
+      lng: -0.115,
+    },
+  ],
+  charters: [
+    {
+      id: 'charter-1',
+      name: 'Brighton Charter Boats',
+      lat: 50.8125,
+      lng: -0.103,
+    },
+  ],
+}
+
+type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters'
+
+export default function ExplorePage() {
+  const navigate = useNavigate()
+  const [view, setView] = useState<'map' | 'list'>('map')
+  const [filters, setFilters] = useState<Record<ExploreFilterKey, boolean>>({
+    sessions: true,
+    catches: true,
+    shops: true,
+    clubs: true,
+    charters: true,
+  })
+
+  const [liveBounds, setLiveBounds] = useState<
+    | {
+        north: number
+        south: number
+        east: number
+        west: number
+      }
+    | null
+  >(null)
+
+  const [appliedBounds, setAppliedBounds] = useState<
+    | {
+        north: number
+        south: number
+        east: number
+        west: number
+      }
+    | null
+  >(null)
+
+  const [selectedMarker, setSelectedMarker] = useState<ExploreMarker | null>(null)
+
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [isLocating, setIsLocating] = useState(false)
+
+  const { data: sessions } = useSessions()
+  const { catches } = useCatches()
+
+  // Try to get user location on first load
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        setUserLocation(loc)
+      },
+      () => {
+        // Silent failure; user can still tap the button manually
+      },
+    )
+  }, [])
+
+  const markers: ExploreMarker[] = useMemo(() => {
+    const items: ExploreMarker[] = []
+
+    if (filters.sessions && sessions) {
+      for (const s of sessions) {
+        if (!s.latitude || !s.longitude) continue
+        items.push({
+          id: `session-${s.id}`,
+          type: 'session',
+          lat: s.latitude,
+          lng: s.longitude,
+          title: s.title || s.location_name,
+        })
+      }
+    }
+
+    if (filters.catches && catches) {
+      for (const c of catches) {
+        if (c.latitude == null || c.longitude == null) continue
+        items.push({
+          id: `catch-${c.id}`,
+          type: 'catch',
+          lat: c.latitude,
+          lng: c.longitude,
+          title: c.species,
+        })
+      }
+    }
+
+    if (filters.shops) {
+      for (const shop of STATIC_POIS.shops) {
+        items.push({ id: shop.id, type: 'shop', lat: shop.lat, lng: shop.lng, title: shop.name })
+      }
+    }
+
+    if (filters.clubs) {
+      for (const club of STATIC_POIS.clubs) {
+        items.push({ id: club.id, type: 'club', lat: club.lat, lng: club.lng, title: club.name })
+      }
+    }
+
+    if (filters.charters) {
+      for (const ch of STATIC_POIS.charters) {
+        items.push({ id: ch.id, type: 'charter', lat: ch.lat, lng: ch.lng, title: ch.name })
+      }
+    }
+
+    if (!appliedBounds) return items
+
+    return items.filter((m) => {
+      if (Number.isNaN(m.lat) || Number.isNaN(m.lng)) return false
+      return (
+        m.lat <= appliedBounds.north &&
+        m.lat >= appliedBounds.south &&
+        m.lng <= appliedBounds.east &&
+        m.lng >= appliedBounds.west
+      )
+    })
+  }, [sessions, catches, filters, appliedBounds])
+
+  const toggleFilter = (key: ExploreFilterKey) => {
+    setFilters((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const renderFilterChip = (key: ExploreFilterKey, label: string) => (
+    <button
+      key={key}
+      type="button"
+      onClick={() => toggleFilter(key)}
+      className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
+        filters[key]
+          ? 'bg-primary text-white shadow-sm'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+      }`}
+    >
+      {label}
+    </button>
+  )
+
+  const hasPendingBounds = useMemo(() => {
+    if (!liveBounds) return false
+    if (!appliedBounds) return true
+    return (
+      liveBounds.north !== appliedBounds.north ||
+      liveBounds.south !== appliedBounds.south ||
+      liveBounds.east !== appliedBounds.east ||
+      liveBounds.west !== appliedBounds.west
+    )
+  }, [liveBounds, appliedBounds])
+
+  const applyBounds = () => {
+    if (!liveBounds) return
+    setAppliedBounds(liveBounds)
+  }
+
+  const handleMarkerClick = (marker: ExploreMarker) => {
+    setSelectedMarker(marker)
+  }
+
+  const handleViewDetails = () => {
+    if (!selectedMarker) return
+
+    if (selectedMarker.id.startsWith('session-')) {
+      const sessionId = selectedMarker.id.replace('session-', '')
+      navigate(`/sessions/${sessionId}`)
+      return
+    }
+
+    if (selectedMarker.id.startsWith('catch-')) {
+      const catchId = selectedMarker.id.replace('catch-', '')
+      navigate(`/catches/${catchId}`)
+      return
+    }
+  }
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) return
+    setIsLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        setUserLocation(loc)
+        setLiveBounds(null)
+        setAppliedBounds(null)
+        setIsLocating(false)
+      },
+      () => {
+        setIsLocating(false)
+      },
+    )
+  }
+
+  return (
+    <Layout>
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-3 px-4 pb-24 pt-3">
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-base font-semibold text-slate-900">Explore</h1>
+            <p className="text-[11px] text-slate-500">Find sessions, catches and places to fish.</p>
+          </div>
+          <div className="inline-flex rounded-full bg-slate-100 p-1 text-[11px] font-medium text-slate-600">
+            <button
+              type="button"
+              onClick={() => setView('map')}
+              className={`rounded-full px-3 py-1 transition-colors ${
+                view === 'map' ? 'bg-white text-slate-900 shadow-sm' : ''
+              }`}
+            >
+              Map
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('list')}
+              className={`rounded-full px-3 py-1 transition-colors ${
+                view === 'list' ? 'bg-white text-slate-900 shadow-sm' : ''
+              }`}
+            >
+              List
+            </button>
+          </div>
+        </header>
+
+        <section className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+          <div className="flex flex-wrap gap-2">
+            {renderFilterChip('sessions', 'Sessions')}
+            {renderFilterChip('catches', 'Catches')}
+            {renderFilterChip('shops', 'Tackle shops')}
+            {renderFilterChip('clubs', 'Clubs')}
+            {renderFilterChip('charters', 'Charter boats')}
+          </div>
+          <button
+            type="button"
+            onClick={handleUseMyLocation}
+            className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
+          >
+            {isLocating ? 'Locating…' : 'Use my location'}
+          </button>
+        </section>
+
+        {view === 'map' ? (
+          <section className="relative mt-1 h-[60vh] overflow-hidden rounded-xl bg-surface shadow">
+            {hasPendingBounds ? (
+              <button
+                type="button"
+                onClick={applyBounds}
+                className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-1.5 text-xs font-medium text-white shadow-md"
+              >
+                Search this area
+              </button>
+            ) : null}
+
+            {selectedMarker ? (
+              <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-white/95 p-3 text-xs shadow-lg backdrop-blur">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-[12px] font-semibold text-slate-900">{selectedMarker.title}</p>
+                    <p className="text-[11px] capitalize text-slate-500">{selectedMarker.type}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMarker(null)}
+                    className="text-[11px] font-medium text-slate-400 hover:text-slate-600"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                {(selectedMarker.id.startsWith('session-') || selectedMarker.id.startsWith('catch-')) && (
+                  <button
+                    type="button"
+                    onClick={handleViewDetails}
+                    className="w-full rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-slate-800"
+                  >
+                    {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
+                  </button>
+                )}
+              </div>
+            ) : null}
+
+            <ExploreMap
+              markers={markers}
+              center={userLocation ?? undefined}
+              onBoundsChange={setLiveBounds}
+              onMarkerClick={handleMarkerClick}
+            />
+          </section>
+        ) : (
+          <section className="mt-1 space-y-3 rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
+            {markers.length === 0 ? (
+              <p className="text-[11px] text-slate-500">No places to show. Try changing filters or search area.</p>
+            ) : (
+              <>
+                {(['session', 'catch', 'shop', 'club', 'charter'] as ExploreMarkerType[]).map((type) => {
+                  const itemsForType = markers.filter((m) => m.type === type)
+                  if (itemsForType.length === 0) return null
+
+                  const labelMap: Record<ExploreMarkerType, string> = {
+                    session: 'Sessions',
+                    catch: 'Catches',
+                    shop: 'Tackle shops',
+                    club: 'Clubs',
+                    charter: 'Charter boats',
+                  }
+
+                  return (
+                    <div key={type} className="space-y-1">
+                      <h2 className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        {labelMap[type]}
+                      </h2>
+                      <ul className="space-y-1">
+                        {itemsForType.map((m) => (
+                          <li
+                            key={m.id}
+                            className="flex items-center justify-between rounded-lg px-2 py-1 hover:bg-slate-50"
+                          >
+                            <div>
+                              <p className="text-[11px] font-medium text-slate-900">{m.title}</p>
+                              <p className="text-[10px] capitalize text-slate-500">{m.type}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                })}
+              </>
+            )}
+          </section>
+        )}
+      </main>
+    </Layout>
+  )
+}

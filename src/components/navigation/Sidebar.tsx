@@ -34,7 +34,7 @@ export function Sidebar() {
             <span className="text-base">Feed</span>
           </button>
 
-          {/* Dashboard */}
+          {/* Sessions */}
           <button
             type="button"
             onClick={() => navigate('/sessions')}
@@ -43,7 +43,7 @@ export function Sidebar() {
             }`}
           >
             <Calendar size={28} className="text-gray-900" />
-            <span className="text-base">Dashboard</span>
+            <span className="text-base">Sessions</span>
           </button>
 
           {/* Explore */}

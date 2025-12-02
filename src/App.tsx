@@ -11,6 +11,7 @@ import UserProfilePage from './pages/UserProfilePage'
 import StartSessionPage from './pages/StartSessionPage'
 import { SessionDetailPage } from './pages/SessionDetailPage'
 import FeedView from './pages/FeedView'
+import ExplorePage from './pages/ExplorePage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 function App() {
@@ -21,10 +22,7 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/feed" element={<FeedView />} />
-        <Route
-          path="/explore"
-          element={<div className="p-8 text-center text-sm text-gray-600">Explore coming soon</div>}
-        />
+        <Route path="/explore" element={<ExplorePage />} />
         <Route
           path="/compete"
           element={<div className="p-8 text-center text-sm text-gray-600">Compete coming soon</div>}

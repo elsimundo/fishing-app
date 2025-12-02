@@ -56,7 +56,7 @@ export function BottomNav() {
           <Plus size={28} className="text-white" strokeWidth={3} />
         </button>
 
-        {/* Dashboard */}
+        {/* Sessions */}
         <button
           onClick={() => navigate('/sessions')}
           className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
@@ -67,7 +67,7 @@ export function BottomNav() {
               isActive('/sessions') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
-            Dashboard
+            Sessions
           </span>
         </button>
 

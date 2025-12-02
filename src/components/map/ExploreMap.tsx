@@ -1,0 +1,119 @@
+import { useEffect, useRef } from 'react'
+import mapboxgl, { Map as MapboxMapType, Marker } from 'mapbox-gl'
+
+export type ExploreMarkerType = 'session' | 'catch' | 'shop' | 'club' | 'charter'
+
+export interface ExploreMarker {
+  id: string
+  type: ExploreMarkerType
+  lat: number
+  lng: number
+  title: string
+}
+
+interface ExploreMapProps {
+  markers: ExploreMarker[]
+  center?: { lat: number; lng: number }
+  zoom?: number
+  onMarkerClick?: (marker: ExploreMarker) => void
+  onBoundsChange?: (bounds: { north: number; south: number; east: number; west: number }) => void
+}
+
+const typeColors: Record<ExploreMarkerType, string> = {
+  session: '#0f766e',
+  catch: '#2563eb',
+  shop: '#f97316',
+  club: '#7c3aed',
+  charter: '#e11d48',
+}
+
+export function ExploreMap({ markers, center, zoom = 9, onMarkerClick, onBoundsChange }: ExploreMapProps) {
+  const mapContainerRef = useRef<HTMLDivElement | null>(null)
+  const mapRef = useRef<MapboxMapType | null>(null)
+  const markersRef = useRef<Marker[]>([])
+
+  // Init map
+  useEffect(() => {
+    const token = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
+    if (!token) return
+    if (!mapContainerRef.current || mapRef.current) return
+
+    mapboxgl.accessToken = token
+
+    const initialCenter = center ?? { lat: 50.82, lng: -0.14 } // Brighton-ish default
+
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: 'mapbox://styles/mapbox/outdoors-v12',
+      center: [initialCenter.lng, initialCenter.lat],
+      zoom,
+    })
+
+    mapRef.current = map
+
+    if (onBoundsChange) {
+      map.on('moveend', () => {
+        const b = map.getBounds()
+        onBoundsChange({
+          north: b.getNorth(),
+          south: b.getSouth(),
+          east: b.getEast(),
+          west: b.getWest(),
+        })
+      })
+    }
+
+    return () => {
+      markersRef.current.forEach((m) => m.remove())
+      map.remove()
+      mapRef.current = null
+    }
+  }, [center, zoom, onBoundsChange])
+
+  // Respond to center prop changes after initialisation
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !center) return
+
+    map.flyTo({ center: [center.lng, center.lat], essential: true })
+  }, [center])
+
+  // Update markers when data changes
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    // Clear existing
+    markersRef.current.forEach((m) => m.remove())
+    markersRef.current = []
+
+    markers.forEach((m) => {
+      if (Number.isNaN(m.lat) || Number.isNaN(m.lng)) return
+
+      const el = document.createElement('div')
+      el.className = 'rounded-full border border-white shadow-md'
+      el.style.width = '16px'
+      el.style.height = '16px'
+      el.style.backgroundColor = typeColors[m.type]
+
+      if (onMarkerClick) {
+        el.style.cursor = 'pointer'
+        el.addEventListener('click', () => onMarkerClick(m))
+      }
+
+      const marker = new mapboxgl.Marker(el).setLngLat([m.lng, m.lat]).addTo(map)
+      markersRef.current.push(marker)
+    })
+
+    // Only auto-fit to markers when no external bounds handling is used.
+    // When onBoundsChange is provided (e.g. ExplorePage "search this area"),
+    // we let the user control the viewport so the map doesn't snap back.
+    if (!onBoundsChange && markers.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds()
+      markers.forEach((m) => bounds.extend([m.lng, m.lat]))
+      map.fitBounds(bounds, { padding: 40, maxZoom: 13 })
+    }
+  }, [markers, onMarkerClick, onBoundsChange])
+
+  return <div ref={mapContainerRef} className="h-full w-full" />
+}
