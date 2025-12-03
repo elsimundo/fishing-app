@@ -4,6 +4,8 @@ import { Layout } from '../components/layout/Layout'
 import { useSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
 import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
+import { calculateDistance, formatDistance } from '../utils/distance'
+import { SortSelector, type SortOption } from '../components/explore/SortSelector'
 
 const STATIC_POIS = {
   shops: [
@@ -97,6 +99,7 @@ export default function ExplorePage() {
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
+  const [sortBy, setSortBy] = useState<SortOption>('distance')
 
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
@@ -175,11 +178,20 @@ export default function ExplorePage() {
     })
   }, [sessions, catches, filters, appliedBounds])
 
+  const markersWithDistance: ExploreMarker[] = useMemo(() => {
+    if (!userLocation) return markers
+
+    return markers.map((marker) => ({
+      ...marker,
+      distance: calculateDistance(userLocation.lat, userLocation.lng, marker.lat, marker.lng),
+    }))
+  }, [markers, userLocation])
+
   const toggleFilter = (key: ExploreFilterKey) => {
     setFilters((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const renderFilterChip = (key: ExploreFilterKey, label: string) => (
+  const renderFilterChip = (key: ExploreFilterKey, label: string, count?: number) => (
     <button
       key={key}
       type="button"
@@ -191,6 +203,9 @@ export default function ExplorePage() {
       }`}
     >
       {label}
+      {filters[key] && count && count > 0 ? (
+        <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">{count}</span>
+      ) : null}
     </button>
   )
 
@@ -204,6 +219,36 @@ export default function ExplorePage() {
       liveBounds.west !== appliedBounds.west
     )
   }, [liveBounds, appliedBounds])
+
+  const visibleMarkersCount = useMemo(() => {
+    if (!liveBounds) return markersWithDistance.length
+
+    return markersWithDistance.filter((marker) => {
+      if (Number.isNaN(marker.lat) || Number.isNaN(marker.lng)) return false
+      return (
+        marker.lat <= liveBounds.north &&
+        marker.lat >= liveBounds.south &&
+        marker.lng <= liveBounds.east &&
+        marker.lng >= liveBounds.west
+      )
+    }).length
+  }, [markersWithDistance, liveBounds])
+
+  const markerCounts = useMemo(
+    () => ({
+      session: markersWithDistance.filter((m) => m.type === 'session').length,
+      catch: markersWithDistance.filter((m) => m.type === 'catch').length,
+      shop: markersWithDistance.filter((m) => m.type === 'shop').length,
+      club: markersWithDistance.filter((m) => m.type === 'club').length,
+      charter: markersWithDistance.filter((m) => m.type === 'charter').length,
+    }),
+    [markersWithDistance],
+  )
+
+  const pillVisible = useMemo(() => {
+    if (selectedMarker) return false
+    return hasPendingBounds
+  }, [selectedMarker, hasPendingBounds])
 
   const applyBounds = () => {
     if (!liveBounds) return
@@ -279,11 +324,11 @@ export default function ExplorePage() {
 
         <section className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
           <div className="flex flex-wrap gap-2">
-            {renderFilterChip('sessions', 'Sessions')}
-            {renderFilterChip('catches', 'Catches')}
-            {renderFilterChip('shops', 'Tackle shops')}
-            {renderFilterChip('clubs', 'Clubs')}
-            {renderFilterChip('charters', 'Charter boats')}
+            {renderFilterChip('sessions', 'Sessions', markerCounts.session)}
+            {renderFilterChip('catches', 'Catches', markerCounts.catch)}
+            {renderFilterChip('shops', 'Tackle shops', markerCounts.shop)}
+            {renderFilterChip('clubs', 'Clubs', markerCounts.club)}
+            {renderFilterChip('charters', 'Charter boats', markerCounts.charter)}
           </div>
           <button
             type="button"
@@ -296,13 +341,32 @@ export default function ExplorePage() {
 
         {view === 'map' ? (
           <section className="relative mt-1 h-[60vh] overflow-hidden rounded-xl bg-surface shadow">
-            {hasPendingBounds ? (
+            {pillVisible ? (
               <button
                 type="button"
                 onClick={applyBounds}
                 className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-1.5 text-xs font-medium text-white shadow-md"
               >
                 Search this area
+                {visibleMarkersCount > 0 && (
+                  <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
+                    {visibleMarkersCount}
+                  </span>
+                )}
+              </button>
+            ) : null}
+
+            {appliedBounds && userLocation ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setAppliedBounds(null)
+                  setLiveBounds(null)
+                  setSelectedMarker(null)
+                }}
+                className="absolute bottom-3 right-3 z-20 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-md hover:bg-slate-50"
+              >
+                ↻ Reset view
               </button>
             ) : null}
 
@@ -311,6 +375,12 @@ export default function ExplorePage() {
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <div>
                     <p className="text-[12px] font-semibold text-slate-900">{selectedMarker.title}</p>
+                    {selectedMarker.distance !== undefined ? (
+                      <div className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-600">
+                        <span>📍</span>
+                        <span>{formatDistance(selectedMarker.distance)} away</span>
+                      </div>
+                    ) : null}
                     <span
                       className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_META[selectedMarker.type].className}`}
                     >
@@ -342,18 +412,42 @@ export default function ExplorePage() {
             <ExploreMap
               markers={markers}
               center={userLocation ?? undefined}
+              userLocation={userLocation ?? undefined}
               onBoundsChange={setLiveBounds}
               onMarkerClick={handleMarkerClick}
             />
           </section>
         ) : (
           <section className="mt-1 space-y-3 rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
-            {markers.length === 0 ? (
+            {markersWithDistance.length === 0 ? (
               <p className="text-[11px] text-slate-500">No places to show. Try changing filters or search area.</p>
             ) : (
               <>
+                <div className="mb-2 flex justify-end">
+                  <SortSelector
+                    value={sortBy}
+                    onChange={setSortBy}
+                    hasUserLocation={!!userLocation}
+                  />
+                </div>
                 {(['session', 'catch', 'shop', 'club', 'charter'] as ExploreMarkerType[]).map((type) => {
-                  const itemsForType = markers.filter((m) => m.type === type)
+                  const itemsForType = markersWithDistance
+                    .filter((m) => m.type === type)
+                    .slice()
+                    .sort((a, b) => {
+                      if (sortBy === 'distance') {
+                        if (!userLocation) return 0
+                        if (a.distance === undefined) return 1
+                        if (b.distance === undefined) return -1
+                        return a.distance - b.distance
+                      }
+
+                      // date sort fallback using timestamp when present
+                      if (a.timestamp && b.timestamp) {
+                        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                      }
+                      return 0
+                    })
                   if (itemsForType.length === 0) return null
 
                   const labelMap: Record<ExploreMarkerType, string> = {

@@ -35,6 +35,56 @@ button {
   font-family: inherit;
 }
 
+.mapboxgl-ctrl-geolocate {
+  border-radius: 12px !important;
+}
+
+.custom-marker {
+  transition: transform 0.2s;
+}
+
+.custom-marker:hover {
+  transform: scale(1.2);
+}
+
+.user-location-pulse {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border: 3px solid #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.user-location-pulse::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: rgba(59, 130, 246, 0.4);
+  transform: translate(-50%, -50%) scale(1);
+  animation: user-location-pulse 2s infinite;
+}
+
+@keyframes user-location-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
 /* Prevent iOS Safari from auto-zooming inputs by ensuring 16px font-size on small screens */
 @media (max-width: 640px) {
   input,

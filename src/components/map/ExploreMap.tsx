@@ -9,12 +9,16 @@ export interface ExploreMarker {
   lat: number
   lng: number
   title: string
+  distance?: number
+  timestamp?: string
+  weight?: number
 }
 
 interface ExploreMapProps {
   markers: ExploreMarker[]
   center?: { lat: number; lng: number }
   zoom?: number
+  userLocation?: { lat: number; lng: number }
   onMarkerClick?: (marker: ExploreMarker) => void
   onBoundsChange?: (bounds: { north: number; south: number; east: number; west: number }) => void
 }
@@ -27,10 +31,11 @@ const typeColors: Record<ExploreMarkerType, string> = {
   charter: '#e11d48',
 }
 
-export function ExploreMap({ markers, center, zoom = 9, onMarkerClick, onBoundsChange }: ExploreMapProps) {
+export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerClick, onBoundsChange }: ExploreMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMapType | null>(null)
   const markersRef = useRef<Marker[]>([])
+  const userMarkerRef = useRef<Marker | null>(null)
 
   // Init map
   useEffect(() => {
@@ -54,6 +59,7 @@ export function ExploreMap({ markers, center, zoom = 9, onMarkerClick, onBoundsC
     if (onBoundsChange) {
       map.on('moveend', () => {
         const b = map.getBounds()
+        if (!b) return
         onBoundsChange({
           north: b.getNorth(),
           south: b.getSouth(),
@@ -114,6 +120,25 @@ export function ExploreMap({ markers, center, zoom = 9, onMarkerClick, onBoundsC
       map.fitBounds(bounds, { padding: 40, maxZoom: 13 })
     }
   }, [markers, onMarkerClick, onBoundsChange])
+
+  // User location marker
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove()
+      userMarkerRef.current = null
+    }
+
+    if (!userLocation) return
+
+    const el = document.createElement('div')
+    el.className = 'user-location-pulse'
+
+    const marker = new mapboxgl.Marker(el).setLngLat([userLocation.lng, userLocation.lat]).addTo(map)
+    userMarkerRef.current = marker
+  }, [userLocation])
 
   return <div ref={mapContainerRef} className="h-full w-full" />
 }
