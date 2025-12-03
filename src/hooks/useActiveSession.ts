@@ -3,10 +3,14 @@ import { supabase } from '../lib/supabase'
 import type { Session } from '../types'
 
 async function fetchActiveSession(): Promise<Session | null> {
+  const userRes = await supabase.auth.getUser()
+  const userId = userRes.data.user?.id
+
+  if (!userId) return null
+
   const { data, error } = await supabase
     .from('sessions')
     .select('*')
-    .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
     .is('ended_at', null)
     .order('started_at', { ascending: false })
     .limit(1)

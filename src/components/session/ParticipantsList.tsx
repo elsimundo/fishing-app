@@ -29,7 +29,16 @@ export function ParticipantsList({
   onRemove,
 }: ParticipantsListProps) {
   if (!participants || participants.length === 0) {
-    return <p className="text-[11px] text-slate-500">No participants yet.</p>
+    if (myRole === 'owner') {
+      return (
+        <p className="text-[11px] text-slate-500">
+          You&apos;re the only angler in this session so far. Use the Invite button to add contributors or
+          viewers.
+        </p>
+      )
+    }
+
+    return <p className="text-[11px] text-slate-500">No other participants have joined this session yet.</p>
   }
 
   return (

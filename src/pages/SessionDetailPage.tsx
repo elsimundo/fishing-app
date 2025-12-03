@@ -327,6 +327,13 @@ export function SessionDetailPage() {
                 : undefined
             }
           />
+
+          {isOwner ? (
+            <p className="mt-2 text-[10px] text-slate-500">
+              Contributors can log catches in this session. Viewers can see the trip but can&apos;t log or
+              edit catches.
+            </p>
+          ) : null}
         </section>
 
         {/* Share session (viewer-level sharing) */}
