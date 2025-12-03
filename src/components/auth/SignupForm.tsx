@@ -47,8 +47,6 @@ export function SignupForm() {
 
     const normalizedUsername = normalizeUsername(values.username)
 
-    const normalizedUsername = normalizeUsername(values.username)
-
     const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
