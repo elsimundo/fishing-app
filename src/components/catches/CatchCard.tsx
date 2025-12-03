@@ -8,6 +8,7 @@ type CatchCardProps = {
 
 export function CatchCard({ item }: CatchCardProps) {
   const dateLabel = format(new Date(item.caught_at), 'd MMM yyyy')
+  const loggedByLabel = item.logged_by?.username || item.logged_by?.full_name || null
 
   return (
     <Link to={`/catches/${item.id}`} className="block">
@@ -28,6 +29,11 @@ export function CatchCard({ item }: CatchCardProps) {
             <h3 className="text-sm font-semibold text-slate-900">{item.species}</h3>
             <p className="text-[11px] text-slate-600">{item.location_name}</p>
             <p className="text-[11px] text-slate-500">{dateLabel}</p>
+            {loggedByLabel ? (
+              <p className="text-[10px] text-slate-500">
+                Logged by <span className="font-medium">@{loggedByLabel}</span>
+              </p>
+            ) : null}
           </div>
           <div className="text-right text-[11px] text-slate-600">
             {item.weight_kg != null && item.weight_kg > 0 ? (

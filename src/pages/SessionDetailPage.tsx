@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
 import { useSessionShares, useAddSessionShare, useDeleteSessionShare } from '../hooks/useSessionShares'
+import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant } from '../hooks/useSessionParticipants'
 import { Map } from '../components/map'
 import { CatchCard } from '../components/catches/CatchCard'
 import { BottomSheet } from '../components/ui/BottomSheet'
@@ -11,6 +12,8 @@ import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
 import { Share2, User2 } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
+import { ParticipantsList } from '../components/session/ParticipantsList'
+import { InviteToSessionModal } from '../components/session/InviteToSessionModal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { ErrorState } from '../components/ui/ErrorState'
 
@@ -35,6 +38,7 @@ export function SessionDetailPage() {
   const [viewerEmails, setViewerEmails] = useState<Record<string, string | null>>({})
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [shareToRemoveId, setShareToRemoveId] = useState<string | null>(null)
+  const [showInviteModal, setShowInviteModal] = useState(false)
 
   useEffect(() => {
     async function loadUser() {
@@ -134,6 +138,12 @@ export function SessionDetailPage() {
     }
   }
 
+  const { data: participants = [] } = useSessionParticipants(id)
+  const { data: mySessionRole } = useMySessionRole(id)
+  const { mutateAsync: leaveSession, isPending: isLeaving } = useLeaveSession()
+  const { mutateAsync: changeParticipantRole } = useChangeParticipantRole()
+  const { mutateAsync: removeParticipant } = useRemoveParticipant()
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
@@ -162,6 +172,12 @@ export function SessionDetailPage() {
   const isOwner = currentUserId != null && currentUserId === session.user_id
   const viewerRole: ViewerRole = isOwner ? 'owner' : 'guest'
   const canSeeExactLocation = viewerRole === 'owner' || session.location_privacy === 'exact'
+  const canLogCatches = isOwner || mySessionRole === 'contributor'
+
+  const myParticipant =
+    participants.find(
+      (p) => p.user_id === currentUserId && (p.status === 'active' || p.status === 'pending'),
+    ) ?? null
 
   const handleEndSession = async () => {
     if (!session || session.ended_at) return
@@ -180,11 +196,38 @@ export function SessionDetailPage() {
 
         {/* Overview + main actions */}
         <section className="overflow-hidden rounded-xl bg-surface p-4 text-xs text-slate-700 shadow">
-          <h1 className="text-base font-semibold text-slate-900">{title}</h1>
-          <p className="mt-1 text-[11px] text-slate-500">Session overview · {privacyLabel}</p>
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h1 className="text-base font-semibold text-slate-900">{title}</h1>
+              <p className="mt-1 text-[11px] text-slate-500">Session overview · {privacyLabel}</p>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700">
+                {isOwner
+                  ? 'Owner'
+                  : mySessionRole === 'contributor'
+                    ? 'Contributor'
+                    : mySessionRole === 'viewer'
+                      ? 'Viewer'
+                      : 'Viewer'}
+              </span>
+              {myParticipant && !isOwner ? (
+                <button
+                  type="button"
+                  disabled={isLeaving}
+                  onClick={() => {
+                    void leaveSession({ participant_id: myParticipant.id, session_id: session.id })
+                  }}
+                  className="text-[10px] text-red-600 hover:underline disabled:opacity-60"
+                >
+                  {isLeaving ? 'Leaving…' : 'Leave session'}
+                </button>
+              ) : null}
+            </div>
+          </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-[11px] text-slate-500">Catch location and details below.</p>
-            {viewerRole === 'owner' ? (
+            {isOwner ? (
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -218,12 +261,72 @@ export function SessionDetailPage() {
                   {session.ended_at ? 'Session ended' : isEnding ? 'Ending…' : 'End session'}
                 </button>
               </div>
+            ) : canLogCatches ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsQuickLogOpen(true)}
+                  className="rounded-md bg-primary px-3 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-primary/90"
+                >
+                  Quick log catch
+                </button>
+              </div>
             ) : (
               <p className="text-[11px] text-slate-500">
-                You&apos;re viewing a shared session. Catch logging and editing are disabled.
+                You&apos;re viewing this session. Catch logging and editing are disabled for your role.
               </p>
             )}
           </div>
+        </section>
+
+        {/* Participants */}
+        <section className="rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
+          <div className="mb-2 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                Participants
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                Anglers who can view or log catches in this session.
+              </p>
+            </div>
+            {isOwner ? (
+              <button
+                type="button"
+                onClick={() => setShowInviteModal(true)}
+                className="rounded-md bg-primary px-3 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-primary/90"
+              >
+                Invite angler
+              </button>
+            ) : null}
+          </div>
+
+          <ParticipantsList
+            participants={participants}
+            currentUserId={currentUserId}
+            myRole={isOwner ? 'owner' : mySessionRole ?? null}
+            onChangeRole={
+              isOwner
+                ? (participant, role) => {
+                    void changeParticipantRole({
+                      participant_id: participant.id,
+                      session_id: session.id,
+                      role,
+                    })
+                  }
+                : undefined
+            }
+            onRemove={
+              isOwner
+                ? (participant) => {
+                    void removeParticipant({
+                      participant_id: participant.id,
+                      session_id: session.id,
+                    })
+                  }
+                : undefined
+            }
+          />
         </section>
 
         {/* Share session (viewer-level sharing) */}
@@ -281,6 +384,10 @@ export function SessionDetailPage() {
             {!shareError && shareSuccess ? (
               <p className="mt-1 text-[11px] text-emerald-600">{shareSuccess}</p>
             ) : null}
+
+        {showInviteModal ? (
+          <InviteToSessionModal sessionId={session.id} onClose={() => setShowInviteModal(false)} />
+        ) : null}
 
             <div className="mt-3 space-y-1">
               <p className="text-[11px] font-medium text-slate-700">Current viewers</p>
@@ -371,7 +478,7 @@ export function SessionDetailPage() {
         </section>
 
         {/* Quick log bottom sheet */}
-        {viewerRole === 'owner' ? (
+        {canLogCatches ? (
           <BottomSheet
             open={isQuickLogOpen}
             title="Quick log catch"
@@ -388,7 +495,7 @@ export function SessionDetailPage() {
         ) : null}
 
         {/* Share to feed/profile modal */}
-        {viewerRole === 'owner' && shareMode ? (
+        {isOwner && shareMode ? (
           <ShareToFeedModal
             session={session}
             mode={shareMode}

@@ -4,12 +4,15 @@ import { Loader2, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { Layout } from '../components/layout/Layout'
+import { LocationPicker } from '../components/map/LocationPicker'
 
 type WaterType = 'saltwater' | 'freshwater'
 type Privacy = 'private' | 'general' | 'exact'
 
 interface FormState {
   locationName?: string
+  latitude?: number | null
+  longitude?: number | null
   title: string
   waterType?: WaterType
   privacy: Privacy
@@ -25,10 +28,18 @@ export default function StartSessionPage() {
   const [loadingMessage, setLoadingMessage] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
   const [createdSessionId, setCreatedSessionId] = useState<string | null>(null)
+  const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false)
+  const [locationCoords, setLocationCoords] = useState<{ lat: number | null; lng: number | null }>({
+    lat: null,
+    lng: null,
+  })
+  const [locationError, setLocationError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState<FormState>({
     title: '',
     privacy: 'general',
+    latitude: null,
+    longitude: null,
   })
 
   const handleQuickStart = async () => {
@@ -148,8 +159,8 @@ export default function StartSessionPage() {
         location_name: formData.locationName ?? 'Fishing spot',
         water_type: formData.waterType ?? 'saltwater',
         location_privacy: formData.privacy,
-        latitude: 0,
-        longitude: 0,
+        latitude: formData.latitude ?? 0,
+        longitude: formData.longitude ?? 0,
         started_at: now.toISOString(),
         is_public: true,
         description: formData.notes ?? null,
@@ -178,6 +189,55 @@ export default function StartSessionPage() {
       setFormData((prev) => ({ ...prev, privacy: 'general' }))
     }
   }, [step, formData.privacy])
+
+  const openLocationPicker = () => {
+    setIsLocationPickerOpen(true)
+    setLocationError(null)
+
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not available. Drag the pin to set your spot.')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        setLocationCoords({ lat: latitude, lng: longitude })
+        setFormData((prev) => ({
+          ...prev,
+          latitude,
+          longitude,
+          locationName: prev.locationName ?? 'Current location',
+        }))
+      },
+      () => {
+        setLocationError('Could not get your current location. Drag the pin instead.')
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    )
+  }
+
+  const handleLocationChange = ({ lat, lng }: { lat: number; lng: number }) => {
+    setLocationCoords({ lat, lng })
+    setFormData((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+      locationName: prev.locationName ?? 'Pinned location',
+    }))
+  }
+
+  const handleConfirmLocation = () => {
+    if (locationCoords.lat == null || locationCoords.lng == null) {
+      setLocationError('Drop a pin on the map to continue.')
+      return
+    }
+    setFormData((prev) => ({
+      ...prev,
+      locationName: prev.locationName ?? 'Pinned location',
+    }))
+    setIsLocationPickerOpen(false)
+  }
 
   const renderProgress = () => {
     if (step < 1 || step > 4) return null
@@ -280,7 +340,10 @@ export default function StartSessionPage() {
   )
 
   const renderStep1 = () => {
-    const hasLocation = Boolean(formData.locationName)
+    const hasLocation =
+      Boolean(formData.locationName) &&
+      formData.latitude != null &&
+      formData.longitude != null
     const hasTitle = Boolean(formData.title.trim())
 
     return (
@@ -290,11 +353,9 @@ export default function StartSessionPage() {
 
         <button
           type="button"
-          onClick={() =>
-            setFormData((prev) => ({ ...prev, locationName: 'Brighton Marina' }))
-          }
+          onClick={openLocationPicker}
           className={`mb-4 flex items-center justify-between rounded-xl border-2 p-4 transition-colors ${
-            hasLocation ? 'border-navy-800 bg-gray-50' : 'border-gray-200 bg-white'
+            hasLocation ? 'border-navy-800 bg-gray-50' : 'border-gray-300 bg-white hover:border-navy-800'
           }`}
         >
           <div className="flex items-center gap-3">
@@ -310,7 +371,9 @@ export default function StartSessionPage() {
               </p>
             </div>
           </div>
-          <span className="text-xs font-semibold text-blue-600">Set</span>
+          <span className="text-xs font-semibold text-blue-600">
+            {hasLocation ? 'Change' : 'Set'}
+          </span>
         </button>
 
         <div className="mb-1">
@@ -331,7 +394,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={handleNext}
           disabled={!hasLocation || !hasTitle}
-          className="mt-2 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -393,7 +456,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={handleNext}
           disabled={!selected}
-          className="mt-4 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -464,7 +527,7 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={handleNext}
-          className="mt-4 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
+          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
         >
           Continue
         </button>
@@ -497,7 +560,7 @@ export default function StartSessionPage() {
       <button
         type="button"
         onClick={handleNext}
-        className="mt-2 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
+        className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
       >
         Start Session
       </button>
@@ -531,13 +594,55 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={() => navigate(`/sessions/${createdSessionId}`)}
-          className="mt-2 rounded-xl bg-navy-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
+          className="mt-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
         >
           View Active Session
         </button>
       ) : null}
     </div>
   )
+
+  const renderLocationModal = () => {
+    if (!isLocationPickerOpen) return null
+
+    const canConfirm = locationCoords.lat != null && locationCoords.lng != null
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div className="w-full max-w-xl rounded-xl bg-white p-4 shadow-lg">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900">Set your spot</h3>
+            <button
+              type="button"
+              onClick={() => setIsLocationPickerOpen(false)}
+              className="text-xs font-medium text-gray-500 hover:underline"
+            >
+              Close
+            </button>
+          </div>
+
+          {locationError ? (
+            <div className="mb-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">{locationError}</div>
+          ) : null}
+
+          <p className="mb-2 text-xs text-gray-600">We use your current location and let you drop a pin.</p>
+
+          <div className="overflow-hidden rounded-lg border border-gray-200">
+            <LocationPicker value={locationCoords} onChange={handleLocationChange} />
+          </div>
+
+          <button
+            type="button"
+            disabled={!canConfirm}
+            onClick={handleConfirmLocation}
+            className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-gray-300"
+          >
+            Use this spot
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   let content: JSX.Element
 
@@ -568,7 +673,7 @@ export default function StartSessionPage() {
           </section>
         </div>
       </main>
+      {renderLocationModal()}
     </Layout>
   )
 }
-

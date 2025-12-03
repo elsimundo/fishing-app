@@ -16,6 +16,23 @@ export type LocationPrivacy = 'private' | 'general' | 'exact'
 
 export type TideState = 'High' | 'Low' | 'Rising' | 'Falling' | 'Unknown'
 
+export type ParticipantRole = 'owner' | 'contributor' | 'viewer'
+
+export type ParticipantStatus = 'pending' | 'active' | 'left' | 'removed'
+
+export interface SessionParticipant {
+  id: string
+  session_id: string
+  user_id: string
+  role: ParticipantRole
+  status: ParticipantStatus
+  invited_at: string
+  joined_at: string | null
+  left_at: string | null
+
+  user?: Profile
+}
+
 export type Session = {
   id: string
   user_id: string
@@ -37,6 +54,11 @@ export type Session = {
   tide_state: TideState | null
   created_at: string
   updated_at: string
+
+  // Collaborative sessions (optional, when joined via richer queries)
+  participants?: SessionParticipant[]
+  participant_count?: number
+  my_role?: ParticipantRole
 }
 
 export type Catch = {
@@ -61,6 +83,9 @@ export type Catch = {
   released?: boolean | null
   created_at: string
   updated_at: string
+
+  // Optional relation for attribution
+  logged_by?: Profile
 }
 
 export type SessionStats = {
