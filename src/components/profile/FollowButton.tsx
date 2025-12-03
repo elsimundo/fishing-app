@@ -28,7 +28,9 @@ export function FollowButton({ userId, isFollowing }: FollowButtonProps) {
       onClick={handleClick}
       disabled={isPending}
       className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-        isFollowing ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : 'bg-navy-800 text-white hover:bg-navy-900'
+        isFollowing
+          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+          : 'bg-blue-600 text-white hover:bg-blue-700'
       }`}
     >
       {isPending ? (

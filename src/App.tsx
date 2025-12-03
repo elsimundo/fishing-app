@@ -11,7 +11,12 @@ import UserProfilePage from './pages/UserProfilePage'
 import StartSessionPage from './pages/StartSessionPage'
 import { SessionDetailPage } from './pages/SessionDetailPage'
 import FeedView from './pages/FeedView'
+import SearchUsersPage from './pages/SearchUsersPage'
 import ExplorePage from './pages/ExplorePage'
+import DiscoverPage from './pages/DiscoverPage'
+import CompetePage from './pages/CompetePage'
+import CompetitionDetailPage from './pages/CompetitionDetailPage'
+import CreateCompetitionPage from './pages/CreateCompetitionPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 function App() {
@@ -22,11 +27,12 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/feed" element={<FeedView />} />
+        <Route path="/search" element={<SearchUsersPage />} />
         <Route path="/explore" element={<ExplorePage />} />
-        <Route
-          path="/compete"
-          element={<div className="p-8 text-center text-sm text-gray-600">Compete coming soon</div>}
-        />
+        <Route path="/discover" element={<DiscoverPage />} />
+        <Route path="/compete" element={<CompetePage />} />
+        <Route path="/compete/create" element={<CreateCompetitionPage />} />
+        <Route path="/compete/:competitionId" element={<CompetitionDetailPage />} />
         <Route path="/sessions/new" element={<StartSessionPage />} />
         <Route path="/catches/new" element={<LogCatchPage />} />
         <Route

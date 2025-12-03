@@ -32,18 +32,18 @@ export function BottomNav() {
           </span>
         </button>
 
-        {/* Explore */}
+        {/* Discover */}
         <button
-          onClick={() => navigate('/explore')}
+          onClick={() => navigate('/discover')}
           className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
         >
-          <Map size={24} className={isActive('/explore') ? 'text-navy-800' : 'text-gray-600'} />
+          <Map size={24} className={isActive('/discover') ? 'text-navy-800' : 'text-gray-600'} />
           <span
             className={`text-[10px] font-semibold ${
-              isActive('/explore') ? 'text-navy-800' : 'text-gray-600'
+              isActive('/discover') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
-            Explore
+            Discover
           </span>
         </button>
 

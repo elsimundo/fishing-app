@@ -1,0 +1,254 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useCreateCompetition } from '../hooks/useCompetitions'
+import type { CompetitionType } from '../types'
+import { CompetitionTypeStep } from '../components/compete/create/CompetitionTypeStep'
+import { BasicInfoStep } from '../components/compete/create/BasicInfoStep'
+import { RulesStep } from '../components/compete/create/RulesStep'
+import { PrivacyStep } from '../components/compete/create/PrivacyStep'
+
+interface CompetitionLocationRestrictionForm {
+  lat: number
+  lng: number
+  radius_km: number
+}
+
+interface FormData {
+  // Step 1
+  type: CompetitionType | null
+  // Step 2
+  title: string
+  description: string
+  starts_at: string
+  ends_at: string
+  prize: string
+  cover_image_url: string
+  // Step 3
+  allowed_species: string[]
+  water_type: 'saltwater' | 'freshwater' | 'any'
+  location_restriction: CompetitionLocationRestrictionForm | null
+  entry_fee: number
+  max_participants: number | null
+  // Step 4
+  is_public: boolean
+  invite_only: boolean
+}
+
+export default function CreateCompetitionPage() {
+  const navigate = useNavigate()
+  const createCompetition = useCreateCompetition()
+
+  const [step, setStep] = useState(1)
+  const totalSteps = 4
+
+  const [formData, setFormData] = useState<FormData>({
+    type: null,
+    title: '',
+    description: '',
+    starts_at: '',
+    ends_at: '',
+    prize: '',
+    cover_image_url: '',
+    allowed_species: [],
+    water_type: 'any',
+    location_restriction: null,
+    entry_fee: 0,
+    max_participants: null,
+    is_public: true,
+    invite_only: false,
+  })
+
+  const updateFormData = (updates: Partial<FormData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }))
+  }
+
+  const canProceed = () => {
+    switch (step) {
+      case 1:
+        return formData.type !== null
+      case 2:
+        return (
+          formData.title.trim() !== '' &&
+          formData.starts_at !== '' &&
+          formData.ends_at !== '' &&
+          new Date(formData.ends_at) > new Date(formData.starts_at)
+        )
+      case 3:
+      case 4:
+        return true
+      default:
+        return false
+    }
+  }
+
+  const handleNext = () => {
+    if (step < totalSteps && canProceed()) {
+      setStep((s) => s + 1)
+    }
+  }
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep((s) => s - 1)
+    } else {
+      navigate('/compete')
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (!canProceed() || !formData.type) return
+
+    try {
+      const now = new Date()
+      const startsAt = new Date(formData.starts_at)
+      const status: 'upcoming' | 'active' = startsAt <= now ? 'active' : 'upcoming'
+
+      const created = await createCompetition.mutateAsync({
+        type: formData.type,
+        title: formData.title.trim(),
+        description: formData.description.trim() || null,
+        starts_at: new Date(formData.starts_at).toISOString(),
+        ends_at: new Date(formData.ends_at).toISOString(),
+        prize: formData.prize.trim() || null,
+        cover_image_url: formData.cover_image_url || null,
+        allowed_species:
+          formData.allowed_species.length > 0 ? formData.allowed_species : null,
+        water_type: formData.water_type,
+        location_restriction: formData.location_restriction,
+        entry_fee: formData.entry_fee,
+        max_participants: formData.max_participants,
+        is_public: formData.is_public,
+        invite_only: formData.invite_only,
+        status,
+      })
+
+      navigate(`/compete/${created.id}`)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error creating competition', error)
+    }
+  }
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <CompetitionTypeStep
+            selected={formData.type}
+            onSelect={(type: CompetitionType) => updateFormData({ type })}
+          />
+        )
+      case 2:
+        return (
+          <BasicInfoStep
+            data={{
+              title: formData.title,
+              description: formData.description,
+              starts_at: formData.starts_at,
+              ends_at: formData.ends_at,
+              prize: formData.prize,
+            }}
+            onChange={updateFormData}
+          />
+        )
+      case 3:
+        return (
+          <RulesStep
+            data={{
+              allowed_species: formData.allowed_species,
+              water_type: formData.water_type,
+              location_restriction: formData.location_restriction,
+              entry_fee: formData.entry_fee,
+              max_participants: formData.max_participants,
+            }}
+            onChange={updateFormData}
+          />
+        )
+      case 4:
+        return (
+          <PrivacyStep
+            data={{
+              is_public: formData.is_public,
+              invite_only: formData.invite_only,
+            }}
+            onChange={updateFormData}
+          />
+        )
+      default:
+        return null
+    }
+  }
+
+  const progress = Math.round((step / totalSteps) * 100)
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+        <div className="px-5 py-4">
+          <div className="mb-4 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="rounded-full px-3 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+            >
+              ← Back
+            </button>
+            <h1 className="text-base font-semibold text-gray-900">Create competition</h1>
+            <div className="w-12" />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs text-gray-600">
+              <span>
+                Step {step} of {totalSteps}
+              </span>
+              <span>{progress}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+              <div
+                className="h-full bg-navy-800 transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5">{renderStep()}</div>
+
+      <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-5">
+        <div className="flex gap-3">
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="rounded-xl border-2 border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Back
+            </button>
+          )}
+
+          {step < totalSteps ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={!canProceed()}
+              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-gray-300"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canProceed() || createCompetition.isPending}
+              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-gray-300"
+            >
+              {createCompetition.isPending ? 'Creating…' : 'Create competition'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

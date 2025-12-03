@@ -3,14 +3,15 @@ import { supabase } from '../lib/supabase'
 import type { Post, PostWithUser, Session, Catch } from '../types'
 
 // Fetch user's feed (posts from followed users + own posts)
-export function useFeed(userId: string) {
+// pageLimit/pageOffset allow simple client-side pagination (e.g. Load More)
+export function useFeed(userId: string, pageLimit = 20, pageOffset = 0) {
   return useQuery<PostWithUser[]>({
-    queryKey: ['feed', userId],
+    queryKey: ['feed', userId, pageLimit, pageOffset],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_user_feed', {
         for_user_id: userId,
-        page_limit: 20,
-        page_offset: 0,
+        page_limit: pageLimit,
+        page_offset: pageOffset,
       })
 
       if (error) throw new Error(error.message)

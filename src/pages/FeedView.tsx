@@ -1,31 +1,28 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
+import PullToRefresh from 'react-simple-pull-to-refresh'
 import { useAuth } from '../hooks/useAuth'
 import { useFeed } from '../hooks/usePosts'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
+import { PostSkeleton } from '../components/feed/PostSkeleton'
 
 export default function FeedView() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const userId = user?.id ?? ''
   const [activeTab, setActiveTab] = useState<'my' | 'friends' | 'global'>('friends')
+  const [pageSize, setPageSize] = useState(20)
 
   const {
     data: posts,
     isLoading,
     error,
-  } = useFeed(userId)
+    refetch,
+  } = useFeed(userId, pageSize, 0)
 
   if (!user) {
     return <Navigate to="/login" replace />
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-navy-800" />
-      </div>
-    )
   }
 
   if (error) {
@@ -48,9 +45,7 @@ export default function FeedView() {
         </p>
         <button
           type="button"
-          onClick={() => {
-            window.location.href = '/explore'
-          }}
+          onClick={() => navigate('/discover')}
           className="rounded-xl bg-navy-800 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900"
         >
           Discover Anglers
@@ -104,12 +99,39 @@ export default function FeedView() {
         </div>
       </div>
 
-      {/* Feed Posts */}
-      <div className="divide-y divide-gray-200">
-        {filteredPosts.map((post) => (
-          <FeedPostCard key={post.id} post={post} />
-        ))}
-      </div>
+      {/* Feed Posts with pull-to-refresh */}
+      <PullToRefresh onRefresh={refetch}>
+        <div className="divide-y divide-gray-200">
+          {isLoading ? (
+            <>
+              <PostSkeleton />
+              <PostSkeleton />
+              <PostSkeleton />
+            </>
+          ) : (
+            filteredPosts.map((post) => <FeedPostCard key={post.id} post={post} />)
+          )}
+        </div>
+
+        {/* Load more posts */}
+        {!isLoading && posts.length >= pageSize && (
+          <div className="border-t border-gray-200 bg-white px-5 py-4 text-center">
+            <button
+              type="button"
+              onClick={() => setPageSize((prev) => prev + 10)}
+              className="text-sm font-semibold text-navy-800 hover:text-navy-900"
+            >
+              Load more posts
+            </button>
+          </div>
+        )}
+
+        {!isLoading && posts.length > 0 && posts.length < pageSize && (
+          <div className="border-t border-gray-200 bg-white px-5 py-4 text-center text-xs text-gray-500">
+            You're all caught up! 🎣
+          </div>
+        )}
+      </PullToRefresh>
     </div>
   )
 }

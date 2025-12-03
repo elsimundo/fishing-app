@@ -207,3 +207,82 @@ export interface ProfileWithCounts extends Profile {
   following_count: number
   post_count: number
 }
+
+// ============================================================================
+// Competitions Types
+// ============================================================================
+
+export type CompetitionType = 'heaviest_fish' | 'most_catches' | 'species_diversity' | 'photo_contest'
+
+export type CompetitionStatus = 'upcoming' | 'active' | 'ended' | 'cancelled'
+
+export type CompetitionInviteStatus = 'pending' | 'accepted' | 'declined'
+
+export interface CompetitionLocationRestriction {
+  lat: number
+  lng: number
+  radius_km: number
+}
+
+export interface Competition {
+  id: string
+  created_by: string
+  title: string
+  description: string | null
+  type: CompetitionType
+  allowed_species: string[] | null
+  // Note: this water_type is competition-specific, not the main Session WaterType
+  water_type: 'saltwater' | 'freshwater' | 'any' | null
+  location_restriction: CompetitionLocationRestriction | null
+  starts_at: string
+  ends_at: string
+  entry_fee: number
+  prize: string | null
+  max_participants: number | null
+  is_public: boolean
+  invite_only: boolean
+  status: CompetitionStatus
+  winner_id: string | null
+  cover_image_url: string | null
+  created_at: string
+  updated_at: string
+
+  // Optional relations/enriched fields
+  creator?: Profile
+  winner?: Profile
+  participant_count?: number
+  entry_count?: number
+}
+
+export interface CompetitionEntry {
+  id: string
+  competition_id: string
+  user_id: string
+  session_id: string
+  submitted_at: string
+  score: number | null
+  rank: number | null
+  is_valid: boolean
+  notes: string | null
+  created_at: string
+
+  // Optional relations
+  competition?: Competition
+  user?: Profile
+  session?: Session
+}
+
+export interface CompetitionInvite {
+  id: string
+  competition_id: string
+  inviter_id: string
+  invitee_id: string
+  status: CompetitionInviteStatus
+  created_at: string
+  responded_at: string | null
+
+  // Optional relations
+  competition?: Competition
+  inviter?: Profile
+  invitee?: Profile
+}

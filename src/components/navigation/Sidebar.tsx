@@ -46,16 +46,16 @@ export function Sidebar() {
             <span className="text-base">Sessions</span>
           </button>
 
-          {/* Explore */}
+          {/* Discover */}
           <button
             type="button"
-            onClick={() => navigate('/explore')}
+            onClick={() => navigate('/discover')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/explore') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+              isActive('/discover') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
             }`}
           >
             <Map size={28} className="text-gray-900" />
-            <span className="text-base">Explore</span>
+            <span className="text-base">Discover</span>
           </button>
 
           {/* Compete (coming soon) */}
