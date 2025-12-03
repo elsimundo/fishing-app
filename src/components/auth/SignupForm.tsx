@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase'
 import { APP_NAME } from '../../lib/constants'
 import { validateUsername, normalizeUsername } from '../../utils/validation'
 import { useCheckUsername } from '../../hooks/useCheckUsername'
+import { ensureProfile } from '../../utils/profile'
 
 const signupSchema = z.object({
   username: z.string().min(3).max(20),
@@ -46,9 +47,16 @@ export function SignupForm() {
 
     const normalizedUsername = normalizeUsername(values.username)
 
+    const normalizedUsername = normalizeUsername(values.username)
+
     const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
+      options: {
+        data: {
+          username: normalizedUsername,
+        },
+      },
     })
 
     if (error) {
@@ -59,19 +67,14 @@ export function SignupForm() {
     const authUser = data.user
 
     if (authUser) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert(
-          {
-            id: authUser.id,
-            username: normalizedUsername,
-            email: values.email,
-          },
-          { onConflict: 'id' },
+      try {
+        await ensureProfile({ userId: authUser.id, username: normalizedUsername, email: values.email })
+      } catch (profileErr) {
+        const message = profileErr instanceof Error ? profileErr.message : 'Profile creation failed.'
+        console.error('Profile creation failed after signup', message)
+        setFormError(
+          'Account created but profile failed. Please try signing in again to finish setup or contact support.',
         )
-
-      if (profileError) {
-        setFormError('Account created but profile failed. Please contact support.')
         return
       }
     }

@@ -23,7 +23,6 @@ export function SessionPickerModal({ competition, onClose }: SessionPickerModalP
       let query = supabase
         .from('sessions')
         .select('*')
-        .eq('user_id', user.id)
         .gte('started_at', competition.starts_at)
         .lte('started_at', competition.ends_at)
         .order('started_at', { ascending: false })

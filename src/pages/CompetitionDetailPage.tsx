@@ -4,7 +4,6 @@ import { useCompetitionLeaderboard, useUserEntry } from '../hooks/useCompetition
 import { CompetitionHero } from '../components/compete/CompetitionHero'
 import { CompetitionInfo } from '../components/compete/CompetitionInfo'
 import { CompetitionLeaderboard } from '../components/compete/CompetitionLeaderboard'
-import { JoinCompetitionButton } from '../components/compete/JoinCompetitionButton'
 import { EnterSessionButton } from '../components/compete/EnterSessionButton'
 import { ErrorState } from '../components/ui/ErrorState'
 
@@ -60,8 +59,6 @@ export default function CompetitionDetailPage() {
     }
   }
 
-  const hasEntered = Boolean(userEntry)
-
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
@@ -87,10 +84,7 @@ export default function CompetitionDetailPage() {
       <CompetitionInfo competition={competition} />
 
       <div className="mt-4 border-y border-gray-200 bg-white px-5 py-4">
-        {competition.status === 'active' && !hasEntered && (
-          <JoinCompetitionButton competitionId={competition.id} />
-        )}
-        {competition.status === 'active' && hasEntered && (
+        {competition.status === 'active' && (
           <EnterSessionButton competitionId={competition.id} />
         )}
         {competition.status === 'upcoming' && (

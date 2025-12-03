@@ -59,7 +59,7 @@ export function PrivacyStep({ data, onChange }: PrivacyStepProps) {
             </div>
             <div
               className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                selectedId === option.id ? 'border-navy-800 bg-navy-800' : 'border-gray-300'
+                selectedId === option.id ? 'border-primary bg-primary' : 'border-gray-300'
               }`}
             >
               {selectedId === option.id && (

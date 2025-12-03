@@ -11,7 +11,6 @@ export function useActiveCompetitions() {
         .from('competitions')
         .select(
           `*,
-           competition_stats(participant_count, entry_count),
            creator:profiles!competitions_created_by_fkey(id, username, full_name, avatar_url)`
         )
         .eq('status', 'active')
@@ -22,8 +21,8 @@ export function useActiveCompetitions() {
 
       return (data ?? []).map((row: any) => ({
         ...(row as Competition),
-        participant_count: row.competition_stats?.participant_count ?? 0,
-        entry_count: row.competition_stats?.entry_count ?? 0,
+        participant_count: 0,
+        entry_count: 0,
         creator: row.creator ?? undefined,
       }))
     },
@@ -38,7 +37,6 @@ export function useUpcomingCompetitions() {
         .from('competitions')
         .select(
           `*,
-           competition_stats(participant_count, entry_count),
            creator:profiles!competitions_created_by_fkey(id, username, full_name, avatar_url)`
         )
         .eq('status', 'upcoming')
@@ -49,8 +47,8 @@ export function useUpcomingCompetitions() {
 
       return (data ?? []).map((row: any) => ({
         ...(row as Competition),
-        participant_count: row.competition_stats?.participant_count ?? 0,
-        entry_count: row.competition_stats?.entry_count ?? 0,
+        participant_count: 0,
+        entry_count: 0,
         creator: row.creator ?? undefined,
       }))
     },
@@ -67,7 +65,6 @@ export function useCompetition(competitionId: string) {
         .from('competitions')
         .select(
           `*,
-           competition_stats(participant_count, entry_count),
            creator:profiles!competitions_created_by_fkey(id, username, full_name, avatar_url),
            winner:profiles!competitions_winner_id_fkey(id, username, full_name, avatar_url)`
         )
@@ -78,10 +75,21 @@ export function useCompetition(competitionId: string) {
 
       if (!data) return null
 
+      const { data: entries, error: entriesError } = await supabase
+        .from('competition_entries')
+        .select('user_id')
+        .eq('competition_id', competitionId)
+
+      if (entriesError) throw new Error(entriesError.message)
+
+      const participantIds = new Set((entries ?? []).map((e: any) => e.user_id))
+      const participantCount = participantIds.size
+      const entryCount = entries?.length ?? 0
+
       return {
         ...(data as any as Competition),
-        participant_count: (data as any).competition_stats?.participant_count ?? 0,
-        entry_count: (data as any).competition_stats?.entry_count ?? 0,
+        participant_count: participantCount,
+        entry_count: entryCount,
         creator: (data as any).creator ?? undefined,
         winner: (data as any).winner ?? undefined,
       }
@@ -100,7 +108,7 @@ export function useMyCompetitions() {
 
       const { data, error } = await supabase
         .from('competitions')
-        .select('*, competition_stats(participant_count, entry_count)')
+        .select('*')
         .eq('created_by', user.id)
         .order('created_at', { ascending: false })
 
@@ -108,8 +116,8 @@ export function useMyCompetitions() {
 
       return (data ?? []).map((row: any) => ({
         ...(row as Competition),
-        participant_count: row.competition_stats?.participant_count ?? 0,
-        entry_count: row.competition_stats?.entry_count ?? 0,
+        participant_count: 0,
+        entry_count: 0,
       }))
     },
     enabled: Boolean(user?.id),
@@ -126,9 +134,7 @@ export function useMyEnteredCompetitions() {
 
       const { data, error } = await supabase
         .from('competition_entries')
-        .select(
-          `competition:competitions(*, competition_stats(participant_count, entry_count))`
-        )
+        .select(`competition:competitions(*)`)
         .eq('user_id', user.id)
         .order('submitted_at', { ascending: false })
 
@@ -139,8 +145,8 @@ export function useMyEnteredCompetitions() {
         .filter(Boolean)
         .map((c: any) => ({
           ...(c as Competition),
-          participant_count: c.competition_stats?.participant_count ?? 0,
-          entry_count: c.competition_stats?.entry_count ?? 0,
+          participant_count: 0,
+          entry_count: 0,
         }))
 
       return competitions

@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { APP_NAME } from '../../lib/constants'
+import { ensureProfile } from '../../utils/profile'
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -36,6 +37,23 @@ export function LoginForm() {
       setFormError(error.message)
       toast.error(error.message)
       return
+    }
+
+    // Ensure a profile exists (covers cases where signup created the account but profile insert failed)
+    const { data: userRes } = await supabase.auth.getUser()
+    const user = userRes.user
+    if (user) {
+      try {
+        await ensureProfile({
+          userId: user.id,
+          username: (user.user_metadata as any)?.username ?? null,
+          email: user.email,
+        })
+      } catch (profileErr) {
+        const message = profileErr instanceof Error ? profileErr.message : 'Could not ensure profile.'
+        console.error('Ensure profile after login failed', message)
+        toast.error('Signed in, but we could not finish your profile. Please try again.')
+      }
     }
 
     toast.success('Signed in')

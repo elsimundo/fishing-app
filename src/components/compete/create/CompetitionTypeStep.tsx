@@ -59,7 +59,7 @@ export function CompetitionTypeStep({ selected, onSelect }: CompetitionTypeStepP
             </div>
             <div
               className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                selected === type.id ? 'border-navy-800 bg-navy-800' : 'border-gray-300'
+                selected === type.id ? 'border-primary bg-primary' : 'border-gray-300'
               }`}
             >
               {selected === type.id && (

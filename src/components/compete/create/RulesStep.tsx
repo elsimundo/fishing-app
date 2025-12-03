@@ -49,7 +49,7 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
                 onClick={() => toggleSpecies(species)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                   data.allowed_species.includes(species)
-                    ? 'bg-navy-800 text-white'
+                    ? 'bg-primary text-white shadow-sm'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >

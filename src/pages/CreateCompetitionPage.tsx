@@ -233,7 +233,7 @@ export default function CreateCompetitionPage() {
               type="button"
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="flex-1 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
             >
               Next
             </button>
@@ -242,7 +242,7 @@ export default function CreateCompetitionPage() {
               type="button"
               onClick={handleSubmit}
               disabled={!canProceed() || createCompetition.isPending}
-              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="flex-1 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
             >
               {createCompetition.isPending ? 'Creating…' : 'Create competition'}
             </button>
