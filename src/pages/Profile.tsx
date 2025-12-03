@@ -57,7 +57,7 @@ export function Profile() {
       <div className="mx-auto flex max-w-xl flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-slate-600">
           <Link to="/dashboard" className="text-secondary hover:underline">
-            ← Back to dashboard
+            ← Back to logbook
           </Link>
         </div>
 

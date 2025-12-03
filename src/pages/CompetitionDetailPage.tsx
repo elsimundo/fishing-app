@@ -6,12 +6,13 @@ import { CompetitionInfo } from '../components/compete/CompetitionInfo'
 import { CompetitionLeaderboard } from '../components/compete/CompetitionLeaderboard'
 import { JoinCompetitionButton } from '../components/compete/JoinCompetitionButton'
 import { EnterSessionButton } from '../components/compete/EnterSessionButton'
+import { ErrorState } from '../components/ui/ErrorState'
 
 export default function CompetitionDetailPage() {
   const { competitionId } = useParams<{ competitionId: string }>()
   const navigate = useNavigate()
 
-  const { data: competition, isLoading } = useCompetition(competitionId || '')
+  const { data: competition, isLoading, error } = useCompetition(competitionId || '')
   const { data: entries, isLoading: leaderboardLoading } =
     useCompetitionLeaderboard(competitionId || '')
   const { data: userEntry } = useUserEntry(competitionId || '')
@@ -25,13 +26,16 @@ export default function CompetitionDetailPage() {
   }
 
   if (!competition) {
+    const message =
+      error instanceof Error ? error.message : 'This competition may have been removed or is unavailable.'
+
     return (
       <div className="flex h-screen flex-col items-center justify-center p-5 text-center">
-        <p className="mb-3 text-lg font-semibold text-gray-900">Competition not found</p>
+        <ErrorState title="Competition not found" message={message} />
         <button
           type="button"
           onClick={() => navigate('/compete')}
-          className="rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
+          className="mt-4 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
         >
           Back to competitions
         </button>

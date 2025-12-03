@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Calendar, Home, Map, Plus, Trophy, User } from 'lucide-react'
+import { BookOpen, Home, Map, Plus, Trophy, User } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { CreatePostModal } from '../post/CreatePostModal'
 
@@ -34,28 +34,28 @@ export function Sidebar() {
             <span className="text-base">Feed</span>
           </button>
 
-          {/* Sessions */}
+          {/* Logbook */}
           <button
             type="button"
-            onClick={() => navigate('/sessions')}
+            onClick={() => navigate('/dashboard')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/sessions') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+              isActive('/dashboard') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
             }`}
           >
-            <Calendar size={28} className="text-gray-900" />
-            <span className="text-base">Sessions</span>
+            <BookOpen size={28} className="text-gray-900" />
+            <span className="text-base">Logbook</span>
           </button>
 
-          {/* Discover */}
+          {/* Explore */}
           <button
             type="button"
-            onClick={() => navigate('/discover')}
+            onClick={() => navigate('/explore')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/discover') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+              isActive('/explore') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
             }`}
           >
             <Map size={28} className="text-gray-900" />
-            <span className="text-base">Discover</span>
+            <span className="text-base">Explore</span>
           </button>
 
           {/* Compete (coming soon) */}

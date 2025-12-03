@@ -4,6 +4,7 @@ import PullToRefresh from 'react-simple-pull-to-refresh'
 import { useActiveCompetitions, useUpcomingCompetitions, useMyCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
 import type { Competition } from '../types'
 import { CompetitionCard } from '../components/compete/CompetitionCard'
+import { CompetitionCardSkeleton } from '../components/skeletons/CompetitionCardSkeleton'
 
  type Tab = 'active' | 'upcoming' | 'mine'
 
@@ -140,8 +141,10 @@ export default function CompetePage() {
       <PullToRefresh onRefresh={async () => { await refetch() }}>
         <div className="p-5 pb-20">
           {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="h-8 w-8 rounded-full border-2 border-navy-800 border-t-transparent animate-spin" />
+            <div className="space-y-4">
+              <CompetitionCardSkeleton />
+              <CompetitionCardSkeleton />
+              <CompetitionCardSkeleton />
             </div>
           ) : competitions && competitions.length > 0 ? (
             <div className="space-y-4">

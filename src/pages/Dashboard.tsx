@@ -9,6 +9,7 @@ import { CatchCard } from '../components/catches/CatchCard'
 import { Map } from '../components/map'
 import { useCatches } from '../hooks/useCatches'
 import { useSessions } from '../hooks/useSessions'
+import { SessionCardSkeleton } from '../components/skeletons/SessionCardSkeleton'
 import { SessionForm } from '../components/sessions/SessionForm'
 import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
 import { SessionCard } from '../components/sessions/SessionCard'
@@ -69,6 +70,13 @@ export function Dashboard() {
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-24 pt-3">
         <ActiveSessionBanner />
+
+        <header className="flex items-baseline justify-between">
+          <div>
+            <h1 className="text-base font-semibold text-slate-900">Logbook</h1>
+            <p className="text-[11px] text-slate-500">Your fishing history, stats and recent trips.</p>
+          </div>
+        </header>
 
         <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 text-xs text-slate-100 shadow">
           <div className="flex items-center justify-between">
@@ -196,7 +204,12 @@ export function Dashboard() {
             ) : null}
           </div>
 
-          {recentSessions.length === 0 ? (
+          {!sessions ? (
+            <div className="space-y-2">
+              <SessionCardSkeleton />
+              <SessionCardSkeleton />
+            </div>
+          ) : recentSessions.length === 0 ? (
             <p className="text-xs text-slate-500">
               No sessions yet — start your first fishing session to see it here.
             </p>

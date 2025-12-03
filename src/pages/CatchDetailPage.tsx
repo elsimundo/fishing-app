@@ -4,6 +4,7 @@ import { useCatch } from '../hooks/useCatch'
 import type { Catch } from '../types'
 import { Share2, User2 } from 'lucide-react'
 import { ShareCatchToFeedModal } from '../components/catch/ShareCatchToFeedModal'
+import { ErrorState } from '../components/ui/ErrorState'
 
 export function CatchDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -38,17 +39,14 @@ export function CatchDetailPage() {
   }
 
   if (isError || !catchItem) {
+    const message = error instanceof Error ? error.message : 'Please try again in a moment.'
+
     return (
       <main className="min-h-screen bg-background px-4 py-6">
         <Link to="/sessions" className="mb-4 inline-block text-xs text-secondary hover:underline">
-          ← Back to dashboard
+          Back to logbook
         </Link>
-        <div className="max-w-xs rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-          <p className="font-medium">Failed to load catch.</p>
-          <p className="mt-1 text-[11px] text-red-600">
-            {error instanceof Error ? error.message : 'Please try again in a moment.'}
-          </p>
-        </div>
+        <ErrorState title="Failed to load catch" message={message} />
       </main>
     )
   }
@@ -58,7 +56,7 @@ export function CatchDetailPage() {
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-slate-600">
           <Link to="/sessions" className="text-secondary hover:underline">
-            ← Back to dashboard
+            Back to logbook
           </Link>
         </div>
 

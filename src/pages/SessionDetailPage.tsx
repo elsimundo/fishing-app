@@ -11,6 +11,8 @@ import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
 import { Share2, User2 } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { ErrorState } from '../components/ui/ErrorState'
 
 export function SessionDetailPage() {
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false)
@@ -31,6 +33,8 @@ export function SessionDetailPage() {
   const [shareSuccess, setShareSuccess] = useState<string | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [viewerEmails, setViewerEmails] = useState<Record<string, string | null>>({})
+  const [showEndConfirm, setShowEndConfirm] = useState(false)
+  const [shareToRemoveId, setShareToRemoveId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadUser() {
@@ -141,17 +145,14 @@ export function SessionDetailPage() {
   }
 
   if (isError || !session) {
+    const message = error instanceof Error ? error.message : 'Please try again in a moment.'
+
     return (
       <main className="min-h-screen bg-background px-4 py-6">
         <Link to="/sessions" className="mb-4 inline-block text-xs text-secondary hover:underline">
-          ← Back to dashboard
+          Back to logbook
         </Link>
-        <div className="max-w-xs rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-          <p className="font-medium">Failed to load session.</p>
-          <p className="mt-1 text-[11px] text-red-600">
-            {error instanceof Error ? error.message : 'Please try again in a moment.'}
-          </p>
-        </div>
+        <ErrorState title="Failed to load session" message={message} />
       </main>
     )
   }
@@ -164,10 +165,6 @@ export function SessionDetailPage() {
 
   const handleEndSession = async () => {
     if (!session || session.ended_at) return
-
-    const confirmed = window.confirm('End this session? You can still view it later in your sessions list.')
-    if (!confirmed) return
-
     await updateSession({ id: session.id, ended_at: new Date().toISOString() })
     await refetch()
   }
@@ -177,7 +174,7 @@ export function SessionDetailPage() {
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-slate-600">
           <Link to="/sessions" className="text-secondary hover:underline">
-            ← Back to dashboard
+            Back to logbook
           </Link>
         </div>
 
@@ -215,9 +212,7 @@ export function SessionDetailPage() {
                 <button
                   type="button"
                   disabled={isEnding || Boolean(session.ended_at)}
-                  onClick={() => {
-                    void handleEndSession()
-                  }}
+                  onClick={() => setShowEndConfirm(true)}
                   className="rounded-md border border-slate-300 bg-surface px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
                 >
                   {session.ended_at ? 'Session ended' : isEnding ? 'Ending…' : 'End session'}
@@ -309,9 +304,7 @@ export function SessionDetailPage() {
                       <button
                         type="button"
                         disabled={isDeletingShare}
-                        onClick={() => {
-                          void deleteShare({ id: share.id, session_id: share.session_id })
-                        }}
+                        onClick={() => setShareToRemoveId(share.id)}
                         className="ml-2 rounded-md border border-slate-300 px-2 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100 disabled:opacity-60"
                       >
                         Remove
@@ -409,6 +402,39 @@ export function SessionDetailPage() {
             }}
           />
         ) : null}
+
+        <ConfirmDialog
+          isOpen={showEndConfirm}
+          title="End session?"
+          message="You can still view this session later in your logbook. Ending it will stop further logging for this trip."
+          confirmLabel={isEnding ? 'Ending…' : 'End session'}
+          cancelLabel="Cancel"
+          onCancel={() => setShowEndConfirm(false)}
+          onConfirm={() => {
+            setShowEndConfirm(false)
+            void handleEndSession()
+          }}
+        />
+
+        <ConfirmDialog
+          isOpen={shareToRemoveId != null}
+          title="Remove viewer?"
+          message="This person will no longer be able to view this shared session. You can always share it again later."
+          confirmLabel={isDeletingShare ? 'Removing…' : 'Remove viewer'}
+          cancelLabel="Cancel"
+          onCancel={() => setShareToRemoveId(null)}
+          onConfirm={() => {
+            if (!shareToRemoveId) return
+            const target = shares?.find((s) => s.id === shareToRemoveId)
+            if (!target) {
+              setShareToRemoveId(null)
+              return
+            }
+            void deleteShare({ id: target.id, session_id: target.session_id }).finally(() => {
+              setShareToRemoveId(null)
+            })
+          }}
+        />
       </div>
     </main>
   )

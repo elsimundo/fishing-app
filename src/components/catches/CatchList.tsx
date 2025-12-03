@@ -24,7 +24,7 @@ export function CatchList() {
   if (!catches.length) {
     return (
       <div className="rounded-lg border border-dashed border-slate-300 bg-surface p-4 text-sm text-slate-500">
-        No catches yet — log your first catch from the dashboard.
+        No catches yet — log your first catch from the logbook.
       </div>
     )
   }

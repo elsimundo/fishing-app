@@ -1,6 +1,7 @@
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useCatch } from '../hooks/useCatch'
 import { CatchForm } from '../components/catches/CatchForm'
+import { ErrorState } from '../components/ui/ErrorState'
 
 export function CatchEditPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,17 +19,14 @@ export function CatchEditPage() {
   }
 
   if (isError || !catchItem || !id) {
+    const message = error instanceof Error ? error.message : 'Please try again in a moment.'
+
     return (
       <main className="min-h-screen bg-background px-4 py-6">
         <Link to="/dashboard" className="mb-4 inline-block text-xs text-secondary hover:underline">
-          ← Back to dashboard
+          ← Back to logbook
         </Link>
-        <div className="max-w-xs rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-          <p className="font-medium">Failed to load catch for editing.</p>
-          <p className="mt-1 text-[11px] text-red-600">
-            {error instanceof Error ? error.message : 'Please try again in a moment.'}
-          </p>
-        </div>
+        <ErrorState title="Failed to load catch for editing" message={message} />
       </main>
     )
   }

@@ -74,7 +74,7 @@ export default function ProfilePage() {
           </div>
         ) : !posts || (posts as any[]).length === 0 ? (
           <div className="py-8 text-center text-sm text-gray-500">
-            Nothing shared yet. Share a great session, catch, or photo from your dashboard.
+            Nothing shared yet. Share a great session, catch, or photo from your logbook.
           </div>
         ) : (
           <div className="space-y-3">

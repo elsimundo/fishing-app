@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useFeed } from '../hooks/usePosts'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { PostSkeleton } from '../components/feed/PostSkeleton'
+import { ErrorState } from '../components/ui/ErrorState'
 
 export default function FeedView() {
   const { user } = useAuth()
@@ -27,12 +28,7 @@ export default function FeedView() {
 
   if (error) {
     const message = error instanceof Error ? error.message : 'Something went wrong'
-    return (
-      <div className="flex h-screen flex-col items-center justify-center p-5 text-center">
-        <p className="mb-2 text-lg font-semibold text-gray-900">Unable to load feed</p>
-        <p className="text-sm text-gray-600">{message}</p>
-      </div>
-    )
+    return <ErrorState title="Unable to load feed" message={message} onRetry={refetch} />
   }
 
   if (!posts || posts.length === 0) {

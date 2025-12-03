@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Calendar, Home, Map, Plus, User } from 'lucide-react'
+import { BookOpen, Home, Map, Plus, User } from 'lucide-react'
 import { CreatePostModal } from '../post/CreatePostModal'
 
 export function BottomNav() {
@@ -32,18 +32,18 @@ export function BottomNav() {
           </span>
         </button>
 
-        {/* Discover */}
+        {/* Explore */}
         <button
-          onClick={() => navigate('/discover')}
+          onClick={() => navigate('/explore')}
           className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
         >
-          <Map size={24} className={isActive('/discover') ? 'text-navy-800' : 'text-gray-600'} />
+          <Map size={24} className={isActive('/explore') ? 'text-navy-800' : 'text-gray-600'} />
           <span
             className={`text-[10px] font-semibold ${
-              isActive('/discover') ? 'text-navy-800' : 'text-gray-600'
+              isActive('/explore') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
-            Discover
+            Explore
           </span>
         </button>
 
@@ -56,18 +56,18 @@ export function BottomNav() {
           <Plus size={28} className="text-white" strokeWidth={3} />
         </button>
 
-        {/* Sessions */}
+        {/* Logbook */}
         <button
-          onClick={() => navigate('/sessions')}
+          onClick={() => navigate('/dashboard')}
           className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
         >
-          <Calendar size={24} className={isActive('/sessions') ? 'text-navy-800' : 'text-gray-600'} />
+          <BookOpen size={24} className={isActive('/dashboard') ? 'text-navy-800' : 'text-gray-600'} />
           <span
             className={`text-[10px] font-semibold ${
-              isActive('/sessions') ? 'text-navy-800' : 'text-gray-600'
+              isActive('/dashboard') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
-            Sessions
+            Logbook
           </span>
         </button>
 
