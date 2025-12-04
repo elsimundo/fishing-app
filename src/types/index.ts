@@ -55,6 +55,9 @@ export type Session = {
   created_at: string
   updated_at: string
 
+  // When this session is the backing session for a competition
+  competition_id?: string | null
+
   // Collaborative sessions (optional, when joined via richer queries)
   participants?: SessionParticipant[]
   participant_count?: number
@@ -252,6 +255,8 @@ export interface CompetitionLocationRestriction {
 export interface Competition {
   id: string
   created_by: string
+  // Linked live session for this competition (may be null for legacy rows)
+  session_id?: string | null
   title: string
   description: string | null
   type: CompetitionType
@@ -277,6 +282,24 @@ export interface Competition {
   winner?: Profile
   participant_count?: number
   entry_count?: number
+  // Derived stats when using the new session-based model
+  catch_count?: number
+  my_rank?: number
+}
+
+export interface CompetitionLeaderboardEntry {
+  rank: number
+  user_id: string
+  username: string
+  full_name: string | null
+  avatar_url: string | null
+  score: number
+  catch_count: number
+  best_catch_id: string | null
+  best_catch_species: string | null
+  best_catch_weight: number | null
+  best_catch_length: number | null
+  best_catch_photo: string | null
 }
 
 export interface CompetitionEntry {

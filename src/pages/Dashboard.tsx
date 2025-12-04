@@ -12,6 +12,7 @@ import { useSessions } from '../hooks/useSessions'
 import { SessionCardSkeleton } from '../components/skeletons/SessionCardSkeleton'
 import { SessionForm } from '../components/sessions/SessionForm'
 import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
+import { ActiveCompetitionBanner } from '../components/compete/ActiveCompetitionBanner'
 import { SessionCard } from '../components/sessions/SessionCard'
 
 export function Dashboard() {
@@ -69,6 +70,7 @@ export function Dashboard() {
     <Layout>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-24 pt-3">
+        <ActiveCompetitionBanner />
         <ActiveSessionBanner />
 
         <header className="flex items-baseline justify-between">

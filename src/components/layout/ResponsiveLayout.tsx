@@ -15,7 +15,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
     return (
       <div className="flex min-h-screen flex-col bg-gray-50">
         <MobileHeader />
-        <main className="flex-1 overflow-auto pb-20">{children}</main>
+        <main className="flex-1 overflow-auto pb-24">{children}</main>
         <BottomNav />
       </div>
     )

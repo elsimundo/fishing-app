@@ -182,7 +182,7 @@ export default function CreateCompetitionPage() {
   const progress = Math.round((step / totalSteps) * 100)
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-24 md:pb-20">
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
         <div className="px-5 py-4">
           <div className="mb-4 flex items-center justify-between">
@@ -216,7 +216,8 @@ export default function CreateCompetitionPage() {
 
       <div className="p-5">{renderStep()}</div>
 
-      <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-5">
+      {/* Fixed Bottom Actions */}
+      <div className="fixed bottom-20 left-0 right-0 border-t border-gray-200 bg-white p-5 md:bottom-0 md:left-[275px] md:max-w-[600px]">
         <div className="flex gap-3">
           {step > 1 && (
             <button
@@ -233,7 +234,7 @@ export default function CreateCompetitionPage() {
               type="button"
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex-1 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
+              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
             >
               Next
             </button>
@@ -242,7 +243,7 @@ export default function CreateCompetitionPage() {
               type="button"
               onClick={handleSubmit}
               disabled={!canProceed() || createCompetition.isPending}
-              className="flex-1 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
+              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
             >
               {createCompetition.isPending ? 'Creating…' : 'Create competition'}
             </button>

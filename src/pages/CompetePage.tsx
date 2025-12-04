@@ -139,7 +139,7 @@ export default function CompetePage() {
 
       {/* Content */}
       <PullToRefresh onRefresh={async () => { await refetch() }}>
-        <div className="p-5 pb-20">
+        <div className="p-5 pb-24 md:pb-20">
           {isLoading ? (
             <div className="space-y-4">
               <CompetitionCardSkeleton />
