@@ -1,8 +1,10 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CatchForm } from '../components/catches/CatchForm'
 
 export default function LogCatchPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const sessionId = searchParams.get('session')
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-4">
@@ -12,7 +14,7 @@ export default function LogCatchPage() {
           onClick={() => navigate(-1)}
           className="self-start text-xs text-slate-600 hover:underline"
         >
-           Back
+           Back
         </button>
 
         <section className="rounded-xl bg-white p-4 shadow">
@@ -24,7 +26,7 @@ export default function LogCatchPage() {
           <div className="mt-4">
             <CatchForm
               onSuccess={() => {
-                navigate('/dashboard')
+                navigate(-1)
               }}
             />
           </div>

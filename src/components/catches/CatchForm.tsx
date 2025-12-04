@@ -71,6 +71,19 @@ type CatchFormProps = {
 export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }: CatchFormProps) {
   const { user } = useAuth()
   const { data: activeSession } = useActiveSession()
+  
+  // Check if a specific session is requested via URL parameter
+  const searchParams = new URLSearchParams(window.location.search)
+  const requestedSessionId = searchParams.get('session')
+  
+  // Use requested session if provided, otherwise fall back to active session
+  const targetSessionId = requestedSessionId || activeSession?.id
+  
+  // Debug logging
+  console.log('CatchForm - URL params:', window.location.search)
+  console.log('CatchForm - requestedSessionId:', requestedSessionId)
+  console.log('CatchForm - activeSession?.id:', activeSession?.id)
+  console.log('CatchForm - targetSessionId:', targetSessionId)
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
 
@@ -176,9 +189,12 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       fishing_style: values.fishing_style ?? null,
       photo_url: photoUrl,
       notes: values.notes ?? null,
-      // Attach to active session if creating a new catch and one exists
-      session_id: mode === 'create' && !catchId && activeSession ? activeSession.id : undefined,
+      // Attach to requested session (from URL) or active session if creating a new catch
+      session_id: mode === 'create' && !catchId ? targetSessionId : undefined,
     }
+
+    console.log('CatchForm - Submitting payload with session_id:', payload.session_id)
+    console.log('CatchForm - Full payload:', payload)
 
     const isEdit = mode === 'edit' && catchId
 
