@@ -80,88 +80,93 @@ export function SignupForm() {
     setSuccessMessage('Check your email to confirm your account, then log in.')
   }
 
+  const inputClass = "block w-full rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0 min-h-[56px]"
+  const labelClass = "mb-2 block text-sm font-semibold text-slate-700"
+  const errorClass = "mt-2 text-sm text-red-600 font-medium"
+  const successClass = "mt-2 text-sm text-emerald-600 font-medium"
+
   return (
-    <div className="mx-auto w-full max-w-md rounded-xl bg-surface p-6 shadow-lg">
-      <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>
-      <p className="mb-6 text-center text-sm text-slate-600">Create a new account</p>
+    <div className="mx-auto w-full max-w-md rounded-2xl bg-surface p-6 shadow-lg">
+      <h1 className="mb-2 text-center text-3xl font-bold text-navy-800">{APP_NAME}</h1>
+      <p className="mb-8 text-center text-base text-slate-600">Create a new account</p>
 
       {formError ? (
-        <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="mb-6 rounded-xl bg-red-50 px-4 py-3 text-base text-red-700 font-medium">
           {formError}
         </div>
       ) : null}
 
       {successMessage ? (
-        <div className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+        <div className="mb-6 rounded-xl bg-emerald-50 px-4 py-3 text-base text-emerald-700 font-medium">
           {successMessage}
         </div>
       ) : null}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="username">
+          <label className={labelClass} htmlFor="username">
             Username
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base text-slate-400">
               @
             </span>
             <input
               id="username"
               type="text"
               autoComplete="username"
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 pl-5 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="block w-full rounded-xl border-2 border-slate-200 px-4 py-4 pl-8 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0 min-h-[56px]"
               maxLength={20}
               {...register('username')}
             />
           </div>
           {watchedUsername && !usernameValidation.valid ? (
-            <p className="mt-1 text-xs text-red-600">{usernameValidation.error}</p>
+            <p className={errorClass}>{usernameValidation.error}</p>
           ) : null}
           {watchedUsername && usernameValidation.valid && availability && !availability.available ? (
-            <p className="mt-1 text-xs text-red-600">@{normalizeUsername(watchedUsername)} is already taken</p>
+            <p className={errorClass}>@{normalizeUsername(watchedUsername)} is already taken</p>
           ) : null}
           {watchedUsername && usernameValidation.valid && availability?.available ? (
-            <p className="mt-1 text-xs text-emerald-600">@{normalizeUsername(watchedUsername)} is available</p>
+            <p className={successClass}>✓ @{normalizeUsername(watchedUsername)} is available</p>
           ) : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="email">
+          <label className={labelClass} htmlFor="email">
             Email
           </label>
           <input
             id="email"
             type="email"
             autoComplete="email"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className={inputClass}
             {...register('email')}
           />
           {errors.email ? (
-            <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
+            <p className={errorClass}>{errors.email.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="password">
+          <label className={labelClass} htmlFor="password">
             Password
           </label>
           <input
             id="password"
             type="password"
             autoComplete="new-password"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className={inputClass}
             {...register('password')}
           />
           {errors.password ? (
-            <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+            <p className={errorClass}>{errors.password.message}</p>
           ) : null}
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
+          className="w-full rounded-xl bg-navy-800 px-6 py-5 text-lg font-semibold text-white shadow-lg hover:bg-navy-900 disabled:bg-navy-400 active:scale-[0.98] transition-all min-h-[64px]"
         >
           {isSubmitting ? 'Creating account…' : 'Create account'}
         </button>
