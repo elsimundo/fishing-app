@@ -3,6 +3,26 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import type { Competition } from '../types'
 
+// Helper function to get participant count for a competition
+async function getParticipantCount(competitionId: string): Promise<number> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_competition_leaderboard', {
+        p_competition_id: competitionId,
+      })
+
+    if (error) {
+      console.error('Failed to fetch leaderboard for participant count:', error)
+      return 0
+    }
+
+    return data?.length ?? 0
+  } catch (error) {
+    console.error('Error getting participant count:', error)
+    return 0
+  }
+}
+
 export function useActiveCompetitions() {
   return useQuery<Competition[]>({
     queryKey: ['competitions', 'active'],
@@ -19,12 +39,20 @@ export function useActiveCompetitions() {
 
       if (error) throw new Error(error.message)
 
-      return (data ?? []).map((row: any) => ({
-        ...(row as Competition),
-        participant_count: 0,
-        entry_count: 0,
-        creator: row.creator ?? undefined,
-      }))
+      // Get participant counts for all competitions
+      const competitionsWithCounts = await Promise.all(
+        (data ?? []).map(async (row: any) => {
+          const participantCount = await getParticipantCount(row.id)
+          return {
+            ...(row as Competition),
+            participant_count: participantCount,
+            entry_count: participantCount,
+            creator: row.creator ?? undefined,
+          }
+        })
+      )
+
+      return competitionsWithCounts
     },
   })
 }
@@ -115,11 +143,19 @@ export function useMyCompetitions() {
 
       if (error) throw new Error(error.message)
 
-      return (data ?? []).map((row: any) => ({
-        ...(row as Competition),
-        participant_count: 0,
-        entry_count: 0,
-      }))
+      // Get participant counts for all competitions
+      const competitionsWithCounts = await Promise.all(
+        (data ?? []).map(async (row: any) => {
+          const participantCount = await getParticipantCount(row.id)
+          return {
+            ...(row as Competition),
+            participant_count: participantCount,
+            entry_count: participantCount,
+          }
+        })
+      )
+
+      return competitionsWithCounts
     },
     enabled: Boolean(user?.id),
   })
@@ -144,13 +180,20 @@ export function useMyEnteredCompetitions() {
       const competitions = (data ?? [])
         .map((row: any) => row.competition)
         .filter(Boolean)
-        .map((c: any) => ({
-          ...(c as Competition),
-          participant_count: 0,
-          entry_count: 0,
-        }))
 
-      return competitions
+      // Get participant counts for all competitions
+      const competitionsWithCounts = await Promise.all(
+        competitions.map(async (c: any) => {
+          const participantCount = await getParticipantCount(c.id)
+          return {
+            ...(c as Competition),
+            participant_count: participantCount,
+            entry_count: participantCount,
+          }
+        })
+      )
+
+      return competitionsWithCounts
     },
     enabled: Boolean(user?.id),
   })
