@@ -106,15 +106,25 @@ export default function ExplorePage() {
 
   // Try to get user location on first load
   useEffect(() => {
-    if (!navigator.geolocation) return
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported')
+      return
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         setUserLocation(loc)
+        console.log('User location obtained:', loc)
       },
-      () => {
+      (error) => {
+        console.warn('Geolocation error:', error.message)
         // Silent failure; user can still tap the button manually
       },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000, // 5 minutes
+      }
     )
   }, [])
 
@@ -276,7 +286,10 @@ export default function ExplorePage() {
   }
 
   const handleUseMyLocation = () => {
-    if (!navigator.geolocation) return
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
     setIsLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -285,10 +298,18 @@ export default function ExplorePage() {
         setLiveBounds(null)
         setAppliedBounds(null)
         setIsLocating(false)
+        console.log('Location updated:', loc)
       },
-      () => {
+      (error) => {
         setIsLocating(false)
+        console.error('Geolocation error:', error)
+        alert(`Location error: ${error.message}. Please enable location permissions in your browser settings.`)
       },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
     )
   }
 
