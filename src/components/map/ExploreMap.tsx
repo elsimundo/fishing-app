@@ -40,39 +40,63 @@ export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerCl
   // Init map
   useEffect(() => {
     const token = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
-    if (!token) return
-    if (!mapContainerRef.current || mapRef.current) return
+    console.log('Mapbox token present:', !!token)
+    if (!token) {
+      console.error('VITE_MAPBOX_TOKEN not found')
+      return
+    }
+    if (!mapContainerRef.current) {
+      console.error('Map container ref not found')
+      return
+    }
+    if (mapRef.current) {
+      console.log('Map already initialized')
+      return
+    }
 
     mapboxgl.accessToken = token
 
     const initialCenter = center ?? { lat: 50.82, lng: -0.14 } // Brighton-ish default
+    console.log('Initializing map at:', initialCenter)
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/outdoors-v12',
-      center: [initialCenter.lng, initialCenter.lat],
-      zoom,
-    })
-
-    mapRef.current = map
-
-    if (onBoundsChange) {
-      map.on('moveend', () => {
-        const b = map.getBounds()
-        if (!b) return
-        onBoundsChange({
-          north: b.getNorth(),
-          south: b.getSouth(),
-          east: b.getEast(),
-          west: b.getWest(),
-        })
+    try {
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/outdoors-v12',
+        center: [initialCenter.lng, initialCenter.lat],
+        zoom,
       })
-    }
 
-    return () => {
-      markersRef.current.forEach((m) => m.remove())
-      map.remove()
-      mapRef.current = null
+      map.on('load', () => {
+        console.log('Map loaded successfully')
+      })
+
+      map.on('error', (e) => {
+        console.error('Map error:', e)
+      })
+
+      if (onBoundsChange) {
+        map.on('moveend', () => {
+          const b = map.getBounds()
+          if (!b) return
+          onBoundsChange({
+            north: b.getNorth(),
+            south: b.getSouth(),
+            east: b.getEast(),
+            west: b.getWest(),
+          })
+        })
+      }
+
+      mapRef.current = map
+
+      return () => {
+        markersRef.current.forEach((m) => m.remove())
+        map.remove()
+        mapRef.current = null
+      }
+    } catch (error) {
+      console.error('Failed to initialize map:', error)
     }
   }, [center, zoom, onBoundsChange])
 
