@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useCreateCompetition } from '../hooks/useCompetitions'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useCreateCompetition, useCompetition } from '../hooks/useCompetitions'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '../lib/supabase'
 import type { CompetitionType } from '../types'
 import { CompetitionTypeStep } from '../components/compete/create/CompetitionTypeStep'
 import { BasicInfoStep } from '../components/compete/create/BasicInfoStep'
@@ -36,6 +38,11 @@ interface FormData {
 
 export default function CreateCompetitionPage() {
   const navigate = useNavigate()
+  const { competitionId } = useParams<{ competitionId: string }>()
+  const queryClient = useQueryClient()
+  
+  const isEditMode = Boolean(competitionId)
+  const { data: existingCompetition, isLoading: loadingCompetition } = useCompetition(competitionId || '')
   const createCompetition = useCreateCompetition()
 
   const [step, setStep] = useState(1)
@@ -57,6 +64,28 @@ export default function CreateCompetitionPage() {
     is_public: true,
     invite_only: false,
   })
+
+  // Load existing competition data in edit mode
+  useEffect(() => {
+    if (isEditMode && existingCompetition) {
+      setFormData({
+        type: existingCompetition.type,
+        title: existingCompetition.title,
+        description: existingCompetition.description || '',
+        starts_at: new Date(existingCompetition.starts_at).toISOString().slice(0, 16),
+        ends_at: new Date(existingCompetition.ends_at).toISOString().slice(0, 16),
+        prize: existingCompetition.prize || '',
+        cover_image_url: existingCompetition.cover_image_url || '',
+        allowed_species: existingCompetition.allowed_species || [],
+        water_type: existingCompetition.water_type || 'any',
+        location_restriction: existingCompetition.location_restriction,
+        entry_fee: existingCompetition.entry_fee || 0,
+        max_participants: existingCompetition.max_participants,
+        is_public: existingCompetition.is_public ?? true,
+        invite_only: existingCompetition.invite_only ?? false,
+      })
+    }
+  }, [isEditMode, existingCompetition])
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }))
@@ -95,6 +124,22 @@ export default function CreateCompetitionPage() {
     }
   }
 
+  const updateCompetition = useMutation({
+    mutationFn: async (data: any) => {
+      const { error } = await supabase
+        .from('competitions')
+        .update(data)
+        .eq('id', competitionId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['competition', competitionId] })
+      queryClient.invalidateQueries({ queryKey: ['competitions'] })
+      navigate(`/compete/${competitionId}`)
+    },
+  })
+
   const handleSubmit = async () => {
     if (!canProceed() || !formData.type) return
 
@@ -103,7 +148,7 @@ export default function CreateCompetitionPage() {
       const startsAt = new Date(formData.starts_at)
       const status: 'upcoming' | 'active' = startsAt <= now ? 'active' : 'upcoming'
 
-      const created = await createCompetition.mutateAsync({
+      const competitionData = {
         type: formData.type,
         title: formData.title.trim(),
         description: formData.description.trim() || null,
@@ -120,12 +165,17 @@ export default function CreateCompetitionPage() {
         is_public: formData.is_public,
         invite_only: formData.invite_only,
         status,
-      })
+      }
 
-      navigate(`/compete/${created.id}`)
+      if (isEditMode) {
+        await updateCompetition.mutateAsync(competitionData)
+      } else {
+        const created = await createCompetition.mutateAsync(competitionData)
+        navigate(`/compete/${created.id}`)
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Error creating competition', error)
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} competition`, error)
     }
   }
 
@@ -193,7 +243,9 @@ export default function CreateCompetitionPage() {
             >
               ← Back
             </button>
-            <h1 className="text-base font-semibold text-gray-900">Create competition</h1>
+            <h1 className="text-base font-semibold text-gray-900">
+              {isEditMode ? 'Edit competition' : 'Create competition'}
+            </h1>
             <div className="w-12" />
           </div>
 
@@ -242,10 +294,12 @@ export default function CreateCompetitionPage() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!canProceed() || createCompetition.isPending}
+              disabled={!canProceed() || createCompetition.isPending || updateCompetition.isPending}
               className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
             >
-              {createCompetition.isPending ? 'Creating…' : 'Create competition'}
+              {createCompetition.isPending || updateCompetition.isPending
+                ? isEditMode ? 'Updating…' : 'Creating…'
+                : isEditMode ? 'Update competition' : 'Create competition'}
             </button>
           )}
         </div>
