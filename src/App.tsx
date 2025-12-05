@@ -32,6 +32,7 @@ function App() {
         <Route path="/discover" element={<DiscoverPage />} />
         <Route path="/compete" element={<CompetePage />} />
         <Route path="/compete/create" element={<CreateCompetitionPage />} />
+        <Route path="/compete/:competitionId/edit" element={<CreateCompetitionPage />} />
         <Route path="/compete/:competitionId" element={<CompetitionDetailPage />} />
         <Route path="/sessions/new" element={<StartSessionPage />} />
         <Route path="/catches/new" element={<LogCatchPage />} />

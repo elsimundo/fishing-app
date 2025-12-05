@@ -15,7 +15,8 @@ import { WinnersDisplay } from '../components/compete/WinnersDisplay'
 import { DeclareWinnerModal } from '../components/compete/DeclareWinnerModal'
 import { AdjustTimeModal } from '../components/compete/AdjustTimeModal'
 import { CompetitionInviteModal } from '../components/compete/CompetitionInviteModal'
-import { Clock, Trophy, UserPlus } from 'lucide-react'
+import { useDeleteCompetition } from '../hooks/useDeleteCompetition'
+import { Clock, Trophy, UserPlus, Edit2, Trash2 } from 'lucide-react'
 
 export default function CompetitionDetailPage() {
   const { competitionId } = useParams<{ competitionId: string }>()
@@ -35,6 +36,7 @@ export default function CompetitionDetailPage() {
     'leaderboard'
   )
 
+  const deleteCompetition = useDeleteCompetition()
   const isOrganizer = competition?.created_by === user?.id
   const hasEnded = competition ? new Date(competition.ends_at) < new Date() : false
   const isParticipant = participants?.some(p => p.user_id === user?.id && p.status === 'active') ?? false
@@ -82,6 +84,27 @@ export default function CompetitionDetailPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!competitionId) return
+    
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this competition? This action cannot be undone.'
+    )
+    
+    if (confirmed) {
+      try {
+        await deleteCompetition.mutateAsync(competitionId)
+      } catch (error) {
+        console.error('Failed to delete competition:', error)
+        alert('Failed to delete competition. Please try again.')
+      }
+    }
+  }
+
+  const handleEdit = () => {
+    navigate(`/compete/${competitionId}/edit`)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24 md:pb-20">
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
@@ -113,22 +136,37 @@ export default function CompetitionDetailPage() {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setShowInviteModal(true)}
-              className="px-4 py-2 bg-navy-800 text-white rounded-lg font-semibold hover:bg-navy-900 flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-navy-800 text-white rounded-lg font-semibold hover:bg-navy-900 flex items-center justify-center gap-2 text-sm"
             >
               <UserPlus size={16} />
               <span>Invite</span>
             </button>
             <button
               onClick={() => setShowAdjustTime(true)}
-              className="px-4 py-2 bg-navy-100 text-navy-800 rounded-lg font-semibold hover:bg-navy-200 flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-navy-100 text-navy-800 rounded-lg font-semibold hover:bg-navy-200 flex items-center justify-center gap-2 text-sm"
             >
               <Clock size={16} />
               <span>Adjust Time</span>
             </button>
             <button
+              onClick={handleEdit}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 flex items-center justify-center gap-2 text-sm"
+            >
+              <Edit2 size={16} />
+              <span>Edit</span>
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleteCompetition.isPending}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+            >
+              <Trash2 size={16} />
+              <span>{deleteCompetition.isPending ? 'Deleting...' : 'Delete'}</span>
+            </button>
+            <button
               onClick={() => setShowDeclareWinner(true)}
               disabled={!hasEnded}
-              className="col-span-2 px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="col-span-2 px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
             >
               <Trophy size={16} />
               <span>Declare Winner</span>
