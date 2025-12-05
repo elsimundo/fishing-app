@@ -75,21 +75,22 @@ export function useCompetition(competitionId: string) {
 
       if (!data) return null
 
-      const { data: entries, error: entriesError } = await supabase
-        .from('competition_entries')
-        .select('user_id')
-        .eq('competition_id', competitionId)
+      // Count participants from the leaderboard (users who have logged catches)
+      const { data: leaderboard, error: leaderboardError } = await supabase
+        .rpc('get_competition_leaderboard', {
+          p_competition_id: competitionId,
+        })
 
-      if (entriesError) throw new Error(entriesError.message)
+      if (leaderboardError) {
+        console.error('Failed to fetch leaderboard for participant count:', leaderboardError)
+      }
 
-      const participantIds = new Set((entries ?? []).map((e: any) => e.user_id))
-      const participantCount = participantIds.size
-      const entryCount = entries?.length ?? 0
+      const participantCount = leaderboard?.length ?? 0
 
       return {
         ...(data as any as Competition),
         participant_count: participantCount,
-        entry_count: entryCount,
+        entry_count: participantCount,
         creator: (data as any).creator ?? undefined,
         winner: (data as any).winner ?? undefined,
       }
