@@ -106,7 +106,7 @@ export default function CompetitionDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 md:pb-20">
+    <div className="min-h-screen bg-gray-50 pb-28 md:pb-20">
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
         <div className="flex items-center justify-between px-5 py-3">
           <button
