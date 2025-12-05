@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom'
-import type { Competition, CompetitionEntry } from '../../types'
+import type { Competition, CompetitionLeaderboardEntry } from '../../types'
+import { useAuth } from '../../hooks/useAuth'
 
 interface CompetitionLeaderboardProps {
   competition: Competition
-  entries: CompetitionEntry[]
+  entries: CompetitionLeaderboardEntry[]
   isLoading: boolean
-  userEntry?: CompetitionEntry | null
+  userEntry?: CompetitionLeaderboardEntry | null
 }
 
 const podiumBg: Record<number, string> = {
@@ -42,6 +43,7 @@ export function CompetitionLeaderboard({
   userEntry,
 }: CompetitionLeaderboardProps) {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const unit = getUnit(competition.type)
 
   if (isLoading) {
@@ -76,16 +78,16 @@ export function CompetitionLeaderboard({
       </div>
 
       <div className="space-y-2">
-        {entries.map((entry) => {
-          const isYou = entry.id === userEntry?.id
+        {entries.map((entry, index) => {
+          const isYou = entry.user_id === user?.id
           const rank = entry.rank ?? 999
           const isPodium = rank >= 1 && rank <= 3
 
           return (
             <button
-              key={entry.id}
+              key={`${entry.user_id}-${index}`}
               type="button"
-              onClick={() => entry.session && navigate(`/sessions/${entry.session.id}`)}
+              onClick={() => entry.best_catch_id && navigate(`/catches/${entry.best_catch_id}`)}
               className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
                 isYou
                   ? 'border-2 border-navy-800 bg-navy-50'
@@ -99,16 +101,16 @@ export function CompetitionLeaderboard({
               </div>
 
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-sm font-semibold text-white">
-                {entry.user?.username?.[0]?.toUpperCase() ?? 'U'}
+                {entry.username?.[0]?.toUpperCase() ?? 'U'}
               </div>
 
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-gray-900">
-                  {entry.user?.username ?? 'Unknown'}
+                  {entry.username ?? 'Unknown'}
                   {isYou && <span className="ml-1 text-xs text-navy-800">(you)</span>}
                 </p>
-                {entry.session && (
-                  <p className="truncate text-xs text-gray-600">{entry.session.title}</p>
+                {entry.best_catch_species && (
+                  <p className="truncate text-xs text-gray-600">{entry.best_catch_species}</p>
                 )}
               </div>
 
