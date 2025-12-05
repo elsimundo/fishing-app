@@ -1,6 +1,14 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl, { Map as MapboxMapType, Marker } from 'mapbox-gl'
 
+// Set Mapbox token at module level
+const token = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
+if (token) {
+  mapboxgl.accessToken = token
+} else {
+  console.error('VITE_MAPBOX_TOKEN not found in environment variables')
+}
+
 export type ExploreMarkerType = 'session' | 'catch' | 'shop' | 'club' | 'charter'
 
 export interface ExploreMarker {
@@ -39,7 +47,6 @@ export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerCl
 
   // Init map
   useEffect(() => {
-    const token = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
     console.log('Mapbox token present:', !!token)
     if (!token) {
       console.error('VITE_MAPBOX_TOKEN not found')
@@ -53,8 +60,6 @@ export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerCl
       console.log('Map already initialized')
       return
     }
-
-    mapboxgl.accessToken = token
 
     const initialCenter = center ?? { lat: 50.82, lng: -0.14 } // Brighton-ish default
     console.log('Initializing map at:', initialCenter)
