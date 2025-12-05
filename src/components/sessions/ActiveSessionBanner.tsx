@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import type { Session } from '../../types'
-import { useActiveSession } from '../../hooks/useActiveSession'
+import { useActiveSessions } from '../../hooks/useActiveSession'
 import { useCatches } from '../../hooks/useCatches'
 
 function formatDuration(startedAt: string, endedAt: string | null): string {
@@ -34,17 +34,13 @@ function getWaterTypeBadge(session: Session | null): string {
   }
 }
 
-export function ActiveSessionBanner() {
-  const { data: session, isLoading } = useActiveSession()
-
-  const { catches } = useCatches(session?.id)
-
+function SessionBannerItem({ session }: { session: Session }) {
+  const { catches } = useCatches(session.id)
+  
   const durationLabel = useMemo(
-    () => (session ? formatDuration(session.started_at, session.ended_at) : ''),
-    [session?.started_at, session?.ended_at],
+    () => formatDuration(session.started_at, session.ended_at),
+    [session.started_at, session.ended_at],
   )
-
-  if (isLoading || !session) return null
 
   const title = session.title || session.location_name
   const waterBadge = getWaterTypeBadge(session)
@@ -78,5 +74,19 @@ export function ActiveSessionBanner() {
         </div>
       </div>
     </section>
+  )
+}
+
+export function ActiveSessionBanner() {
+  const { data: sessions, isLoading } = useActiveSessions()
+
+  if (isLoading || !sessions || sessions.length === 0) return null
+
+  return (
+    <>
+      {sessions.map(session => (
+        <SessionBannerItem key={session.id} session={session} />
+      ))}
+    </>
   )
 }

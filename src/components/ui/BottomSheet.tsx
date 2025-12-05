@@ -11,14 +11,14 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/40">
       <div
         className="absolute inset-0"
         aria-hidden="true"
         onClick={onClose}
       />
       <section
-        className="relative z-10 w-full max-w-lg rounded-t-2xl bg-surface px-4 pb-6 pt-3 shadow-xl sm:mb-6 sm:rounded-2xl"
+        className="relative z-[210] w-full max-w-lg rounded-t-2xl bg-surface px-4 pb-[calc(3rem+env(safe-area-inset-bottom,0px))] pt-3 shadow-xl sm:mb-6 sm:rounded-2xl"
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -34,7 +34,7 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
             Close
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto pt-1 text-sm text-slate-700">
+        <div className="max-h-[70vh] overflow-y-auto pt-1 pb-4 text-sm text-slate-700">
           {children}
         </div>
       </section>

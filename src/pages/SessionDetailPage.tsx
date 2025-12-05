@@ -4,6 +4,7 @@ import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
 import { useSessionShares, useAddSessionShare, useDeleteSessionShare } from '../hooks/useSessionShares'
 import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant } from '../hooks/useSessionParticipants'
+import { useMarkSessionViewed } from '../hooks/useMarkSessionViewed'
 import { Map } from '../components/map'
 import { CatchCard } from '../components/catches/CatchCard'
 import { BottomSheet } from '../components/ui/BottomSheet'
@@ -28,6 +29,7 @@ export function SessionDetailPage() {
   const { data: shares } = useSessionShares(id)
   const { mutateAsync: addShare, isPending: isAddingShare } = useAddSessionShare()
   const { mutateAsync: deleteShare, isPending: isDeletingShare } = useDeleteSessionShare()
+  const markViewed = useMarkSessionViewed()
 
   const [newShareEmail, setNewShareEmail] = useState('')
   const [isFindingUser, setIsFindingUser] = useState(false)
@@ -48,6 +50,13 @@ export function SessionDetailPage() {
 
     void loadUser()
   }, [])
+
+  // Mark session as viewed if it's ended
+  useEffect(() => {
+    if (session && session.ended_at && id) {
+      markViewed.mutate(id)
+    }
+  }, [session?.ended_at, id])
 
   // Auto-open share modal when arriving with ?share=1 or ?share=true and viewer is owner
   useEffect(() => {

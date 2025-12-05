@@ -4,27 +4,19 @@ import { useAuth } from './useAuth'
 import type { CompetitionEntry } from '../types'
 
 export function useCompetitionLeaderboard(competitionId: string) {
-  return useQuery<CompetitionEntry[]>({
+  return useQuery({
     queryKey: ['competition-leaderboard', competitionId],
     queryFn: async () => {
       if (!competitionId) return []
 
       const { data, error } = await supabase
-        .from('competition_entries')
-        .select(
-          `*,
-           user:profiles!competition_entries_user_id_fkey(id, username, full_name, avatar_url),
-           session:sessions(id, title, cover_photo_url)`
-        )
-        .eq('competition_id', competitionId)
-        .eq('is_valid', true)
-        .order('rank', { ascending: true })
-        .order('score', { ascending: false })
-        .limit(100)
+        .rpc('get_competition_leaderboard', {
+          p_competition_id: competitionId
+        })
 
       if (error) throw new Error(error.message)
 
-      return (data ?? []) as CompetitionEntry[]
+      return (data ?? [])
     },
     enabled: Boolean(competitionId),
   })

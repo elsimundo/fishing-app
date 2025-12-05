@@ -93,61 +93,68 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
       </button>
 
       <BottomSheet open={isCommentsOpen} title={commentsTitle} onClose={() => setIsCommentsOpen(false)}>
-        {isLoading ? (
-          <p className="text-xs text-slate-500">Loading comments…</p>
-        ) : comments.length === 0 ? (
-          <p className="text-xs text-slate-500">No comments yet. Be the first to comment!</p>
-        ) : (
-          <ul className="space-y-3 text-xs">
-            {comments.map((c) => {
-              const timeAgo = formatDistanceToNow(new Date(c.created_at), { addSuffix: true })
-              const userInitial = c.user.username?.[0]?.toUpperCase() || 'U'
+        <div className="flex max-h-[65vh] flex-col gap-3 pb-2">
+          <div className="flex-1 overflow-y-auto pr-1">
+            {isLoading ? (
+              <p className="text-xs text-slate-500">Loading comments…</p>
+            ) : comments.length === 0 ? (
+              <p className="text-xs text-slate-500">No comments yet. Be the first to comment!</p>
+            ) : (
+              <ul className="space-y-3 text-xs">
+                {comments.map((c) => {
+                  const timeAgo = formatDistanceToNow(new Date(c.created_at), { addSuffix: true })
+                  const userInitial = c.user.username?.[0]?.toUpperCase() || 'U'
 
-              return (
-                <li key={c.id} className="flex items-start gap-2">
-                  {c.user.avatar_url ? (
-                    <img
-                      src={c.user.avatar_url}
-                      alt={c.user.username ?? ''}
-                      className="mt-0.5 h-7 w-7 flex-shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-[11px] font-semibold text-white">
-                      {userInitial}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-[11px] font-semibold text-slate-900">
-                        {c.user.username || c.user.full_name || 'Angler'}
-                      </p>
-                      <span className="text-[10px] text-slate-400">{timeAgo}</span>
-                    </div>
-                    <p className="mt-0.5 text-[11px] text-slate-700">{c.text}</p>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
+                  return (
+                    <li key={c.id} className="flex items-start gap-2">
+                      {c.user.avatar_url ? (
+                        <img
+                          src={c.user.avatar_url}
+                          alt={c.user.username ?? ''}
+                          className="mt-0.5 h-7 w-7 flex-shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-[11px] font-semibold text-white">
+                          {userInitial}
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[11px] font-semibold text-slate-900">
+                            {c.user.username || c.user.full_name || 'Angler'}
+                          </p>
+                          <span className="text-[10px] text-slate-400">{timeAgo}</span>
+                        </div>
+                        <p className="mt-0.5 text-[11px] text-slate-700">{c.text}</p>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
 
-        <div className="mt-4 border-t border-slate-200 pt-3">
-          <div className="flex items-end gap-2">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder={user ? 'Add a comment…' : 'Sign in to comment'}
-              className="h-16 flex-1 resize-none rounded-xl border border-slate-200 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50"
-              disabled={!user || isAddingComment}
-            />
-            <button
-              type="button"
-              onClick={handleSubmitComment}
-              disabled={!user || isAddingComment || !newComment.trim()}
-              className="mb-1 rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-60"
-            >
-              Post
-            </button>
+          <div
+            className="sticky bottom-0 rounded-xl border border-slate-200 bg-surface p-2 shadow-sm"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)' }}
+          >
+            <div className="flex items-end gap-2">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={user ? 'Add a comment…' : 'Sign in to comment'}
+                className="h-16 flex-1 resize-none rounded-lg border border-slate-200 px-3 py-2 text-xs shadow-inner focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50"
+                disabled={!user || isAddingComment}
+              />
+              <button
+                type="button"
+                onClick={handleSubmitComment}
+                disabled={!user || isAddingComment || !newComment.trim()}
+                className="rounded-full bg-primary px-4 py-2 text-[11px] font-semibold text-white shadow-sm hover:bg-primary/90 disabled:opacity-60"
+              >
+                Post
+              </button>
+            </div>
           </div>
         </div>
       </BottomSheet>

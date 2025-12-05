@@ -14,7 +14,8 @@ import { MyCatchesWithStatus } from '../components/compete/MyCatchesWithStatus'
 import { WinnersDisplay } from '../components/compete/WinnersDisplay'
 import { DeclareWinnerModal } from '../components/compete/DeclareWinnerModal'
 import { AdjustTimeModal } from '../components/compete/AdjustTimeModal'
-import { Clock, Trophy } from 'lucide-react'
+import { CompetitionInviteModal } from '../components/compete/CompetitionInviteModal'
+import { Clock, Trophy, UserPlus } from 'lucide-react'
 
 export default function CompetitionDetailPage() {
   const { competitionId } = useParams<{ competitionId: string }>()
@@ -29,6 +30,7 @@ export default function CompetitionDetailPage() {
 
   const [showDeclareWinner, setShowDeclareWinner] = useState(false)
   const [showAdjustTime, setShowAdjustTime] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
   const [activeTab, setActiveTab] = useState<'leaderboard' | 'my-catches' | 'pending'>(
     'leaderboard'
   )
@@ -108,10 +110,17 @@ export default function CompetitionDetailPage() {
       {isOrganizer && (
         <div className="p-5 bg-white border-b border-gray-200">
           <p className="text-sm font-semibold text-navy-800 mb-3">Organizer Actions</p>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="px-4 py-2 bg-navy-800 text-white rounded-lg font-semibold hover:bg-navy-900 flex items-center justify-center gap-2"
+            >
+              <UserPlus size={16} />
+              <span>Invite</span>
+            </button>
             <button
               onClick={() => setShowAdjustTime(true)}
-              className="flex-1 px-4 py-2 bg-navy-100 text-navy-800 rounded-lg font-semibold hover:bg-navy-200 flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-navy-100 text-navy-800 rounded-lg font-semibold hover:bg-navy-200 flex items-center justify-center gap-2"
             >
               <Clock size={16} />
               <span>Adjust Time</span>
@@ -119,7 +128,7 @@ export default function CompetitionDetailPage() {
             <button
               onClick={() => setShowDeclareWinner(true)}
               disabled={!hasEnded}
-              className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="col-span-2 px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Trophy size={16} />
               <span>Declare Winner</span>
@@ -217,6 +226,14 @@ export default function CompetitionDetailPage() {
         <DeclareWinnerModal
           competitionId={competition.id}
           onClose={() => setShowDeclareWinner(false)}
+        />
+      )}
+
+      {showInviteModal && (
+        <CompetitionInviteModal
+          competitionId={competition.id}
+          competitionTitle={competition.title}
+          onClose={() => setShowInviteModal(false)}
         />
       )}
 
