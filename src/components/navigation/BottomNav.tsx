@@ -9,28 +9,23 @@ export function BottomNav() {
   const location = useLocation()
 
   const isActive = (path: string) => location.pathname === path
-  
-  // Common button classes for large touch targets
-  const navButtonClass = "flex flex-col items-center justify-center gap-1 min-w-[64px] min-h-[64px] px-3 rounded-xl transition-all active:bg-gray-100"
-  
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-bottom">
-        <div className="flex justify-around items-center h-20 px-2">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+        <div className="flex justify-around items-center h-16">
         {/* Feed */}
         <button
           onClick={() => navigate('/feed')}
-          className={navButtonClass}
+          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
         >
           <Home
-            size={28}
-            className={isActive('/feed') ? 'text-navy-800' : 'text-gray-500'}
+            size={24}
+            className={isActive('/feed') ? 'text-navy-800' : 'text-gray-600'}
             fill={isActive('/feed') ? 'currentColor' : 'none'}
-            strokeWidth={isActive('/feed') ? 2.5 : 2}
           />
           <span
-            className={`text-xs font-semibold ${
-              isActive('/feed') ? 'text-navy-800' : 'text-gray-500'
+            className={`text-[10px] font-semibold ${
+              isActive('/feed') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
             Feed
@@ -40,44 +35,36 @@ export function BottomNav() {
         {/* Explore */}
         <button
           onClick={() => navigate('/explore')}
-          className={navButtonClass}
+          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
         >
-          <Map 
-            size={28} 
-            className={isActive('/explore') ? 'text-navy-800' : 'text-gray-500'}
-            strokeWidth={isActive('/explore') ? 2.5 : 2}
-          />
+          <Map size={24} className={isActive('/explore') ? 'text-navy-800' : 'text-gray-600'} />
           <span
-            className={`text-xs font-semibold ${
-              isActive('/explore') ? 'text-navy-800' : 'text-gray-500'
+            className={`text-[10px] font-semibold ${
+              isActive('/explore') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
             Explore
           </span>
         </button>
 
-        {/* CENTER POST BUTTON - ELEVATED FAB - Larger for gloves */}
+        {/* CENTER POST BUTTON - ELEVATED FAB */}
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center justify-center w-16 h-16 -mt-8 rounded-full bg-blue-600 shadow-xl transition-all hover:bg-blue-700 active:scale-95 active:shadow-lg"
+          className="flex items-center justify-center w-14 h-14 -mt-7 rounded-full bg-blue-600 shadow-lg transition-all hover:bg-blue-700 active:scale-95"
         >
-          <Plus size={32} className="text-white" strokeWidth={3} />
+          <Plus size={28} className="text-white" strokeWidth={3} />
         </button>
 
         {/* Logbook */}
         <button
           onClick={() => navigate('/dashboard')}
-          className={navButtonClass}
+          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
         >
-          <BookOpen 
-            size={28} 
-            className={isActive('/dashboard') ? 'text-navy-800' : 'text-gray-500'}
-            strokeWidth={isActive('/dashboard') ? 2.5 : 2}
-          />
+          <BookOpen size={24} className={isActive('/dashboard') ? 'text-navy-800' : 'text-gray-600'} />
           <span
-            className={`text-xs font-semibold ${
-              isActive('/dashboard') ? 'text-navy-800' : 'text-gray-500'
+            className={`text-[10px] font-semibold ${
+              isActive('/dashboard') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
             Logbook
@@ -87,17 +74,16 @@ export function BottomNav() {
         {/* Profile */}
         <button
           onClick={() => navigate('/profile')}
-          className={navButtonClass}
+          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
         >
           <User
-            size={28}
-            className={isActive('/profile') ? 'text-navy-800' : 'text-gray-500'}
+            size={24}
+            className={isActive('/profile') ? 'text-navy-800' : 'text-gray-600'}
             fill={isActive('/profile') ? 'currentColor' : 'none'}
-            strokeWidth={isActive('/profile') ? 2.5 : 2}
           />
           <span
-            className={`text-xs font-semibold ${
-              isActive('/profile') ? 'text-navy-800' : 'text-gray-500'
+            className={`text-[10px] font-semibold ${
+              isActive('/profile') ? 'text-navy-800' : 'text-gray-600'
             }`}
           >
             Profile

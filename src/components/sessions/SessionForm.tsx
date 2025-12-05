@@ -101,58 +101,52 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
     }
   }
 
-  // Common input classes for large touch targets
-  const inputClass = "block w-full rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0 min-h-[56px]"
-  const selectClass = "block w-full rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0 min-h-[56px] appearance-none bg-white"
-  const labelClass = "mb-2 block text-sm font-semibold text-slate-700"
-  const errorClass = "mt-2 text-sm text-red-600 font-medium"
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {formError ? (
-        <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">{formError}</div>
+        <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">{formError}</div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className={labelClass} htmlFor="title">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="title">
             Session title (optional)
           </label>
           <input
             id="title"
             type="text"
             placeholder="e.g. Morning bass hunt"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('title')}
           />
           {errors.title ? (
-            <p className={errorClass}>{errors.title.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.title.message}</p>
           ) : null}
         </div>
 
         <div className="sm:col-span-2">
-          <label className={labelClass} htmlFor="location_name">
-            Location name *
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="location_name">
+            Location name
           </label>
           <input
             id="location_name"
             type="text"
             placeholder="e.g. Southend Pier"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('location_name')}
           />
           {errors.location_name ? (
-            <p className={errorClass}>{errors.location_name.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.location_name.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="water_type">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="water_type">
             Water type
           </label>
           <select
             id="water_type"
-            className={selectClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('water_type')}
           >
             <option value="">Select water type</option>
@@ -165,26 +159,26 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="started_at">
-            Start time *
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="started_at">
+            Start time
           </label>
           <input
             id="started_at"
             type="datetime-local"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('started_at')}
           />
           {errors.started_at ? (
-            <p className={errorClass}>{errors.started_at.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.started_at.message}</p>
           ) : null}
         </div>
 
-        <div className="sm:col-span-2 space-y-3">
+        <div className="sm:col-span-2 space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-700">Pick session location</p>
+            <p className="text-[11px] font-medium text-slate-700">Pick session location</p>
             <button
               type="button"
-              className="rounded-xl border-2 border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:bg-slate-100 min-h-[48px]"
+              className="rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
               onClick={() => {
                 if (!navigator.geolocation) {
                   setFormError('Geolocation is not available in this browser.')
@@ -204,7 +198,7 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
                 )
               }}
             >
-              📍 Use my location
+              Use my current location
             </button>
           </div>
 
@@ -217,30 +211,30 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
           />
 
           {errors.latitude ? (
-            <p className={errorClass}>{errors.latitude.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.latitude.message}</p>
           ) : null}
           {errors.longitude ? (
-            <p className={errorClass}>{errors.longitude.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.longitude.message}</p>
           ) : null}
         </div>
 
-        <div className="sm:col-span-2 space-y-3">
-          <p className="text-sm font-semibold text-slate-700">Location privacy</p>
-          <div className="space-y-2">
+        <div className="sm:col-span-2 space-y-2">
+          <p className="text-[11px] font-medium text-slate-700">Location privacy</p>
+          <div className="space-y-1">
             {LOCATION_PRIVACY_OPTIONS.map((opt) => (
               <label
                 key={opt.value}
-                className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-slate-200 px-4 py-4 text-sm hover:bg-slate-50 active:bg-slate-100 min-h-[64px]"
+                className="flex cursor-pointer items-start gap-2 rounded-md border border-slate-200 px-2 py-2 text-[11px] hover:bg-slate-50"
               >
                 <input
                   type="radio"
                   value={opt.value}
-                  className="mt-1 h-5 w-5"
+                  className="mt-[3px] h-3 w-3"
                   {...register('location_privacy')}
                 />
                 <span>
-                  <span className="block font-semibold text-slate-800">{opt.label}</span>
-                  <span className="text-slate-500 text-sm">{opt.description}</span>
+                  <span className="block font-medium">{opt.label}</span>
+                  <span className="text-slate-500">{opt.description}</span>
                 </span>
               </label>
             ))}
@@ -248,12 +242,12 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="tide_state">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="tide_state">
             Tide (optional)
           </label>
           <select
             id="tide_state"
-            className={selectClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('tide_state')}
           >
             <option value="">Not set</option>
@@ -266,37 +260,37 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div>
-          <label className={labelClass}>Visibility</label>
-          <label className="flex items-center gap-3 rounded-xl border-2 border-slate-200 px-4 py-4 text-sm cursor-pointer hover:bg-slate-50 active:bg-slate-100 min-h-[56px]">
-            <input type="checkbox" className="h-5 w-5" {...register('is_public')} />
-            <span className="font-medium text-slate-700">Make this session public</span>
+          <label className="mb-1 block text-xs font-medium text-slate-700">Visibility</label>
+          <label className="inline-flex items-center gap-2 text-[11px] text-slate-700">
+            <input type="checkbox" className="h-3 w-3" {...register('is_public')} />
+            <span>Make this session public (future social features)</span>
           </label>
         </div>
 
         <div className="sm:col-span-2">
-          <label className={labelClass} htmlFor="session_notes">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="session_notes">
             Session notes (optional)
           </label>
           <textarea
             id="session_notes"
-            rows={4}
-            className="block w-full resize-none rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0"
-            placeholder="Plans, conditions, tactics"
+            rows={3}
+            className="block w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="Plans, conditions, tactics for this trip"
             {...register('session_notes')}
           />
           {errors.session_notes ? (
-            <p className={errorClass}>{errors.session_notes.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.session_notes.message}</p>
           ) : null}
         </div>
       </div>
 
-      <div className="pt-4">
+      <div className="flex justify-end gap-2 pt-2">
         <button
           type="submit"
           disabled={isPending}
-          className="w-full rounded-xl bg-navy-800 px-6 py-5 text-lg font-semibold text-white shadow-lg hover:bg-navy-900 disabled:bg-navy-400 active:scale-[0.98] transition-all min-h-[64px]"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
         >
-          {isPending ? 'Starting…' : '🎣 Start session'}
+          {isPending ? 'Saving…' : 'Start session'}
         </button>
       </div>
     </form>

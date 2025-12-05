@@ -82,9 +82,9 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-3 transition-colors hover:bg-gray-100 active:bg-gray-200 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            className="rounded-full p-2 transition-colors hover:bg-gray-100"
           >
-            <X size={24} className="text-gray-600" />
+            <X size={20} className="text-gray-600" />
           </button>
         </div>
 
@@ -95,28 +95,28 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
               key={option.id}
               type="button"
               onClick={option.onClick}
-              className="group flex w-full items-center gap-4 rounded-2xl p-5 transition-all hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] min-h-[80px] border-2 border-gray-100"
+              className="group flex w-full items-center gap-4 rounded-xl p-4 transition-colors hover:bg-gray-50"
             >
               <div
-                className={`flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl text-3xl ${option.color}`}
+                className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-2xl ${option.color}`}
               >
                 {option.icon}
               </div>
 
               <div className="flex-1 text-left">
-                <p className="text-lg font-bold text-gray-900">{option.title}</p>
-                <p className="mt-1 text-sm text-gray-600">{option.subtitle}</p>
+                <p className="text-base font-semibold text-gray-900">{option.title}</p>
+                <p className="mt-0.5 text-sm text-gray-600">{option.subtitle}</p>
               </div>
 
               <ChevronRight
-                size={24}
+                size={20}
                 className="flex-shrink-0 text-gray-400 transition-colors group-hover:text-gray-600"
               />
             </button>
           ))}
         </div>
 
-        <div className="h-8 md:h-6" />
+        <div className="h-6 md:h-4" />
       </div>
     </div>
   )

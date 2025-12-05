@@ -71,7 +71,7 @@ export default function CompetePage() {
           </div>
 
           {/* Content */}
-          <div className="space-y-4 p-4 pb-28">
+          <div className="space-y-4 p-4 pb-24">
             {/* Your Competitions */}
             <section>
               <h2 className="mb-3 text-sm font-semibold text-gray-900">Your Competitions</h2>

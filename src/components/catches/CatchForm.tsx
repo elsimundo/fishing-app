@@ -212,35 +212,29 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
     onSuccess()
   }
 
-  // Common input classes for large touch targets
-  const inputClass = "block w-full rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0 min-h-[56px]"
-  const selectClass = "block w-full rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0 min-h-[56px] appearance-none bg-white"
-  const labelClass = "mb-2 block text-sm font-semibold text-slate-700"
-  const errorClass = "mt-2 text-sm text-red-600 font-medium"
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {formError ? (
-        <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
+        <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
           {formError}
         </div>
       ) : null}
 
       {mode === 'create' && activeSession ? (
-        <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="rounded-md bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
           This catch will be added to your active session:{' '}
           <span className="font-semibold">{activeSession.title || activeSession.location_name}</span>.
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className={labelClass} htmlFor="species">
-            Species *
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="species">
+            Species
           </label>
           <select
             id="species"
-            className={selectClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('species')}
           >
             <option value="">Select species</option>
@@ -268,47 +262,47 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
             <option value="Other">Other / not listed</option>
           </select>
           {errors.species ? (
-            <p className={errorClass}>{errors.species.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.species.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="caught_at">
-            Date & time *
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="caught_at">
+            Date & time
           </label>
           <input
             id="caught_at"
             type="datetime-local"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('caught_at')}
           />
           {errors.caught_at ? (
-            <p className={errorClass}>{errors.caught_at.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.caught_at.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="location_name">
-            Location name *
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="location_name">
+            Location name
           </label>
           <input
             id="location_name"
             type="text"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="e.g. Chesil Beach, Dorset"
             {...register('location_name')}
           />
           {errors.location_name ? (
-            <p className={errorClass}>{errors.location_name.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.location_name.message}</p>
           ) : null}
         </div>
 
-        <div className="sm:col-span-2 space-y-3">
+        <div className="sm:col-span-2 space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-700">Pick location on map</p>
+            <p className="text-[11px] font-medium text-slate-700">Pick location on map</p>
             <button
               type="button"
-              className="rounded-xl border-2 border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:bg-slate-100 min-h-[48px]"
+              className="rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
               onClick={() => {
                 if (!navigator.geolocation) {
                   setFormError('Geolocation is not available in this browser.')
@@ -328,7 +322,7 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
                 )
               }}
             >
-              📍 Use my location
+              Use my current location
             </button>
           </div>
 
@@ -339,49 +333,44 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
               setValue('longitude', lng.toString(), { shouldValidate: true })
             }}
           />
-          <p className="text-sm text-slate-500">
-            Tap or drag the pin to your fishing spot.
+          <p className="mt-1 text-[11px] text-slate-500">
+            Tap or drag the pin to your fishing spot. Coordinates are saved automatically.
           </p>
           {errors.latitude ? (
-            <p className={errorClass}>{errors.latitude.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.latitude.message}</p>
           ) : null}
           {errors.longitude ? (
-            <p className={errorClass}>{errors.longitude.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.longitude.message}</p>
           ) : null}
         </div>
 
-        <div className="sm:col-span-2 space-y-3">
-          <label className={labelClass} htmlFor="photo">
+        <div className="sm:col-span-2 space-y-1">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="photo">
             Photo (optional)
-          </label>
-          <label
-            htmlFor="photo"
-            className="flex items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-base font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 active:bg-slate-200 min-h-[80px]"
-          >
-            📷 {photoFile ? 'Change photo' : 'Add photo'}
           </label>
           <input
             id="photo"
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            className="hidden"
+            className="block w-full text-[11px] text-slate-600 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-slate-50 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-slate-700 hover:file:bg-slate-100"
             onChange={(e) => {
               const file = e.target.files?.[0]
               setPhotoFile(file ?? null)
             }}
           />
           {photoFile ? (
-            <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3">
-              <span className="text-sm text-emerald-700">✓ Selected:</span>
-              <span className="truncate text-sm font-medium text-emerald-800 max-w-[200px]">
+            <div className="mt-1 inline-flex items-center gap-2">
+              <span className="text-[11px] text-slate-600">Selected:</span>
+              <span className="truncate text-[11px] text-slate-700 max-w-[160px]">
                 {photoFile.name}
               </span>
             </div>
           ) : null}
+          <p className="mt-1 text-[11px] text-slate-500">JPG, PNG, or WebP up to 5MB.</p>
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="weight_kg">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="weight_kg">
             Weight (kg)
           </label>
           <input
@@ -389,17 +378,16 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
             type="number"
             inputMode="decimal"
             step="0.01"
-            placeholder="0.00"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('weight_kg')}
           />
           {errors.weight_kg ? (
-            <p className={errorClass}>{errors.weight_kg.message as string}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.weight_kg.message as string}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="length_cm">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="length_cm">
             Length (cm)
           </label>
           <input
@@ -407,54 +395,53 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
             type="number"
             inputMode="decimal"
             step="0.1"
-            placeholder="0.0"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('length_cm')}
           />
           {errors.length_cm ? (
-            <p className={errorClass}>{errors.length_cm.message as string}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.length_cm.message as string}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="bait">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="bait">
             Bait
           </label>
           <input
             id="bait"
             type="text"
-            placeholder="e.g. lugworm, ragworm"
-            className={inputClass}
+            placeholder="e.g. lugworm, ragworm, squid"
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('bait')}
           />
           {errors.bait ? (
-            <p className={errorClass}>{errors.bait.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.bait.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="rig">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="rig">
             Rig
           </label>
           <input
             id="rig"
             type="text"
-            placeholder="e.g. running ledger"
-            className={inputClass}
+            placeholder="e.g. running ledger, paternoster"
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('rig')}
           />
           {errors.rig ? (
-            <p className={errorClass}>{errors.rig.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.rig.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="fishing_style">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="fishing_style">
             Fishing style
           </label>
           <select
             id="fishing_style"
-            className={selectClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('fishing_style')}
           >
             <option value="">Select style</option>
@@ -465,34 +452,34 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
             ))}
           </select>
           {errors.fishing_style ? (
-            <p className={errorClass}>{errors.fishing_style.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.fishing_style.message}</p>
           ) : null}
         </div>
 
         <div className="sm:col-span-2">
-          <label className={labelClass} htmlFor="notes">
+          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="notes">
             Notes
           </label>
           <textarea
             id="notes"
-            rows={4}
-            className="block w-full resize-none rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0"
-            placeholder="Conditions, tactics, etc."
+            rows={3}
+            className="block w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="Conditions, tactics, who you were fishing with, etc."
             {...register('notes')}
           />
           {errors.notes ? (
-            <p className={errorClass}>{errors.notes.message}</p>
+            <p className="mt-1 text-[11px] text-red-600">{errors.notes.message}</p>
           ) : null}
         </div>
       </div>
 
-      <div className="pt-4">
+      <div className="flex justify-end gap-2 pt-2">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-navy-800 px-6 py-5 text-lg font-semibold text-white shadow-lg hover:bg-navy-900 disabled:bg-navy-400 active:scale-[0.98] transition-all min-h-[64px]"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
         >
-          {isSubmitting ? 'Saving…' : '🐟 Save catch'}
+          {isSubmitting ? 'Saving…' : 'Save catch'}
         </button>
       </div>
     </form>

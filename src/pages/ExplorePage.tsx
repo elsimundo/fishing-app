@@ -315,7 +315,7 @@ export default function ExplorePage() {
 
   return (
     <Layout>
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-3 px-4 pb-28 pt-3">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-3 px-4 pb-24 pt-3">
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-base font-semibold text-slate-900">Explore</h1>

@@ -232,7 +232,7 @@ export default function CreateCompetitionPage() {
   const progress = Math.round((step / totalSteps) * 100)
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-28 md:pb-20">
+    <div className="min-h-screen bg-gray-50 pb-24 md:pb-20">
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
         <div className="px-5 py-4">
           <div className="mb-4 flex items-center justify-between">

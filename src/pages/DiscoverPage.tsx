@@ -44,7 +44,7 @@ export default function DiscoverPage() {
         </div>
       </div>
 
-      <div className="pb-28 md:pb-20">
+      <div className="pb-24 md:pb-20">
         {isSearching ? (
           <UserSearchResults query={debouncedQuery} />
         ) : (

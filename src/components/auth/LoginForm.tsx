@@ -60,58 +60,54 @@ export function LoginForm() {
     navigate('/dashboard', { replace: true })
   }
 
-  const inputClass = "block w-full rounded-xl border-2 border-slate-200 px-4 py-4 text-base shadow-sm focus:border-navy-800 focus:outline-none focus:ring-0 min-h-[56px]"
-  const labelClass = "mb-2 block text-sm font-semibold text-slate-700"
-  const errorClass = "mt-2 text-sm text-red-600 font-medium"
-
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl bg-surface p-6 shadow-lg">
-      <h1 className="mb-2 text-center text-3xl font-bold text-navy-800">{APP_NAME}</h1>
-      <p className="mb-8 text-center text-base text-slate-600">Sign in to your account</p>
+    <div className="mx-auto w-full max-w-md rounded-xl bg-surface p-6 shadow-lg">
+      <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>
+      <p className="mb-6 text-center text-sm text-slate-600">Sign in to your account</p>
 
       {formError ? (
-        <div className="mb-6 rounded-xl bg-red-50 px-4 py-3 text-base text-red-700 font-medium">
+        <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           {formError}
         </div>
       ) : null}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className={labelClass} htmlFor="email">
+          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="email">
             Email
           </label>
           <input
             id="email"
             type="email"
             autoComplete="email"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('email')}
           />
           {errors.email ? (
-            <p className={errorClass}>{errors.email.message}</p>
+            <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="password">
+          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="password">
             Password
           </label>
           <input
             id="password"
             type="password"
             autoComplete="current-password"
-            className={inputClass}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('password')}
           />
           {errors.password ? (
-            <p className={errorClass}>{errors.password.message}</p>
+            <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
           ) : null}
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-navy-800 px-6 py-5 text-lg font-semibold text-white shadow-lg hover:bg-navy-900 disabled:bg-navy-400 active:scale-[0.98] transition-all min-h-[64px]"
+          className="flex w-full items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
         >
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>

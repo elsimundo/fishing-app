@@ -69,7 +69,7 @@ export function Dashboard() {
   return (
     <Layout>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-28 pt-3">
+      <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-24 pt-3">
         <ActiveCompetitionBanner />
         <ActiveSessionBanner />
 
