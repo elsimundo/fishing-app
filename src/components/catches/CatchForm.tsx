@@ -473,13 +473,13 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex justify-end gap-2 pt-4">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
+          className="inline-flex items-center justify-center rounded-xl bg-navy-800 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:opacity-70"
         >
-          {isSubmitting ? 'Saving…' : 'Save catch'}
+          {isSubmitting ? 'Saving…' : 'Save Catch'}
         </button>
       </div>
     </form>

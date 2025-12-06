@@ -1,37 +1,52 @@
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { Layout } from '../components/layout/Layout'
 import { CatchForm } from '../components/catches/CatchForm'
+import { ArrowLeft, Fish } from 'lucide-react'
 
 export default function LogCatchPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const sessionId = searchParams.get('session')
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-4">
-      <div className="mx-auto flex max-w-xl flex-col gap-4">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="self-start text-xs text-slate-600 hover:underline"
-        >
-           Back
-        </button>
+    <Layout>
+      <main className="min-h-screen bg-gray-50 pb-24">
+        {/* Header */}
+        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+          <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="text-base font-bold text-gray-900">Log a Catch</h1>
+          </div>
+        </header>
 
-        <section className="rounded-xl bg-white p-4 shadow">
-          <h1 className="text-base font-semibold text-slate-900">Log a catch</h1>
-          <p className="mt-1 text-xs text-slate-500">
-            Add a new catch with species, weight, and location.
-          </p>
+        <div className="mx-auto max-w-2xl px-4 py-4">
+          {/* Hero */}
+          <div className="mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-600 p-5 text-white">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+                <Fish size={24} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">Record Your Catch</h2>
+                <p className="text-sm text-white/80">Add species, weight, photo and location</p>
+              </div>
+            </div>
+          </div>
 
-          <div className="mt-4">
+          {/* Form Card */}
+          <div className="rounded-2xl bg-white p-5 shadow-sm">
             <CatchForm
               onSuccess={() => {
-                navigate(-1)
+                navigate('/dashboard')
               }}
             />
           </div>
-        </section>
-      </div>
-    </main>
+        </div>
+      </main>
+    </Layout>
   )
 }
