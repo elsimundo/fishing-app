@@ -39,7 +39,8 @@ export async function getTideData(
   lng: number
 ): Promise<TideData | null> {
   // Try UK Environment Agency first for UK waters (free, real-time data)
-  // Supplement with WorldTides predictions for accurate tide times
+  // ALWAYS supplement with WorldTides predictions for future tide times
+  // UK-EA only provides historical readings, not future predictions
   if (isUKWaters(lat, lng)) {
     console.log('[Tides] Trying UK Environment Agency (UK waters)...')
     try {
@@ -47,26 +48,31 @@ export async function getTideData(
       if (gaugeData) {
         let tideData = convertGaugeToTideData(gaugeData)
         if (tideData) {
-          // UK-EA only has real-time readings, not predictions
-          // Supplement with WorldTides predictions if available
-          if (isWorldTidesConfigured() && tideData.predictions.length < 4) {
-            console.log('[Tides] Supplementing UK-EA with WorldTides predictions...')
+          // UK-EA only has real-time readings, NOT future predictions
+          // Always get WorldTides predictions for tide times
+          if (isWorldTidesConfigured()) {
+            console.log('[Tides] Getting WorldTides predictions for future tide times...')
             try {
-              const predictions = await getWorldTidesPredictions(lat, lng, 2)
+              const predictions = await getWorldTidesPredictions(lat, lng, 3) // 3 days
               if (predictions.length > 0) {
+                const now = new Date()
+                const futurePredictions = predictions.filter(p => new Date(p.time) > now)
+                
                 tideData = {
                   ...tideData,
-                  predictions,
+                  predictions: futurePredictions,
                   extremes: {
-                    nextHigh: predictions.find(p => p.type === 'high' && new Date(p.time) > new Date()) || null,
-                    nextLow: predictions.find(p => p.type === 'low' && new Date(p.time) > new Date()) || null,
+                    nextHigh: futurePredictions.find(p => p.type === 'high') || null,
+                    nextLow: futurePredictions.find(p => p.type === 'low') || null,
                   },
                 }
-                console.log('[Tides] WorldTides predictions added ✓')
+                console.log(`[Tides] WorldTides: ${futurePredictions.length} future tide times added ✓`)
               }
             } catch (e) {
-              console.log('[Tides] WorldTides supplement failed, using UK-EA only')
+              console.log('[Tides] WorldTides supplement failed, using UK-EA only (no future predictions)')
             }
+          } else {
+            console.log('[Tides] WorldTides not configured - no future tide times available')
           }
           console.log('[Tides] UK-EA data found ✓')
           return tideData

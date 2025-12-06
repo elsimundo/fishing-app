@@ -162,33 +162,47 @@ export function TideCard({ lat, lng }: TideCardProps) {
             </div>
           )}
 
-          {/* Upcoming Tides */}
-          {predictions.length > 0 && (
+          {/* Upcoming Tides - grouped by day */}
+          {predictions.length > 0 ? (
             <div className="mt-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Upcoming Tides
+                Tide Times
               </p>
               <div className="mt-2 space-y-1.5">
-                {predictions.slice(0, 6).map((pred, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">{pred.type === 'high' ? '⬆️' : '⬇️'}</span>
-                      <div>
-                        <p className="text-xs font-semibold text-gray-900">
-                          {pred.type === 'high' ? 'High' : 'Low'} Tide
-                        </p>
-                        <p className="text-[10px] text-gray-500">
-                          {format(new Date(pred.time), 'EEE, MMM d · h:mm a')}
-                        </p>
+                {predictions.slice(0, 8).map((pred, idx) => {
+                  const predDate = new Date(pred.time)
+                  const isToday = format(predDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+                  const isTomorrow = format(predDate, 'yyyy-MM-dd') === format(new Date(Date.now() + 86400000), 'yyyy-MM-dd')
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                        isToday ? 'bg-blue-50' : 'bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{pred.type === 'high' ? '⬆️' : '⬇️'}</span>
+                        <div>
+                          <p className="text-xs font-semibold text-gray-900">
+                            {pred.type === 'high' ? 'High' : 'Low'} · {format(predDate, 'h:mm a')}
+                          </p>
+                          <p className="text-[10px] text-gray-500">
+                            {isToday ? 'Today' : isTomorrow ? 'Tomorrow' : format(predDate, 'EEE, MMM d')}
+                          </p>
+                        </div>
                       </div>
+                      <p className="text-sm font-bold text-gray-900">{formatHeight(pred.height)}</p>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{formatHeight(pred.height)}</p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
+            </div>
+          ) : (
+            <div className="mt-3 rounded-lg bg-amber-50 p-3">
+              <p className="text-xs text-amber-700">
+                Future tide times unavailable. Only live readings shown.
+              </p>
             </div>
           )}
 
