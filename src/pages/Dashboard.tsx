@@ -1,20 +1,14 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
-import { BottomSheet } from '../components/ui/BottomSheet'
-import { CatchForm } from '../components/catches/CatchForm'
 import { CatchCard } from '../components/catches/CatchCard'
 import { useCatches } from '../hooks/useCatches'
 import { useSessions } from '../hooks/useSessions'
 import { SessionCardSkeleton } from '../components/skeletons/SessionCardSkeleton'
-import { SessionForm } from '../components/sessions/SessionForm'
 import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
 import { ActiveCompetitionBanner } from '../components/compete/ActiveCompetitionBanner'
 import { SessionCard } from '../components/sessions/SessionCard'
 
 export function Dashboard() {
-  const [isCatchSheetOpen, setIsCatchSheetOpen] = useState(false)
-  const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false)
   const navigate = useNavigate()
   const { catches } = useCatches()
   const { data: sessions } = useSessions()
@@ -140,23 +134,16 @@ export function Dashboard() {
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Sessions
             </p>
-            <button
-              type="button"
-              onClick={() => setIsSessionSheetOpen(true)}
-              className="rounded-full bg-navy-800 px-3 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-navy-900"
-            >
-              Start session
-            </button>
+            {hasMoreSessions && (
+              <button
+                type="button"
+                onClick={() => navigate('/sessions')}
+                className="text-[11px] font-medium text-primary hover:underline"
+              >
+                View all
+              </button>
+            )}
           </div>
-          {hasMoreSessions && (
-            <button
-              type="button"
-              onClick={() => navigate('/sessions')}
-              className="text-[11px] font-medium text-primary hover:underline"
-            >
-              View all sessions →
-            </button>
-          )}
 
           {!sessions ? (
             <div className="space-y-2">
@@ -183,21 +170,6 @@ export function Dashboard() {
           )}
         </section>
 
-        <BottomSheet
-          open={isCatchSheetOpen}
-          title="Log a catch"
-          onClose={() => setIsCatchSheetOpen(false)}
-        >
-          <CatchForm onSuccess={() => setIsCatchSheetOpen(false)} />
-        </BottomSheet>
-
-        <BottomSheet
-          open={isSessionSheetOpen}
-          title="Start session"
-          onClose={() => setIsSessionSheetOpen(false)}
-        >
-          <SessionForm onSuccess={() => setIsSessionSheetOpen(false)} />
-        </BottomSheet>
       </main>
     </Layout>
   )
