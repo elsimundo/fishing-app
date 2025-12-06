@@ -5,70 +5,37 @@ import { useSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
 import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
 import { calculateDistance, formatDistance } from '../utils/distance'
-import { SortSelector, type SortOption } from '../components/explore/SortSelector'
-import { TideButton } from '../components/explore/TideButton'
-import { WeatherButton } from '../components/explore/WeatherButton'
+import { TideCard } from '../components/explore/TideCard'
+import { WeatherCard } from '../components/explore/WeatherCard'
+import { TackleShopsCard } from '../components/explore/TackleShopsCard'
+import { SessionsCatchesCard } from '../components/explore/SessionsCatchesCard'
+import { MapPin, Navigation } from 'lucide-react'
 
 const STATIC_POIS = {
   shops: [
-    {
-      id: 'shop-1',
-      name: 'Brighton Angling Centre',
-      lat: 50.8205,
-      lng: -0.1372,
-    },
+    { id: 'shop-1', name: 'Brighton Angling Centre', lat: 50.8205, lng: -0.1372 },
+    { id: 'shop-2', name: 'Shoreham Tackle', lat: 50.8321, lng: -0.2731 },
   ],
   clubs: [
-    {
-      id: 'club-1',
-      name: 'Brighton Sea Anglers',
-      lat: 50.8175,
-      lng: -0.115,
-    },
+    { id: 'club-1', name: 'Brighton Sea Anglers', lat: 50.8175, lng: -0.115 },
   ],
   charters: [
-    {
-      id: 'charter-1',
-      name: 'Brighton Charter Boats',
-      lat: 50.8125,
-      lng: -0.103,
-    },
+    { id: 'charter-1', name: 'Brighton Charter Boats', lat: 50.8125, lng: -0.103 },
   ],
 }
 
 type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters'
 
 const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; className: string }> = {
-  session: {
-    label: 'Session',
-    icon: '🎣',
-    className: 'bg-emerald-100 text-emerald-700',
-  },
-  catch: {
-    label: 'Catch',
-    icon: '🐟',
-    className: 'bg-sky-100 text-sky-700',
-  },
-  shop: {
-    label: 'Tackle shop',
-    icon: '🛒',
-    className: 'bg-amber-100 text-amber-800',
-  },
-  club: {
-    label: 'Club',
-    icon: '👥',
-    className: 'bg-indigo-100 text-indigo-700',
-  },
-  charter: {
-    label: 'Charter boat',
-    icon: '⛵',
-    className: 'bg-rose-100 text-rose-700',
-  },
+  session: { label: 'Session', icon: '🎣', className: 'bg-emerald-100 text-emerald-700' },
+  catch: { label: 'Catch', icon: '🐟', className: 'bg-sky-100 text-sky-700' },
+  shop: { label: 'Tackle shop', icon: '🛒', className: 'bg-amber-100 text-amber-800' },
+  club: { label: 'Club', icon: '👥', className: 'bg-indigo-100 text-indigo-700' },
+  charter: { label: 'Charter boat', icon: '⛵', className: 'bg-rose-100 text-rose-700' },
 }
 
 export default function ExplorePage() {
   const navigate = useNavigate()
-  const [view, setView] = useState<'map' | 'list'>('map')
   const [filters, setFilters] = useState<Record<ExploreFilterKey, boolean>>({
     sessions: true,
     catches: true,
@@ -77,56 +44,47 @@ export default function ExplorePage() {
     charters: true,
   })
 
-  const [liveBounds, setLiveBounds] = useState<
-    | {
-        north: number
-        south: number
-        east: number
-        west: number
-      }
-    | null
-  >(null)
+  const [liveBounds, setLiveBounds] = useState<{
+    north: number
+    south: number
+    east: number
+    west: number
+  } | null>(null)
 
-  const [appliedBounds, setAppliedBounds] = useState<
-    | {
-        north: number
-        south: number
-        east: number
-        west: number
-      }
-    | null
-  >(null)
+  const [appliedBounds, setAppliedBounds] = useState<{
+    north: number
+    south: number
+    east: number
+    west: number
+  } | null>(null)
 
   const [selectedMarker, setSelectedMarker] = useState<ExploreMarker | null>(null)
-
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
-  const [sortBy, setSortBy] = useState<SortOption>('distance')
+
+  // Current map center for data cards
+  const mapCenter = useMemo(() => {
+    if (liveBounds) {
+      return {
+        lat: (liveBounds.north + liveBounds.south) / 2,
+        lng: (liveBounds.east + liveBounds.west) / 2,
+      }
+    }
+    return userLocation
+  }, [liveBounds, userLocation])
 
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
 
   // Try to get user location on first load
   useEffect(() => {
-    if (!navigator.geolocation) {
-      console.warn('Geolocation not supported')
-      return
-    }
+    if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-        setUserLocation(loc)
-        console.log('User location obtained:', loc)
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
       },
-      (error) => {
-        console.warn('Geolocation error:', error.message)
-        // Silent failure; user can still tap the button manually
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 300000, // 5 minutes
-      }
+      () => {},
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     )
   }, [])
 
@@ -192,7 +150,6 @@ export default function ExplorePage() {
 
   const markersWithDistance: ExploreMarker[] = useMemo(() => {
     if (!userLocation) return markers
-
     return markers.map((marker) => ({
       ...marker,
       distance: calculateDistance(userLocation.lat, userLocation.lng, marker.lat, marker.lng),
@@ -202,24 +159,6 @@ export default function ExplorePage() {
   const toggleFilter = (key: ExploreFilterKey) => {
     setFilters((prev) => ({ ...prev, [key]: !prev[key] }))
   }
-
-  const renderFilterChip = (key: ExploreFilterKey, label: string, count?: number) => (
-    <button
-      key={key}
-      type="button"
-      onClick={() => toggleFilter(key)}
-      className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
-        filters[key]
-          ? 'bg-primary text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-      }`}
-    >
-      {label}
-      {filters[key] && count && count > 0 ? (
-        <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">{count}</span>
-      ) : null}
-    </button>
-  )
 
   const hasPendingBounds = useMemo(() => {
     if (!liveBounds) return false
@@ -234,7 +173,6 @@ export default function ExplorePage() {
 
   const visibleMarkersCount = useMemo(() => {
     if (!liveBounds) return markersWithDistance.length
-
     return markersWithDistance.filter((marker) => {
       if (Number.isNaN(marker.lat) || Number.isNaN(marker.lng)) return false
       return (
@@ -254,7 +192,7 @@ export default function ExplorePage() {
       club: markersWithDistance.filter((m) => m.type === 'club').length,
       charter: markersWithDistance.filter((m) => m.type === 'charter').length,
     }),
-    [markersWithDistance],
+    [markersWithDistance]
   )
 
   const pillVisible = useMemo(() => {
@@ -273,17 +211,10 @@ export default function ExplorePage() {
 
   const handleViewDetails = () => {
     if (!selectedMarker) return
-
     if (selectedMarker.id.startsWith('session-')) {
-      const sessionId = selectedMarker.id.replace('session-', '')
-      navigate(`/sessions/${sessionId}`)
-      return
-    }
-
-    if (selectedMarker.id.startsWith('catch-')) {
-      const catchId = selectedMarker.id.replace('catch-', '')
-      navigate(`/catches/${catchId}`)
-      return
+      navigate(`/sessions/${selectedMarker.id.replace('session-', '')}`)
+    } else if (selectedMarker.id.startsWith('catch-')) {
+      navigate(`/catches/${selectedMarker.id.replace('catch-', '')}`)
     }
   }
 
@@ -295,234 +226,196 @@ export default function ExplorePage() {
     setIsLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-        setUserLocation(loc)
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         setLiveBounds(null)
         setAppliedBounds(null)
         setIsLocating(false)
-        console.log('Location updated:', loc)
       },
       (error) => {
         setIsLocating(false)
-        console.error('Geolocation error:', error)
-        alert(`Location error: ${error.message}. Please enable location permissions in your browser settings.`)
+        alert(`Location error: ${error.message}`)
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
   }
 
+  const renderFilterChip = (key: ExploreFilterKey, label: string, count?: number) => (
+    <button
+      key={key}
+      type="button"
+      onClick={() => toggleFilter(key)}
+      className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+        filters[key]
+          ? 'bg-navy-800 text-white shadow-sm'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+      }`}
+    >
+      {label}
+      {filters[key] && count && count > 0 && (
+        <span className="ml-1.5 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-semibold">
+          {count}
+        </span>
+      )}
+    </button>
+  )
+
+  // Prepare data for cards
+  const sessionsForCard = (sessions || []).map((s) => ({
+    id: s.id,
+    title: s.title,
+    location_name: s.location_name,
+    latitude: s.latitude,
+    longitude: s.longitude,
+    started_at: s.started_at,
+  }))
+
+  const catchesForCard = (catches || []).map((c) => ({
+    id: c.id,
+    species: c.species,
+    latitude: c.latitude ?? undefined,
+    longitude: c.longitude ?? undefined,
+    caught_at: c.caught_at,
+  }))
+
   return (
     <Layout>
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-3 px-4 pb-24 pt-3">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-semibold text-slate-900">Explore</h1>
-            <p className="text-[11px] text-slate-500">Find sessions, catches and places to fish.</p>
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col pb-24">
+        {/* Header */}
+        <header className="sticky top-0 z-10 bg-white px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">Explore</h1>
+              <p className="text-xs text-gray-500">Find fishing spots & conditions</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleUseMyLocation}
+              className="flex items-center gap-1.5 rounded-full bg-navy-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-navy-900"
+            >
+              <Navigation size={14} />
+              {isLocating ? 'Locating…' : 'My Location'}
+            </button>
           </div>
-          <div className="inline-flex rounded-full bg-slate-100 p-1 text-[11px] font-medium text-slate-600">
-            <button
-              type="button"
-              onClick={() => setView('map')}
-              className={`rounded-full px-3 py-1 transition-colors ${
-                view === 'map' ? 'bg-white text-slate-900 shadow-sm' : ''
-              }`}
-            >
-              Map
-            </button>
-            <button
-              type="button"
-              onClick={() => setView('list')}
-              className={`rounded-full px-3 py-1 transition-colors ${
-                view === 'list' ? 'bg-white text-slate-900 shadow-sm' : ''
-              }`}
-            >
-              List
-            </button>
+
+          {/* Filter chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {renderFilterChip('sessions', 'Sessions', markerCounts.session)}
+            {renderFilterChip('catches', 'Catches', markerCounts.catch)}
+            {renderFilterChip('shops', 'Shops', markerCounts.shop)}
+            {renderFilterChip('clubs', 'Clubs', markerCounts.club)}
+            {renderFilterChip('charters', 'Charters', markerCounts.charter)}
           </div>
         </header>
 
-        <section className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
-          <div className="flex flex-wrap gap-2">
-            {renderFilterChip('sessions', 'Sessions', markerCounts.session)}
-            {renderFilterChip('catches', 'Catches', markerCounts.catch)}
-            {renderFilterChip('shops', 'Tackle shops', markerCounts.shop)}
-            {renderFilterChip('clubs', 'Clubs', markerCounts.club)}
-            {renderFilterChip('charters', 'Charter boats', markerCounts.charter)}
-          </div>
-          <button
-            type="button"
-            onClick={handleUseMyLocation}
-            className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
-          >
-            {isLocating ? 'Locating…' : 'Use my location'}
-          </button>
+        {/* Compact Map */}
+        <section className="relative h-[35vh] min-h-[200px] bg-gray-100">
+          {pillVisible && (
+            <button
+              type="button"
+              onClick={applyBounds}
+              className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-navy-800 px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-navy-900"
+            >
+              Search this area
+              {visibleMarkersCount > 0 && (
+                <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
+                  {visibleMarkersCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {appliedBounds && userLocation && (
+            <button
+              type="button"
+              onClick={() => {
+                setAppliedBounds(null)
+                setLiveBounds(null)
+                setSelectedMarker(null)
+              }}
+              className="absolute bottom-3 right-3 z-20 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 shadow-md hover:bg-gray-50"
+            >
+              ↻ Reset
+            </button>
+          )}
+
+          {selectedMarker && (
+            <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-white/95 p-3 text-xs shadow-lg backdrop-blur">
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{selectedMarker.title}</p>
+                  {selectedMarker.distance !== undefined && (
+                    <p className="text-[10px] text-gray-600">
+                      📍 {formatDistance(selectedMarker.distance)} away
+                    </p>
+                  )}
+                  <span
+                    className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_META[selectedMarker.type].className}`}
+                  >
+                    {TYPE_META[selectedMarker.type].icon} {TYPE_META[selectedMarker.type].label}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedMarker(null)}
+                  className="text-xs font-medium text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+              {(selectedMarker.id.startsWith('session-') || selectedMarker.id.startsWith('catch-')) && (
+                <button
+                  type="button"
+                  onClick={handleViewDetails}
+                  className="w-full rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                >
+                  {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
+                </button>
+              )}
+            </div>
+          )}
+
+          <ExploreMap
+            markers={markers}
+            center={userLocation ?? undefined}
+            userLocation={userLocation ?? undefined}
+            onBoundsChange={setLiveBounds}
+            onMarkerClick={handleMarkerClick}
+          />
         </section>
 
-        {view === 'map' ? (
-          <section className="relative mt-1 h-[60vh] overflow-hidden rounded-xl bg-surface shadow">
-            {pillVisible ? (
-              <button
-                type="button"
-                onClick={applyBounds}
-                className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-1.5 text-xs font-medium text-white shadow-md"
-              >
-                Search this area
-                {visibleMarkersCount > 0 && (
-                  <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
-                    {visibleMarkersCount}
-                  </span>
-                )}
-              </button>
-            ) : null}
-
-            {/* Weather & Tide Buttons */}
-            <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-              <WeatherButton
-                lat={liveBounds ? (liveBounds.north + liveBounds.south) / 2 : userLocation?.lat ?? null}
-                lng={liveBounds ? (liveBounds.east + liveBounds.west) / 2 : userLocation?.lng ?? null}
-              />
-              <TideButton
-                lat={liveBounds ? (liveBounds.north + liveBounds.south) / 2 : userLocation?.lat ?? null}
-                lng={liveBounds ? (liveBounds.east + liveBounds.west) / 2 : userLocation?.lng ?? null}
-              />
+        {/* Data Cards */}
+        <section className="flex flex-col gap-3 px-4 py-4">
+          {/* Location indicator */}
+          {mapCenter && (
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <MapPin size={14} className="text-gray-400" />
+              <span>
+                Showing data for {mapCenter.lat.toFixed(3)}, {mapCenter.lng.toFixed(3)}
+              </span>
             </div>
+          )}
 
-            {appliedBounds && userLocation ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setAppliedBounds(null)
-                  setLiveBounds(null)
-                  setSelectedMarker(null)
-                }}
-                className="absolute bottom-3 right-3 z-20 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-md hover:bg-slate-50"
-              >
-                ↻ Reset view
-              </button>
-            ) : null}
+          {/* Tide Card */}
+          <TideCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
 
-            {selectedMarker ? (
-              <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-white/95 p-3 text-xs shadow-lg backdrop-blur">
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-[12px] font-semibold text-slate-900">{selectedMarker.title}</p>
-                    {selectedMarker.distance !== undefined ? (
-                      <div className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-600">
-                        <span>📍</span>
-                        <span>{formatDistance(selectedMarker.distance)} away</span>
-                      </div>
-                    ) : null}
-                    <span
-                      className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_META[selectedMarker.type].className}`}
-                    >
-                      <span>{TYPE_META[selectedMarker.type].icon}</span>
-                      <span>{TYPE_META[selectedMarker.type].label}</span>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMarker(null)}
-                    className="text-[11px] font-medium text-slate-400 hover:text-slate-600"
-                  >
-                    Close
-                  </button>
-                </div>
+          {/* Weather Card */}
+          <WeatherCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
 
-                {(selectedMarker.id.startsWith('session-') || selectedMarker.id.startsWith('catch-')) && (
-                  <button
-                    type="button"
-                    onClick={handleViewDetails}
-                    className="w-full rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-slate-800"
-                  >
-                    {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
-                  </button>
-                )}
-              </div>
-            ) : null}
+          {/* Tackle Shops Card */}
+          <TackleShopsCard
+            lat={mapCenter?.lat ?? null}
+            lng={mapCenter?.lng ?? null}
+            shops={STATIC_POIS.shops}
+          />
 
-            <ExploreMap
-              markers={markers}
-              center={userLocation ?? undefined}
-              userLocation={userLocation ?? undefined}
-              onBoundsChange={setLiveBounds}
-              onMarkerClick={handleMarkerClick}
-            />
-          </section>
-        ) : (
-          <section className="mt-1 space-y-3 rounded-xl bg-surface p-3 text-xs text-slate-700 shadow">
-            {markersWithDistance.length === 0 ? (
-              <p className="text-[11px] text-slate-500">No places to show. Try changing filters or search area.</p>
-            ) : (
-              <>
-                <div className="mb-2 flex justify-end">
-                  <SortSelector
-                    value={sortBy}
-                    onChange={setSortBy}
-                    hasUserLocation={!!userLocation}
-                  />
-                </div>
-                {(['session', 'catch', 'shop', 'club', 'charter'] as ExploreMarkerType[]).map((type) => {
-                  const itemsForType = markersWithDistance
-                    .filter((m) => m.type === type)
-                    .slice()
-                    .sort((a, b) => {
-                      if (sortBy === 'distance') {
-                        if (!userLocation) return 0
-                        if (a.distance === undefined) return 1
-                        if (b.distance === undefined) return -1
-                        return a.distance - b.distance
-                      }
-
-                      // date sort fallback using timestamp when present
-                      if (a.timestamp && b.timestamp) {
-                        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-                      }
-                      return 0
-                    })
-                  if (itemsForType.length === 0) return null
-
-                  const labelMap: Record<ExploreMarkerType, string> = {
-                    session: 'Sessions',
-                    catch: 'Catches',
-                    shop: 'Tackle shops',
-                    club: 'Clubs',
-                    charter: 'Charter boats',
-                  }
-
-                  return (
-                    <div key={type} className="space-y-1">
-                      <h2 className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                        {labelMap[type]}
-                      </h2>
-                      <ul className="space-y-1">
-                        {itemsForType.map((m) => (
-                          <li
-                            key={m.id}
-                            className="flex items-center justify-between rounded-lg px-2 py-1 hover:bg-slate-50"
-                          >
-                            <div>
-                              <p className="text-[11px] font-medium text-slate-900">{m.title}</p>
-                              <span
-                                className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_META[m.type].className}`}
-                              >
-                                <span>{TYPE_META[m.type].icon}</span>
-                                <span>{TYPE_META[m.type].label}</span>
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )
-                })}
-              </>
-            )}
-          </section>
-        )}
+          {/* Sessions & Catches Card */}
+          <SessionsCatchesCard
+            lat={mapCenter?.lat ?? null}
+            lng={mapCenter?.lng ?? null}
+            sessions={sessionsForCard}
+            catches={catchesForCard}
+          />
+        </section>
       </main>
     </Layout>
   )
