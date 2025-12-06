@@ -1,0 +1,196 @@
+import type { TideStation, TidePrediction, TideData } from '../types/tides'
+
+const WORLDTIDES_BASE_URL = 'https://www.worldtides.info/api/v3'
+
+function getApiKey(): string | null {
+  return import.meta.env.VITE_WORLDTIDES_API_KEY || null
+}
+
+interface WorldTidesStation {
+  id: string
+  name: string
+  lat: number
+  lon: number
+}
+
+interface WorldTidesExtreme {
+  dt: number // Unix timestamp
+  height: number
+  type: 'High' | 'Low'
+}
+
+/**
+ * Find nearest WorldTides station
+ */
+export async function findNearestWorldTidesStation(
+  lat: number,
+  lng: number
+): Promise<TideStation | null> {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    console.warn('WorldTides API key not configured')
+    return null
+  }
+
+  const params = new URLSearchParams({
+    stations: '',
+    lat: lat.toString(),
+    lon: lng.toString(),
+    key: apiKey,
+  })
+
+  const response = await fetch(`${WORLDTIDES_BASE_URL}?${params}`)
+
+  if (!response.ok) {
+    throw new Error(`WorldTides API error: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  if (data.error) {
+    throw new Error(data.error || 'WorldTides API error')
+  }
+
+  if (!data.stations || data.stations.length === 0) {
+    return null
+  }
+
+  // API returns stations sorted by distance
+  const nearest = data.stations[0] as WorldTidesStation
+
+  return {
+    id: nearest.id,
+    name: nearest.name,
+    lat: nearest.lat,
+    lng: nearest.lon,
+    source: 'worldtides',
+  }
+}
+
+/**
+ * Get tide predictions from WorldTides
+ */
+export async function getWorldTidesPredictions(
+  lat: number,
+  lng: number,
+  days: number = 2
+): Promise<TidePrediction[]> {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    throw new Error('WorldTides API key not configured')
+  }
+
+  const params = new URLSearchParams({
+    extremes: '',
+    lat: lat.toString(),
+    lon: lng.toString(),
+    length: (days * 24 * 60 * 60).toString(),
+    key: apiKey,
+  })
+
+  const response = await fetch(`${WORLDTIDES_BASE_URL}?${params}`)
+
+  if (!response.ok) {
+    throw new Error(`WorldTides API error: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  if (data.error) {
+    throw new Error(data.error || 'WorldTides API error')
+  }
+
+  if (!data.extremes || data.extremes.length === 0) {
+    return []
+  }
+
+  return data.extremes.map((extreme: WorldTidesExtreme) => ({
+    time: new Date(extreme.dt * 1000).toISOString(),
+    height: extreme.height,
+    type: extreme.type === 'High' ? 'high' : 'low',
+  }))
+}
+
+/**
+ * Get complete tide data from WorldTides
+ */
+export async function getWorldTidesData(
+  lat: number,
+  lng: number
+): Promise<TideData | null> {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    console.warn('WorldTides API key not configured')
+    return null
+  }
+
+  const station = await findNearestWorldTidesStation(lat, lng)
+  if (!station) return null
+
+  const predictions = await getWorldTidesPredictions(lat, lng)
+  if (predictions.length === 0) return null
+
+  const now = new Date()
+  const currentIdx = predictions.findIndex(p => new Date(p.time) > now)
+
+  let current: TideData['current'] = undefined
+  let extremes: TideData['extremes'] = undefined
+
+  if (currentIdx > 0) {
+    const prev = predictions[currentIdx - 1]
+    const next = predictions[currentIdx]
+    const prevTime = new Date(prev.time).getTime()
+    const nextTime = new Date(next.time).getTime()
+    const nowTime = now.getTime()
+    const progress = (nowTime - prevTime) / (nextTime - prevTime)
+
+    // Interpolate current height using cosine for smoother curve
+    const cosProgress = (1 - Math.cos(progress * Math.PI)) / 2
+    const currentHeight = prev.height + (next.height - prev.height) * cosProgress
+
+    current = {
+      height: currentHeight,
+      type: next.type === 'high' ? 'rising' : 'falling',
+      nextTide: next,
+    }
+
+    const futurePredictions = predictions.slice(currentIdx)
+    const nextHigh = futurePredictions.find(p => p.type === 'high')
+    const nextLow = futurePredictions.find(p => p.type === 'low')
+
+    extremes = {
+      nextHigh: nextHigh || null,
+      nextLow: nextLow || null,
+    }
+  } else if (predictions.length > 0) {
+    const next = predictions[0]
+    current = {
+      height: 0,
+      type: next.type === 'high' ? 'rising' : 'falling',
+      nextTide: next,
+    }
+
+    const nextHigh = predictions.find(p => p.type === 'high')
+    const nextLow = predictions.find(p => p.type === 'low')
+
+    extremes = {
+      nextHigh: nextHigh || null,
+      nextLow: nextLow || null,
+    }
+  }
+
+  return {
+    station,
+    predictions,
+    current,
+    extremes,
+    fetchedAt: now.toISOString(),
+  }
+}
+
+/**
+ * Check if WorldTides API is configured
+ */
+export function isWorldTidesConfigured(): boolean {
+  return Boolean(getApiKey())
+}

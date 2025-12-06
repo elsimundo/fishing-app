@@ -6,6 +6,7 @@ import { useCatches } from '../hooks/useCatches'
 import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
 import { calculateDistance, formatDistance } from '../utils/distance'
 import { SortSelector, type SortOption } from '../components/explore/SortSelector'
+import { TideButton } from '../components/explore/TideButton'
 
 const STATIC_POIS = {
   shops: [
@@ -376,6 +377,13 @@ export default function ExplorePage() {
                 )}
               </button>
             ) : null}
+
+            {/* Tide Button */}
+            <TideButton
+              lat={liveBounds ? (liveBounds.north + liveBounds.south) / 2 : userLocation?.lat ?? null}
+              lng={liveBounds ? (liveBounds.east + liveBounds.west) / 2 : userLocation?.lng ?? null}
+              className="absolute top-3 right-3 z-20"
+            />
 
             {appliedBounds && userLocation ? (
               <button
