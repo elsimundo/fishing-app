@@ -79,7 +79,7 @@ export default function CreatePostPage() {
         user_id: user.id,
         content: content.trim() || null,
         image_url: imageUrl,
-        post_type: imageUrl ? 'photo' : 'text',
+        type: 'photo',
       })
 
       if (error) throw error
