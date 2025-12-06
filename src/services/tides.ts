@@ -1,6 +1,6 @@
 import type { TideData } from '../types/tides'
 import { getNOAATideData } from './noaa-tides'
-import { getWorldTidesData, isWorldTidesConfigured } from './worldtides'
+import { getWorldTidesData, getWorldTidesPredictions, isWorldTidesConfigured } from './worldtides'
 import { getUKTideGaugeData, convertGaugeToTideData } from './uk-ea-tides'
 
 /**
@@ -39,13 +39,35 @@ export async function getTideData(
   lng: number
 ): Promise<TideData | null> {
   // Try UK Environment Agency first for UK waters (free, real-time data)
+  // Supplement with WorldTides predictions for accurate tide times
   if (isUKWaters(lat, lng)) {
     console.log('[Tides] Trying UK Environment Agency (UK waters)...')
     try {
       const gaugeData = await getUKTideGaugeData(lat, lng)
       if (gaugeData) {
-        const tideData = convertGaugeToTideData(gaugeData)
+        let tideData = convertGaugeToTideData(gaugeData)
         if (tideData) {
+          // UK-EA only has real-time readings, not predictions
+          // Supplement with WorldTides predictions if available
+          if (isWorldTidesConfigured() && tideData.predictions.length < 4) {
+            console.log('[Tides] Supplementing UK-EA with WorldTides predictions...')
+            try {
+              const predictions = await getWorldTidesPredictions(lat, lng, 2)
+              if (predictions.length > 0) {
+                tideData = {
+                  ...tideData,
+                  predictions,
+                  extremes: {
+                    nextHigh: predictions.find(p => p.type === 'high' && new Date(p.time) > new Date()) || null,
+                    nextLow: predictions.find(p => p.type === 'low' && new Date(p.time) > new Date()) || null,
+                  },
+                }
+                console.log('[Tides] WorldTides predictions added ✓')
+              }
+            } catch (e) {
+              console.log('[Tides] WorldTides supplement failed, using UK-EA only')
+            }
+          }
           console.log('[Tides] UK-EA data found ✓')
           return tideData
         }
