@@ -1,6 +1,15 @@
 import type { TideData } from '../types/tides'
 import { getNOAATideData } from './noaa-tides'
 import { getWorldTidesData, isWorldTidesConfigured } from './worldtides'
+import { getUKTideGaugeData, convertGaugeToTideData } from './uk-ea-tides'
+
+/**
+ * Check if location is in UK waters (rough approximation)
+ */
+function isUKWaters(lat: number, lng: number): boolean {
+  // UK and Ireland coastal waters
+  return lat >= 49 && lat <= 61 && lng >= -11 && lng <= 2
+}
 
 /**
  * Check if location is in US coastal waters (rough approximation)
@@ -23,13 +32,31 @@ function isUSWaters(lat: number, lng: number): boolean {
 
 /**
  * Get tide data for a location
- * Tries NOAA first for US waters, falls back to WorldTides for global coverage
+ * Priority: UK-EA (UK) → NOAA (US) → WorldTides (global)
  */
 export async function getTideData(
   lat: number,
   lng: number
 ): Promise<TideData | null> {
-  // Try NOAA first for US waters (free, no API key needed)
+  // Try UK Environment Agency first for UK waters (free, real-time data)
+  if (isUKWaters(lat, lng)) {
+    console.log('[Tides] Trying UK Environment Agency (UK waters)...')
+    try {
+      const gaugeData = await getUKTideGaugeData(lat, lng)
+      if (gaugeData) {
+        const tideData = convertGaugeToTideData(gaugeData)
+        if (tideData) {
+          console.log('[Tides] UK-EA data found ✓')
+          return tideData
+        }
+      }
+      console.log('[Tides] No nearby UK-EA station, trying WorldTides...')
+    } catch (error) {
+      console.warn('[Tides] UK-EA failed:', error)
+    }
+  }
+
+  // Try NOAA for US waters (free, no API key needed)
   if (isUSWaters(lat, lng)) {
     console.log('[Tides] Trying NOAA (US waters)...')
     try {
@@ -42,12 +69,11 @@ export async function getTideData(
     } catch (error) {
       console.warn('[Tides] NOAA failed:', error)
     }
-  } else {
-    console.log('[Tides] Non-US waters, using WorldTides...')
   }
 
   // Fallback to WorldTides for global coverage
   if (isWorldTidesConfigured()) {
+    console.log('[Tides] Trying WorldTides (global)...')
     try {
       const worldTidesData = await getWorldTidesData(lat, lng)
       if (worldTidesData) {
@@ -72,6 +98,11 @@ export async function getTideData(
 export function isTideDataLikelyAvailable(lat: number, lng: number): boolean {
   // Check if near any coast (very rough approximation)
   // This is just for UI hints, actual availability depends on API response
+
+  // UK waters have excellent coverage via UK-EA
+  if (isUKWaters(lat, lng)) {
+    return true
+  }
 
   // US waters have good coverage via NOAA
   if (isUSWaters(lat, lng)) {

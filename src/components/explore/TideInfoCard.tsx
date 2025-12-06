@@ -1,5 +1,5 @@
 import type { TideData } from '../../types/tides'
-import { Waves, TrendingUp, TrendingDown, Clock, MapPin, X } from 'lucide-react'
+import { Waves, TrendingUp, TrendingDown, Clock, MapPin, X, Activity } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 
 interface TideInfoCardProps {
@@ -45,8 +45,52 @@ export function TideInfoCard({ tideData, onClose }: TideInfoCardProps) {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Current Tide */}
-        {current && (
+        {/* Real-Time Reading (UK-EA only) */}
+        {tideData.gaugeData?.latestReading && (
+          <div className="p-4 border-b border-gray-100 bg-gradient-to-br from-green-50 to-emerald-50">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1 bg-green-100 rounded-full">
+                <Activity size={16} className="text-green-600" />
+              </div>
+              <p className="text-xs text-green-700 font-semibold uppercase tracking-wide">
+                Live Reading
+              </p>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-bold text-green-900">
+                  {formatHeight(tideData.gaugeData.latestReading.level)}
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Measured {formatDistanceToNow(new Date(tideData.gaugeData.latestReading.time), { addSuffix: true })}
+                </p>
+              </div>
+              {current && (
+                <div className="flex items-center gap-1.5">
+                  {current.type === 'rising' ? (
+                    <>
+                      <div className="p-1.5 bg-green-100 rounded-full">
+                        <TrendingUp size={20} className="text-green-600" />
+                      </div>
+                      <span className="text-sm font-semibold text-green-700">Rising</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-1.5 bg-orange-100 rounded-full">
+                        <TrendingDown size={20} className="text-orange-600" />
+                      </div>
+                      <span className="text-sm font-semibold text-orange-700">Falling</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Current Tide (for non-gauge data) */}
+        {current && !tideData.gaugeData?.latestReading && (
           <div className="p-4 border-b border-gray-100 bg-gradient-to-br from-blue-50 to-cyan-50">
             <div className="flex items-center justify-between">
               <div>
@@ -166,10 +210,27 @@ export function TideInfoCard({ tideData, onClose }: TideInfoCardProps) {
 
       {/* Footer */}
       <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
-        <p className="text-xs text-gray-500 text-center">
-          Data from {station.source === 'noaa' ? 'NOAA Tides & Currents' : 'WorldTides'} ·{' '}
-          Updated {formatDistanceToNow(new Date(tideData.fetchedAt), { addSuffix: true })}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-gray-500">
+            Data from{' '}
+            {station.source === 'uk-ea' ? (
+              <span className="font-semibold text-green-600">UK Environment Agency</span>
+            ) : station.source === 'noaa' ? (
+              <span className="font-semibold text-blue-600">NOAA</span>
+            ) : (
+              <span className="font-semibold text-purple-600">WorldTides</span>
+            )}
+          </p>
+          <p className="text-xs text-gray-400">
+            {formatDistanceToNow(new Date(tideData.fetchedAt), { addSuffix: true })}
+          </p>
+        </div>
+        {station.source === 'uk-ea' && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <p className="text-xs text-green-700 font-semibold">Live tide gauge data</p>
+          </div>
+        )}
       </div>
     </div>
   )
