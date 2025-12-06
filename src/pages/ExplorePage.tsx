@@ -7,6 +7,7 @@ import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../compo
 import { calculateDistance, formatDistance } from '../utils/distance'
 import { SortSelector, type SortOption } from '../components/explore/SortSelector'
 import { TideButton } from '../components/explore/TideButton'
+import { WeatherButton } from '../components/explore/WeatherButton'
 
 const STATIC_POIS = {
   shops: [
@@ -378,12 +379,17 @@ export default function ExplorePage() {
               </button>
             ) : null}
 
-            {/* Tide Button */}
-            <TideButton
-              lat={liveBounds ? (liveBounds.north + liveBounds.south) / 2 : userLocation?.lat ?? null}
-              lng={liveBounds ? (liveBounds.east + liveBounds.west) / 2 : userLocation?.lng ?? null}
-              className="absolute top-3 right-3 z-20"
-            />
+            {/* Weather & Tide Buttons */}
+            <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+              <WeatherButton
+                lat={liveBounds ? (liveBounds.north + liveBounds.south) / 2 : userLocation?.lat ?? null}
+                lng={liveBounds ? (liveBounds.east + liveBounds.west) / 2 : userLocation?.lng ?? null}
+              />
+              <TideButton
+                lat={liveBounds ? (liveBounds.north + liveBounds.south) / 2 : userLocation?.lat ?? null}
+                lng={liveBounds ? (liveBounds.east + liveBounds.west) / 2 : userLocation?.lng ?? null}
+              />
+            </div>
 
             {appliedBounds && userLocation ? (
               <button
