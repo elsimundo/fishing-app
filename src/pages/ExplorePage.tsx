@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { useSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
+import { useTackleShops } from '../hooks/useTackleShops'
 import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
 import { calculateDistance, formatDistance } from '../utils/distance'
 import { TideCard } from '../components/explore/TideCard'
@@ -11,11 +12,8 @@ import { TackleShopsCard } from '../components/explore/TackleShopsCard'
 import { SessionsCatchesCard } from '../components/explore/SessionsCatchesCard'
 import { MapPin, Navigation } from 'lucide-react'
 
+// Static POIs for clubs and charters (future: fetch from API)
 const STATIC_POIS = {
-  shops: [
-    { id: 'shop-1', name: 'Brighton Angling Centre', lat: 50.8205, lng: -0.1372 },
-    { id: 'shop-2', name: 'Shoreham Tackle', lat: 50.8321, lng: -0.2731 },
-  ],
   clubs: [
     { id: 'club-1', name: 'Brighton Sea Anglers', lat: 50.8175, lng: -0.115 },
   ],
@@ -76,6 +74,13 @@ export default function ExplorePage() {
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
 
+  // Fetch tackle shops from OpenStreetMap
+  const { data: shopsData } = useTackleShops(
+    appliedBounds || liveBounds,
+    userLocation,
+    filters.shops
+  )
+
   // Try to get user location on first load
   useEffect(() => {
     if (!navigator.geolocation) return
@@ -117,9 +122,15 @@ export default function ExplorePage() {
       }
     }
 
-    if (filters.shops) {
-      for (const shop of STATIC_POIS.shops) {
-        items.push({ id: shop.id, type: 'shop', lat: shop.lat, lng: shop.lng, title: shop.name })
+    if (filters.shops && shopsData?.shops) {
+      for (const shop of shopsData.shops) {
+        items.push({
+          id: shop.id,
+          type: 'shop',
+          lat: shop.lat,
+          lng: shop.lng,
+          title: shop.name,
+        })
       }
     }
 
@@ -146,7 +157,7 @@ export default function ExplorePage() {
         m.lng >= appliedBounds.west
       )
     })
-  }, [sessions, catches, filters, appliedBounds])
+  }, [sessions, catches, shopsData, filters, appliedBounds])
 
   const markersWithDistance: ExploreMarker[] = useMemo(() => {
     if (!userLocation) return markers
@@ -405,7 +416,7 @@ export default function ExplorePage() {
           <TackleShopsCard
             lat={mapCenter?.lat ?? null}
             lng={mapCenter?.lng ?? null}
-            shops={STATIC_POIS.shops}
+            shops={shopsData?.shops || []}
           />
 
           {/* Sessions & Catches Card */}

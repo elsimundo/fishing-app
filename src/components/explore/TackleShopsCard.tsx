@@ -1,15 +1,7 @@
 import { useState } from 'react'
-import { Store, ChevronDown, ChevronUp, MapPin } from 'lucide-react'
+import { Store, ChevronDown, ChevronUp, Phone, Globe, Navigation } from 'lucide-react'
 import { calculateDistance, formatDistance } from '../../utils/distance'
-
-interface TackleShop {
-  id: string
-  name: string
-  lat: number
-  lng: number
-  address?: string
-  phone?: string
-}
+import type { TackleShop } from '../../types/shops'
 
 interface TackleShopsCardProps {
   lat: number | null
@@ -81,42 +73,77 @@ export function TackleShopsCard({ lat, lng, shops }: TackleShopsCardProps) {
 
       {expanded && (
         <div className="border-t border-gray-100 px-4 pb-4">
-          <div className="mt-3 space-y-2">
-            {nearbyShops.map((shop) => (
-              <div
-                key={shop.id}
-                className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
-                    <Store size={14} className="text-amber-600" />
+          <div className="mt-3 space-y-3">
+            {nearbyShops.slice(0, 10).map((shop) => (
+              <div key={shop.id} className="rounded-lg bg-gray-50 p-3">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎣</span>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{shop.name}</p>
+                      {shop.distance !== undefined && (
+                        <p className="text-xs text-gray-500">
+                          {formatDistance(shop.distance)} away
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{shop.name}</p>
-                    {shop.address && (
-                      <p className="text-xs text-gray-500">{shop.address}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {shop.distance !== undefined && (
-                    <span className="text-xs font-medium text-gray-600">
-                      {formatDistance(shop.distance)}
+                  {shop.shopType && (
+                    <span className="rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-medium capitalize text-cyan-800">
+                      {shop.shopType}
                     </span>
                   )}
+                </div>
+
+                {shop.address && (
+                  <p className="mb-2 text-xs text-gray-600">{shop.address}</p>
+                )}
+
+                {shop.openingHours && (
+                  <p className="mb-2 text-xs text-gray-500">🕒 {shop.openingHours}</p>
+                )}
+
+                <div className="flex gap-2">
+                  {shop.phone && (
+                    <a
+                      href={`tel:${shop.phone}`}
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Phone size={14} />
+                      <span>Call</span>
+                    </a>
+                  )}
+                  {shop.website && (
+                    <a
+                      href={shop.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Globe size={14} />
+                      <span>Website</span>
+                    </a>
+                  )}
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${shop.lat},${shop.lng}`}
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full p-1.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <MapPin size={16} />
+                    <Navigation size={14} />
+                    <span>Directions</span>
                   </a>
                 </div>
               </div>
             ))}
           </div>
+
+          <p className="mt-3 text-center text-xs text-gray-400">
+            Data from OpenStreetMap contributors
+          </p>
         </div>
       )}
     </div>
