@@ -30,11 +30,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
       </div>
 
       {profile.bio ? (
-        <p className="mb-3 text-[15px] leading-relaxed text-gray-700">{profile.bio}</p>
-      ) : null}
-
-      {profile.location ? (
-        <p className="flex items-center gap-1 text-sm text-gray-600">📍 {profile.location}</p>
+        <p className="text-[15px] leading-relaxed text-gray-700">{profile.bio}</p>
       ) : null}
     </div>
   )
