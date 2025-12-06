@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import type { Catch, Session } from '../../types'
 import { FISH_SPECIES } from '../../lib/constants'
+import { Camera, X } from 'lucide-react'
 
 const quickLogSchema = z.object({
   species: z.string().min(1, 'Species is required'),
@@ -43,8 +44,63 @@ type QuickLogFormProps = {
 
 export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) {
   const [formError, setFormError] = useState<string | null>(null)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const defaultNow = new Date().toISOString().slice(0, 16)
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be less than 10MB')
+      return
+    }
+
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
+  const removePhoto = () => {
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const uploadPhoto = async (userId: string): Promise<string | null> => {
+    if (!photoFile) return null
+
+    setIsUploading(true)
+    try {
+      const fileExt = photoFile.name.split('.').pop()
+      const fileName = `${userId}-${Date.now()}.${fileExt}`
+      const filePath = `catches/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('catches')
+        .upload(filePath, photoFile)
+
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage.from('catches').getPublicUrl(filePath)
+      return data.publicUrl
+    } catch (error) {
+      console.error('Error uploading photo:', error)
+      throw error
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   const {
     register,
@@ -69,6 +125,17 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       return
     }
 
+    // Upload photo if present
+    let photoUrl: string | null = null
+    if (photoFile) {
+      try {
+        photoUrl = await uploadPhoto(userData.user.id)
+      } catch {
+        toast.error('Failed to upload photo')
+        return
+      }
+    }
+
     const payload = {
       user_id: userData.user.id,
       session_id: session.id,
@@ -82,7 +149,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       bait: null,
       rig: null,
       fishing_style: null,
-      photo_url: null,
+      photo_url: photoUrl,
       notes: values.notes ?? null,
     }
 
@@ -210,15 +277,54 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
             <p className="mt-1 text-[11px] text-red-600">{errors.notes.message}</p>
           ) : null}
         </div>
+
+        {/* Photo upload */}
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-xs font-medium text-slate-700">
+            Photo (optional)
+          </label>
+          {photoPreview ? (
+            <div className="relative">
+              <img
+                src={photoPreview}
+                alt="Catch preview"
+                className="h-32 w-full rounded-lg object-cover"
+              />
+              <button
+                type="button"
+                onClick={removePhoto}
+                className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-4 text-xs text-slate-500 hover:border-slate-400 hover:text-slate-600"
+            >
+              <Camera size={18} />
+              <span>Add a photo of your catch</span>
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            className="hidden"
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
+          disabled={isSubmitting || isUploading}
+          className="inline-flex items-center justify-center rounded-md bg-navy-800 px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-navy-900 disabled:opacity-70"
         >
-          {isSubmitting ? 'Logging…' : 'Log catch'}
+          {isSubmitting || isUploading ? 'Logging…' : 'Log catch'}
         </button>
       </div>
     </form>
