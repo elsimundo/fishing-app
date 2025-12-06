@@ -14,16 +14,14 @@ function buildTackleShopQuery(bounds: {
   const { south, west, north, east } = bounds
 
   // Overpass QL query
-  // Searches for: fishing shops, outdoor shops, and shops with "tackle" or "bait" in name
+  // Searches for: fishing/tackle shops only (no outdoor/sports stores)
   return `
     [out:json][timeout:25];
     (
       node["shop"="fishing"](${south},${west},${north},${east});
       way["shop"="fishing"](${south},${west},${north},${east});
-      node["shop"="outdoor"](${south},${west},${north},${east});
-      way["shop"="outdoor"](${south},${west},${north},${east});
-      node["shop"]["name"~"tackle|bait|fishing|angling",i](${south},${west},${north},${east});
-      way["shop"]["name"~"tackle|bait|fishing|angling",i](${south},${west},${north},${east});
+      node["shop"]["name"~"tackle|bait|angling",i](${south},${west},${north},${east});
+      way["shop"]["name"~"tackle|bait|angling",i](${south},${west},${north},${east});
     );
     out center;
   `
@@ -78,10 +76,8 @@ function parseOverpassResponse(data: {
     if (seen.has(key)) continue
     seen.add(key)
 
-    // Determine shop type from OSM tags
-    let shopType: 'fishing' | 'outdoor' | 'sports' = 'fishing'
-    if (tags.shop === 'outdoor') shopType = 'outdoor'
-    if (tags.shop === 'sports') shopType = 'sports'
+    // All results are fishing shops now
+    const shopType: 'fishing' = 'fishing'
 
     shops.push({
       id: `osm-${element.type}-${element.id}`,

@@ -76,23 +76,16 @@ export function TackleShopsCard({ lat, lng, shops }: TackleShopsCardProps) {
           <div className="mt-3 space-y-3">
             {nearbyShops.slice(0, 10).map((shop) => (
               <div key={shop.id} className="rounded-lg bg-gray-50 p-3">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🎣</span>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{shop.name}</p>
-                      {shop.distance !== undefined && (
-                        <p className="text-xs text-gray-500">
-                          {formatDistance(shop.distance)} away
-                        </p>
-                      )}
-                    </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">🎣</span>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{shop.name}</p>
+                    {shop.distance !== undefined && (
+                      <p className="text-xs text-gray-500">
+                        {formatDistance(shop.distance)} away
+                      </p>
+                    )}
                   </div>
-                  {shop.shopType && (
-                    <span className="rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-medium capitalize text-cyan-800">
-                      {shop.shopType}
-                    </span>
-                  )}
                 </div>
 
                 {shop.address && (

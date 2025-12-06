@@ -7,7 +7,7 @@ export interface TackleShop {
   phone?: string
   website?: string
   openingHours?: string
-  shopType?: 'fishing' | 'outdoor' | 'sports'
+  shopType?: 'fishing'
   distance?: number
   source: 'osm'
   verified?: boolean
