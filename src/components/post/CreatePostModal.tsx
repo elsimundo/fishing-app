@@ -39,10 +39,10 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       },
     },
     {
-      id: 'share-photo',
-      icon: '📸',
-      title: 'Share Photo',
-      subtitle: 'Post a moment from the water',
+      id: 'share-update',
+      icon: '✏️',
+      title: 'Share Update',
+      subtitle: 'Post a thought, photo or video',
       color: 'bg-purple-100',
       onClick: () => {
         onClose()

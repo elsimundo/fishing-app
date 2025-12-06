@@ -17,6 +17,7 @@ import DiscoverPage from './pages/DiscoverPage'
 import CompetePage from './pages/CompetePage'
 import CompetitionDetailPage from './pages/CompetitionDetailPage'
 import CreateCompetitionPage from './pages/CreateCompetitionPage'
+import CreatePostPage from './pages/CreatePostPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 function App() {
@@ -36,15 +37,7 @@ function App() {
         <Route path="/compete/:competitionId" element={<CompetitionDetailPage />} />
         <Route path="/sessions/new" element={<StartSessionPage />} />
         <Route path="/catches/new" element={<LogCatchPage />} />
-        <Route
-          path="/posts/new"
-          element={
-            <div className="p-8 text-center">
-              <p className="mb-2 text-lg font-semibold">Share Photo</p>
-              <p className="text-sm text-gray-600">Coming in Phase 2C.</p>
-            </div>
-          }
-        />
+        <Route path="/posts/new" element={<CreatePostPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/catches/:id" element={<CatchDetailPage />} />
         <Route path="/catches/:id/edit" element={<CatchEditPage />} />
