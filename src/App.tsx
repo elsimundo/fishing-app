@@ -5,7 +5,7 @@ import { Dashboard } from './pages/Dashboard'
 import { CatchDetailPage } from './pages/CatchDetailPage'
 import { CatchEditPage } from './pages/CatchEditPage'
 import LogCatchPage from './pages/LogCatchPage'
-import { Profile } from './pages/Profile'
+// import { Profile } from './pages/Profile' // Unused
 import ProfilePage from './pages/ProfilePage'
 import UserProfilePage from './pages/UserProfilePage'
 import StartSessionPage from './pages/StartSessionPage'
@@ -19,6 +19,10 @@ import CompetitionDetailPage from './pages/CompetitionDetailPage'
 import CreateCompetitionPage from './pages/CreateCompetitionPage'
 import CreatePostPage from './pages/CreatePostPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+// Admin pages
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import UsersPage from './pages/admin/UsersPage'
+import BusinessesPage from './pages/admin/BusinessesPage'
 
 function App() {
   return (
@@ -45,6 +49,10 @@ function App() {
         <Route path="/sessions/:id" element={<SessionDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<UserProfilePage />} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/users" element={<UsersPage />} />
+        <Route path="/admin/businesses" element={<BusinessesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
