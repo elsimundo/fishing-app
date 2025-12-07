@@ -61,9 +61,7 @@ export default function ProfilePage() {
         </button>
         <button
           type="button"
-          onClick={() => {
-            window.location.href = '/settings'
-          }}
+          onClick={() => setShowEditModal(true)}
           className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200"
         >
           <Settings size={20} className="text-gray-700" />
