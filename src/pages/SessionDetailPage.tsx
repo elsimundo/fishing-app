@@ -10,7 +10,7 @@ import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil } from 'lucide-react'
+import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil, LogOut } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 import { EditSessionModal } from '../components/session/EditSessionModal'
 import { ParticipantsList } from '../components/session/ParticipantsList'
@@ -28,6 +28,7 @@ export function SessionDetailPage() {
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const [showActions, setShowActions] = useState(false)
 
   const { id } = useParams<{ id: string }>()
@@ -126,27 +127,27 @@ export function SessionDetailPage() {
 
           <div className="flex items-center gap-2">
             {isOwner && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setShareMode('feed')}
-                  className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-                >
-                  <Share2 size={20} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowActions(!showActions)}
-                  className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-                >
-                  <MoreHorizontal size={20} />
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => setShareMode('feed')}
+                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+              >
+                <Share2 size={20} />
+              </button>
+            )}
+            {(isOwner || myParticipant) && (
+              <button
+                type="button"
+                onClick={() => setShowActions(!showActions)}
+                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+              >
+                <MoreHorizontal size={20} />
+              </button>
             )}
           </div>
         </div>
 
-        {/* Actions dropdown */}
+        {/* Actions dropdown - Owner */}
         {showActions && isOwner && (
           <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-black/5">
             <button
@@ -201,6 +202,20 @@ export function SessionDetailPage() {
             >
               <Trash2 size={16} />
               Delete Session
+            </button>
+          </div>
+        )}
+
+        {/* Actions dropdown - Participant (not owner) */}
+        {showActions && !isOwner && myParticipant && (
+          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-black/5">
+            <button
+              type="button"
+              onClick={() => { setShowLeaveConfirm(true); setShowActions(false) }}
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              <LogOut size={16} />
+              Leave Session
             </button>
           </div>
         )}
@@ -432,6 +447,27 @@ export function SessionDetailPage() {
           }}
         />
       )}
+
+      {/* Leave session confirm */}
+      <ConfirmDialog
+        isOpen={showLeaveConfirm}
+        title="Leave session?"
+        message="You will no longer be able to log catches to this session."
+        confirmLabel={isLeaving ? 'Leaving…' : 'Leave session'}
+        cancelLabel="Cancel"
+        onCancel={() => setShowLeaveConfirm(false)}
+        onConfirm={async () => {
+          if (!myParticipant) return
+          try {
+            await leaveSession({ participant_id: myParticipant.id, session_id: session!.id })
+            toast.success('Left session')
+            navigate('/dashboard')
+          } catch {
+            toast.error('Failed to leave session')
+          }
+          setShowLeaveConfirm(false)
+        }}
+      />
     </main>
   )
 }
