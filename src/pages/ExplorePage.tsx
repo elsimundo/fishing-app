@@ -10,7 +10,8 @@ import { TideCard } from '../components/explore/TideCard'
 import { WeatherCard } from '../components/explore/WeatherCard'
 import { TackleShopsCard } from '../components/explore/TackleShopsCard'
 import { SessionsCatchesCard } from '../components/explore/SessionsCatchesCard'
-import { MapPin, Navigation } from 'lucide-react'
+import { MapPin, Navigation, Store } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 // Static POIs for clubs and charters (future: fetch from API)
 const STATIC_POIS = {
@@ -418,6 +419,21 @@ export default function ExplorePage() {
             lng={mapCenter?.lng ?? null}
             shops={shopsData?.shops || []}
           />
+
+          {/* List Your Business Banner */}
+          <Link
+            to="/businesses/submit"
+            className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-navy-800 to-navy-900 p-4 text-white shadow-sm transition-transform hover:scale-[1.02]"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+              <Store size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold">Own a fishing business?</p>
+              <p className="text-xs text-white/80">List your shop, charter, or club for free</p>
+            </div>
+            <span className="text-lg">→</span>
+          </Link>
 
           {/* Sessions & Catches Card */}
           <SessionsCatchesCard

@@ -31,7 +31,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-navy-800" />
           <p className="mt-2 text-sm text-gray-600">Verifying access...</p>
@@ -48,7 +48,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   ]
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="fixed inset-0 z-[100] flex bg-gray-50">
       {/* Mobile Header */}
       <div className="fixed left-0 right-0 top-0 z-50 flex h-14 items-center justify-between bg-navy-900 px-4 lg:hidden">
         <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed bottom-0 left-0 top-0 z-40 w-64 flex-shrink-0 transform bg-navy-900 text-white transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed bottom-0 left-0 top-0 z-40 w-64 flex-shrink-0 transform bg-navy-900 text-white transition-transform lg:relative lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -126,7 +126,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pt-14 lg:pt-0">{children}</main>
+      <main className="flex-1 overflow-y-auto pt-14 lg:ml-0 lg:pt-0">{children}</main>
     </div>
   )
 }

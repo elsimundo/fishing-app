@@ -23,6 +23,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import UsersPage from './pages/admin/UsersPage'
 import BusinessesPage from './pages/admin/BusinessesPage'
+import SubmitBusinessPage from './pages/SubmitBusinessPage'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/feed" element={<FeedView />} />
         <Route path="/search" element={<SearchUsersPage />} />
         <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/businesses/submit" element={<SubmitBusinessPage />} />
         <Route path="/discover" element={<DiscoverPage />} />
         <Route path="/compete" element={<CompetePage />} />
         <Route path="/compete/create" element={<CreateCompetitionPage />} />
