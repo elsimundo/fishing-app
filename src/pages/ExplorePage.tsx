@@ -384,45 +384,20 @@ export default function ExplorePage() {
             </button>
           )}
 
-          {/* Bottom right buttons */}
-          <div className="absolute bottom-3 right-3 z-20 flex flex-col gap-2">
-            {/* Save as default button */}
-            {(liveBounds || appliedBounds) && !hasDefaultArea && (
-              <button
-                type="button"
-                onClick={saveAsDefaultArea}
-                className="rounded-full bg-navy-800 px-3 py-1.5 text-[11px] font-medium text-white shadow-md hover:bg-navy-900"
-              >
-                ⭐ Set as default
-              </button>
-            )}
-            
-            {/* Clear default button */}
-            {hasDefaultArea && (
-              <button
-                type="button"
-                onClick={clearDefaultArea}
-                className="rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-amber-600 shadow-md hover:bg-amber-50"
-              >
-                ✕ Clear default
-              </button>
-            )}
-
-            {/* Reset button */}
-            {appliedBounds && userLocation && (
-              <button
-                type="button"
-                onClick={() => {
-                  setAppliedBounds(null)
-                  setLiveBounds(null)
-                  setSelectedMarker(null)
-                }}
-                className="rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 shadow-md hover:bg-gray-50"
-              >
-                ↻ Reset
-              </button>
-            )}
-          </div>
+          {/* Reset button */}
+          {appliedBounds && userLocation && (
+            <button
+              type="button"
+              onClick={() => {
+                setAppliedBounds(null)
+                setLiveBounds(null)
+                setSelectedMarker(null)
+              }}
+              className="absolute bottom-3 right-3 z-20 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 shadow-md hover:bg-gray-50"
+            >
+              ↻ Reset
+            </button>
+          )}
 
           {selectedMarker && (
             <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-white/95 p-3 text-xs shadow-lg backdrop-blur">
@@ -471,15 +446,39 @@ export default function ExplorePage() {
 
         {/* Data Cards */}
         <section className="flex flex-col gap-3 px-4 py-4">
-          {/* Location indicator */}
-          {mapCenter && (
-            <div className="flex items-center gap-2 text-xs text-gray-600">
-              <MapPin size={14} className="text-gray-400" />
-              <span>
-                Showing data for {mapCenter.lat.toFixed(3)}, {mapCenter.lng.toFixed(3)}
-              </span>
+          {/* Location indicator with default area controls */}
+          <div className="flex items-center justify-between">
+            {mapCenter && (
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <MapPin size={14} className="text-gray-400" />
+                <span>
+                  Showing data for {mapCenter.lat.toFixed(3)}, {mapCenter.lng.toFixed(3)}
+                </span>
+              </div>
+            )}
+            
+            {/* Default area buttons */}
+            <div className="flex items-center gap-2">
+              {(liveBounds || appliedBounds) && !hasDefaultArea && (
+                <button
+                  type="button"
+                  onClick={saveAsDefaultArea}
+                  className="rounded-full bg-navy-800 px-3 py-1 text-[11px] font-medium text-white hover:bg-navy-900"
+                >
+                  ⭐ Set as default
+                </button>
+              )}
+              {hasDefaultArea && (
+                <button
+                  type="button"
+                  onClick={clearDefaultArea}
+                  className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-medium text-amber-700 hover:bg-amber-100"
+                >
+                  ✕ Clear default
+                </button>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Tide Card */}
           <TideCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
