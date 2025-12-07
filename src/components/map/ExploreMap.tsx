@@ -25,6 +25,7 @@ export interface ExploreMarker {
 interface ExploreMapProps {
   markers: ExploreMarker[]
   center?: { lat: number; lng: number }
+  initialBounds?: { north: number; south: number; east: number; west: number }
   zoom?: number
   userLocation?: { lat: number; lng: number }
   onMarkerClick?: (marker: ExploreMarker) => void
@@ -39,7 +40,7 @@ const typeColors: Record<ExploreMarkerType, string> = {
   charter: '#e11d48',
 }
 
-export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerClick, onBoundsChange }: ExploreMapProps) {
+export function ExploreMap({ markers, center, initialBounds, zoom = 9, userLocation, onMarkerClick, onBoundsChange }: ExploreMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMapType | null>(null)
   const markersRef = useRef<Marker[]>([])
@@ -61,8 +62,14 @@ export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerCl
       return
     }
 
-    const initialCenter = center ?? { lat: 50.82, lng: -0.14 } // Brighton-ish default
-    console.log('Initializing map at:', initialCenter)
+    // Calculate initial center from bounds if available
+    const initialCenter = initialBounds 
+      ? { 
+          lat: (initialBounds.north + initialBounds.south) / 2, 
+          lng: (initialBounds.east + initialBounds.west) / 2 
+        }
+      : center ?? { lat: 50.82, lng: -0.14 } // Brighton-ish default
+    console.log('Initializing map at:', initialCenter, 'with bounds:', initialBounds)
 
     try {
       const map = new mapboxgl.Map({
@@ -74,6 +81,13 @@ export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerCl
 
       map.on('load', () => {
         console.log('Map loaded successfully')
+        // Fit to initial bounds if provided
+        if (initialBounds) {
+          map.fitBounds(
+            [[initialBounds.west, initialBounds.south], [initialBounds.east, initialBounds.north]],
+            { padding: 20, duration: 0 }
+          )
+        }
       })
 
       map.on('error', (e) => {
@@ -105,13 +119,19 @@ export function ExploreMap({ markers, center, zoom = 9, userLocation, onMarkerCl
     }
   }, [center, zoom, onBoundsChange])
 
-  // Respond to center prop changes after initialisation
+  // Respond to initialBounds changes (e.g., when loaded from localStorage)
+  const initialBoundsApplied = useRef(false)
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !center) return
+    if (!map || !initialBounds || initialBoundsApplied.current) return
 
-    map.flyTo({ center: [center.lng, center.lat], essential: true })
-  }, [center])
+    // Only apply once to avoid fighting with user panning
+    initialBoundsApplied.current = true
+    map.fitBounds(
+      [[initialBounds.west, initialBounds.south], [initialBounds.east, initialBounds.north]],
+      { padding: 20, duration: 500 }
+    )
+  }, [initialBounds])
 
   // Update markers when data changes
   useEffect(() => {
