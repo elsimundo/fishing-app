@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Loader2 } from 'lucide-react'
-import { useFollowers, useFollowing } from '../../hooks/useFollows'
+import { X, Loader2, MoreHorizontal, UserMinus, Ban } from 'lucide-react'
+import { useFollowers, useFollowing, useUnfollowUser } from '../../hooks/useFollows'
+import { useAuth } from '../../hooks/useAuth'
+import { toast } from 'react-hot-toast'
 
 interface FollowersModalProps {
   userId: string
@@ -18,10 +20,13 @@ interface FollowUser {
 
 export function FollowersModal({ userId, initialTab, onClose }: FollowersModalProps) {
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [activeTab, setActiveTab] = useState<'followers' | 'following'>(initialTab)
+  const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null)
 
   const { data: followersData, isLoading: loadingFollowers } = useFollowers(userId)
   const { data: followingData, isLoading: loadingFollowing } = useFollowing(userId)
+  const { mutateAsync: unfollowUser, isPending: isUnfollowing } = useUnfollowUser()
 
   // Extract profiles from the follow data
   const followers: FollowUser[] = (followersData || []).map((f: any) => f.profiles).filter(Boolean)
@@ -92,32 +97,90 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                 : 'Not following anyone yet'}
             </div>
           ) : (
-            <div className="space-y-3">
-              {users.map((user) => (
-                <button
-                  key={user.id}
-                  onClick={() => handleUserClick(user.id)}
-                  className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-gray-50"
-                >
-                  {user.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt={user.username}
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-800 font-bold text-white">
-                      {user.username?.[0]?.toUpperCase() || '?'}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate font-semibold text-gray-900">
-                      {user.full_name || user.username}
-                    </p>
-                    <p className="truncate text-sm text-gray-500">@{user.username}</p>
+            <div className="space-y-2">
+              {users.map((user) => {
+                const isOwnProfile = currentUser?.id === userId
+                const showActions = isOwnProfile && activeTab === 'following'
+
+                return (
+                  <div
+                    key={user.id}
+                    className="relative flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50"
+                  >
+                    <button
+                      onClick={() => handleUserClick(user.id)}
+                      className="flex flex-1 items-center gap-3 text-left"
+                    >
+                      {user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.username}
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-800 font-bold text-white">
+                          {user.username?.[0]?.toUpperCase() || '?'}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-gray-900">
+                          {user.full_name || user.username}
+                        </p>
+                        <p className="truncate text-sm text-gray-500">@{user.username}</p>
+                      </div>
+                    </button>
+
+                    {/* Actions Menu */}
+                    {showActions && (
+                      <div className="relative">
+                        <button
+                          onClick={() => setMenuOpenFor(menuOpenFor === user.id ? null : user.id)}
+                          className="rounded-full p-1.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                        >
+                          <MoreHorizontal size={18} />
+                        </button>
+
+                        {menuOpenFor === user.id && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setMenuOpenFor(null)}
+                            />
+                            <div className="absolute right-0 top-8 z-20 w-40 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await unfollowUser(user.id)
+                                    toast.success(`Unfollowed @${user.username}`)
+                                    setMenuOpenFor(null)
+                                  } catch {
+                                    toast.error('Failed to unfollow')
+                                  }
+                                }}
+                                disabled={isUnfollowing}
+                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                              >
+                                <UserMinus size={14} />
+                                <span>Unfollow</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  toast.error('Block feature coming soon')
+                                  setMenuOpenFor(null)
+                                }}
+                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                              >
+                                <Ban size={14} />
+                                <span>Block</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </button>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
