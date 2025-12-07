@@ -225,7 +225,7 @@ export default function MessagesPage() {
                   </div>
                 )}
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4">
                   {loadingMessages ? (
                     <div className="flex justify-center py-12">
                       <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
@@ -264,34 +264,37 @@ export default function MessagesPage() {
                   )}
                 </div>
 
-                {/* Message Input */}
-                <div className="border-t border-gray-200 bg-white p-3">
-                  <div className="flex items-end gap-2">
-                    <textarea
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      onKeyDown={handleKeyPress}
-                      placeholder="Type a message..."
-                      rows={1}
-                      className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
-                    />
-                    <button
-                      onClick={handleSend}
-                      disabled={!messageText.trim() || isSending}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy-800 text-white transition-colors hover:bg-navy-900 disabled:bg-gray-300"
-                    >
-                      {isSending ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                      ) : (
-                        <Send size={20} />
-                      )}
-                    </button>
-                  </div>
-                </div>
               </>
             )}
           </div>
         </div>
+
+        {/* Message Input - Fixed above bottom nav */}
+        {conversationId && (
+          <div className="fixed bottom-14 left-0 right-0 border-t border-gray-200 bg-white p-3 md:static md:bottom-auto">
+            <div className="flex items-end gap-2">
+              <textarea
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Type a message..."
+                rows={1}
+                className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+              />
+              <button
+                onClick={handleSend}
+                disabled={!messageText.trim() || isSending}
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy-800 text-white transition-colors hover:bg-navy-900 disabled:bg-gray-300"
+              >
+                {isSending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send size={20} />
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   )
