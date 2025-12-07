@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Loader2, Settings, Share2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Loader2, Settings, Share2, MessageCircle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
 import { useOwnPosts, useTogglePostVisibility } from '../hooks/usePosts'
+import { useUnreadCount } from '../hooks/useMessages'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { ProfileStats } from '../components/profile/ProfileStats'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
@@ -11,10 +13,12 @@ import { EditProfileModal } from '../components/profile/EditProfileModal'
 import { FollowersModal } from '../components/profile/FollowersModal'
 
 export default function ProfilePage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { data: profile, isLoading: profileLoading } = useProfile()
   const [showEditModal, setShowEditModal] = useState(false)
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
+  const unreadCount = useUnreadCount()
 
   const userId = user?.id ?? ''
   const { data: followCounts } = useFollowCounts(userId)
@@ -52,6 +56,18 @@ export default function ProfilePage() {
           className="flex-1 rounded-lg bg-gray-100 px-4 py-2 font-semibold text-gray-900 transition-colors hover:bg-gray-200"
         >
           Edit Profile
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/messages')}
+          className="relative rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200"
+        >
+          <MessageCircle size={20} className="text-gray-700" />
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
         <button
           type="button"
