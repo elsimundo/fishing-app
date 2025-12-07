@@ -77,9 +77,10 @@ export default function CreatePostPage() {
 
       const { error } = await supabase.from('posts').insert({
         user_id: user.id,
-        content: content.trim() || null,
-        image_url: imageUrl,
+        caption: content.trim() || null,
+        photo_url: imageUrl,
         type: 'photo',
+        is_public: true,
       })
 
       if (error) throw error
