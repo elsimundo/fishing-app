@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
@@ -8,13 +9,14 @@ import { useUserPosts } from '../hooks/usePosts'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { ProfileStats } from '../components/profile/ProfileStats'
-import { PostsGrid } from '../components/profile/PostsGrid'
 import { FollowButton } from '../components/profile/FollowButton'
+import { FollowersModal } from '../components/profile/FollowersModal'
 import type { Profile } from '../types'
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
   const { user: currentUser } = useAuth()
+  const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
 
   const { data: profile, isLoading: profileLoading } = useQuery<Profile | null>({
     queryKey: ['profile', userId],
@@ -65,6 +67,8 @@ export default function UserProfilePage() {
           postCount={postCount}
           followerCount={followCounts?.follower_count ?? 0}
           followingCount={followCounts?.following_count ?? 0}
+          onFollowersClick={() => setFollowersModalTab('followers')}
+          onFollowingClick={() => setFollowersModalTab('following')}
         />
       </div>
 
@@ -90,6 +94,14 @@ export default function UserProfilePage() {
           </div>
         )}
       </div>
+
+      {followersModalTab && userId && (
+        <FollowersModal
+          userId={userId}
+          initialTab={followersModalTab}
+          onClose={() => setFollowersModalTab(null)}
+        />
+      )}
     </div>
   )
 }

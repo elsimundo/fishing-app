@@ -8,11 +8,13 @@ import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { ProfileStats } from '../components/profile/ProfileStats'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { EditProfileModal } from '../components/profile/EditProfileModal'
+import { FollowersModal } from '../components/profile/FollowersModal'
 
 export default function ProfilePage() {
   const { user } = useAuth()
   const { data: profile, isLoading: profileLoading } = useProfile()
   const [showEditModal, setShowEditModal] = useState(false)
+  const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
 
   const userId = user?.id ?? ''
   const { data: followCounts } = useFollowCounts(userId)
@@ -38,6 +40,8 @@ export default function ProfilePage() {
           postCount={postCount}
           followerCount={followCounts?.follower_count ?? 0}
           followingCount={followCounts?.following_count ?? 0}
+          onFollowersClick={() => setFollowersModalTab('followers')}
+          onFollowingClick={() => setFollowersModalTab('following')}
         />
       </div>
 
@@ -92,7 +96,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {showEditModal ? (
+      {showEditModal && (
         <EditProfileModal
           profile={profile}
           onClose={() => setShowEditModal(false)}
@@ -101,7 +105,15 @@ export default function ProfilePage() {
             window.location.reload()
           }}
         />
-      ) : null}
+      )}
+
+      {followersModalTab && (
+        <FollowersModal
+          userId={userId}
+          initialTab={followersModalTab}
+          onClose={() => setFollowersModalTab(null)}
+        />
+      )}
     </div>
   )
 }
