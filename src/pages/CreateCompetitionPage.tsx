@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Layout } from '../components/layout/Layout'
 import { useCreateCompetition, useCompetition } from '../hooks/useCompetitions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
@@ -8,6 +9,7 @@ import { CompetitionTypeStep } from '../components/compete/create/CompetitionTyp
 import { BasicInfoStep } from '../components/compete/create/BasicInfoStep'
 import { RulesStep } from '../components/compete/create/RulesStep'
 import { PrivacyStep } from '../components/compete/create/PrivacyStep'
+import { ArrowLeft, Trophy } from 'lucide-react'
 
 interface CompetitionLocationRestrictionForm {
   lat: number
@@ -232,78 +234,101 @@ export default function CreateCompetitionPage() {
   const progress = Math.round((step / totalSteps) * 100)
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 md:pb-20">
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
-        <div className="px-5 py-4">
-          <div className="mb-4 flex items-center justify-between">
+    <Layout>
+      <div className="min-h-screen bg-gray-50 pb-32">
+        {/* Header */}
+        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+          <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3">
             <button
               type="button"
               onClick={handleBack}
-              className="rounded-full px-3 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+              className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
             >
-              ← Back
+              <ArrowLeft size={20} />
             </button>
-            <h1 className="text-base font-semibold text-gray-900">
-              {isEditMode ? 'Edit competition' : 'Create competition'}
+            <h1 className="text-base font-bold text-gray-900">
+              {isEditMode ? 'Edit Competition' : 'Create Competition'}
             </h1>
-            <div className="w-12" />
           </div>
+        </header>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs text-gray-600">
-              <span>
+        <div className="mx-auto max-w-2xl px-4 py-4">
+          {/* Hero - only on step 1 */}
+          {step === 1 && (
+            <div className="mb-4 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-5 text-white">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+                  <Trophy size={24} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold">
+                    {isEditMode ? 'Edit Your Competition' : 'Create a Competition'}
+                  </h2>
+                  <p className="text-sm text-white/80">Challenge anglers to compete</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Progress */}
+          <div className="mb-4 rounded-2xl bg-white p-4 shadow-sm">
+            <div className="mb-2 flex justify-between text-xs">
+              <span className="font-medium text-gray-700">
                 Step {step} of {totalSteps}
               </span>
-              <span>{progress}%</span>
+              <span className="font-semibold text-navy-800">{progress}%</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-gray-200">
               <div
-                className="h-full bg-navy-800 transition-all duration-300"
+                className="h-full rounded-full bg-navy-800 transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
+
+          {/* Step Content */}
+          <div className="rounded-2xl bg-white p-5 shadow-sm">
+            {renderStep()}
+          </div>
+        </div>
+
+        {/* Fixed Bottom Actions */}
+        <div className="fixed bottom-20 left-0 right-0 border-t border-gray-200 bg-white p-4 md:bottom-0">
+          <div className="mx-auto flex max-w-2xl gap-3">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={handleBack}
+                className="rounded-xl border-2 border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Back
+              </button>
+            )}
+
+            {step < totalSteps ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={!canProceed()}
+                className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!canProceed() || createCompetition.isPending || updateCompetition.isPending}
+                className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
+              >
+                {createCompetition.isPending || updateCompetition.isPending
+                  ? isEditMode ? 'Updating…' : 'Creating…'
+                  : isEditMode ? 'Update Competition' : 'Create Competition'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-
-      <div className="p-5">{renderStep()}</div>
-
-      {/* Fixed Bottom Actions */}
-      <div className="fixed bottom-20 left-0 right-0 border-t border-gray-200 bg-white p-5 md:bottom-0 md:left-[275px] md:max-w-[600px]">
-        <div className="flex gap-3">
-          {step > 1 && (
-            <button
-              type="button"
-              onClick={handleBack}
-              className="rounded-xl border-2 border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-            >
-              Back
-            </button>
-          )}
-
-          {step < totalSteps ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={!canProceed()}
-              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!canProceed() || createCompetition.isPending || updateCompetition.isPending}
-              className="flex-1 rounded-xl bg-navy-800 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
-            >
-              {createCompetition.isPending || updateCompetition.isPending
-                ? isEditMode ? 'Updating…' : 'Creating…'
-                : isEditMode ? 'Update competition' : 'Create competition'}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+    </Layout>
   )
 }
