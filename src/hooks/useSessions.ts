@@ -10,6 +10,7 @@ async function fetchSessions(): Promise<SessionWithCatches[]> {
   const { data, error } = await supabase
     .from('sessions')
     .select('*, catches(*)')
+    .order('ended_at', { ascending: true, nullsFirst: true })
     .order('started_at', { ascending: false })
 
   if (error) {
