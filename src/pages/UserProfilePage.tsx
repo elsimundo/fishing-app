@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, MessageCircle } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useFollowCounts, useIsFollowing } from '../hooks/useFollows'
@@ -84,6 +85,10 @@ export default function UserProfilePage() {
               startConversation(userId, {
                 onSuccess: (conversationId) => {
                   navigate(`/messages/${conversationId}`)
+                },
+                onError: (error) => {
+                  console.error('Failed to start conversation:', error)
+                  toast.error('Failed to start conversation')
                 }
               })
             }}
@@ -91,7 +96,7 @@ export default function UserProfilePage() {
             className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
           >
             <MessageCircle size={18} />
-            Message
+            {isStartingConversation ? 'Starting...' : 'Message'}
           </button>
         </div>
       ) : null}
