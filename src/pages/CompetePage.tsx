@@ -4,7 +4,7 @@ import { Layout } from '../components/layout/Layout'
 import { useActiveCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
 import { CompetitionCard } from '../components/compete/CompetitionCard'
 import { CompetitionCardSkeleton } from '../components/skeletons/CompetitionCardSkeleton'
-import { Trophy, Plus, Users, Target } from 'lucide-react'
+import { Trophy, Plus, Target } from 'lucide-react'
 
 function EmptyState({ type }: { type: 'yours' | 'available' }) {
   if (type === 'yours') {
@@ -75,33 +75,8 @@ export default function CompetePage() {
               </div>
             </header>
 
-            {/* Hero */}
-            <div className="p-4">
-              <div className="rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-5 text-white">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-                    <Trophy size={24} />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold">Fishing Competitions</h2>
-                    <p className="text-sm text-white/80">Compete with anglers worldwide</p>
-                  </div>
-                </div>
-                <div className="mt-4 flex gap-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users size={16} className="text-white/70" />
-                    <span>{yourCompetitions.length} joined</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Target size={16} className="text-white/70" />
-                    <span>{availableCompetitions.length} available</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Content */}
-            <div className="space-y-6 px-4 pb-8">
+            <div className="space-y-6 px-4 pt-4 pb-8">
               {/* Your Competitions */}
               <section>
                 <div className="mb-3 flex items-center gap-2">
