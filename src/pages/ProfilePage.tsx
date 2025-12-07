@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Trash2 } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
@@ -12,6 +12,7 @@ import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { EditProfileModal } from '../components/profile/EditProfileModal'
 import { FollowersModal } from '../components/profile/FollowersModal'
 import { DeleteAccountModal } from '../components/profile/DeleteAccountModal'
+import { FishingPreferenceModal } from '../components/onboarding/FishingPreferenceModal'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
@@ -19,6 +20,7 @@ export default function ProfilePage() {
   const { data: profile, isLoading: profileLoading } = useProfile()
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
   const unreadCount = useUnreadCount()
 
@@ -26,6 +28,12 @@ export default function ProfilePage() {
   const { data: followCounts } = useFollowCounts(userId)
   const { data: posts, isLoading: postsLoading } = useOwnPosts(userId)
   const { mutate: toggleVisibility } = useTogglePostVisibility()
+
+  const preferenceLabels: Record<string, string> = {
+    sea: 'Sea Fishing',
+    freshwater: 'Freshwater Fishing',
+    both: 'All Fishing',
+  }
 
   if (!user || profileLoading || !profile) {
     return (
@@ -86,15 +94,40 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* Danger Zone */}
-      <div className="border-b border-gray-200 bg-white px-5 py-3">
+      {/* Settings */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="px-5 py-3">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Settings</h3>
+        </div>
+        
+        {/* Fishing Preference */}
+        <button
+          type="button"
+          onClick={() => setShowPreferenceModal(true)}
+          className="flex w-full items-center justify-between px-5 py-3 hover:bg-gray-50"
+        >
+          <div className="flex items-center gap-3">
+            <Fish size={18} className="text-gray-500" />
+            <div className="text-left">
+              <p className="text-sm font-medium text-gray-900">Fishing Preference</p>
+              <p className="text-xs text-gray-500">
+                {profile.fishing_preference 
+                  ? preferenceLabels[profile.fishing_preference] 
+                  : 'Not set'}
+              </p>
+            </div>
+          </div>
+          <ChevronRight size={18} className="text-gray-400" />
+        </button>
+
+        {/* Delete Account */}
         <button
           type="button"
           onClick={() => setShowDeleteModal(true)}
-          className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700"
+          className="flex w-full items-center gap-3 px-5 py-3 text-red-600 hover:bg-red-50"
         >
-          <Trash2 size={16} />
-          Delete Account
+          <Trash2 size={18} />
+          <span className="text-sm font-medium">Delete Account</span>
         </button>
       </div>
 
@@ -145,6 +178,15 @@ export default function ProfilePage() {
 
       {showDeleteModal && (
         <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />
+      )}
+
+      {showPreferenceModal && (
+        <FishingPreferenceModal 
+          onComplete={() => {
+            setShowPreferenceModal(false)
+            window.location.reload()
+          }} 
+        />
       )}
     </div>
   )

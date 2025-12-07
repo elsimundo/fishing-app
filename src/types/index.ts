@@ -1,3 +1,5 @@
+export type FishingPreference = 'sea' | 'freshwater' | 'both'
+
 export type Profile = {
   id: string
   username: string | null
@@ -7,6 +9,7 @@ export type Profile = {
   bio?: string | null
   cover_photo_url?: string | null
   location?: string | null
+  fishing_preference?: FishingPreference | null
   created_at: string
 }
 
