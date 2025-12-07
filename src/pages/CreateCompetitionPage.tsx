@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { AwardCategory, CompetitionType } from '../types'
 import { BasicInfoStep } from '../components/compete/create/BasicInfoStep'
-import { AwardsStep } from '../components/compete/create/AwardsStep'
+import { AwardsStep, type AwardInput } from '../components/compete/create/AwardsStep'
 import { RulesStep } from '../components/compete/create/RulesStep'
 import { PrivacyStep } from '../components/compete/create/PrivacyStep'
 import { ArrowLeft, Trophy } from 'lucide-react'
@@ -15,13 +15,6 @@ interface CompetitionLocationRestrictionForm {
   lat: number
   lng: number
   radius_km: number
-}
-
-interface AwardInput {
-  id: string
-  category: AwardCategory
-  title: string
-  prize: string
 }
 
 interface FormData {

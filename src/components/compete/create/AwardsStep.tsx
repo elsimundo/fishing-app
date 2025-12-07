@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Plus, X, Trophy, Scale, Ruler, Hash, Palette, Camera, GripVertical } from 'lucide-react'
 import type { AwardCategory } from '../../../types'
 
-interface AwardInput {
+export interface AwardInput {
   id: string
   category: AwardCategory
   title: string
@@ -13,7 +13,7 @@ interface AwardsStepProps {
   data: {
     awards: AwardInput[]
   }
-  onChange: (updates: { awards: AwardInput[] }) => void
+  onChange: (updates: Partial<{ awards: AwardInput[] }>) => void
 }
 
 const AWARD_CATEGORIES: {
@@ -68,7 +68,8 @@ const AWARD_CATEGORIES: {
 ]
 
 export function AwardsStep({ data, onChange }: AwardsStepProps) {
-  const [showPicker, setShowPicker] = useState(false)
+  // Show picker by default when no awards exist
+  const [showPicker, setShowPicker] = useState(data.awards.length === 0)
 
   const addAward = (category: AwardCategory) => {
     const categoryInfo = AWARD_CATEGORIES.find((c) => c.category === category)
