@@ -138,9 +138,10 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
       if (error) throw error
 
       onSuccess()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating profile', error)
-      window.alert('Failed to update profile. Please try again.')
+      const message = error?.message || 'Failed to update profile. Please try again.'
+      window.alert(message)
     } finally {
       setIsSaving(false)
     }
