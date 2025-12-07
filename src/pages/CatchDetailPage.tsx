@@ -85,8 +85,8 @@ export function CatchDetailPage() {
                 Share
               </button>
               
-              {/* More Menu */}
-              {user?.id === catchItem.user_id && (
+              {/* More Menu - show for owner */}
+              {user && catchItem.user_id && user.id === catchItem.user_id && (
                 <div className="relative">
                   <button
                     type="button"

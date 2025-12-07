@@ -10,8 +10,9 @@ import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
+import { EditSessionModal } from '../components/session/EditSessionModal'
 import { ParticipantsList } from '../components/session/ParticipantsList'
 import { InviteToSessionModal } from '../components/session/InviteToSessionModal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
@@ -26,6 +27,7 @@ export function SessionDetailPage() {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [showActions, setShowActions] = useState(false)
 
   const { id } = useParams<{ id: string }>()
@@ -147,6 +149,14 @@ export function SessionDetailPage() {
         {/* Actions dropdown */}
         {showActions && isOwner && (
           <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-black/5">
+            <button
+              type="button"
+              onClick={() => { setShowEditModal(true); setShowActions(false) }}
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Pencil size={16} />
+              Edit Session
+            </button>
             <button
               type="button"
               onClick={() => { setShareMode('feed'); setShowActions(false) }}
@@ -410,6 +420,18 @@ export function SessionDetailPage() {
           setShowDeleteConfirm(false)
         }}
       />
+
+      {/* Edit Session Modal */}
+      {showEditModal && session && (
+        <EditSessionModal
+          session={session}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={() => {
+            setShowEditModal(false)
+            void refetch()
+          }}
+        />
+      )}
     </main>
   )
 }
