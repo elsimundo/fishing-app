@@ -82,12 +82,22 @@ export default function ExplorePage() {
     filters.shops
   )
 
-  // Try to get user location on first load
+  // Try to get user location on first load and set initial bounds
   useEffect(() => {
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setUserLocation({ lat, lng })
+        // Set initial bounds around user location (~20km radius)
+        const delta = 0.2
+        setAppliedBounds({
+          north: lat + delta,
+          south: lat - delta,
+          east: lng + delta,
+          west: lng - delta,
+        })
       },
       () => {},
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
