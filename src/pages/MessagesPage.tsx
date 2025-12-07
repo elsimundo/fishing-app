@@ -70,14 +70,14 @@ export default function MessagesPage() {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-8rem)] flex-col md:h-[calc(100vh-4rem)]">
-        {/* Header */}
-        <header className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3">
+      <div className="flex h-[calc(100vh-8rem)] flex-col md:h-screen">
+        {/* Header - only show on mobile or when in conversation */}
+        <header className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
           {showConversation ? (
             <>
               <button
                 onClick={() => navigate('/messages')}
-                className="rounded-full p-1.5 text-gray-600 hover:bg-gray-100 md:hidden"
+                className="rounded-full p-1.5 text-gray-600 hover:bg-gray-100"
               >
                 <ArrowLeft size={20} />
               </button>
@@ -113,7 +113,12 @@ export default function MessagesPage() {
 
         <div className="flex flex-1 overflow-hidden">
           {/* Conversation List - hidden on mobile when viewing a conversation */}
-          <div className={`w-full flex-shrink-0 overflow-y-auto border-r border-gray-200 bg-white md:w-80 ${showConversation ? 'hidden md:block' : ''}`}>
+          <div className={`w-full flex-shrink-0 border-r border-gray-200 bg-white md:w-80 ${showConversation ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
+            {/* Desktop list header */}
+            <div className="hidden border-b border-gray-200 px-4 py-3 md:block">
+              <h1 className="text-lg font-bold text-gray-900">Messages</h1>
+            </div>
+            <div className="flex-1 overflow-y-auto">
             {loadingConversations ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
@@ -178,6 +183,7 @@ export default function MessagesPage() {
                 })}
               </div>
             )}
+            </div>
           </div>
 
           {/* Message Thread */}
@@ -191,6 +197,33 @@ export default function MessagesPage() {
               </div>
             ) : (
               <>
+                {/* Desktop conversation header */}
+                {otherUser && (
+                  <div className="hidden border-b border-gray-200 bg-white px-4 py-3 md:block">
+                    <button
+                      onClick={() => navigate(`/profile/${otherUser.id}`)}
+                      className="flex items-center gap-3"
+                    >
+                      {otherUser.avatar_url ? (
+                        <img
+                          src={otherUser.avatar_url}
+                          alt={otherUser.username}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy-800 font-bold text-white">
+                          {otherUser.username?.[0]?.toUpperCase() || '?'}
+                        </div>
+                      )}
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900">
+                          {otherUser.full_name || otherUser.username}
+                        </p>
+                        <p className="text-xs text-gray-500">@{otherUser.username}</p>
+                      </div>
+                    </button>
+                  </div>
+                )}
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4">
                   {loadingMessages ? (
