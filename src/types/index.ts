@@ -242,6 +242,25 @@ export interface ProfileWithCounts extends Profile {
 
 export type CompetitionType = 'heaviest_fish' | 'most_catches' | 'species_diversity' | 'photo_contest'
 
+// Award categories for competitions (can have multiple per competition)
+export type AwardCategory = 
+  | 'heaviest_total'      // Sum of all catch weights
+  | 'biggest_single'      // Largest individual fish by weight
+  | 'longest_fish'        // Longest individual fish
+  | 'most_catches'        // Total number of fish caught
+  | 'species_diversity'   // Most different species
+  | 'photo_contest'       // Best photo (judged)
+
+export interface CompetitionAward {
+  id: string
+  competition_id: string
+  category: AwardCategory
+  title: string
+  prize: string | null
+  position: number
+  created_at: string
+}
+
 export type CompetitionStatus = 'upcoming' | 'active' | 'ended' | 'cancelled'
 
 export type CompetitionInviteStatus = 'pending' | 'accepted' | 'declined'

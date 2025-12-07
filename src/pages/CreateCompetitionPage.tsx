@@ -4,9 +4,9 @@ import { Layout } from '../components/layout/Layout'
 import { useCreateCompetition, useCompetition } from '../hooks/useCompetitions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import type { CompetitionType } from '../types'
-import { CompetitionTypeStep } from '../components/compete/create/CompetitionTypeStep'
+import type { AwardCategory, CompetitionType } from '../types'
 import { BasicInfoStep } from '../components/compete/create/BasicInfoStep'
+import { AwardsStep } from '../components/compete/create/AwardsStep'
 import { RulesStep } from '../components/compete/create/RulesStep'
 import { PrivacyStep } from '../components/compete/create/PrivacyStep'
 import { ArrowLeft, Trophy } from 'lucide-react'
@@ -17,23 +17,29 @@ interface CompetitionLocationRestrictionForm {
   radius_km: number
 }
 
+interface AwardInput {
+  id: string
+  category: AwardCategory
+  title: string
+  prize: string
+}
+
 interface FormData {
-  // Step 1
-  type: CompetitionType | null
-  // Step 2
+  // Step 1: Basic Info
   title: string
   description: string
   starts_at: string
   ends_at: string
-  prize: string
   cover_image_url: string
-  // Step 3
+  // Step 2: Awards
+  awards: AwardInput[]
+  // Step 3: Rules
   allowed_species: string[]
   water_type: 'saltwater' | 'freshwater' | 'any'
   location_restriction: CompetitionLocationRestrictionForm | null
   entry_fee: number
   max_participants: number | null
-  // Step 4
+  // Step 4: Privacy
   is_public: boolean
   invite_only: boolean
 }
@@ -44,20 +50,19 @@ export default function CreateCompetitionPage() {
   const queryClient = useQueryClient()
   
   const isEditMode = Boolean(competitionId)
-  const { data: existingCompetition, isLoading: loadingCompetition } = useCompetition(competitionId || '')
+  const { data: existingCompetition } = useCompetition(competitionId || '')
   const createCompetition = useCreateCompetition()
 
   const [step, setStep] = useState(1)
   const totalSteps = 4
 
   const [formData, setFormData] = useState<FormData>({
-    type: null,
     title: '',
     description: '',
     starts_at: '',
     ends_at: '',
-    prize: '',
     cover_image_url: '',
+    awards: [],
     allowed_species: [],
     water_type: 'any',
     location_restriction: null,
@@ -68,15 +73,15 @@ export default function CreateCompetitionPage() {
   })
 
   // Load existing competition data in edit mode
+  // Note: Awards are loaded separately from competition_awards table
   useEffect(() => {
     if (isEditMode && existingCompetition) {
-      setFormData({
-        type: existingCompetition.type,
+      setFormData((prev) => ({
+        ...prev,
         title: existingCompetition.title,
         description: existingCompetition.description || '',
         starts_at: new Date(existingCompetition.starts_at).toISOString().slice(0, 16),
         ends_at: new Date(existingCompetition.ends_at).toISOString().slice(0, 16),
-        prize: existingCompetition.prize || '',
         cover_image_url: existingCompetition.cover_image_url || '',
         allowed_species: existingCompetition.allowed_species || [],
         water_type: existingCompetition.water_type || 'any',
@@ -85,9 +90,32 @@ export default function CreateCompetitionPage() {
         max_participants: existingCompetition.max_participants,
         is_public: existingCompetition.is_public ?? true,
         invite_only: existingCompetition.invite_only ?? false,
-      })
+      }))
+      
+      // Load existing awards
+      loadExistingAwards(existingCompetition.id)
     }
   }, [isEditMode, existingCompetition])
+
+  const loadExistingAwards = async (compId: string) => {
+    const { data } = await supabase
+      .from('competition_awards')
+      .select('*')
+      .eq('competition_id', compId)
+      .order('position')
+    
+    if (data && data.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        awards: data.map((a) => ({
+          id: a.id,
+          category: a.category as AwardCategory,
+          title: a.title,
+          prize: a.prize || '',
+        })),
+      }))
+    }
+  }
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }))
@@ -95,17 +123,17 @@ export default function CreateCompetitionPage() {
 
   const canProceed = () => {
     switch (step) {
-      case 1:
-        return formData.type !== null
-      case 2:
+      case 1: // Basic Info
         return (
           formData.title.trim() !== '' &&
           formData.starts_at !== '' &&
           formData.ends_at !== '' &&
           new Date(formData.ends_at) > new Date(formData.starts_at)
         )
-      case 3:
-      case 4:
+      case 2: // Awards
+        return formData.awards.length > 0
+      case 3: // Rules
+      case 4: // Privacy
         return true
       default:
         return false
@@ -143,20 +171,29 @@ export default function CreateCompetitionPage() {
   })
 
   const handleSubmit = async () => {
-    if (!canProceed() || !formData.type) return
+    if (!canProceed() || formData.awards.length === 0) return
 
     try {
       const now = new Date()
       const startsAt = new Date(formData.starts_at)
       const status: 'upcoming' | 'active' = startsAt <= now ? 'active' : 'upcoming'
 
+      // Use first award category as the legacy 'type' field for backwards compatibility
+      const primaryType: CompetitionType = formData.awards[0].category === 'heaviest_total' || formData.awards[0].category === 'biggest_single'
+        ? 'heaviest_fish'
+        : formData.awards[0].category === 'most_catches'
+          ? 'most_catches'
+          : formData.awards[0].category === 'species_diversity'
+            ? 'species_diversity'
+            : 'photo_contest'
+
       const competitionData = {
-        type: formData.type,
+        type: primaryType,
         title: formData.title.trim(),
         description: formData.description.trim() || null,
         starts_at: new Date(formData.starts_at).toISOString(),
         ends_at: new Date(formData.ends_at).toISOString(),
-        prize: formData.prize.trim() || null,
+        prize: null, // Prizes are now per-award
         cover_image_url: formData.cover_image_url || null,
         allowed_species:
           formData.allowed_species.length > 0 ? formData.allowed_species : null,
@@ -169,11 +206,42 @@ export default function CreateCompetitionPage() {
         status,
       }
 
+      let competitionIdToUse = competitionId
+
       if (isEditMode) {
         await updateCompetition.mutateAsync(competitionData)
+        
+        // Delete existing awards and re-insert
+        await supabase
+          .from('competition_awards')
+          .delete()
+          .eq('competition_id', competitionId)
       } else {
         const created = await createCompetition.mutateAsync(competitionData)
-        navigate(`/compete/${created.id}`)
+        competitionIdToUse = created.id
+      }
+
+      // Insert awards
+      if (competitionIdToUse) {
+        const awardsToInsert = formData.awards.map((award, index) => ({
+          competition_id: competitionIdToUse,
+          category: award.category,
+          title: award.title,
+          prize: award.prize || null,
+          position: index + 1,
+        }))
+
+        const { error: awardsError } = await supabase
+          .from('competition_awards')
+          .insert(awardsToInsert)
+
+        if (awardsError) {
+          console.error('Error inserting awards:', awardsError)
+        }
+      }
+
+      if (!isEditMode && competitionIdToUse) {
+        navigate(`/compete/${competitionIdToUse}`)
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -183,14 +251,7 @@ export default function CreateCompetitionPage() {
 
   const renderStep = () => {
     switch (step) {
-      case 1:
-        return (
-          <CompetitionTypeStep
-            selected={formData.type}
-            onSelect={(type: CompetitionType) => updateFormData({ type })}
-          />
-        )
-      case 2:
+      case 1: // Basic Info
         return (
           <BasicInfoStep
             data={{
@@ -198,12 +259,18 @@ export default function CreateCompetitionPage() {
               description: formData.description,
               starts_at: formData.starts_at,
               ends_at: formData.ends_at,
-              prize: formData.prize,
             }}
             onChange={updateFormData}
           />
         )
-      case 3:
+      case 2: // Awards
+        return (
+          <AwardsStep
+            data={{ awards: formData.awards }}
+            onChange={updateFormData}
+          />
+        )
+      case 3: // Rules
         return (
           <RulesStep
             data={{
@@ -216,7 +283,7 @@ export default function CreateCompetitionPage() {
             onChange={updateFormData}
           />
         )
-      case 4:
+      case 4: // Privacy
         return (
           <PrivacyStep
             data={{

@@ -4,7 +4,6 @@ interface BasicInfoStepProps {
     description: string
     starts_at: string
     ends_at: string
-    prize: string
   }
   onChange: (updates: Partial<BasicInfoStepProps['data']>) => void
 }
@@ -12,7 +11,7 @@ interface BasicInfoStepProps {
 export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
   return (
     <div>
-      <h2 className="mb-2 text-xl font-bold text-gray-900">Competition details</h2>
+      <h2 className="mb-2 text-xl font-bold text-gray-900">Competition Details</h2>
       <p className="mb-6 text-sm text-gray-600">Tell anglers what this competition is about.</p>
 
       <div className="space-y-4">
@@ -67,18 +66,9 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
             onChange={(e) => onChange({ ends_at: e.target.value })}
             className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
           />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-900">Prize (optional)</label>
-          <input
-            type="text"
-            value={data.prize}
-            onChange={(e) => onChange({ prize: e.target.value })}
-            placeholder="e.g. £200 tackle voucher"
-            className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
-          />
-          <p className="mt-1 text-xs text-gray-500">Leave blank if there is no prize.</p>
+          <p className="mt-1 text-xs text-gray-500">
+            Prizes can be set per award category in the next step.
+          </p>
         </div>
       </div>
     </div>
