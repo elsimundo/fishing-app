@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Loader2, X, Camera } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { compressAvatar } from '../../utils/imageCompression'
 import type { Profile } from '../../types'
 
 interface EditProfileModalProps {
@@ -51,7 +52,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
     setUsernameError(validateUsername(sanitized))
   }
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -61,14 +62,21 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
       return
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be less than 5MB')
+    // Validate file size (max 20MB before compression)
+    if (file.size > 20 * 1024 * 1024) {
+      alert('Image must be less than 20MB')
       return
     }
 
-    setAvatarFile(file)
-    setAvatarPreview(URL.createObjectURL(file))
+    try {
+      // Compress the image
+      const compressedFile = await compressAvatar(file)
+      setAvatarFile(compressedFile)
+      setAvatarPreview(URL.createObjectURL(compressedFile))
+    } catch (error) {
+      console.error('Failed to compress image:', error)
+      alert('Failed to process image. Please try a different one.')
+    }
   }
 
   const uploadAvatar = async (): Promise<string | null> => {
