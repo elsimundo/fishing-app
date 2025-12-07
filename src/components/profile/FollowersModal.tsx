@@ -48,7 +48,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative mb-20 w-full max-w-md rounded-t-2xl bg-white sm:mb-0 sm:rounded-2xl">
+      <div className="relative w-full max-w-md rounded-t-2xl bg-white sm:rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
           <h2 className="text-lg font-bold text-gray-900">

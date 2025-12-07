@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { BookOpen, Home, Map, Plus, User } from 'lucide-react'
+import { BookOpen, Home, Map, PlusSquare, User } from 'lucide-react'
 import { CreatePostModal } from '../post/CreatePostModal'
 
 export function BottomNav() {
@@ -9,90 +9,79 @@ export function BottomNav() {
   const location = useLocation()
 
   const isActive = (path: string) => location.pathname === path
+
+  const NavButton = ({ 
+    onClick, 
+    icon: Icon, 
+    label, 
+    active = false,
+    filled = false 
+  }: { 
+    onClick: () => void
+    icon: typeof Home
+    label: string
+    active?: boolean
+    filled?: boolean
+  }) => (
+    <button
+      onClick={onClick}
+      className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition-colors"
+    >
+      <Icon
+        size={22}
+        className={active ? 'text-navy-800' : 'text-gray-500'}
+        fill={active && filled ? 'currentColor' : 'none'}
+      />
+      <span
+        className={`text-[10px] font-medium ${
+          active ? 'text-navy-800' : 'text-gray-500'
+        }`}
+      >
+        {label}
+      </span>
+    </button>
+  )
+
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="flex justify-around items-center h-16">
-        {/* Feed */}
-        <button
-          onClick={() => navigate('/feed')}
-          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
-        >
-          <Home
-            size={24}
-            className={isActive('/feed') ? 'text-navy-800' : 'text-gray-600'}
-            fill={isActive('/feed') ? 'currentColor' : 'none'}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb">
+        <div className="flex items-stretch h-14">
+          <NavButton
+            onClick={() => navigate('/feed')}
+            icon={Home}
+            label="Feed"
+            active={isActive('/feed')}
+            filled
           />
-          <span
-            className={`text-[10px] font-semibold ${
-              isActive('/feed') ? 'text-navy-800' : 'text-gray-600'
-            }`}
-          >
-            Feed
-          </span>
-        </button>
-
-        {/* Explore */}
-        <button
-          onClick={() => navigate('/explore')}
-          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
-        >
-          <Map size={24} className={isActive('/explore') ? 'text-navy-800' : 'text-gray-600'} />
-          <span
-            className={`text-[10px] font-semibold ${
-              isActive('/explore') ? 'text-navy-800' : 'text-gray-600'
-            }`}
-          >
-            Explore
-          </span>
-        </button>
-
-        {/* CENTER POST BUTTON - ELEVATED FAB */}
-        <button
-          type="button"
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center justify-center w-14 h-14 -mt-7 rounded-full bg-blue-600 shadow-lg transition-all hover:bg-blue-700 active:scale-95"
-        >
-          <Plus size={28} className="text-white" strokeWidth={3} />
-        </button>
-
-        {/* Logbook */}
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
-        >
-          <BookOpen size={24} className={isActive('/dashboard') ? 'text-navy-800' : 'text-gray-600'} />
-          <span
-            className={`text-[10px] font-semibold ${
-              isActive('/dashboard') ? 'text-navy-800' : 'text-gray-600'
-            }`}
-          >
-            Logbook
-          </span>
-        </button>
-
-        {/* Profile */}
-        <button
-          onClick={() => navigate('/profile')}
-          className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors"
-        >
-          <User
-            size={24}
-            className={isActive('/profile') ? 'text-navy-800' : 'text-gray-600'}
-            fill={isActive('/profile') ? 'currentColor' : 'none'}
+          <NavButton
+            onClick={() => navigate('/explore')}
+            icon={Map}
+            label="Explore"
+            active={isActive('/explore')}
           />
-          <span
-            className={`text-[10px] font-semibold ${
-              isActive('/profile') ? 'text-navy-800' : 'text-gray-600'
-            }`}
-          >
-            Profile
-          </span>
-        </button>
-      </div>
-    </nav>
+          <NavButton
+            onClick={() => setShowCreateModal(true)}
+            icon={PlusSquare}
+            label="Post"
+            active={showCreateModal}
+          />
+          <NavButton
+            onClick={() => navigate('/dashboard')}
+            icon={BookOpen}
+            label="Logbook"
+            active={isActive('/dashboard')}
+          />
+          <NavButton
+            onClick={() => navigate('/profile')}
+            icon={User}
+            label="Profile"
+            active={isActive('/profile')}
+            filled
+          />
+        </div>
+      </nav>
 
-      {showCreateModal ? <CreatePostModal onClose={() => setShowCreateModal(false)} /> : null}
+      {showCreateModal && <CreatePostModal onClose={() => setShowCreateModal(false)} />}
     </>
   )
 }
