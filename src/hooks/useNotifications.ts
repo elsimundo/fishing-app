@@ -5,7 +5,7 @@ import { useAuth } from './useAuth'
 export interface Notification {
   id: string
   user_id: string
-  type: 'competition_invite' | 'competition_starting_soon' | 'competition_winner' | 'catch_approved' | 'catch_rejected' | 'post_like' | 'post_comment' | 'follow' | 'session_catch'
+  type: 'competition_invite' | 'competition_starting_soon' | 'competition_winner' | 'catch_approved' | 'catch_rejected' | 'post_like' | 'post_comment' | 'follow' | 'session_catch' | 'message'
   title: string
   message: string
   action_url: string | null
