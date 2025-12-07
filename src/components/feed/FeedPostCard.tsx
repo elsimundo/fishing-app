@@ -1,7 +1,12 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { PostWithUser } from '../../types'
 import { PostHeader } from './PostHeader'
 import { PostActions } from './PostActions'
+import { useDeletePost } from '../../hooks/usePosts'
+import { useAuth } from '../../hooks/useAuth'
+import { Trash2, MoreHorizontal } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 interface FeedPostCardProps {
   post: PostWithUser
@@ -11,6 +16,25 @@ interface FeedPostCardProps {
 
 export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedPostCardProps) {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const { mutate: deletePost, isPending: isDeleting } = useDeletePost()
+  const [showMenu, setShowMenu] = useState(false)
+
+  const isOwnPost = user?.id === post.user_id
+
+  const handleDelete = () => {
+    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return
+    
+    deletePost(post.id, {
+      onSuccess: () => {
+        toast.success('Post deleted')
+        setShowMenu(false)
+      },
+      onError: () => {
+        toast.error('Failed to delete post')
+      },
+    })
+  }
 
   const getCoverImage = () => {
     if (post.photo_url) return post.photo_url
@@ -36,7 +60,40 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
   }
 
   return (
-    <article className="bg-white px-5 py-4">
+    <article className="relative bg-white px-5 py-4">
+      {/* Post Menu for own posts */}
+      {isOwnPost && (
+        <div className="absolute right-4 top-4">
+          <button
+            type="button"
+            onClick={() => setShowMenu(!showMenu)}
+            className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <MoreHorizontal size={18} />
+          </button>
+          
+          {showMenu && (
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setShowMenu(false)}
+              />
+              <div className="absolute right-0 top-8 z-20 w-36 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                >
+                  <Trash2 size={14} />
+                  <span>{isDeleting ? 'Deleting...' : 'Delete Post'}</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       <PostHeader
         user={post.user}
         createdAt={post.created_at}

@@ -423,16 +423,16 @@ export default function ExplorePage() {
           {/* List Your Business Banner */}
           <Link
             to="/businesses/submit"
-            className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-navy-800 to-navy-900 p-4 text-white shadow-sm transition-transform hover:scale-[1.02]"
+            className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-navy-800 to-navy-900 p-4 shadow-sm transition-transform hover:scale-[1.02]"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-              <Store size={20} />
+              <Store size={20} className="text-white" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold">Own a fishing business?</p>
+              <p className="text-sm font-bold text-white">Own a fishing business?</p>
               <p className="text-xs text-white/80">List your shop, charter, or club for free</p>
             </div>
-            <span className="text-lg">→</span>
+            <span className="text-lg text-white">→</span>
           </Link>
 
           {/* Sessions & Catches Card */}
