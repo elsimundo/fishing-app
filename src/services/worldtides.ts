@@ -87,15 +87,20 @@ export async function getWorldTidesPredictions(
 
   console.log(`[WorldTides] Fetching predictions for ${lat}, ${lng} (${days} days)...`)
 
+  // Format today's date as YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0]
+
   const params = new URLSearchParams({
-    extremes: '',
     lat: lat.toString(),
     lon: lng.toString(),
-    length: (days * 24 * 60 * 60).toString(),
+    date: today,
+    days: days.toString(),
     key: apiKey,
   })
 
-  const response = await fetch(`${WORLDTIDES_BASE_URL}?${params}`)
+  // Add extremes as a flag parameter (no value)
+  const url = `${WORLDTIDES_BASE_URL}?extremes&${params}`
+  const response = await fetch(url)
 
   if (!response.ok) {
     console.error(`[WorldTides] API error: ${response.status}`)
