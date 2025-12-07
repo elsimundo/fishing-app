@@ -3,7 +3,11 @@ import type { TideStation, TidePrediction, TideData } from '../types/tides'
 const WORLDTIDES_BASE_URL = 'https://www.worldtides.info/api/v3'
 
 function getApiKey(): string | null {
-  return import.meta.env.VITE_WORLDTIDES_API_KEY || null
+  const key = import.meta.env.VITE_WORLDTIDES_API_KEY || null
+  if (!key) {
+    console.log('[WorldTides] API key not found in environment')
+  }
+  return key
 }
 
 interface WorldTidesStation {
@@ -77,8 +81,11 @@ export async function getWorldTidesPredictions(
 ): Promise<TidePrediction[]> {
   const apiKey = getApiKey()
   if (!apiKey) {
+    console.error('[WorldTides] Cannot fetch predictions - API key not configured')
     throw new Error('WorldTides API key not configured')
   }
+
+  console.log(`[WorldTides] Fetching predictions for ${lat}, ${lng} (${days} days)...`)
 
   const params = new URLSearchParams({
     extremes: '',
@@ -91,18 +98,23 @@ export async function getWorldTidesPredictions(
   const response = await fetch(`${WORLDTIDES_BASE_URL}?${params}`)
 
   if (!response.ok) {
+    console.error(`[WorldTides] API error: ${response.status}`)
     throw new Error(`WorldTides API error: ${response.status}`)
   }
 
   const data = await response.json()
 
   if (data.error) {
+    console.error(`[WorldTides] API returned error: ${data.error}`)
     throw new Error(data.error || 'WorldTides API error')
   }
 
   if (!data.extremes || data.extremes.length === 0) {
+    console.log('[WorldTides] No extremes data returned')
     return []
   }
+
+  console.log(`[WorldTides] Got ${data.extremes.length} tide predictions`)
 
   return data.extremes.map((extreme: WorldTidesExtreme) => ({
     time: new Date(extreme.dt * 1000).toISOString(),
