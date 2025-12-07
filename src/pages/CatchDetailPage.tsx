@@ -4,7 +4,7 @@ import { useCatch } from '../hooks/useCatch'
 import { useDeleteCatch } from '../hooks/useDeleteCatch'
 import { useAuth } from '../hooks/useAuth'
 import type { Catch } from '../types'
-import { Share2, Trash2, MoreHorizontal } from 'lucide-react'
+import { Share2, Trash2, MoreHorizontal, Pencil } from 'lucide-react'
 import { ShareCatchToFeedModal } from '../components/catch/ShareCatchToFeedModal'
 import { ErrorState } from '../components/ui/ErrorState'
 import { toast } from 'react-hot-toast'
@@ -100,6 +100,17 @@ export function CatchDetailPage() {
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
                       <div className="absolute right-0 top-9 z-20 w-40 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowMenu(false)
+                            navigate(`/catches/${catchItem.id}/edit`)
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <Pencil size={14} />
+                          <span>Edit Catch</span>
+                        </button>
                         <button
                           type="button"
                           onClick={async () => {

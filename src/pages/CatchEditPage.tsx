@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useCatch } from '../hooks/useCatch'
 import { CatchForm } from '../components/catches/CatchForm'
 import { ErrorState } from '../components/ui/ErrorState'
