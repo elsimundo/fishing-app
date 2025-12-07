@@ -38,7 +38,7 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess, mode = 'f
   const primaryLabel = mode === 'profile' ? 'Share to Profile' : 'Share to Feed'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
       <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white md:max-w-lg md:rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">

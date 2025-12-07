@@ -64,7 +64,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center"
       onClick={onClose}
     >
       <div

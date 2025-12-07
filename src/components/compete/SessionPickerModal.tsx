@@ -53,7 +53,7 @@ export function SessionPickerModal({ competition, onClose }: SessionPickerModalP
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
       <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-white md:rounded-2xl">
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
           <h2 className="text-lg font-bold text-gray-900">Choose your session</h2>

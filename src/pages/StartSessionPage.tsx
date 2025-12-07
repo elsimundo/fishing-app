@@ -608,7 +608,7 @@ export default function StartSessionPage() {
     const canConfirm = locationCoords.lat != null && locationCoords.lng != null
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
         <div className="w-full max-w-xl rounded-xl bg-white p-4 shadow-lg">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900">Set your spot</h3>
