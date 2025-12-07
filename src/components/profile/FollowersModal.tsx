@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Loader2, MoreHorizontal, UserMinus, Ban } from 'lucide-react'
 import { useFollowers, useFollowing, useUnfollowUser } from '../../hooks/useFollows'
+import { useBlockUser } from '../../hooks/useBlocks'
 import { useAuth } from '../../hooks/useAuth'
 import { toast } from 'react-hot-toast'
 
@@ -27,6 +28,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
   const { data: followersData, isLoading: loadingFollowers } = useFollowers(userId)
   const { data: followingData, isLoading: loadingFollowing } = useFollowing(userId)
   const { mutateAsync: unfollowUser, isPending: isUnfollowing } = useUnfollowUser()
+  const { mutateAsync: blockUser, isPending: isBlocking } = useBlockUser()
 
   // Extract profiles from the follow data
   const followers: FollowUser[] = (followersData || []).map((f: any) => f.profiles).filter(Boolean)
@@ -100,7 +102,8 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
             <div className="space-y-2">
               {users.map((user) => {
                 const isOwnProfile = currentUser?.id === userId
-                const showActions = isOwnProfile && activeTab === 'following'
+                const showUnfollowActions = isOwnProfile && activeTab === 'following'
+                const showBlockAction = isOwnProfile && user.id !== currentUser?.id
 
                 return (
                   <div
@@ -131,7 +134,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                     </button>
 
                     {/* Actions Menu */}
-                    {showActions && (
+                    {showBlockAction && (
                       <div className="relative">
                         <button
                           onClick={() => setMenuOpenFor(menuOpenFor === user.id ? null : user.id)}
@@ -147,28 +150,37 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                               onClick={() => setMenuOpenFor(null)}
                             />
                             <div className="absolute right-0 top-8 z-20 w-40 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                              {showUnfollowActions && (
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await unfollowUser(user.id)
+                                      toast.success(`Unfollowed @${user.username}`)
+                                      setMenuOpenFor(null)
+                                    } catch {
+                                      toast.error('Failed to unfollow')
+                                    }
+                                  }}
+                                  disabled={isUnfollowing}
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  <UserMinus size={14} />
+                                  <span>Unfollow</span>
+                                </button>
+                              )}
                               <button
                                 onClick={async () => {
+                                  if (!confirm(`Block @${user.username}? They won't be able to see your posts or follow you.`)) return
                                   try {
-                                    await unfollowUser(user.id)
-                                    toast.success(`Unfollowed @${user.username}`)
+                                    await blockUser(user.id)
+                                    toast.success(`Blocked @${user.username}`)
                                     setMenuOpenFor(null)
                                   } catch {
-                                    toast.error('Failed to unfollow')
+                                    toast.error('Failed to block user')
                                   }
                                 }}
-                                disabled={isUnfollowing}
-                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                              >
-                                <UserMinus size={14} />
-                                <span>Unfollow</span>
-                              </button>
-                              <button
-                                onClick={() => {
-                                  toast.error('Block feature coming soon')
-                                  setMenuOpenFor(null)
-                                }}
-                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                                disabled={isBlocking}
+                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
                               >
                                 <Ban size={14} />
                                 <span>Block</span>
