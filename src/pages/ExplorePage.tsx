@@ -75,9 +75,9 @@ export default function ExplorePage() {
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
 
-  // Fetch tackle shops from OpenStreetMap
+  // Fetch tackle shops from OpenStreetMap - only when user clicks "Search this area"
   const { data: shopsData } = useTackleShops(
-    appliedBounds || liveBounds,
+    appliedBounds,
     userLocation,
     filters.shops
   )
