@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Trash2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
@@ -11,12 +11,14 @@ import { ProfileStats } from '../components/profile/ProfileStats'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { EditProfileModal } from '../components/profile/EditProfileModal'
 import { FollowersModal } from '../components/profile/FollowersModal'
+import { DeleteAccountModal } from '../components/profile/DeleteAccountModal'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { data: profile, isLoading: profileLoading } = useProfile()
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
   const unreadCount = useUnreadCount()
 
@@ -84,6 +86,18 @@ export default function ProfilePage() {
         </button>
       </div>
 
+      {/* Danger Zone */}
+      <div className="border-b border-gray-200 bg-white px-5 py-3">
+        <button
+          type="button"
+          onClick={() => setShowDeleteModal(true)}
+          className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700"
+        >
+          <Trash2 size={16} />
+          Delete Account
+        </button>
+      </div>
+
       <div className="p-5">
         <h2 className="mb-4 text-lg font-bold text-gray-900">Posts</h2>
         {postsLoading ? (
@@ -127,6 +141,10 @@ export default function ProfilePage() {
           initialTab={followersModalTab}
           onClose={() => setFollowersModalTab(null)}
         />
+      )}
+
+      {showDeleteModal && (
+        <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />
       )}
     </div>
   )
