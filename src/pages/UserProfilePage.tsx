@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useFollowCounts, useIsFollowing } from '../hooks/useFollows'
 import { useUserPosts } from '../hooks/usePosts'
+import { useStartConversation } from '../hooks/useMessages'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { ProfileStats } from '../components/profile/ProfileStats'
@@ -15,8 +16,10 @@ import type { Profile } from '../types'
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
+  const navigate = useNavigate()
   const { user: currentUser } = useAuth()
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
+  const { mutate: startConversation, isPending: isStartingConversation } = useStartConversation()
 
   const { data: profile, isLoading: profileLoading } = useQuery<Profile | null>({
     queryKey: ['profile', userId],
@@ -73,8 +76,23 @@ export default function UserProfilePage() {
       </div>
 
       {!isOwnProfile ? (
-        <div className="border-b border-gray-200 bg-white px-5 py-3">
+        <div className="flex gap-3 border-b border-gray-200 bg-white px-5 py-3">
           <FollowButton userId={userId ?? ''} isFollowing={isFollowing ?? false} />
+          <button
+            onClick={() => {
+              if (!userId) return
+              startConversation(userId, {
+                onSuccess: (conversationId) => {
+                  navigate(`/messages/${conversationId}`)
+                }
+              })
+            }}
+            disabled={isStartingConversation}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+          >
+            <MessageCircle size={18} />
+            Message
+          </button>
         </div>
       ) : null}
 
