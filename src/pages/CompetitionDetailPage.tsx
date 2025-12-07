@@ -16,6 +16,7 @@ import { WinnersDisplay } from '../components/compete/WinnersDisplay'
 import { DeclareWinnerModal } from '../components/compete/DeclareWinnerModal'
 import { AdjustTimeModal } from '../components/compete/AdjustTimeModal'
 import { CompetitionInviteModal } from '../components/compete/CompetitionInviteModal'
+import { CompetitionAwardsCard } from '../components/compete/CompetitionAwardsCard'
 import { useDeleteCompetition } from '../hooks/useDeleteCompetition'
 import { ArrowLeft, Share2, MoreHorizontal, Clock, Trophy, UserPlus, Edit2, Trash2, Fish } from 'lucide-react'
 
@@ -133,6 +134,11 @@ export default function CompetitionDetailPage() {
         <div className="mx-auto max-w-2xl">
           <CompetitionHero competition={competition} userEntry={userEntry} />
           <CompetitionInfo competition={competition} />
+
+          {/* Award Categories */}
+          <div className="mx-4 mb-4">
+            <CompetitionAwardsCard competitionId={competition.id} />
+          </div>
 
           {/* Organizer Actions */}
           {isOrganizer && (
