@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import { Layout } from '../components/layout/Layout'
 import { useSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
@@ -60,6 +61,7 @@ export default function ExplorePage() {
   const [selectedMarker, setSelectedMarker] = useState<ExploreMarker | null>(null)
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
+  const [hasDefaultArea, setHasDefaultArea] = useState(false)
 
   // Current map center for data cards
   const mapCenter = useMemo(() => {
@@ -84,8 +86,28 @@ export default function ExplorePage() {
     filters.shops
   )
 
-  // Try to get user location on first load and set initial bounds
+  // Load saved default area or get user location on first load
   useEffect(() => {
+    // Check for saved default area first
+    const savedArea = localStorage.getItem('explore-default-area')
+    if (savedArea) {
+      try {
+        const bounds = JSON.parse(savedArea)
+        setAppliedBounds(bounds)
+        setHasDefaultArea(true)
+        // Still get user location for the blue dot
+        navigator.geolocation?.getCurrentPosition(
+          (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => {},
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+        )
+        return
+      } catch {
+        localStorage.removeItem('explore-default-area')
+      }
+    }
+
+    // No saved area - use geolocation
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -105,6 +127,20 @@ export default function ExplorePage() {
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     )
   }, [])
+
+  const saveAsDefaultArea = () => {
+    const boundsToSave = liveBounds || appliedBounds
+    if (!boundsToSave) return
+    localStorage.setItem('explore-default-area', JSON.stringify(boundsToSave))
+    setHasDefaultArea(true)
+    toast.success('Default area saved')
+  }
+
+  const clearDefaultArea = () => {
+    localStorage.removeItem('explore-default-area')
+    setHasDefaultArea(false)
+    toast.success('Default area cleared')
+  }
 
   const markers: ExploreMarker[] = useMemo(() => {
     const items: ExploreMarker[] = []
@@ -348,19 +384,45 @@ export default function ExplorePage() {
             </button>
           )}
 
-          {appliedBounds && userLocation && (
-            <button
-              type="button"
-              onClick={() => {
-                setAppliedBounds(null)
-                setLiveBounds(null)
-                setSelectedMarker(null)
-              }}
-              className="absolute bottom-3 right-3 z-20 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 shadow-md hover:bg-gray-50"
-            >
-              ↻ Reset
-            </button>
-          )}
+          {/* Bottom right buttons */}
+          <div className="absolute bottom-3 right-3 z-20 flex flex-col gap-2">
+            {/* Save as default button */}
+            {(liveBounds || appliedBounds) && !hasDefaultArea && (
+              <button
+                type="button"
+                onClick={saveAsDefaultArea}
+                className="rounded-full bg-navy-800 px-3 py-1.5 text-[11px] font-medium text-white shadow-md hover:bg-navy-900"
+              >
+                ⭐ Set as default
+              </button>
+            )}
+            
+            {/* Clear default button */}
+            {hasDefaultArea && (
+              <button
+                type="button"
+                onClick={clearDefaultArea}
+                className="rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-amber-600 shadow-md hover:bg-amber-50"
+              >
+                ✕ Clear default
+              </button>
+            )}
+
+            {/* Reset button */}
+            {appliedBounds && userLocation && (
+              <button
+                type="button"
+                onClick={() => {
+                  setAppliedBounds(null)
+                  setLiveBounds(null)
+                  setSelectedMarker(null)
+                }}
+                className="rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 shadow-md hover:bg-gray-50"
+              >
+                ↻ Reset
+              </button>
+            )}
+          </div>
 
           {selectedMarker && (
             <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-white/95 p-3 text-xs shadow-lg backdrop-blur">
