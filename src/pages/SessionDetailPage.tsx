@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
 import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant } from '../hooks/useSessionParticipants'
@@ -10,12 +10,14 @@ import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2 } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 import { ParticipantsList } from '../components/session/ParticipantsList'
 import { InviteToSessionModal } from '../components/session/InviteToSessionModal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { ErrorState } from '../components/ui/ErrorState'
+import { useDeleteSession } from '../hooks/useDeleteSession'
+import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
 
 export function SessionDetailPage() {
@@ -23,9 +25,11 @@ export function SessionDetailPage() {
   const [shareMode, setShareMode] = useState<'feed' | 'profile' | null>(null)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showActions, setShowActions] = useState(false)
 
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { data: session, isLoading, isError, error, refetch } = useSession(id)
   const { mutateAsync: updateSession, isPending: isEnding } = useUpdateSession()
@@ -62,6 +66,7 @@ export function SessionDetailPage() {
   const { mutateAsync: leaveSession, isPending: isLeaving } = useLeaveSession()
   const { mutateAsync: changeParticipantRole } = useChangeParticipantRole()
   const { mutateAsync: removeParticipant } = useRemoveParticipant()
+  const { mutateAsync: deleteSession, isPending: isDeleting } = useDeleteSession()
 
   if (isLoading) {
     return (
@@ -178,6 +183,15 @@ export function SessionDetailPage() {
                 </button>
               </>
             )}
+            <div className="my-2 border-t border-gray-100" />
+            <button
+              type="button"
+              onClick={() => { setShowDeleteConfirm(true); setShowActions(false) }}
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+              Delete Session
+            </button>
           </div>
         )}
       </header>
@@ -375,6 +389,26 @@ export function SessionDetailPage() {
         cancelLabel="Cancel"
         onCancel={() => setShowEndConfirm(false)}
         onConfirm={() => { setShowEndConfirm(false); void handleEndSession() }}
+      />
+
+      {/* Delete session confirm */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete session?"
+        message="This will permanently delete this session and all its catches. This cannot be undone."
+        confirmLabel={isDeleting ? 'Deleting…' : 'Delete session'}
+        cancelLabel="Cancel"
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={async () => {
+          try {
+            await deleteSession(session!.id)
+            toast.success('Session deleted')
+            navigate('/dashboard')
+          } catch {
+            toast.error('Failed to delete session')
+          }
+          setShowDeleteConfirm(false)
+        }}
       />
     </main>
   )
