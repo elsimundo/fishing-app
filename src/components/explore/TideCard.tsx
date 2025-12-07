@@ -206,10 +206,15 @@ export function TideCard({ lat, lng }: TideCardProps) {
             </div>
           )}
 
-          {/* Footer */}
-          <div className="mt-3 flex items-center justify-between text-[10px] text-gray-500">
-            <span>📍 {station.name}</span>
-            <span className="capitalize">{station.source}</span>
+          {/* Station Info */}
+          <div className="mt-3 rounded-lg bg-gray-50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+              Reference Station
+            </p>
+            <p className="mt-1 text-xs font-medium text-gray-900">📍 {station.name}</p>
+            <p className="mt-0.5 text-[10px] text-gray-500">
+              {station.distance ? `${station.distance.toFixed(1)} km away` : 'Nearest station'} · {station.source === 'uk-ea' ? 'UK Environment Agency' : station.source === 'noaa' ? 'NOAA' : 'WorldTides'}
+            </p>
           </div>
         </div>
       )}
