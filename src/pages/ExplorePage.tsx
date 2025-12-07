@@ -63,14 +63,16 @@ export default function ExplorePage() {
 
   // Current map center for data cards
   const mapCenter = useMemo(() => {
-    if (liveBounds) {
+    // Use liveBounds (from map movement), then appliedBounds, then userLocation
+    const bounds = liveBounds || appliedBounds
+    if (bounds) {
       return {
-        lat: (liveBounds.north + liveBounds.south) / 2,
-        lng: (liveBounds.east + liveBounds.west) / 2,
+        lat: (bounds.north + bounds.south) / 2,
+        lng: (bounds.east + bounds.west) / 2,
       }
     }
     return userLocation
-  }, [liveBounds, userLocation])
+  }, [liveBounds, appliedBounds, userLocation])
 
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
