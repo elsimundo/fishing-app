@@ -40,84 +40,60 @@ const typeColors: Record<ExploreMarkerType, string> = {
   charter: '#e11d48',
 }
 
-export function ExploreMap({ markers, center, initialBounds, zoom = 9, userLocation, onMarkerClick, onBoundsChange }: ExploreMapProps) {
+export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onMarkerClick, onBoundsChange }: ExploreMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMapType | null>(null)
   const markersRef = useRef<Marker[]>([])
   const userMarkerRef = useRef<Marker | null>(null)
 
-  // Init map
+  // Store onBoundsChange in a ref to avoid re-init on callback change
+  const onBoundsChangeRef = useRef(onBoundsChange)
+  onBoundsChangeRef.current = onBoundsChange
+
+  // Init map - only runs once on mount
   useEffect(() => {
-    console.log('Mapbox token present:', !!token)
     if (!token) {
       console.error('VITE_MAPBOX_TOKEN not found')
       return
     }
-    if (!mapContainerRef.current) {
-      console.error('Map container ref not found')
-      return
-    }
-    if (mapRef.current) {
-      console.log('Map already initialized')
+    if (!mapContainerRef.current || mapRef.current) {
       return
     }
 
-    // Calculate initial center from bounds if available
-    const initialCenter = initialBounds 
-      ? { 
-          lat: (initialBounds.north + initialBounds.south) / 2, 
-          lng: (initialBounds.east + initialBounds.west) / 2 
-        }
-      : center ?? { lat: 50.82, lng: -0.14 } // Brighton-ish default
-    console.log('Initializing map at:', initialCenter, 'with bounds:', initialBounds)
+    // Default center (Brighton) - will be overridden by initialBounds if available
+    const defaultCenter = { lat: 50.82, lng: -0.14 }
 
-    try {
-      const map = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/outdoors-v12',
-        center: [initialCenter.lng, initialCenter.lat],
-        zoom,
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: 'mapbox://styles/mapbox/outdoors-v12',
+      center: [defaultCenter.lng, defaultCenter.lat],
+      zoom,
+    })
+
+    map.on('error', (e) => {
+      console.error('Map error:', e)
+    })
+
+    map.on('moveend', () => {
+      const b = map.getBounds()
+      if (!b) return
+      onBoundsChangeRef.current?.({
+        north: b.getNorth(),
+        south: b.getSouth(),
+        east: b.getEast(),
+        west: b.getWest(),
       })
+    })
 
-      map.on('load', () => {
-        console.log('Map loaded successfully')
-        // Fit to initial bounds if provided
-        if (initialBounds) {
-          map.fitBounds(
-            [[initialBounds.west, initialBounds.south], [initialBounds.east, initialBounds.north]],
-            { padding: 20, duration: 0 }
-          )
-        }
-      })
+    mapRef.current = map
 
-      map.on('error', (e) => {
-        console.error('Map error:', e)
-      })
-
-      if (onBoundsChange) {
-        map.on('moveend', () => {
-          const b = map.getBounds()
-          if (!b) return
-          onBoundsChange({
-            north: b.getNorth(),
-            south: b.getSouth(),
-            east: b.getEast(),
-            west: b.getWest(),
-          })
-        })
-      }
-
-      mapRef.current = map
-
-      return () => {
-        markersRef.current.forEach((m) => m.remove())
-        map.remove()
-        mapRef.current = null
-      }
-    } catch (error) {
-      console.error('Failed to initialize map:', error)
+    return () => {
+      markersRef.current.forEach((m) => m.remove())
+      map.remove()
+      mapRef.current = null
     }
-  }, [center, zoom, onBoundsChange])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty deps - only init once
 
   // Respond to initialBounds changes (e.g., when loaded from localStorage)
   const initialBoundsApplied = useRef(false)

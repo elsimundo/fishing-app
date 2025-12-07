@@ -437,7 +437,6 @@ export default function ExplorePage() {
 
           <ExploreMap
             markers={markers}
-            center={mapCenter ?? undefined}
             initialBounds={appliedBounds ?? undefined}
             userLocation={userLocation ?? undefined}
             onBoundsChange={setLiveBounds}
