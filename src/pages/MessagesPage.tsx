@@ -70,7 +70,7 @@ export default function MessagesPage() {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-8rem)] flex-col md:h-screen">
+      <div className="flex h-[calc(100dvh-3.5rem)] flex-col pb-14 md:h-screen md:pb-0">
         {/* Header - only show on mobile or when in conversation */}
         <header className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
           {showConversation ? (
