@@ -10,6 +10,7 @@ interface EditProfileModalProps {
 }
 
 export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileModalProps) {
+  const [username, setUsername] = useState(profile.username ?? '')
   const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const [avatarUrl] = useState(profile.avatar_url ?? '')
@@ -17,7 +18,38 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Validate username format
+  const validateUsername = (value: string): string | null => {
+    if (!value.trim()) return 'Username is required'
+    if (value.length < 3) return 'Username must be at least 3 characters'
+    if (value.length > 20) return 'Username must be 20 characters or less'
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Only letters, numbers, and underscores allowed'
+    return null
+  }
+
+  // Check if username is available
+  const checkUsernameAvailable = async (value: string): Promise<boolean> => {
+    if (value.toLowerCase() === profile.username?.toLowerCase()) return true
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .ilike('username', value)
+      .neq('id', profile.id)
+      .limit(1)
+    
+    return !data || data.length === 0
+  }
+
+  const handleUsernameChange = (value: string) => {
+    const sanitized = value.toLowerCase().replace(/[^a-z0-9_]/g, '')
+    setUsername(sanitized)
+    setUsernameError(validateUsername(sanitized))
+  }
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -65,8 +97,28 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
   }
 
   const handleSave = async () => {
+    // Validate username
+    const usernameValidation = validateUsername(username)
+    if (usernameValidation) {
+      setUsernameError(usernameValidation)
+      return
+    }
+
     setIsSaving(true)
     try {
+      // Check username availability if changed
+      if (username.toLowerCase() !== profile.username?.toLowerCase()) {
+        setIsCheckingUsername(true)
+        const isAvailable = await checkUsernameAvailable(username)
+        setIsCheckingUsername(false)
+        
+        if (!isAvailable) {
+          setUsernameError('Username is already taken')
+          setIsSaving(false)
+          return
+        }
+      }
+
       // Upload avatar if changed
       let newAvatarUrl: string | null = avatarUrl || null
       if (avatarFile) {
@@ -76,6 +128,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
       const { error } = await supabase
         .from('profiles')
         .update({
+          username: username.trim(),
           full_name: fullName.trim() || null,
           bio: bio.trim() || null,
           avatar_url: newAvatarUrl,
@@ -138,6 +191,30 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
               />
             </div>
             <p className="mt-2 text-xs text-gray-500">Tap to change photo</p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-900">Username</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">@</span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => handleUsernameChange(e.target.value)}
+                maxLength={20}
+                className={`w-full rounded-xl border px-4 py-3 pl-8 text-sm focus:border-transparent focus:outline-none focus:ring-2 ${
+                  usernameError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-navy-800'
+                }`}
+                placeholder="username"
+              />
+              {isCheckingUsername && (
+                <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
+              )}
+            </div>
+            {usernameError && (
+              <p className="mt-1 text-xs text-red-500">{usernameError}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">3-20 characters, letters, numbers, underscores only</p>
           </div>
 
           <div>
