@@ -44,6 +44,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { to: '/admin', icon: BarChart3, label: 'Dashboard' },
     { to: '/admin/users', icon: Users, label: 'Users' },
     { to: '/admin/businesses', icon: Store, label: 'Businesses' },
+    { to: '/admin/lakes', icon: Store, label: 'Lakes' },
     { to: '/admin/settings', icon: Settings, label: 'Settings' },
   ]
 

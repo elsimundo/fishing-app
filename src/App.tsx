@@ -18,11 +18,13 @@ import CompetePage from './pages/CompetePage'
 import CompetitionDetailPage from './pages/CompetitionDetailPage'
 import CreateCompetitionPage from './pages/CreateCompetitionPage'
 import CreatePostPage from './pages/CreatePostPage'
+import LakeDetailPage from './pages/LakeDetailPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 // Admin pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import UsersPage from './pages/admin/UsersPage'
 import BusinessesPage from './pages/admin/BusinessesPage'
+import LakesPage from './pages/admin/LakesPage'
 import SubmitBusinessPage from './pages/SubmitBusinessPage'
 import MessagesPage from './pages/MessagesPage'
 
@@ -50,6 +52,7 @@ function App() {
         <Route path="/catches/:id/edit" element={<CatchEditPage />} />
         <Route path="/sessions" element={<Dashboard />} />
         <Route path="/sessions/:id" element={<SessionDetailPage />} />
+        <Route path="/lakes/:slugOrId" element={<LakeDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<UserProfilePage />} />
         <Route path="/messages" element={<MessagesPage />} />
@@ -58,6 +61,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<UsersPage />} />
         <Route path="/admin/businesses" element={<BusinessesPage />} />
+        <Route path="/admin/lakes" element={<LakesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

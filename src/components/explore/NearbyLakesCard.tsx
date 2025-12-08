@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee } from 'lucide-react'
 import { useLakes } from '../../hooks/useLakes'
+import { useAuth } from '../../hooks/useAuth'
+import { toast } from 'react-hot-toast'
+import { createLakeClaim } from '../../services/lake-claims'
+import { Link } from 'react-router-dom'
 import type { Lake } from '../../types'
 
 interface Bounds {
@@ -14,11 +18,13 @@ interface NearbyLakesCardProps {
   lat: number | null
   lng: number | null
   bounds?: Bounds | null
+  onSelectLake?: (lake: Lake) => void
 }
 
-export function NearbyLakesCard({ lat, lng, bounds }: NearbyLakesCardProps) {
+export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [showAll, setShowAll] = useState(false)
+  const { user } = useAuth()
   const { data: lakes, isLoading, error } = useLakes({
     lat,
     lng,
@@ -123,7 +129,42 @@ export function NearbyLakesCard({ lat, lng, bounds }: NearbyLakesCardProps) {
           ) : (
             <div className="mt-3 space-y-3">
               {lakes.slice(0, showAll ? undefined : 5).map((lake) => (
-                <LakeItem key={lake.id} lake={lake} />
+                <LakeItem
+                  key={lake.id}
+                  lake={lake}
+                  canClaim={!!user}
+                  onSelect={onSelectLake}
+                  onClaim={async () => {
+                    if (!user) {
+                      toast.error('You need to be logged in to claim a venue')
+                      return
+                    }
+
+                    // Only allow claims for Supabase lakes (not OSM discoveries)
+                    if (typeof lake.id !== 'string' || lake.id.startsWith('osm-')) {
+                      toast.error('You can only claim verified venues')
+                      return
+                    }
+
+                    if (lake.claimed_by) {
+                      toast('This venue is already claimed')
+                      return
+                    }
+
+                    const message = window.prompt(
+                      `Tell us about your relationship to "${lake.name}" (owner, manager, etc):`
+                    )
+
+                    if (message === null) return
+
+                    try {
+                      await createLakeClaim(lake.id, user.id, message.trim() || null)
+                      toast.success('Claim submitted for review')
+                    } catch (err: any) {
+                      toast.error(err?.message || 'Failed to submit claim')
+                    }
+                  }}
+                />
               ))}
               
               {lakes.length > 5 && (
@@ -152,9 +193,23 @@ const LAKE_TYPE_LABELS: Record<string, string> = {
   private: 'Private',
 }
 
-function LakeItem({ lake }: { lake: Lake }) {
+interface LakeItemProps {
+  lake: Lake
+  canClaim?: boolean
+  onClaim?: () => void
+  onSelect?: (lake: Lake) => void
+}
+
+function LakeItem({ lake, canClaim, onClaim, onSelect }: LakeItemProps) {
+  const handleClick = () => {
+    onSelect?.(lake)
+  }
+
   return (
-    <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+    <div
+      className="cursor-pointer rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-gray-100"
+      onClick={handleClick}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h4 className="text-sm font-semibold text-gray-900">{lake.name}</h4>
@@ -235,17 +290,45 @@ function LakeItem({ lake }: { lake: Lake }) {
         </p>
       )}
 
-      {/* Website link */}
-      {lake.website && (
-        <a
-          href={lake.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 inline-block text-xs font-medium text-blue-600 hover:text-blue-700"
-        >
-          Visit website →
-        </a>
-      )}
+      {/* Website / Claim / Details actions */}
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {lake.website && (
+          <a
+            href={lake.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-xs font-medium text-blue-600 hover:text-blue-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Visit website →
+          </a>
+        )}
+
+        {/* Claim this venue (only for unclaimed Supabase lakes) */}
+        {canClaim && onClaim && !lake.claimed_by && typeof lake.id === 'string' && !lake.id.startsWith('osm-') && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onClaim()
+            }}
+            className="inline-flex items-center rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-primary/90"
+          >
+            Claim this venue
+          </button>
+        )}
+
+        {/* Details page link (uses slug if present, else id) */}
+        {typeof lake.id === 'string' && !lake.id.startsWith('osm-') && (
+          <Link
+            to={`/lakes/${lake.slug || lake.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-block text-xs font-medium text-gray-600 hover:text-gray-900"
+          >
+            Details
+          </Link>
+        )}
+      </div>
     </div>
   )
 }

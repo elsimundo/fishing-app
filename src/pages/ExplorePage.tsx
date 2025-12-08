@@ -17,6 +17,7 @@ import { NearbyLakesCard } from '../components/explore/NearbyLakesCard'
 import { useLakes } from '../hooks/useLakes'
 import { MapPin, Navigation, Store } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import type { Lake } from '../types'
 
 // Static POIs for clubs and charters (future: fetch from API)
 const STATIC_POIS = {
@@ -315,6 +316,17 @@ export default function ExplorePage() {
     setSelectedMarker(marker)
   }
 
+  const handleSelectLakeFromCard = (lake: Lake) => {
+    const marker = markers.find((m) => m.id === `lake-${lake.id}`)
+    if (!marker) return
+    setSelectedMarker(marker)
+
+    const mapSection = document.getElementById('explore-map')
+    if (mapSection) {
+      mapSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   const handleViewDetails = () => {
     if (!selectedMarker) return
     if (selectedMarker.id.startsWith('session-')) {
@@ -423,7 +435,7 @@ export default function ExplorePage() {
         </header>
 
         {/* Compact Map */}
-        <section className="relative h-[35vh] min-h-[200px] bg-gray-100">
+        <section id="explore-map" className="relative h-[35vh] min-h-[200px] bg-gray-100">
           {pillVisible && (
             <button
               type="button"
@@ -488,25 +500,42 @@ export default function ExplorePage() {
                 </button>
               )}
               {selectedMarker.id.startsWith('lake-') && (
-                <div className="flex gap-2">
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    📍 Directions
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const lakeId = selectedMarker.id.replace('lake-', '')
-                      navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
-                    }}
-                    className="flex-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
-                  >
-                    🎣 Log Session
-                  </button>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      📍 Directions
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const lakeId = selectedMarker.id.replace('lake-', '')
+                        navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
+                      }}
+                      className="flex-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                    >
+                      🎣 Log Session
+                    </button>
+                  </div>
+                  {(() => {
+                    const lakeId = selectedMarker.id.replace('lake-', '')
+                    if (lakeId.startsWith('osm-')) return null
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate(`/lakes/${lakeId}`)
+                        }}
+                        className="w-full rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary/90"
+                      >
+                        View lake page
+                      </button>
+                    )
+                  })()}
                 </div>
               )}
             </div>
@@ -581,10 +610,11 @@ export default function ExplorePage() {
 
           {/* Nearby Lakes Card - only for freshwater anglers */}
           {showFreshwater && (
-            <NearbyLakesCard 
-              lat={mapCenter?.lat ?? null} 
-              lng={mapCenter?.lng ?? null} 
+            <NearbyLakesCard
+              lat={mapCenter?.lat ?? null}
+              lng={mapCenter?.lng ?? null}
               bounds={appliedBounds}
+              onSelectLake={handleSelectLakeFromCard}
             />
           )}
 
