@@ -545,7 +545,11 @@ export default function ExplorePage() {
           />
 
           {/* Nearby Lakes Card */}
-          <NearbyLakesCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
+          <NearbyLakesCard 
+            lat={mapCenter?.lat ?? null} 
+            lng={mapCenter?.lng ?? null} 
+            bounds={appliedBounds}
+          />
 
           {/* List Your Business Banner */}
           <Link

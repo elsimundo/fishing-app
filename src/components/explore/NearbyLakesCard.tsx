@@ -3,17 +3,26 @@ import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee } from 'luci
 import { useLakes } from '../../hooks/useLakes'
 import type { Lake } from '../../types'
 
+interface Bounds {
+  north: number
+  south: number
+  east: number
+  west: number
+}
+
 interface NearbyLakesCardProps {
   lat: number | null
   lng: number | null
+  bounds?: Bounds | null
 }
 
-export function NearbyLakesCard({ lat, lng }: NearbyLakesCardProps) {
+export function NearbyLakesCard({ lat, lng, bounds }: NearbyLakesCardProps) {
   const [expanded, setExpanded] = useState(false)
   const { data: lakes, isLoading, error } = useLakes({
     lat,
     lng,
-    radiusKm: 50,
+    bounds,
+    radiusKm: 100,
     enabled: lat !== null && lng !== null,
   })
 
