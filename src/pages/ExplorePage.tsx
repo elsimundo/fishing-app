@@ -11,6 +11,7 @@ import { TideCard } from '../components/explore/TideCard'
 import { WeatherCard } from '../components/explore/WeatherCard'
 import { TackleShopsCard } from '../components/explore/TackleShopsCard'
 import { SessionsCatchesCard } from '../components/explore/SessionsCatchesCard'
+import { LocalIntelCard } from '../components/explore/LocalIntelCard'
 import { MapPin, Navigation, Store } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -479,6 +480,9 @@ export default function ExplorePage() {
               )}
             </div>
           </div>
+
+          {/* Local Intel Card */}
+          <LocalIntelCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
 
           {/* Tide Card */}
           <TideCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
