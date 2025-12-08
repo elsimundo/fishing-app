@@ -10,6 +10,7 @@ import type { Catch, CatchFormInput } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 import { FISH_SPECIES } from '../../lib/constants'
+import { getOrCreateSessionForCatch } from '../../lib/autoSession'
 
 const fishingStyles = [
   'Shore fishing',
@@ -175,10 +176,36 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       }
     }
 
-    const payload: CatchFormInput & { user_id: string } = {
+    const caughtAtIso = new Date(values.caught_at).toISOString()
+    
+    // Determine session_id - use existing or auto-create one
+    let sessionId: string | undefined = undefined
+    if (mode === 'create' && !catchId) {
+      if (targetSessionId) {
+        // Use the target session (from URL or active session)
+        sessionId = targetSessionId
+      } else {
+        // No active session - auto-create one based on catch location/time
+        try {
+          sessionId = await getOrCreateSessionForCatch({
+            userId: user.id,
+            latitude: typeof values.latitude === 'number' ? values.latitude : null,
+            longitude: typeof values.longitude === 'number' ? values.longitude : null,
+            locationName: values.location_name,
+            caughtAt: caughtAtIso,
+          })
+          console.log('CatchForm - Auto-created/found session:', sessionId)
+        } catch (err) {
+          console.error('Failed to auto-create session:', err)
+          // Continue without session if auto-creation fails
+        }
+      }
+    }
+
+    const payload = {
       user_id: user.id,
       species: values.species,
-      caught_at: new Date(values.caught_at).toISOString(),
+      caught_at: caughtAtIso,
       location_name: values.location_name,
       latitude: values.latitude,
       longitude: values.longitude,
@@ -189,8 +216,7 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       fishing_style: values.fishing_style ?? null,
       photo_url: photoUrl,
       notes: values.notes ?? null,
-      // Attach to requested session (from URL) or active session if creating a new catch
-      session_id: mode === 'create' && !catchId ? targetSessionId : undefined,
+      session_id: sessionId,
     }
 
     console.log('CatchForm - Submitting payload with session_id:', payload.session_id)

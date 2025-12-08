@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { Search, Check, X, Crown, MapPin, Globe, AlertCircle, UserCheck, User } from 'lucide-react'
+import { Search, Check, X, Crown, MapPin, Globe, AlertCircle, UserCheck, User, ExternalLink, Phone, Mail, FileText } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import type { Lake } from '../../types'
 
@@ -14,14 +14,49 @@ type AdminLakeOwner = {
   email: string | null
 }
 
+type AdminLakeClaim = {
+  id: string
+  lake_id: string
+  user_id: string
+  message: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+  user?: AdminLakeOwner | null
+  // Extended fields
+  role?: string | null
+  business_name?: string | null
+  website?: string | null
+  phone?: string | null
+  email?: string | null
+  proof_url?: string | null
+  proof_type?: string | null
+  lake_details?: Record<string, any> | null
+  interested_in_premium?: boolean
+}
+
 type AdminLake = Lake & {
   owner?: AdminLakeOwner | null
+  claims?: AdminLakeClaim[]
 }
 
 export default function LakesPage() {
   const queryClient = useQueryClient()
   const [filter, setFilter] = useState<LakeFilter>('unverified')
   const [searchTerm, setSearchTerm] = useState('')
+  const [verifyingLakeId, setVerifyingLakeId] = useState<string | null>(null)
+  const [premiumLakeId, setPremiumLakeId] = useState<string | null>(null)
+  const [ownerLakeId, setOwnerLakeId] = useState<string | null>(null)
+  const [claimUpdatingId, setClaimUpdatingId] = useState<string | null>(null)
+  const [showAddLake, setShowAddLake] = useState(false)
+  const [newLake, setNewLake] = useState({
+    name: '',
+    latitude: '',
+    longitude: '',
+    region: '',
+    water_type: 'lake' as 'lake' | 'pond' | 'reservoir' | 'river' | 'canal' | 'other',
+    day_ticket_price: '',
+    website: '',
+  })
 
   const { data: lakes, isLoading } = useQuery({
     queryKey: ['admin-lakes', filter, searchTerm],
@@ -73,9 +108,69 @@ export default function LakesPage() {
         }
       }
 
+      // Fetch pending claims for these lakes
+      const lakeIds = lakeRows.map((l) => l.id)
+      let claimsByLakeId: Record<string, AdminLakeClaim[]> = {}
+      if (lakeIds.length > 0) {
+        const { data: claims, error: claimsError } = await supabase
+          .from('lake_claims')
+          .select('id, lake_id, user_id, message, status, created_at, role, business_name, website, phone, email, proof_url, proof_type, lake_details, interested_in_premium')
+          .in('lake_id', lakeIds)
+          .eq('status', 'pending')
+
+        if (!claimsError && claims) {
+          // Load claimant profiles
+          const claimantIds = Array.from(new Set(claims.map((c) => c.user_id)))
+          let claimantById: Record<string, AdminLakeOwner> = {}
+          if (claimantIds.length > 0) {
+            const { data: claimProfiles } = await supabase
+              .from('profiles')
+              .select('id, username, email')
+              .in('id', claimantIds)
+
+            if (claimProfiles) {
+              claimantById = claimProfiles.reduce((acc, p) => {
+                acc[p.id] = {
+                  id: p.id,
+                  username: (p as any).username ?? null,
+                  email: (p as any).email ?? null,
+                }
+                return acc
+              }, {} as Record<string, AdminLakeOwner>)
+            }
+          }
+
+          claimsByLakeId = claims.reduce((acc, c) => {
+            const claim: AdminLakeClaim = {
+              id: c.id,
+              lake_id: c.lake_id,
+              user_id: c.user_id,
+              message: c.message,
+              status: c.status as AdminLakeClaim['status'],
+              created_at: c.created_at,
+              user: claimantById[c.user_id] ?? null,
+              // Extended fields
+              role: (c as any).role ?? null,
+              business_name: (c as any).business_name ?? null,
+              website: (c as any).website ?? null,
+              phone: (c as any).phone ?? null,
+              email: (c as any).email ?? null,
+              proof_url: (c as any).proof_url ?? null,
+              proof_type: (c as any).proof_type ?? null,
+              lake_details: (c as any).lake_details ?? null,
+              interested_in_premium: (c as any).interested_in_premium ?? false,
+            }
+            if (!acc[c.lake_id]) acc[c.lake_id] = []
+            acc[c.lake_id].push(claim)
+            return acc
+          }, {} as Record<string, AdminLakeClaim[]>)
+        }
+      }
+
       const enriched: AdminLake[] = lakeRows.map((lake) => ({
         ...lake,
         owner: lake.claimed_by ? ownersById[lake.claimed_by] ?? null : null,
+        claims: claimsByLakeId[lake.id] ?? [],
       }))
 
       return enriched
@@ -94,12 +189,88 @@ export default function LakesPage() {
         .eq('id', lakeId)
       if (error) throw error
     },
-    onSuccess: () => {
+    onMutate: ({ lakeId }) => {
+      setVerifyingLakeId(lakeId)
+    },
+    onSuccess: (_data, variables) => {
+      // Optimistically update current list so the UI reflects verification immediately
+      const { lakeId, verified } = variables
+      queryClient.setQueryData<AdminLake[] | undefined>(
+        ['admin-lakes', filter, searchTerm],
+        (prev) =>
+          prev?.map((lake) =>
+            lake.id === lakeId
+              ? { ...lake, is_verified: verified }
+              : lake
+          ) ?? prev
+      )
+
       invalidate()
       toast.success('Lake verification updated')
     },
     onError: (error: Error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      setVerifyingLakeId(null)
+    },
+  })
+
+  const clearOwner = useMutation({
+    mutationFn: async ({ lakeId }: { lakeId: string }) => {
+      const { error } = await supabase
+        .from('lakes')
+        .update({ claimed_by: null, claimed_at: null, is_verified: false })
+        .eq('id', lakeId)
+      if (error) throw error
+    },
+    onMutate: ({ lakeId }) => {
+      setOwnerLakeId(lakeId)
+    },
+    onSuccess: () => {
+      invalidate()
+      toast.success('Lake owner removed')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+    onSettled: () => {
+      setOwnerLakeId(null)
+    },
+  })
+
+  const assignOwner = useMutation({
+    mutationFn: async ({ lakeId, email }: { lakeId: string; email: string }) => {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle()
+
+      if (error) throw error
+      if (!profile) {
+        throw new Error('No user found with that email')
+      }
+
+      const { error: updateError } = await supabase
+        .from('lakes')
+        .update({ claimed_by: profile.id, claimed_at: new Date().toISOString() })
+        .eq('id', lakeId)
+
+      if (updateError) throw updateError
+    },
+    onMutate: ({ lakeId }) => {
+      setOwnerLakeId(lakeId)
+    },
+    onSuccess: () => {
+      invalidate()
+      toast.success('Lake owner assigned')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+    onSettled: () => {
+      setOwnerLakeId(null)
     },
   })
 
@@ -114,12 +285,126 @@ export default function LakesPage() {
         .eq('id', lakeId)
       if (error) throw error
     },
+    onMutate: ({ lakeId }) => {
+      setPremiumLakeId(lakeId)
+    },
     onSuccess: () => {
       invalidate()
       toast.success('Lake set as premium')
     },
     onError: (error: Error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      setPremiumLakeId(null)
+    },
+  })
+
+  const approveClaim = useMutation({
+    mutationFn: async ({
+      claimId,
+      lakeId,
+      userId,
+    }: {
+      claimId: string
+      lakeId: string
+      userId: string
+    }) => {
+      const now = new Date().toISOString()
+
+      const { error: lakeError } = await supabase
+        .from('lakes')
+        .update({ claimed_by: userId, claimed_at: now, is_verified: true })
+        .eq('id', lakeId)
+      if (lakeError) throw lakeError
+
+      const { error: claimError } = await supabase
+        .from('lake_claims')
+        .update({ status: 'approved', reviewed_at: now })
+        .eq('id', claimId)
+      if (claimError) throw claimError
+    },
+    onMutate: ({ claimId }) => {
+      setClaimUpdatingId(claimId)
+    },
+    onSuccess: () => {
+      invalidate()
+      toast.success('Claim approved and owner assigned')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+    onSettled: () => {
+      setClaimUpdatingId(null)
+    },
+  })
+
+  const rejectClaim = useMutation({
+    mutationFn: async ({ claimId, reason }: { claimId: string; reason: string | null }) => {
+      const now = new Date().toISOString()
+      const { error } = await supabase
+        .from('lake_claims')
+        .update({ status: 'rejected', decision_reason: reason, reviewed_at: now })
+        .eq('id', claimId)
+      if (error) throw error
+    },
+    onMutate: ({ claimId }) => {
+      setClaimUpdatingId(claimId)
+    },
+    onSuccess: () => {
+      invalidate()
+      toast.success('Claim rejected')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+    onSettled: () => {
+      setClaimUpdatingId(null)
+    },
+  })
+
+  const createLake = useMutation({
+    mutationFn: async () => {
+      const lat = parseFloat(newLake.latitude)
+      const lng = parseFloat(newLake.longitude)
+      if (Number.isNaN(lat) || Number.isNaN(lng)) {
+        throw new Error('Latitude and longitude must be valid numbers')
+      }
+
+      const dayPrice = newLake.day_ticket_price
+        ? parseFloat(newLake.day_ticket_price)
+        : null
+
+      const { error } = await supabase.from('lakes').insert({
+        name: newLake.name.trim(),
+        latitude: lat,
+        longitude: lng,
+        region: newLake.region.trim() || null,
+        water_type: newLake.water_type,
+        day_ticket_price: dayPrice,
+        website: newLake.website.trim() || null,
+        is_verified: true,
+        is_premium: false,
+      })
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      invalidate()
+      toast.success('Lake added')
+      setShowAddLake(false)
+      setNewLake({
+        name: '',
+        latitude: '',
+        longitude: '',
+        region: '',
+        water_type: 'lake',
+        day_ticket_price: '',
+        website: '',
+      })
+    },
+    onError: (err: Error) => {
+      toast.error(err.message)
     },
   })
 
@@ -131,12 +416,18 @@ export default function LakesPage() {
         .eq('id', lakeId)
       if (error) throw error
     },
+    onMutate: ({ lakeId }) => {
+      setPremiumLakeId(lakeId)
+    },
     onSuccess: () => {
       invalidate()
       toast.success('Premium removed')
     },
     onError: (error: Error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      setPremiumLakeId(null)
     },
   })
 
@@ -172,19 +463,29 @@ export default function LakesPage() {
               ))}
             </div>
 
-            {/* Search */}
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={20}
-              />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search lakes..."
-                className="w-full rounded-lg border-2 border-gray-200 py-2 pl-10 pr-4 text-sm focus:border-navy-800 focus:outline-none sm:w-64"
-              />
+            <div className="flex items-center gap-3">
+              {/* Search */}
+              <div className="relative">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={20}
+                />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search lakes..."
+                  className="w-full rounded-lg border-2 border-gray-200 py-2 pl-10 pr-4 text-sm focus:border-navy-800 focus:outline-none sm:w-64"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAddLake(true)}
+                className="rounded-lg bg-navy-800 px-3 py-2 text-sm font-semibold text-white hover:bg-navy-900"
+              >
+                + Add Lake
+              </button>
             </div>
           </div>
         </div>
@@ -207,9 +508,18 @@ export default function LakesPage() {
                 onClearPremium={() => clearPremium.mutate({ lakeId: lake.id })}
                 onClearOwner={() => clearOwner.mutate({ lakeId: lake.id })}
                 onAssignOwner={(email) => assignOwner.mutate({ lakeId: lake.id, email })}
-                isUpdatingVerify={verifyLake.isPending}
-                isUpdatingPremium={setPremium.isPending || clearPremium.isPending}
-                isUpdatingOwner={clearOwner.isPending || assignOwner.isPending}
+                isUpdatingVerify={verifyingLakeId === lake.id && verifyLake.isPending}
+                isUpdatingPremium={
+                  premiumLakeId === lake.id && (setPremium.isPending || clearPremium.isPending)
+                }
+                isUpdatingOwner={ownerLakeId === lake.id && (clearOwner.isPending || assignOwner.isPending)}
+                claimUpdatingId={claimUpdatingId}
+                onApproveClaim={(claim) =>
+                  approveClaim.mutate({ claimId: claim.id, lakeId: lake.id, userId: claim.user_id })
+                }
+                onRejectClaim={(claim, reason) =>
+                  rejectClaim.mutate({ claimId: claim.id, reason: reason || null })
+                }
               />
             ))}
           </div>
@@ -219,33 +529,120 @@ export default function LakesPage() {
             <span>No lakes found for this filter</span>
           </div>
         )}
-
-        {/* Owner / Claim controls */}
-        {lake.claimed_by ? (
-          <button
-            type="button"
-            onClick={onClearOwner}
-            disabled={isUpdatingOwner}
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200 disabled:opacity-60"
-          >
-            <User size={16} />
-            <span>{isUpdatingOwner ? 'Updating...' : 'Remove Owner'}</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              const email = prompt('Owner email address:')?.trim()
-              if (email) onAssignOwner(email)
-            }}
-            disabled={isUpdatingOwner}
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:bg-primary/60"
-          >
-            <User size={16} />
-            <span>{isUpdatingOwner ? 'Updating...' : 'Assign Owner'}</span>
-          </button>
-        )}
       </div>
+
+      {/* Add Lake Modal */}
+      {showAddLake && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <h2 className="mb-3 text-lg font-bold text-gray-900">Add Lake</h2>
+
+            <div className="space-y-3 text-sm">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">Name</label>
+                <input
+                  type="text"
+                  value={newLake.name}
+                  onChange={(e) => setNewLake((l) => ({ ...l, name: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-700">Latitude</label>
+                  <input
+                    type="text"
+                    value={newLake.latitude}
+                    onChange={(e) => setNewLake((l) => ({ ...l, latitude: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-700">Longitude</label>
+                  <input
+                    type="text"
+                    value={newLake.longitude}
+                    onChange={(e) => setNewLake((l) => ({ ...l, longitude: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">Region</label>
+                <input
+                  type="text"
+                  value={newLake.region}
+                  onChange={(e) => setNewLake((l) => ({ ...l, region: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">Water type</label>
+                <select
+                  value={newLake.water_type}
+                  onChange={(e) =>
+                    setNewLake((l) => ({ ...l, water_type: e.target.value as any }))
+                  }
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                >
+                  <option value="lake">Lake</option>
+                  <option value="pond">Pond</option>
+                  <option value="reservoir">Reservoir</option>
+                  <option value="river">River</option>
+                  <option value="canal">Canal</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-700">
+                    Day ticket price (£)
+                  </label>
+                  <input
+                    type="text"
+                    value={newLake.day_ticket_price}
+                    onChange={(e) =>
+                      setNewLake((l) => ({ ...l, day_ticket_price: e.target.value }))
+                    }
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-700">Website</label>
+                  <input
+                    type="text"
+                    value={newLake.website}
+                    onChange={(e) => setNewLake((l) => ({ ...l, website: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAddLake(false)}
+                className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => createLake.mutate()}
+                disabled={createLake.isPending}
+                className="rounded-lg bg-navy-800 px-3 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+              >
+                {createLake.isPending ? 'Saving…' : 'Save lake'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   )
 }
@@ -260,6 +657,9 @@ function LakeCard({
   isUpdatingVerify,
   isUpdatingPremium,
   isUpdatingOwner,
+  claimUpdatingId,
+  onApproveClaim,
+  onRejectClaim,
 }: {
   lake: AdminLake
   onVerify: (verified: boolean) => void
@@ -270,7 +670,12 @@ function LakeCard({
   isUpdatingVerify: boolean
   isUpdatingPremium: boolean
   isUpdatingOwner: boolean
+  claimUpdatingId: string | null
+  onApproveClaim: (claim: AdminLakeClaim) => void
+  onRejectClaim: (claim: AdminLakeClaim, reason: string | null) => void
 }) {
+  const hasPendingClaims = (lake.claims?.length || 0) > 0
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
       {/* Header */}
@@ -299,6 +704,11 @@ function LakeCard({
                 Owner: {lake.owner.username || lake.owner.email || lake.owner.id}
               </span>
             </div>
+          )}
+          {!lake.owner && hasPendingClaims && (
+            <p className="mt-1 text-xs text-amber-700">
+              {lake.claims!.length} pending claim{lake.claims!.length > 1 ? 's' : ''}
+            </p>
           )}
         </div>
       </div>
@@ -342,7 +752,7 @@ function LakeCard({
           type="button"
           onClick={() => onVerify(!lake.is_verified)}
           disabled={isUpdatingVerify}
-          className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:bg-primary/60"
+          className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-navy-800 px-3 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
         >
           {lake.is_verified ? (
             <>
@@ -376,7 +786,7 @@ function LakeCard({
               if (months > 0) onSetPremium(months)
             }}
             disabled={isUpdatingPremium}
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:bg-primary/60"
+            className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-navy-800 px-3 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
           >
             <Crown size={16} />
             <span>{isUpdatingPremium ? 'Updating...' : 'Set Premium'}</span>
@@ -394,6 +804,150 @@ function LakeCard({
           <span>Map</span>
         </a>
       </div>
+
+      {/* Claim review (collapsed by default) */}
+      {hasPendingClaims && (
+        <details className="mt-4 rounded-lg border border-amber-100 bg-amber-50 p-3 text-xs text-gray-800">
+          <summary className="cursor-pointer list-none font-semibold text-amber-800">
+            Review claims ({lake.claims!.length})
+          </summary>
+          <div className="mt-3 space-y-3">
+            {lake.claims!.map((claim) => {
+              const claimant = claim.user
+              const isUpdating = claimUpdatingId === claim.id
+              const details = claim.lake_details || {}
+              return (
+                <div
+                  key={claim.id}
+                  className="rounded-md bg-white p-3 shadow-sm ring-1 ring-amber-100"
+                >
+                  {/* Header */}
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-900">
+                        {claimant?.username || claimant?.email || claim.user_id}
+                      </p>
+                      <p className="text-[11px] text-gray-500">
+                        {new Date(claim.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    {claim.interested_in_premium && (
+                      <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-medium text-amber-800">
+                        💰 Wants Premium
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Role & Business */}
+                  <div className="mb-2 space-y-1 border-b border-gray-100 pb-2">
+                    {claim.role && (
+                      <p className="text-[11px]">
+                        <span className="font-medium text-gray-700">Role:</span>{' '}
+                        <span className="capitalize">{claim.role}</span>
+                      </p>
+                    )}
+                    {claim.business_name && (
+                      <p className="text-[11px]">
+                        <span className="font-medium text-gray-700">Business:</span> {claim.business_name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Contact */}
+                  <div className="mb-2 flex flex-wrap gap-3 text-[11px]">
+                    {claim.email && (
+                      <a href={`mailto:${claim.email}`} className="flex items-center gap-1 text-blue-600 hover:underline">
+                        <Mail size={10} /> {claim.email}
+                      </a>
+                    )}
+                    {claim.phone && (
+                      <a href={`tel:${claim.phone}`} className="flex items-center gap-1 text-blue-600 hover:underline">
+                        <Phone size={10} /> {claim.phone}
+                      </a>
+                    )}
+                    {claim.website && (
+                      <a href={claim.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline">
+                        <ExternalLink size={10} /> Website
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Proof */}
+                  {claim.proof_type && (
+                    <div className="mb-2 rounded bg-gray-50 p-2">
+                      <p className="text-[11px]">
+                        <span className="font-medium text-gray-700">Proof:</span>{' '}
+                        <span className="capitalize">{claim.proof_type.replace(/_/g, ' ')}</span>
+                      </p>
+                      {claim.proof_url && (
+                        <a
+                          href={claim.proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 flex items-center gap-1 text-[11px] text-blue-600 hover:underline"
+                        >
+                          <FileText size={10} /> View document
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Venue Details */}
+                  {Object.keys(details).length > 0 && (
+                    <div className="mb-2 rounded bg-gray-50 p-2 text-[11px]">
+                      <p className="mb-1 font-medium text-gray-700">Submitted venue details:</p>
+                      <div className="grid grid-cols-2 gap-1 text-gray-600">
+                        {details.water_type && <span>Water: {details.water_type}</span>}
+                        {details.lake_type && <span>Type: {details.lake_type}</span>}
+                        {details.day_ticket_price && <span>Day: £{details.day_ticket_price}</span>}
+                        {details.night_ticket_price && <span>Night: £{details.night_ticket_price}</span>}
+                      </div>
+                      {details.facilities?.length > 0 && (
+                        <p className="mt-1 text-gray-600">
+                          Facilities: {details.facilities.join(', ')}
+                        </p>
+                      )}
+                      {details.description && (
+                        <p className="mt-1 text-gray-600 line-clamp-2">{details.description}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Legacy message */}
+                  {claim.message && (
+                    <p className="mb-2 text-[11px] italic text-gray-600">"{claim.message}"</p>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-2">
+                    <button
+                      type="button"
+                      disabled={isUpdating}
+                      onClick={() => onApproveClaim(claim)}
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-navy-800 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+                    >
+                      <Check size={12} />
+                      <span>{isUpdating ? 'Approving…' : 'Approve & assign owner'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isUpdating}
+                      onClick={() => {
+                        const reason = window.prompt('Reason for rejection (optional):')
+                        onRejectClaim(claim, reason ?? null)
+                      }}
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-semibold text-gray-700 hover:bg-gray-200 disabled:opacity-60"
+                    >
+                      <X size={12} />
+                      <span>{isUpdating ? 'Rejecting…' : 'Reject'}</span>
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </details>
+      )}
     </div>
   )
 }

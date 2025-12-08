@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee } from 'lucide-react'
+import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee, BadgeCheck, Crown, Heart } from 'lucide-react'
 import { useLakes } from '../../hooks/useLakes'
 import { useAuth } from '../../hooks/useAuth'
+import { useSavedLakes } from '../../hooks/useSavedLakes'
 import { toast } from 'react-hot-toast'
-import { createLakeClaim } from '../../services/lake-claims'
 import { Link } from 'react-router-dom'
+import { ClaimLakeModal } from '../lakes/ClaimLakeModal'
 import type { Lake } from '../../types'
 
 interface Bounds {
@@ -24,7 +25,9 @@ interface NearbyLakesCardProps {
 export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [showAll, setShowAll] = useState(false)
+  const [claimingLake, setClaimingLake] = useState<Lake | null>(null)
   const { user } = useAuth()
+  const { isLakeSaved, toggleSave, isPending: isSavePending } = useSavedLakes()
   const { data: lakes, isLoading, error } = useLakes({
     lat,
     lng,
@@ -134,35 +137,24 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
                   lake={lake}
                   canClaim={!!user}
                   onSelect={onSelectLake}
-                  onClaim={async () => {
+                  isSaved={typeof lake.id === 'string' && !lake.id.startsWith('osm-') ? isLakeSaved(lake.id) : false}
+                  onToggleSave={typeof lake.id === 'string' && !lake.id.startsWith('osm-') && user ? () => toggleSave(lake.id) : undefined}
+                  isSaving={isSavePending}
+                  onClaim={() => {
                     if (!user) {
                       toast.error('You need to be logged in to claim a venue')
                       return
                     }
 
-                    // Only allow claims for Supabase lakes (not OSM discoveries)
-                    if (typeof lake.id !== 'string' || lake.id.startsWith('osm-')) {
-                      toast.error('You can only claim verified venues')
-                      return
-                    }
-
+                    // DB lakes: check if already claimed
                     if (lake.claimed_by) {
                       toast('This venue is already claimed')
                       return
                     }
 
-                    const message = window.prompt(
-                      `Tell us about your relationship to "${lake.name}" (owner, manager, etc):`
-                    )
-
-                    if (message === null) return
-
-                    try {
-                      await createLakeClaim(lake.id, user.id, message.trim() || null)
-                      toast.success('Claim submitted for review')
-                    } catch (err: any) {
-                      toast.error(err?.message || 'Failed to submit claim')
-                    }
+                    // Allow claiming both DB lakes and OSM lakes
+                    // OSM lakes will be converted to DB lakes during the claim process
+                    setClaimingLake(lake)
                   }}
                 />
               ))}
@@ -179,6 +171,19 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
             </div>
           )}
         </div>
+      )}
+
+      {/* Claim Modal */}
+      {claimingLake && user && (
+        <ClaimLakeModal
+          lake={claimingLake}
+          userId={user.id}
+          onClose={() => setClaimingLake(null)}
+          onSuccess={() => {
+            setClaimingLake(null)
+            toast.success('Claim submitted! We\'ll review it within 24-48 hours.')
+          }}
+        />
       )}
     </div>
   )
@@ -198,9 +203,12 @@ interface LakeItemProps {
   canClaim?: boolean
   onClaim?: () => void
   onSelect?: (lake: Lake) => void
+  isSaved?: boolean
+  onToggleSave?: () => void
+  isSaving?: boolean
 }
 
-function LakeItem({ lake, canClaim, onClaim, onSelect }: LakeItemProps) {
+function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, isSaving }: LakeItemProps) {
   const handleClick = () => {
     onSelect?.(lake)
   }
@@ -212,7 +220,20 @@ function LakeItem({ lake, canClaim, onClaim, onSelect }: LakeItemProps) {
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-gray-900">{lake.name}</h4>
+          <div className="flex items-center gap-1.5">
+            <h4 className="text-sm font-semibold text-gray-900">{lake.name}</h4>
+            {/* Ownership badges */}
+            {lake.is_premium && (
+              <span title="Premium Venue">
+                <Crown size={14} className="text-amber-500" />
+              </span>
+            )}
+            {lake.claimed_by && !lake.is_premium && (
+              <span title="Verified Owner">
+                <BadgeCheck size={14} className="text-blue-500" />
+              </span>
+            )}
+          </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-2">
             {lake.lake_type && (
               <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
@@ -227,11 +248,31 @@ function LakeItem({ lake, canClaim, onClaim, onSelect }: LakeItemProps) {
             )}
           </div>
         </div>
-        {lake.distance !== undefined && (
-          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
-            {lake.distance.toFixed(1)} km
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {lake.distance !== undefined && (
+            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+              {lake.distance.toFixed(1)} km
+            </span>
+          )}
+          {onToggleSave && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleSave()
+              }}
+              disabled={isSaving}
+              className={`rounded-full p-1.5 transition-colors ${
+                isSaved 
+                  ? 'text-pink-500 hover:bg-pink-100' 
+                  : 'text-gray-300 hover:bg-gray-200 hover:text-pink-400'
+              }`}
+              title={isSaved ? 'Remove from watchlist' : 'Add to watchlist'}
+            >
+              <Heart size={16} fill={isSaved ? 'currentColor' : 'none'} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -283,8 +324,8 @@ function LakeItem({ lake, canClaim, onClaim, onSelect }: LakeItemProps) {
         )}
       </div>
 
-      {/* Pricing */}
-      {lake.day_ticket_price && (
+      {/* Pricing - only show for claimed lakes */}
+      {lake.claimed_by && lake.day_ticket_price && (
         <p className="mt-2 text-xs font-medium text-gray-700">
           Day ticket: £{lake.day_ticket_price.toFixed(2)}
         </p>
@@ -292,7 +333,8 @@ function LakeItem({ lake, canClaim, onClaim, onSelect }: LakeItemProps) {
 
       {/* Website / Claim / Details actions */}
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        {lake.website && (
+        {/* Website - only show for claimed lakes */}
+        {lake.claimed_by && lake.website && (
           <a
             href={lake.website}
             target="_blank"
@@ -304,8 +346,8 @@ function LakeItem({ lake, canClaim, onClaim, onSelect }: LakeItemProps) {
           </a>
         )}
 
-        {/* Claim this venue (only for unclaimed Supabase lakes) */}
-        {canClaim && onClaim && !lake.claimed_by && typeof lake.id === 'string' && !lake.id.startsWith('osm-') && (
+        {/* Claim this venue (for unclaimed DB lakes OR any OSM lake) */}
+        {canClaim && onClaim && !lake.claimed_by && (
           <button
             type="button"
             onClick={(e) => {

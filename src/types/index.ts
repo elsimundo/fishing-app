@@ -65,6 +65,10 @@ export type Session = {
   lake_id?: string | null
   lake?: Lake
 
+  // Link to a saved mark (fishing spot)
+  mark_id?: string | null
+  mark?: SavedMark
+
   // Collaborative sessions (optional, when joined via richer queries)
   participants?: SessionParticipant[]
   participant_count?: number
@@ -93,6 +97,10 @@ export type Catch = {
   released?: boolean | null
   created_at: string
   updated_at: string
+
+  // Link to a saved mark (fishing spot) - can differ from session mark if angler moved
+  mark_id?: string | null
+  mark?: SavedMark
 
   // Optional relation for attribution
   logged_by?: Profile
@@ -276,6 +284,7 @@ export interface Lake {
   claimed_at?: string
   is_verified?: boolean
   is_premium?: boolean
+  is_founding_venue?: boolean
   premium_expires_at?: string
   
   // Stats (auto-updated by triggers)
@@ -431,4 +440,105 @@ export interface CompetitionInvite {
   competition?: Competition
   inviter?: Profile
   invitee?: Profile
+}
+
+// ============================================================================
+// Lake Claims Types
+// ============================================================================
+
+export type LakeClaimRole = 'owner' | 'manager' | 'staff' | 'committee' | 'other'
+
+export type LakeClaimProofType = 
+  | 'insurance'
+  | 'lease'
+  | 'utility_bill'
+  | 'companies_house'
+  | 'club_membership'
+  | 'website_admin'
+  | 'other'
+
+export type LakeClaimStatus = 'pending' | 'approved' | 'rejected'
+
+export interface LakeClaimDetails {
+  water_type?: LakeWaterType
+  lake_type?: LakeType
+  day_ticket_price?: number
+  night_ticket_price?: number
+  facilities?: string[]
+  description?: string
+  species?: string[]
+}
+
+export interface LakeClaim {
+  id: string
+  lake_id: string
+  user_id: string
+  status: LakeClaimStatus
+  
+  // Claimant info
+  role: LakeClaimRole
+  business_name?: string
+  website?: string
+  phone?: string
+  email?: string
+  
+  // Proof of ownership
+  proof_url?: string
+  proof_type?: LakeClaimProofType
+  
+  // Venue details they're submitting
+  lake_details?: LakeClaimDetails
+  
+  // Legacy field (kept for backwards compat)
+  message?: string
+  
+  // Commercial interest
+  interested_in_premium: boolean
+  terms_accepted: boolean
+  
+  // Review info
+  reviewed_at?: string
+  reviewed_by?: string
+  rejection_reason?: string
+  
+  created_at: string
+  
+  // Optional relations
+  lake?: Lake
+  user?: Profile
+}
+
+// Saved Marks / Watchlist
+export type SavedMarkWaterType = 'sea' | 'coastal' | 'river' | 'lake' | 'canal' | 'pond' | 'reservoir' | 'other'
+export type MarkPrivacyLevel = 'private' | 'friends' | 'public'
+
+export interface SavedMark {
+  id: string
+  user_id: string
+  name: string
+  latitude: number
+  longitude: number
+  water_type: SavedMarkWaterType
+  notes?: string | null
+  privacy_level: MarkPrivacyLevel
+  created_at: string
+  updated_at: string
+  
+  // Optional: populated when fetching with shares
+  shares?: MarkShare[]
+  shared_by_user?: Profile // When this mark was shared with you
+  owner?: Profile // The mark owner
+}
+
+export interface MarkShare {
+  id: string
+  mark_id: string
+  shared_by: string
+  shared_with: string
+  can_edit: boolean
+  created_at: string
+  
+  // Optional relations
+  shared_by_user?: Profile
+  shared_with_user?: Profile
 }

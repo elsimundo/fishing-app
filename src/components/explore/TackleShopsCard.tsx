@@ -123,11 +123,11 @@ export function TackleShopsCard({ lat, lng, shops }: TackleShopsCardProps) {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium hover:bg-primary/90"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Navigation size={14} />
-                    <span>Directions</span>
+                    Directions
                   </a>
                 </div>
               </div>

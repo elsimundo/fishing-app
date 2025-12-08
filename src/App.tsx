@@ -19,6 +19,7 @@ import CompetitionDetailPage from './pages/CompetitionDetailPage'
 import CreateCompetitionPage from './pages/CreateCompetitionPage'
 import CreatePostPage from './pages/CreatePostPage'
 import LakeDetailPage from './pages/LakeDetailPage'
+import LakeOwnerDashboard from './pages/LakeOwnerDashboard'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 // Admin pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
@@ -53,6 +54,7 @@ function App() {
         <Route path="/sessions" element={<Dashboard />} />
         <Route path="/sessions/:id" element={<SessionDetailPage />} />
         <Route path="/lakes/:slugOrId" element={<LakeDetailPage />} />
+        <Route path="/lakes/:lakeId/dashboard" element={<LakeOwnerDashboard />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<UserProfilePage />} />
         <Route path="/messages" element={<MessagesPage />} />

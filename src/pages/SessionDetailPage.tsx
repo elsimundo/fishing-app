@@ -10,7 +10,7 @@ import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil, LogOut } from 'lucide-react'
+import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil, LogOut, Bookmark } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 import { EditSessionModal } from '../components/session/EditSessionModal'
 import { ParticipantsList } from '../components/session/ParticipantsList'
@@ -18,6 +18,7 @@ import { InviteToSessionModal } from '../components/session/InviteToSessionModal
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { ErrorState } from '../components/ui/ErrorState'
 import { useDeleteSession } from '../hooks/useDeleteSession'
+import { useSavedMarks } from '../hooks/useSavedMarks'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
 
@@ -37,6 +38,7 @@ export function SessionDetailPage() {
   const { data: session, isLoading, isError, error, refetch } = useSession(id)
   const { mutateAsync: updateSession, isPending: isEnding } = useUpdateSession()
   const markViewed = useMarkSessionViewed()
+  const { createMark, marks: savedMarks } = useSavedMarks()
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
@@ -182,6 +184,29 @@ export function SessionDetailPage() {
               <Plus size={16} />
               Invite Angler
             </button>
+            {session && session.latitude && session.longitude && !savedMarks.some(m => 
+              Math.abs(m.latitude - session.latitude) < 0.001 && 
+              Math.abs(m.longitude - session.longitude) < 0.001
+            ) && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!session) return
+                  createMark.mutate({
+                    name: session.location_name || session.title || 'Fishing spot',
+                    latitude: session.latitude,
+                    longitude: session.longitude,
+                    water_type: (session.water_type as string) === 'saltwater' ? 'sea' : 'lake',
+                    privacy_level: 'private',
+                  })
+                  setShowActions(false)
+                }}
+                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <Bookmark size={16} />
+                Save as Mark
+              </button>
+            )}
             {isActive && (
               <>
                 <div className="my-2 border-t border-gray-100" />

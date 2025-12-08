@@ -40,6 +40,45 @@ Sell anonymized, aggregated fishing data to:
 - **Premium tier**: Enhanced profile, photos, promotions, featured placement
 - **Advertising**: Sponsored listings in Explore results
 
+### Lake / Venue Ownership Tiers
+
+| Tier | Price | Features |
+|------|-------|----------|
+| **Unclaimed** | Free | Community data only (session/catch counts, species) |
+| **Claimed (Free)** | Free | Owner badge, website link, contact info, day ticket price, opening hours, description, respond to comments |
+| **Claimed (Premium)** | £9.99/mo or £99/yr | Featured placement, photo gallery, detailed facilities, multiple pegs, booking link, analytics dashboard, remove competitor ads, priority support |
+
+#### Early Adopter Program (Launch Period)
+- **First 100 venues OR first 3 months** (whichever comes first)
+- Free verification (normally £29 one-time fee post-launch)
+- "Founding Venue" badge displayed permanently on lake page
+- Locked-in lower premium pricing if they upgrade during launch
+
+#### Post-Launch Pricing
+- **Verification fee**: £29 one-time to claim a venue
+- **Premium**: £9.99/mo or £99/yr
+
+#### Lake Card Display by Tier
+
+| Content | Unclaimed | Claimed (Free) | Premium |
+|---------|-----------|----------------|---------|
+| Name, location, distance | ✅ | ✅ | ✅ |
+| Water type | ✅ | ✅ | ✅ |
+| Session/catch counts | ✅ | ✅ | ✅ |
+| Species caught | ✅ | ✅ | ✅ |
+| Basic facilities | ✅ | ✅ | ✅ |
+| Owner badge | ❌ | ✅ | ✅ |
+| Website/contact | ❌ | ✅ | ✅ |
+| Day ticket price | ❌ | ✅ | ✅ |
+| Opening hours | ❌ | ✅ | ✅ |
+| Description | ❌ | ✅ | ✅ |
+| Recent catches (3) | ❌ | ✅ | ✅ |
+| Full session feed | ❌ | ❌ | ✅ |
+| Photo gallery | ❌ | ❌ | ✅ |
+| Featured placement | ❌ | ❌ | ✅ |
+| Analytics dashboard | ❌ | ❌ | ✅ |
+| Booking integration | ❌ | ❌ | ✅ |
+
 ---
 
 ## 3. Premium Features (B2C)
@@ -89,3 +128,28 @@ Potential premium features for individual users:
 ---
 
 *Last updated: December 2024*
+
+---
+
+## Implementation Status
+
+### Lake Ownership ✅
+- [x] `lakes` table with `claimed_by`, `is_verified`, `is_premium` fields
+- [x] `lake_claims` table for claim requests
+- [x] Admin UI to review/approve claims
+- [x] Admin UI to add lakes manually
+- [x] Add `claimed_at` timestamp for early adopter tracking (migration ready)
+- [x] Add `is_founding_venue` boolean (migration ready)
+- [x] Tiered lake card display in Explore (badges + content gating)
+- [x] Lake detail page with tier-appropriate content
+- [x] Premium analytics dashboard for lake owners (`/lakes/:id/dashboard`)
+- [ ] Stripe integration for premium subscriptions (deferred)
+
+### Saved Marks / Watchlist ✅
+- [x] `saved_marks` table with privacy levels (private/friends/public)
+- [x] `mark_shares` table for friend-to-friend sharing
+- [x] My Marks card on Explore page
+- [x] Share modal with friend picker
+- [x] Mark selector in session start form
+- [x] Auto-session creation when logging catch without session
+- [x] `mark_id` on sessions and catches tables

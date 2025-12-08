@@ -14,7 +14,10 @@ import { TackleShopsCard } from '../components/explore/TackleShopsCard'
 import { SessionsCatchesCard } from '../components/explore/SessionsCatchesCard'
 import { LocalIntelCard } from '../components/explore/LocalIntelCard'
 import { NearbyLakesCard } from '../components/explore/NearbyLakesCard'
+import { MyMarksCard } from '../components/explore/MyMarksCard'
+import { MyLakesCard } from '../components/explore/MyLakesCard'
 import { useLakes } from '../hooks/useLakes'
+import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { MapPin, Navigation, Store } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
@@ -29,7 +32,7 @@ const STATIC_POIS = {
   ],
 }
 
-type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters' | 'lakes'
+type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters' | 'lakes' | 'marks'
 
 const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; className: string }> = {
   session: { label: 'Session', icon: '🎣', className: 'bg-emerald-100 text-emerald-700' },
@@ -38,6 +41,8 @@ const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; classN
   club: { label: 'Club', icon: '👥', className: 'bg-indigo-100 text-indigo-700' },
   charter: { label: 'Charter boat', icon: '⛵', className: 'bg-rose-100 text-rose-700' },
   lake: { label: 'Lake', icon: '🏞️', className: 'bg-sky-100 text-sky-700' },
+  mark: { label: 'My Mark', icon: '📍', className: 'bg-red-100 text-red-700' },
+  'shared-mark': { label: 'Shared Mark', icon: '🤝', className: 'bg-green-100 text-green-700' },
 }
 
 export default function ExplorePage() {
@@ -56,6 +61,7 @@ export default function ExplorePage() {
     clubs: true,
     charters: true,
     lakes: true,
+    marks: true,
   })
 
   const [liveBounds, setLiveBounds] = useState<{
@@ -106,6 +112,10 @@ export default function ExplorePage() {
     userLocation,
     filters.shops
   )
+
+  // Fetch saved marks for map display
+  const { marks: savedMarks } = useSavedMarks()
+  const { data: sharedMarks } = useSharedMarks()
 
   // Load saved default area or get user location on first load
   useEffect(() => {
@@ -241,6 +251,32 @@ export default function ExplorePage() {
       }
     }
 
+    // Add saved marks
+    if (filters.marks && savedMarks) {
+      for (const mark of savedMarks) {
+        items.push({
+          id: `mark-${mark.id}`,
+          type: 'mark',
+          lat: mark.latitude,
+          lng: mark.longitude,
+          title: mark.name,
+        })
+      }
+    }
+
+    // Add shared marks
+    if (filters.marks && sharedMarks) {
+      for (const mark of sharedMarks) {
+        items.push({
+          id: `shared-mark-${mark.id}`,
+          type: 'shared-mark',
+          lat: mark.latitude,
+          lng: mark.longitude,
+          title: mark.name,
+        })
+      }
+    }
+
     if (!appliedBounds) return items
 
     return items.filter((m) => {
@@ -252,7 +288,7 @@ export default function ExplorePage() {
         m.lng >= appliedBounds.west
       )
     })
-  }, [sessions, catches, shopsData, lakes, filters, appliedBounds, fishingPreference])
+  }, [sessions, catches, shopsData, lakes, savedMarks, sharedMarks, filters, appliedBounds, fishingPreference])
 
   const markersWithDistance: ExploreMarker[] = useMemo(() => {
     if (!userLocation) return markers
@@ -298,6 +334,8 @@ export default function ExplorePage() {
       lake: markersWithDistance.filter((m) => m.type === 'lake').length,
       club: markersWithDistance.filter((m) => m.type === 'club').length,
       charter: markersWithDistance.filter((m) => m.type === 'charter').length,
+      mark: markersWithDistance.filter((m) => m.type === 'mark').length,
+      'shared-mark': markersWithDistance.filter((m) => m.type === 'shared-mark').length,
     }),
     [markersWithDistance]
   )
@@ -365,6 +403,7 @@ export default function ExplorePage() {
     lakes: { active: 'bg-sky-500 text-white', inactive: 'bg-sky-100 text-sky-700 hover:bg-sky-200' },
     clubs: { active: 'bg-violet-600 text-white', inactive: 'bg-violet-100 text-violet-700 hover:bg-violet-200' },
     charters: { active: 'bg-rose-600 text-white', inactive: 'bg-rose-100 text-rose-700 hover:bg-rose-200' },
+    marks: { active: 'bg-red-600 text-white', inactive: 'bg-red-100 text-red-700 hover:bg-red-200' },
   }
 
   const renderFilterChip = (key: ExploreFilterKey, label: string, count?: number) => (
@@ -429,6 +468,7 @@ export default function ExplorePage() {
             {renderFilterChip('catches', 'Catches', markerCounts.catch)}
             {renderFilterChip('shops', 'Shops', markerCounts.shop)}
             {showFreshwater && renderFilterChip('lakes', 'Lakes', markerCounts.lake)}
+            {renderFilterChip('marks', 'Marks', (markerCounts.mark || 0) + (markerCounts['shared-mark'] || 0))}
             {renderFilterChip('clubs', 'Clubs', markerCounts.club)}
             {showSaltwater && renderFilterChip('charters', 'Charters', markerCounts.charter)}
           </div>
@@ -538,6 +578,36 @@ export default function ExplorePage() {
                   })()}
                 </div>
               )}
+              {(selectedMarker.type === 'mark' || selectedMarker.type === 'shared-mark') && (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      <Navigation size={12} className="inline mr-1" />
+                      Directions
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const markId = selectedMarker.id.replace('mark-', '').replace('shared-mark-', '')
+                        navigate('/sessions/new', { state: { markId, markName: selectedMarker.title } })
+                      }}
+                      className="flex-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                    >
+                      🎣 Log Session
+                    </button>
+                  </div>
+                  {selectedMarker.type === 'shared-mark' && (
+                    <p className="text-center text-[10px] text-gray-500">
+                      Shared with you by a friend
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -614,6 +684,24 @@ export default function ExplorePage() {
               lat={mapCenter?.lat ?? null}
               lng={mapCenter?.lng ?? null}
               bounds={appliedBounds}
+              onSelectLake={handleSelectLakeFromCard}
+            />
+          )}
+
+          {/* My Marks / Watchlist - for any custom spots (sea, rivers, canals, etc.) */}
+          <MyMarksCard
+            onSelectMark={(mark) => {
+              // Open Google Maps directions to the mark
+              window.open(
+                `https://www.google.com/maps/dir/?api=1&destination=${mark.latitude},${mark.longitude}`,
+                '_blank'
+              )
+            }}
+          />
+
+          {/* My Lakes / Watchlist - for freshwater venues */}
+          {showFreshwater && (
+            <MyLakesCard
               onSelectLake={handleSelectLakeFromCard}
             />
           )}

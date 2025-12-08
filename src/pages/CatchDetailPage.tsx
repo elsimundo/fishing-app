@@ -4,9 +4,10 @@ import { useCatch } from '../hooks/useCatch'
 import { useDeleteCatch } from '../hooks/useDeleteCatch'
 import { useAuth } from '../hooks/useAuth'
 import type { Catch } from '../types'
-import { Share2, Trash2, MoreHorizontal, Pencil } from 'lucide-react'
+import { Share2, Trash2, MoreHorizontal, Pencil, Bookmark } from 'lucide-react'
 import { ShareCatchToFeedModal } from '../components/catch/ShareCatchToFeedModal'
 import { ErrorState } from '../components/ui/ErrorState'
+import { useSavedMarks } from '../hooks/useSavedMarks'
 import { toast } from 'react-hot-toast'
 
 export function CatchDetailPage() {
@@ -16,6 +17,7 @@ export function CatchDetailPage() {
   const { user } = useAuth()
   const { data, isLoading, isError, error } = useCatch(id)
   const { mutateAsync: deleteCatch, isPending: isDeleting } = useDeleteCatch()
+  const { createMark, marks: savedMarks } = useSavedMarks()
   const [catchItem, setCatchItem] = useState<Catch | null>(null)
   const [shareMode, setShareMode] = useState<'feed' | 'profile' | null>(null)
   const [showMenu, setShowMenu] = useState(false)
@@ -111,6 +113,28 @@ export function CatchDetailPage() {
                           <Pencil size={14} />
                           <span>Edit Catch</span>
                         </button>
+                        {catchItem.latitude && catchItem.longitude && !savedMarks.some(m => 
+                          Math.abs(m.latitude - (catchItem.latitude || 0)) < 0.001 && 
+                          Math.abs(m.longitude - (catchItem.longitude || 0)) < 0.001
+                        ) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              createMark.mutate({
+                                name: catchItem.location_name || catchItem.species || 'Fishing spot',
+                                latitude: catchItem.latitude!,
+                                longitude: catchItem.longitude!,
+                                water_type: 'sea', // Default to sea for catches
+                                privacy_level: 'private',
+                              })
+                              setShowMenu(false)
+                            }}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            <Bookmark size={14} />
+                            <span>Save as Mark</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={async () => {

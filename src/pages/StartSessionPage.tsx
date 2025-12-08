@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import { Layout } from '../components/layout/Layout'
 import { LocationPicker } from '../components/map/LocationPicker'
 import { useLakes } from '../hooks/useLakes'
+import { useSavedMarks } from '../hooks/useSavedMarks'
 import type { Lake } from '../types'
 
 type WaterType = 'saltwater' | 'freshwater'
@@ -20,6 +21,7 @@ interface FormState {
   privacy: Privacy
   notes?: string
   lakeId?: string | null
+  markId?: string | null
 }
 
 export default function StartSessionPage() {
@@ -45,7 +47,11 @@ export default function StartSessionPage() {
     latitude: null,
     longitude: null,
     lakeId: null,
+    markId: null,
   })
+
+  // Fetch user's saved marks for saltwater sessions
+  const { marks: savedMarks } = useSavedMarks()
 
   // Fetch nearby lakes for freshwater sessions
   const { data: nearbyLakes } = useLakes({
@@ -55,9 +61,15 @@ export default function StartSessionPage() {
     enabled: formData.waterType === 'freshwater' && formData.latitude !== null,
   })
 
-  // Pre-select lake if navigated from Explore page
+  // Pre-select lake or mark if navigated from Explore page
   useEffect(() => {
-    const state = location.state as { lakeId?: string; lakeName?: string } | null
+    const state = location.state as { 
+      lakeId?: string
+      lakeName?: string
+      markId?: string
+      markName?: string 
+    } | null
+    
     if (state?.lakeId) {
       setFormData(prev => ({ 
         ...prev, 
@@ -65,7 +77,24 @@ export default function StartSessionPage() {
         waterType: 'freshwater',
       }))
     }
-  }, [location.state])
+    
+    // If navigating with a mark, find it and pre-fill location
+    if (state?.markId) {
+      const mark = savedMarks.find(m => m.id === state.markId)
+      if (mark) {
+        setFormData(prev => ({ 
+          ...prev, 
+          markId: state.markId,
+          latitude: mark.latitude,
+          longitude: mark.longitude,
+          locationName: mark.name,
+          waterType: 'saltwater', // Marks are typically sea fishing spots
+        }))
+        // Also update the location coords for the picker
+        setLocationCoords({ lat: mark.latitude, lng: mark.longitude })
+      }
+    }
+  }, [location.state, savedMarks])
 
   const handleQuickStart = async () => {
     if (!user) {
@@ -190,6 +219,7 @@ export default function StartSessionPage() {
         is_public: true,
         description: formData.notes ?? null,
         lake_id: formData.lakeId ?? null,
+        mark_id: formData.markId ?? null,
       })
       .select()
       .single()
@@ -371,11 +401,34 @@ export default function StartSessionPage() {
       formData.latitude != null &&
       formData.longitude != null
     const hasTitle = Boolean(formData.title.trim())
+    
+    // Check if we came from a mark
+    const preSelectedMark = formData.markId ? savedMarks.find(m => m.id === formData.markId) : null
 
     return (
       <>
         <h2 className="mb-1 text-lg font-bold text-gray-900">Where are you fishing?</h2>
         <p className="mb-4 text-sm text-gray-600">Set your spot and give your session a name.</p>
+        
+        {/* Pre-selected mark indicator */}
+        {preSelectedMark && (
+          <div className="mb-4 rounded-xl border-2 border-red-200 bg-red-50 p-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">📍</span>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Starting at: {preSelectedMark.name}</p>
+                <p className="text-xs text-gray-600">Your saved mark</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, markId: null }))}
+                className="text-xs text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         <button
           type="button"
@@ -498,6 +551,43 @@ export default function StartSessionPage() {
             </select>
             <p className="mt-1 text-xs text-gray-500">
               Linking helps build local fishing intel
+            </p>
+          </div>
+        )}
+
+        {/* Saved mark selector for saltwater */}
+        {selected === 'saltwater' && savedMarks && savedMarks.length > 0 && (
+          <div className="mt-4 rounded-xl border-2 border-gray-200 bg-white p-4">
+            <label className="mb-2 block text-sm font-semibold text-gray-900">
+              📍 Start at a saved mark (optional)
+            </label>
+            <select
+              value={formData.markId ?? ''}
+              onChange={(e) => {
+                const markId = e.target.value || null
+                const mark = savedMarks.find(m => m.id === markId)
+                setFormData(prev => ({ 
+                  ...prev, 
+                  markId,
+                  // Auto-fill location from mark
+                  ...(mark ? {
+                    latitude: mark.latitude,
+                    longitude: mark.longitude,
+                    locationName: mark.name,
+                  } : {})
+                }))
+              }}
+              className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+            >
+              <option value="">Choose a mark...</option>
+              {savedMarks.map((mark) => (
+                <option key={mark.id} value={mark.id}>
+                  {mark.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Your saved fishing spots
             </p>
           </div>
         )}

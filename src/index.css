@@ -15,7 +15,7 @@
   /* Navy color scale for primary buttons */
   --color-navy-400: #6b7fb8;
   --color-navy-800: #1e3a8a;
-  --color-navy-900: #1e3a8a;
+  --color-navy-900: #172554;
 }
 
 html,
@@ -38,6 +38,19 @@ a {
 
 button {
   font-family: inherit;
+}
+
+/* Ensure white text on primary/navy buttons */
+.bg-primary,
+.bg-navy-800,
+.bg-navy-900 {
+  color: white !important;
+}
+
+.bg-primary svg,
+.bg-navy-800 svg,
+.bg-navy-900 svg {
+  color: white !important;
 }
 
 .mapboxgl-ctrl-geolocate {
