@@ -86,7 +86,8 @@ export default function ExplorePage() {
   const { data: lakes } = useLakes({
     lat: mapCenter?.lat,
     lng: mapCenter?.lng,
-    radiusKm: 50,
+    bounds: appliedBounds,
+    radiusKm: 100, // Larger radius since we're using bounds
     enabled: filters.lakes,
   })
 

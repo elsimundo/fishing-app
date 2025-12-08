@@ -1,48 +1,107 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { calculateDistance } from '../utils/distance'
+import { fetchLakesFromOSM } from '../services/overpass-lakes'
 import type { Lake } from '../types'
+
+interface Bounds {
+  north: number
+  south: number
+  east: number
+  west: number
+}
 
 interface UseLakesOptions {
   lat?: number | null
   lng?: number | null
+  bounds?: Bounds | null
   radiusKm?: number
   enabled?: boolean
 }
 
 /**
- * Fetch lakes, optionally filtered by distance from a point
+ * Fetch lakes from both Supabase (claimed/verified) and OSM (discovered)
  */
-export function useLakes({ lat, lng, radiusKm = 50, enabled = true }: UseLakesOptions = {}) {
+export function useLakes({ lat, lng, bounds, radiusKm = 50, enabled = true }: UseLakesOptions = {}) {
   return useQuery({
-    queryKey: ['lakes', lat, lng, radiusKm],
+    queryKey: ['lakes', bounds, lat, lng, radiusKm],
     queryFn: async (): Promise<Lake[]> => {
-      const { data, error } = await supabase
-        .from('lakes')
-        .select('*')
-        .order('name')
-        .limit(100)
+      const allLakes: Lake[] = []
+      const seenIds = new Set<string>()
 
-      if (error) {
-        console.error('[useLakes] Error:', error)
-        throw error
+      // 1. Fetch from Supabase (claimed/verified lakes take priority)
+      try {
+        let query = supabase.from('lakes').select('*').order('name').limit(100)
+        
+        // Filter by bounds if provided
+        if (bounds) {
+          query = query
+            .gte('latitude', bounds.south)
+            .lte('latitude', bounds.north)
+            .gte('longitude', bounds.west)
+            .lte('longitude', bounds.east)
+        }
+
+        const { data: supabaseLakes, error } = await query
+
+        if (!error && supabaseLakes) {
+          for (const lake of supabaseLakes) {
+            seenIds.add(lake.id)
+            allLakes.push(lake as Lake)
+          }
+          console.log(`[useLakes] Found ${supabaseLakes.length} lakes from Supabase`)
+        }
+      } catch (err) {
+        console.error('[useLakes] Supabase error:', err)
       }
 
-      if (!data) return []
+      // 2. Fetch from OpenStreetMap if bounds provided
+      if (bounds) {
+        try {
+          const osmLakes = await fetchLakesFromOSM(bounds)
+          
+          for (const osmLake of osmLakes) {
+            // Skip if we already have this lake from Supabase (by checking proximity)
+            const isDuplicate = allLakes.some(existing => {
+              if (!osmLake.latitude || !osmLake.longitude) return false
+              const dist = calculateDistance(
+                existing.latitude,
+                existing.longitude,
+                osmLake.latitude,
+                osmLake.longitude
+              )
+              // Consider duplicate if within 100m and similar name
+              return dist < 0.1 && existing.name.toLowerCase().includes(osmLake.name?.toLowerCase().split(' ')[0] || '')
+            })
 
-      // If we have a center point, calculate distances and filter
+            if (!isDuplicate && osmLake.id) {
+              seenIds.add(osmLake.id)
+              allLakes.push({
+                ...osmLake,
+                created_at: osmLake.created_at || new Date().toISOString(),
+                updated_at: osmLake.updated_at || new Date().toISOString(),
+              } as Lake)
+            }
+          }
+          console.log(`[useLakes] Added ${osmLakes.length} lakes from OSM (after dedup)`)
+        } catch (err) {
+          console.error('[useLakes] OSM error:', err)
+        }
+      }
+
+      // 3. Calculate distances if we have a center point
       if (lat != null && lng != null) {
-        const lakesWithDistance = data.map((lake) => ({
-          ...lake,
-          distance: calculateDistance(lat, lng, lake.latitude, lake.longitude),
-        }))
+        for (const lake of allLakes) {
+          lake.distance = calculateDistance(lat, lng, lake.latitude, lake.longitude)
+        }
 
-        return lakesWithDistance
-          .filter((lake) => lake.distance <= radiusKm)
-          .sort((a, b) => a.distance - b.distance)
+        // Filter by radius and sort by distance
+        return allLakes
+          .filter((lake) => lake.distance !== undefined && lake.distance <= radiusKm)
+          .sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity))
       }
 
-      return data as Lake[]
+      return allLakes
     },
     enabled,
     staleTime: 10 * 60 * 1000, // 10 minutes
