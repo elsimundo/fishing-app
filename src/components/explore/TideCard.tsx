@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Waves, ChevronDown, ChevronUp, Clock, Loader2 } from 'lucide-react'
-import { useTideData } from '../../hooks/useTideData'
+import { Waves, ChevronDown, ChevronUp, Clock, Loader2, MapPin, Check } from 'lucide-react'
+import { useTideData, useNearbyTideStations } from '../../hooks/useTideData'
 import { format, formatDistanceToNow } from 'date-fns'
+import type { TideStation } from '../../types/tides'
 
 interface TideCardProps {
   lat: number | null
@@ -10,7 +11,11 @@ interface TideCardProps {
 
 export function TideCard({ lat, lng }: TideCardProps) {
   const [expanded, setExpanded] = useState(false)
-  const { data: tideData, isLoading, error } = useTideData(lat, lng, lat !== null && lng !== null)
+  const [showStationPicker, setShowStationPicker] = useState(false)
+  const [selectedStation, setSelectedStation] = useState<TideStation | null>(null)
+  
+  const { data: nearbyStations } = useNearbyTideStations(lat, lng, lat !== null && lng !== null)
+  const { data: tideData, isLoading, error } = useTideData(lat, lng, lat !== null && lng !== null, selectedStation)
 
   if (!lat || !lng) {
     return (
@@ -208,13 +213,60 @@ export function TideCard({ lat, lng }: TideCardProps) {
 
           {/* Station Info */}
           <div className="mt-3 rounded-lg bg-gray-50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-              Reference Station
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                Reference Station
+              </p>
+              {nearbyStations && nearbyStations.length > 1 && (
+                <button
+                  onClick={() => setShowStationPicker(!showStationPicker)}
+                  className="text-[10px] font-medium text-blue-600 hover:text-blue-700"
+                >
+                  {showStationPicker ? 'Hide options' : 'Change station'}
+                </button>
+              )}
+            </div>
+            <p className="mt-1 text-xs font-medium text-gray-900">
+              <MapPin size={12} className="mr-1 inline text-gray-400" />
+              {station.name}
             </p>
-            <p className="mt-1 text-xs font-medium text-gray-900">📍 {station.name}</p>
             <p className="mt-0.5 text-[10px] text-gray-500">
               {station.distance ? `${station.distance.toFixed(1)} km away` : 'Nearest station'} · {station.source === 'uk-ea' ? 'UK Environment Agency' : station.source === 'noaa' ? 'NOAA' : 'WorldTides'}
             </p>
+
+            {/* Station Picker */}
+            {showStationPicker && nearbyStations && nearbyStations.length > 1 && (
+              <div className="mt-3 space-y-1.5 border-t border-gray-200 pt-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                  Nearby Stations
+                </p>
+                {nearbyStations.map((s) => {
+                  const isSelected = selectedStation?.id === s.id || (!selectedStation && s.id === station.id)
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => {
+                        setSelectedStation(s.id === station.id && !selectedStation ? null : s)
+                        setShowStationPicker(false)
+                      }}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors ${
+                        isSelected ? 'bg-blue-100' : 'bg-white hover:bg-gray-100'
+                      }`}
+                    >
+                      <div>
+                        <p className={`text-xs font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
+                          {s.name}
+                        </p>
+                        <p className="text-[10px] text-gray-500">
+                          {s.distance?.toFixed(1)} km away
+                        </p>
+                      </div>
+                      {isSelected && <Check size={16} className="text-blue-600" />}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

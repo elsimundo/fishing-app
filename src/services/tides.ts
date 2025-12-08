@@ -1,7 +1,7 @@
-import type { TideData } from '../types/tides'
+import type { TideData, TideStation } from '../types/tides'
 import { getNOAATideData } from './noaa-tides'
 import { getWorldTidesData, getWorldTidesPredictions, isWorldTidesConfigured } from './worldtides'
-import { getUKTideGaugeData, convertGaugeToTideData } from './uk-ea-tides'
+import { getUKTideGaugeData, getUKTideGaugeDataForStation, convertGaugeToTideData, findNearbyUKStations } from './uk-ea-tides'
 
 /**
  * Check if location is in UK waters (rough approximation)
@@ -143,4 +143,63 @@ export function isTideDataLikelyAvailable(lat: number, lng: number): boolean {
   }
 
   return false
+}
+
+/**
+ * Get nearby tide stations for a location
+ */
+export async function getNearbyTideStations(
+  lat: number,
+  lng: number,
+  maxDistanceKm: number = 50,
+  limit: number = 5
+): Promise<TideStation[]> {
+  // Currently only UK-EA supports multiple station selection
+  if (isUKWaters(lat, lng)) {
+    return findNearbyUKStations(lat, lng, maxDistanceKm, limit)
+  }
+  
+  // For other regions, return empty (could extend for NOAA in future)
+  return []
+}
+
+/**
+ * Get tide data for a specific station
+ */
+export async function getTideDataForStation(
+  station: TideStation,
+  lat: number,
+  lng: number
+): Promise<TideData | null> {
+  if (station.source === 'uk-ea') {
+    const gaugeData = await getUKTideGaugeDataForStation(station)
+    if (gaugeData) {
+      let tideData = convertGaugeToTideData(gaugeData)
+      if (tideData) {
+        // Supplement with WorldTides predictions
+        if (isWorldTidesConfigured()) {
+          try {
+            const predictions = await getWorldTidesPredictions(lat, lng, 3)
+            if (predictions.length > 0) {
+              const now = new Date()
+              const futurePredictions = predictions.filter(p => new Date(p.time) > now)
+              tideData = {
+                ...tideData,
+                predictions: futurePredictions,
+                extremes: {
+                  nextHigh: futurePredictions.find(p => p.type === 'high') || null,
+                  nextLow: futurePredictions.find(p => p.type === 'low') || null,
+                },
+              }
+            }
+          } catch {
+            // Ignore WorldTides errors
+          }
+        }
+        return tideData
+      }
+    }
+  }
+  
+  return null
 }
