@@ -345,15 +345,23 @@ export default function ExplorePage() {
     )
   }
 
+  // Chip colors matching marker colors
+  const chipColors: Record<ExploreFilterKey, { active: string; inactive: string }> = {
+    sessions: { active: 'bg-teal-700 text-white', inactive: 'bg-teal-100 text-teal-700 hover:bg-teal-200' },
+    catches: { active: 'bg-blue-600 text-white', inactive: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
+    shops: { active: 'bg-orange-500 text-white', inactive: 'bg-orange-100 text-orange-700 hover:bg-orange-200' },
+    lakes: { active: 'bg-sky-500 text-white', inactive: 'bg-sky-100 text-sky-700 hover:bg-sky-200' },
+    clubs: { active: 'bg-violet-600 text-white', inactive: 'bg-violet-100 text-violet-700 hover:bg-violet-200' },
+    charters: { active: 'bg-rose-600 text-white', inactive: 'bg-rose-100 text-rose-700 hover:bg-rose-200' },
+  }
+
   const renderFilterChip = (key: ExploreFilterKey, label: string, count?: number) => (
     <button
       key={key}
       type="button"
       onClick={() => toggleFilter(key)}
-      className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
-        filters[key]
-          ? 'bg-navy-800 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+      className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors shadow-sm ${
+        filters[key] ? chipColors[key].active : chipColors[key].inactive
       }`}
     >
       {label}
