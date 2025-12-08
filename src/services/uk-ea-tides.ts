@@ -62,22 +62,9 @@ export async function findNearestUKStation(
   lng: number,
   maxDistanceKm: number = 30
 ): Promise<TideStation | null> {
-  const stations = await findNearbyUKStations(lat, lng, maxDistanceKm, 1)
-  return stations[0] || null
-}
-
-/**
- * Find multiple nearby UK tide gauge stations
- */
-export async function findNearbyUKStations(
-  lat: number,
-  lng: number,
-  maxDistanceKm: number = 50,
-  limit: number = 5
-): Promise<TideStation[]> {
   const stations = await getAllUKTideStations()
 
-  if (stations.length === 0) return []
+  if (stations.length === 0) return null
 
   // Calculate distances
   const stationsWithDistance = stations.map(station => ({
@@ -85,11 +72,16 @@ export async function findNearbyUKStations(
     distance: calculateDistance(lat, lng, station.lat, station.lng),
   }))
 
-  // Sort by distance and filter by max distance
-  return stationsWithDistance
-    .filter(s => s.distance <= maxDistanceKm)
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, limit)
+  // Sort by distance
+  stationsWithDistance.sort((a, b) => a.distance - b.distance)
+
+  // Only return if within max distance
+  const nearest = stationsWithDistance[0]
+  if (nearest && nearest.distance <= maxDistanceKm) {
+    return nearest
+  }
+
+  return null
 }
 
 /**
@@ -218,15 +210,6 @@ export async function getUKTideGaugeData(
   const station = await findNearestUKStation(lat, lng)
   if (!station) return null
 
-  return getUKTideGaugeDataForStation(station)
-}
-
-/**
- * Get tide gauge data for a specific station
- */
-export async function getUKTideGaugeDataForStation(
-  station: TideStation
-): Promise<TideGaugeData | null> {
   // Get latest reading and historical readings in parallel
   const [latestReading, readings] = await Promise.all([
     getLatestReading(station.id),
