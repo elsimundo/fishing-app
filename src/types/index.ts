@@ -220,6 +220,7 @@ export interface Business {
 }
 
 export type LakeWaterType = 'lake' | 'pond' | 'reservoir' | 'river' | 'canal' | 'other'
+export type LakeType = 'commercial' | 'syndicate' | 'club' | 'day_ticket' | 'public' | 'private'
 
 export interface Lake {
   id: string
@@ -236,9 +237,16 @@ export interface Lake {
   
   // Venue details
   water_type?: LakeWaterType
+  lake_type?: LakeType
   size_acres?: number
   max_depth_m?: number
   species?: string[]
+  
+  // Fishing rules
+  barbless_only?: boolean
+  catch_and_release_only?: boolean
+  max_rods?: number
+  rules?: string
   
   // Facilities
   has_parking?: boolean
@@ -269,6 +277,11 @@ export interface Lake {
   is_verified?: boolean
   is_premium?: boolean
   premium_expires_at?: string
+  
+  // Stats (auto-updated by triggers)
+  total_sessions?: number
+  total_catches?: number
+  last_session_at?: string
   
   // Metadata
   created_at: string

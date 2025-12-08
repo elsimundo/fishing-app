@@ -123,18 +123,34 @@ export function NearbyLakesCard({ lat, lng }: NearbyLakesCardProps) {
   )
 }
 
+const LAKE_TYPE_LABELS: Record<string, string> = {
+  commercial: 'Commercial',
+  syndicate: 'Syndicate',
+  club: 'Club',
+  day_ticket: 'Day Ticket',
+  public: 'Public',
+  private: 'Private',
+}
+
 function LakeItem({ lake }: { lake: Lake }) {
   return (
     <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h4 className="text-sm font-semibold text-gray-900">{lake.name}</h4>
-          {lake.region && (
-            <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-              <MapPin size={10} />
-              {lake.region}
-            </p>
-          )}
+          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            {lake.lake_type && (
+              <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                {LAKE_TYPE_LABELS[lake.lake_type] || lake.lake_type}
+              </span>
+            )}
+            {lake.region && (
+              <span className="flex items-center gap-1 text-xs text-gray-500">
+                <MapPin size={10} />
+                {lake.region}
+              </span>
+            )}
+          </div>
         </div>
         {lake.distance !== undefined && (
           <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
@@ -142,6 +158,18 @@ function LakeItem({ lake }: { lake: Lake }) {
           </span>
         )}
       </div>
+
+      {/* Stats */}
+      {(lake.total_sessions || lake.total_catches) && (
+        <div className="mt-2 flex gap-3 text-[10px] text-gray-600">
+          {lake.total_sessions ? (
+            <span>📊 {lake.total_sessions} sessions</span>
+          ) : null}
+          {lake.total_catches ? (
+            <span>🐟 {lake.total_catches} catches</span>
+          ) : null}
+        </div>
+      )}
 
       {/* Species */}
       {lake.species && lake.species.length > 0 && (

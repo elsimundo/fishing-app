@@ -457,6 +457,28 @@ export default function ExplorePage() {
                   {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
                 </button>
               )}
+              {selectedMarker.id.startsWith('lake-') && (
+                <div className="flex gap-2">
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    📍 Directions
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const lakeId = selectedMarker.id.replace('lake-', '')
+                      navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
+                    }}
+                    className="flex-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                  >
+                    🎣 Log Session
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

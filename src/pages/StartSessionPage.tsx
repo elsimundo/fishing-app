@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Loader2, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { Layout } from '../components/layout/Layout'
 import { LocationPicker } from '../components/map/LocationPicker'
+import { useLakes } from '../hooks/useLakes'
+import type { Lake } from '../types'
 
 type WaterType = 'saltwater' | 'freshwater'
 type Privacy = 'private' | 'general' | 'exact'
@@ -17,10 +19,12 @@ interface FormState {
   waterType?: WaterType
   privacy: Privacy
   notes?: string
+  lakeId?: string | null
 }
 
 export default function StartSessionPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
 
   const [step, setStep] = useState(0) // 0 = choice, 1-4 = full setup
@@ -40,7 +44,28 @@ export default function StartSessionPage() {
     privacy: 'general',
     latitude: null,
     longitude: null,
+    lakeId: null,
   })
+
+  // Fetch nearby lakes for freshwater sessions
+  const { data: nearbyLakes } = useLakes({
+    lat: formData.latitude,
+    lng: formData.longitude,
+    radiusKm: 30,
+    enabled: formData.waterType === 'freshwater' && formData.latitude !== null,
+  })
+
+  // Pre-select lake if navigated from Explore page
+  useEffect(() => {
+    const state = location.state as { lakeId?: string; lakeName?: string } | null
+    if (state?.lakeId) {
+      setFormData(prev => ({ 
+        ...prev, 
+        lakeId: state.lakeId,
+        waterType: 'freshwater',
+      }))
+    }
+  }, [location.state])
 
   const handleQuickStart = async () => {
     if (!user) {
@@ -164,6 +189,7 @@ export default function StartSessionPage() {
         started_at: now.toISOString(),
         is_public: true,
         description: formData.notes ?? null,
+        lake_id: formData.lakeId ?? null,
       })
       .select()
       .single()
@@ -452,11 +478,35 @@ export default function StartSessionPage() {
           {makeCard('freshwater', '🏞️', 'Freshwater', 'Lakes, rivers, ponds, canals')}
         </div>
 
+        {/* Lake selector for freshwater */}
+        {selected === 'freshwater' && nearbyLakes && nearbyLakes.length > 0 && (
+          <div className="mt-4 rounded-xl border-2 border-gray-200 bg-white p-4">
+            <label className="mb-2 block text-sm font-semibold text-gray-900">
+              🏞️ Link to a fishing venue (optional)
+            </label>
+            <select
+              value={formData.lakeId ?? ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, lakeId: e.target.value || null }))}
+              className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+            >
+              <option value="">No specific venue</option>
+              {nearbyLakes.map((lake: Lake) => (
+                <option key={lake.id} value={lake.id}>
+                  {lake.name} {lake.distance ? `(${lake.distance.toFixed(1)} km)` : ''}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Linking helps build local fishing intel
+            </p>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={handleNext}
           disabled={!selected}
-          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="mt-4 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           Continue
         </button>
