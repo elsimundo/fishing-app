@@ -61,6 +61,10 @@ export type Session = {
   // When this session is the backing session for a competition
   competition_id?: string | null
 
+  // Link to a fishing venue (lake/pond/reservoir)
+  lake_id?: string | null
+  lake?: Lake
+
   // Collaborative sessions (optional, when joined via richer queries)
   participants?: SessionParticipant[]
   participant_count?: number
@@ -213,6 +217,65 @@ export interface Business {
   claimed_by_owner?: string
   created_at: string
   updated_at: string
+}
+
+export type LakeWaterType = 'lake' | 'pond' | 'reservoir' | 'river' | 'canal' | 'other'
+
+export interface Lake {
+  id: string
+  name: string
+  slug?: string
+  description?: string
+  
+  // Location
+  latitude: number
+  longitude: number
+  address?: string
+  postcode?: string
+  region?: string
+  
+  // Venue details
+  water_type?: LakeWaterType
+  size_acres?: number
+  max_depth_m?: number
+  species?: string[]
+  
+  // Facilities
+  has_parking?: boolean
+  has_toilets?: boolean
+  has_cafe?: boolean
+  has_tackle_shop?: boolean
+  is_night_fishing_allowed?: boolean
+  is_disabled_accessible?: boolean
+  
+  // Contact
+  phone?: string
+  email?: string
+  website?: string
+  booking_url?: string
+  
+  // Pricing
+  day_ticket_price?: number
+  night_ticket_price?: number
+  season_ticket_price?: number
+  
+  // Images
+  cover_image_url?: string
+  images?: string[]
+  
+  // Ownership
+  claimed_by?: string
+  claimed_at?: string
+  is_verified?: boolean
+  is_premium?: boolean
+  premium_expires_at?: string
+  
+  // Metadata
+  created_at: string
+  updated_at: string
+  
+  // Computed (for UI)
+  distance?: number
 }
 
 // ============================================================================

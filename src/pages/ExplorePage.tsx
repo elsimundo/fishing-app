@@ -12,6 +12,8 @@ import { WeatherCard } from '../components/explore/WeatherCard'
 import { TackleShopsCard } from '../components/explore/TackleShopsCard'
 import { SessionsCatchesCard } from '../components/explore/SessionsCatchesCard'
 import { LocalIntelCard } from '../components/explore/LocalIntelCard'
+import { NearbyLakesCard } from '../components/explore/NearbyLakesCard'
+import { useLakes } from '../hooks/useLakes'
 import { MapPin, Navigation, Store } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -25,7 +27,7 @@ const STATIC_POIS = {
   ],
 }
 
-type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters'
+type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters' | 'lakes'
 
 const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; className: string }> = {
   session: { label: 'Session', icon: '🎣', className: 'bg-emerald-100 text-emerald-700' },
@@ -33,6 +35,7 @@ const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; classN
   shop: { label: 'Tackle shop', icon: '🛒', className: 'bg-amber-100 text-amber-800' },
   club: { label: 'Club', icon: '👥', className: 'bg-indigo-100 text-indigo-700' },
   charter: { label: 'Charter boat', icon: '⛵', className: 'bg-rose-100 text-rose-700' },
+  lake: { label: 'Lake', icon: '🏞️', className: 'bg-sky-100 text-sky-700' },
 }
 
 export default function ExplorePage() {
@@ -43,6 +46,7 @@ export default function ExplorePage() {
     shops: true,
     clubs: true,
     charters: true,
+    lakes: true,
   })
 
   const [liveBounds, setLiveBounds] = useState<{
@@ -79,6 +83,12 @@ export default function ExplorePage() {
 
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
+  const { data: lakes } = useLakes({
+    lat: mapCenter?.lat,
+    lng: mapCenter?.lng,
+    radiusKm: 50,
+    enabled: filters.lakes,
+  })
 
   // Fetch tackle shops from OpenStreetMap - only when user clicks "Search this area"
   const { data: shopsData } = useTackleShops(
@@ -196,6 +206,18 @@ export default function ExplorePage() {
       }
     }
 
+    if (filters.lakes && lakes) {
+      for (const lake of lakes) {
+        items.push({
+          id: `lake-${lake.id}`,
+          type: 'lake',
+          lat: lake.latitude,
+          lng: lake.longitude,
+          title: lake.name,
+        })
+      }
+    }
+
     if (!appliedBounds) return items
 
     return items.filter((m) => {
@@ -207,7 +229,7 @@ export default function ExplorePage() {
         m.lng >= appliedBounds.west
       )
     })
-  }, [sessions, catches, shopsData, filters, appliedBounds])
+  }, [sessions, catches, shopsData, lakes, filters, appliedBounds])
 
   const markersWithDistance: ExploreMarker[] = useMemo(() => {
     if (!userLocation) return markers
@@ -250,6 +272,7 @@ export default function ExplorePage() {
       session: markersWithDistance.filter((m) => m.type === 'session').length,
       catch: markersWithDistance.filter((m) => m.type === 'catch').length,
       shop: markersWithDistance.filter((m) => m.type === 'shop').length,
+      lake: markersWithDistance.filter((m) => m.type === 'lake').length,
       club: markersWithDistance.filter((m) => m.type === 'club').length,
       charter: markersWithDistance.filter((m) => m.type === 'charter').length,
     }),
@@ -363,6 +386,7 @@ export default function ExplorePage() {
             {renderFilterChip('sessions', 'Sessions', markerCounts.session)}
             {renderFilterChip('catches', 'Catches', markerCounts.catch)}
             {renderFilterChip('shops', 'Shops', markerCounts.shop)}
+            {renderFilterChip('lakes', 'Lakes', markerCounts.lake)}
             {renderFilterChip('clubs', 'Clubs', markerCounts.club)}
             {renderFilterChip('charters', 'Charters', markerCounts.charter)}
           </div>
@@ -496,6 +520,9 @@ export default function ExplorePage() {
             lng={mapCenter?.lng ?? null}
             shops={shopsData?.shops || []}
           />
+
+          {/* Nearby Lakes Card */}
+          <NearbyLakesCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
 
           {/* List Your Business Banner */}
           <Link
