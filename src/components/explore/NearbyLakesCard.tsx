@@ -18,6 +18,7 @@ interface NearbyLakesCardProps {
 
 export function NearbyLakesCard({ lat, lng, bounds }: NearbyLakesCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [showAll, setShowAll] = useState(false)
   const { data: lakes, isLoading, error } = useLakes({
     lat,
     lng,
@@ -121,9 +122,19 @@ export function NearbyLakesCard({ lat, lng, bounds }: NearbyLakesCardProps) {
             </div>
           ) : (
             <div className="mt-3 space-y-3">
-              {lakes.slice(0, 5).map((lake) => (
+              {lakes.slice(0, showAll ? undefined : 5).map((lake) => (
                 <LakeItem key={lake.id} lake={lake} />
               ))}
+              
+              {lakes.length > 5 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAll(!showAll)}
+                  className="w-full rounded-lg bg-gray-100 py-2 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                >
+                  {showAll ? 'Show less' : `Show ${lakes.length - 5} more`}
+                </button>
+              )}
             </div>
           )}
         </div>
