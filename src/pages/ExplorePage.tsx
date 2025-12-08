@@ -5,6 +5,7 @@ import { Layout } from '../components/layout/Layout'
 import { useSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
 import { useTackleShops } from '../hooks/useTackleShops'
+import { useProfile } from '../hooks/useProfile'
 import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
 import { calculateDistance, formatDistance } from '../utils/distance'
 import { TideCard } from '../components/explore/TideCard'
@@ -40,6 +41,13 @@ const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; classN
 
 export default function ExplorePage() {
   const navigate = useNavigate()
+  const { data: profile } = useProfile()
+  
+  // Determine what content to show based on fishing preference
+  const fishingPreference = profile?.fishing_preference
+  const showSaltwater = !fishingPreference || fishingPreference === 'sea' || fishingPreference === 'both'
+  const showFreshwater = !fishingPreference || fishingPreference === 'freshwater' || fishingPreference === 'both'
+
   const [filters, setFilters] = useState<Record<ExploreFilterKey, boolean>>({
     sessions: true,
     catches: true,
@@ -88,7 +96,7 @@ export default function ExplorePage() {
     lng: mapCenter?.lng,
     bounds: appliedBounds,
     radiusKm: 100, // Larger radius since we're using bounds
-    enabled: filters.lakes,
+    enabled: filters.lakes && showFreshwater,
   })
 
   // Fetch tackle shops from OpenStreetMap - only when user clicks "Search this area"
@@ -387,7 +395,7 @@ export default function ExplorePage() {
             {renderFilterChip('sessions', 'Sessions', markerCounts.session)}
             {renderFilterChip('catches', 'Catches', markerCounts.catch)}
             {renderFilterChip('shops', 'Shops', markerCounts.shop)}
-            {renderFilterChip('lakes', 'Lakes', markerCounts.lake)}
+            {showFreshwater && renderFilterChip('lakes', 'Lakes', markerCounts.lake)}
             {renderFilterChip('clubs', 'Clubs', markerCounts.club)}
             {renderFilterChip('charters', 'Charters', markerCounts.charter)}
           </div>
@@ -531,8 +539,10 @@ export default function ExplorePage() {
           {/* Local Intel Card */}
           <LocalIntelCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
 
-          {/* Tide Card */}
-          <TideCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
+          {/* Tide Card - only for saltwater anglers */}
+          {showSaltwater && (
+            <TideCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
+          )}
 
           {/* Weather Card */}
           <WeatherCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
@@ -544,12 +554,14 @@ export default function ExplorePage() {
             shops={shopsData?.shops || []}
           />
 
-          {/* Nearby Lakes Card */}
-          <NearbyLakesCard 
-            lat={mapCenter?.lat ?? null} 
-            lng={mapCenter?.lng ?? null} 
-            bounds={appliedBounds}
-          />
+          {/* Nearby Lakes Card - only for freshwater anglers */}
+          {showFreshwater && (
+            <NearbyLakesCard 
+              lat={mapCenter?.lat ?? null} 
+              lng={mapCenter?.lng ?? null} 
+              bounds={appliedBounds}
+            />
+          )}
 
           {/* List Your Business Banner */}
           <Link
