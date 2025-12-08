@@ -397,7 +397,7 @@ export default function ExplorePage() {
             {renderFilterChip('shops', 'Shops', markerCounts.shop)}
             {showFreshwater && renderFilterChip('lakes', 'Lakes', markerCounts.lake)}
             {renderFilterChip('clubs', 'Clubs', markerCounts.club)}
-            {renderFilterChip('charters', 'Charters', markerCounts.charter)}
+            {showSaltwater && renderFilterChip('charters', 'Charters', markerCounts.charter)}
           </div>
         </header>
 
