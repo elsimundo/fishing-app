@@ -162,12 +162,24 @@ export default function ExplorePage() {
     toast.success('Default area cleared')
   }
 
+  // Helper to check if a water type matches user preference
+  const matchesWaterPreference = (waterType: string | null | undefined): boolean => {
+    if (!fishingPreference || fishingPreference === 'both') return true
+    if (!waterType) return true // Show if unknown
+    
+    const isSaltwater = waterType === 'Sea/Coastal'
+    if (fishingPreference === 'sea') return isSaltwater
+    if (fishingPreference === 'freshwater') return !isSaltwater
+    return true
+  }
+
   const markers: ExploreMarker[] = useMemo(() => {
     const items: ExploreMarker[] = []
 
     if (filters.sessions && sessions) {
       for (const s of sessions) {
         if (!s.latitude || !s.longitude) continue
+        if (!matchesWaterPreference(s.water_type)) continue
         items.push({
           id: `session-${s.id}`,
           type: 'session',
@@ -181,6 +193,7 @@ export default function ExplorePage() {
     if (filters.catches && catches) {
       for (const c of catches) {
         if (c.latitude == null || c.longitude == null) continue
+        if (!matchesWaterPreference(c.water_type)) continue
         items.push({
           id: `catch-${c.id}`,
           type: 'catch',
@@ -238,7 +251,7 @@ export default function ExplorePage() {
         m.lng >= appliedBounds.west
       )
     })
-  }, [sessions, catches, shopsData, lakes, filters, appliedBounds])
+  }, [sessions, catches, shopsData, lakes, filters, appliedBounds, fishingPreference])
 
   const markersWithDistance: ExploreMarker[] = useMemo(() => {
     if (!userLocation) return markers
@@ -537,7 +550,11 @@ export default function ExplorePage() {
           </div>
 
           {/* Local Intel Card */}
-          <LocalIntelCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
+          <LocalIntelCard 
+            lat={mapCenter?.lat ?? null} 
+            lng={mapCenter?.lng ?? null} 
+            waterPreference={fishingPreference}
+          />
 
           {/* Tide Card - only for saltwater anglers */}
           {showSaltwater && (

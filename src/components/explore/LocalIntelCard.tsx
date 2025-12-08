@@ -2,15 +2,17 @@ import { useState } from 'react'
 import { Fish, ChevronDown, ChevronUp, Loader2, Trophy, Clock, Users } from 'lucide-react'
 import { useLocalIntel } from '../../hooks/useLocalIntel'
 import { formatDistanceToNow } from 'date-fns'
+import type { FishingPreference } from '../../types'
 
 interface LocalIntelCardProps {
   lat: number | null
   lng: number | null
+  waterPreference?: FishingPreference | null
 }
 
-export function LocalIntelCard({ lat, lng }: LocalIntelCardProps) {
+export function LocalIntelCard({ lat, lng, waterPreference }: LocalIntelCardProps) {
   const [expanded, setExpanded] = useState(false)
-  const { data: intel, isLoading, error } = useLocalIntel(lat, lng, 25, 30, lat !== null && lng !== null)
+  const { data: intel, isLoading, error } = useLocalIntel(lat, lng, 25, 30, lat !== null && lng !== null, waterPreference)
 
   if (!lat || !lng) {
     return (

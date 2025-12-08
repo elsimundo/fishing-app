@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { calculateDistance } from '../utils/distance'
+import type { FishingPreference } from '../types'
 
 export interface LocalIntelData {
   totalCatches: number
@@ -20,20 +21,32 @@ export async function getLocalIntel(
   lat: number,
   lng: number,
   radiusKm: number = 25,
-  days: number = 30
+  days: number = 30,
+  waterPreference?: FishingPreference | null
 ): Promise<LocalIntelData | null> {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
 
-  // Fetch catches with location data from the last N days
+  // Fetch catches with location data and session water_type from the last N days
   // We filter by distance in JS since Supabase doesn't have PostGIS
-  const { data: catches, error } = await supabase
+  const { data: rawCatches, error } = await supabase
     .from('catches')
-    .select('id, user_id, species, bait, weight_kg, length_cm, caught_at, latitude, longitude')
+    .select('id, user_id, species, bait, weight_kg, length_cm, caught_at, latitude, longitude, session:sessions(water_type)')
     .not('latitude', 'is', null)
     .not('longitude', 'is', null)
     .gte('caught_at', since)
     .order('caught_at', { ascending: false })
     .limit(1000)
+  
+  // Filter by water preference if set
+  let catches = rawCatches ?? []
+  if (waterPreference && waterPreference !== 'both') {
+    catches = catches.filter((c) => {
+      const waterType = (c.session as { water_type?: string } | null)?.water_type
+      if (!waterType) return true // Include if unknown
+      const isSaltwater = waterType === 'Sea/Coastal'
+      return waterPreference === 'sea' ? isSaltwater : !isSaltwater
+    })
+  }
 
   if (error) {
     console.error('[LocalIntel] Error fetching catches:', error)

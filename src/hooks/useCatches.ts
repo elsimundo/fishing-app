@@ -1,9 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import type { Catch } from '../types'
+import type { Catch, WaterType } from '../types'
 
-async function fetchCatches(sessionId?: string): Promise<Catch[]> {
-  let query = supabase.from('catches').select('*').order('caught_at', { ascending: false })
+export type CatchWithWaterType = Catch & {
+  water_type?: WaterType | null
+}
+
+async function fetchCatches(sessionId?: string): Promise<CatchWithWaterType[]> {
+  let query = supabase
+    .from('catches')
+    .select('*, session:sessions(water_type)')
+    .order('caught_at', { ascending: false })
 
   if (sessionId) {
     query = query.eq('session_id', sessionId)
@@ -15,7 +22,12 @@ async function fetchCatches(sessionId?: string): Promise<Catch[]> {
     throw new Error(error.message)
   }
 
-  return data ?? []
+  // Flatten session.water_type to top level
+  return (data ?? []).map((c) => ({
+    ...c,
+    water_type: (c.session as { water_type?: WaterType | null } | null)?.water_type ?? null,
+    session: undefined, // Remove nested object
+  }))
 }
 
 export function useCatches(sessionId?: string) {
