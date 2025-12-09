@@ -19,6 +19,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { ErrorState } from '../components/ui/ErrorState'
 import { useDeleteSession } from '../hooks/useDeleteSession'
 import { useSavedMarks } from '../hooks/useSavedMarks'
+import { useSessionXP } from '../hooks/useCatchXP'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
 
@@ -109,9 +110,16 @@ export function SessionDetailPage() {
     (p) => p.user_id === currentUserId && (p.status === 'active' || p.status === 'pending'),
   ) ?? null
 
+  const sessionXP = useSessionXP()
+  
   const handleEndSession = async () => {
     if (!session || session.ended_at) return
     await updateSession({ id: session.id, ended_at: new Date().toISOString() })
+    
+    // Award XP for completing the session
+    const catchCount = session.catches?.length || 0
+    sessionXP.mutate({ sessionId: session.id, catchCount })
+    
     await refetch()
   }
 

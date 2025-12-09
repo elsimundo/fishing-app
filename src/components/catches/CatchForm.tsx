@@ -11,6 +11,7 @@ import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 import { FISH_SPECIES } from '../../lib/constants'
 import { getOrCreateSessionForCatch } from '../../lib/autoSession'
+import { useCatchXP } from '../../hooks/useCatchXP'
 
 const fishingStyles = [
   'Shore fishing',
@@ -72,6 +73,7 @@ type CatchFormProps = {
 export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }: CatchFormProps) {
   const { user } = useAuth()
   const { data: activeSession } = useActiveSession()
+  const catchXP = useCatchXP()
   
   // Check if a specific session is requested via URL parameter
   const searchParams = new URLSearchParams(window.location.search)
@@ -236,9 +238,9 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
 
     const isEdit = mode === 'edit' && catchId
 
-    const { error } = isEdit
-      ? await supabase.from('catches').update(payload).eq('id', catchId)
-      : await supabase.from('catches').insert(payload)
+    const { data, error } = isEdit
+      ? await supabase.from('catches').update(payload).eq('id', catchId).select().single()
+      : await supabase.from('catches').insert(payload).select().single()
 
     if (error) {
       setFormError(error.message)
@@ -246,7 +248,19 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       return
     }
 
-    toast.success(isEdit ? 'Catch updated' : 'Catch added')
+    // Award XP for new catches (not edits)
+    if (!isEdit && data) {
+      catchXP.mutate({
+        catchId: data.id,
+        species: data.species,
+        weightLb: data.weight_kg ? data.weight_kg * 2.205 : null,
+        sessionId: data.session_id,
+        hasPhoto: !!data.photo_url,
+      })
+    } else {
+      toast.success(isEdit ? 'Catch updated' : 'Catch added')
+    }
+    
     onSuccess()
   }
 

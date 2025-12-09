@@ -29,6 +29,7 @@ import BusinessesPage from './pages/admin/BusinessesPage'
 import LakesPage from './pages/admin/LakesPage'
 import SubmitBusinessPage from './pages/SubmitBusinessPage'
 import MessagesPage from './pages/MessagesPage'
+import ChallengeBoardPage from './pages/ChallengeBoardPage'
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
         <Route path="/profile/:userId" element={<UserProfilePage />} />
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/messages/:conversationId" element={<MessagesPage />} />
+        <Route path="/challenges" element={<ChallengeBoardPage />} />
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<UsersPage />} />

@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase'
 import type { Catch, Session } from '../../types'
 import { FISH_SPECIES } from '../../lib/constants'
 import { Camera, X } from 'lucide-react'
+import { useCatchXP } from '../../hooks/useCatchXP'
 
 const quickLogSchema = z.object({
   species: z.string().min(1, 'Species is required'),
@@ -48,6 +49,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const catchXP = useCatchXP()
 
   const defaultNow = new Date().toISOString().slice(0, 16)
 
@@ -163,7 +165,16 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     }
 
     const created = data as Catch
-    toast.success('Catch logged')
+    
+    // Award XP for the catch (don't await - let it run in background)
+    catchXP.mutate({
+      catchId: created.id,
+      species: created.species,
+      weightLb: created.weight_kg ? created.weight_kg * 2.205 : null,
+      sessionId: created.session_id,
+      hasPhoto: !!created.photo_url,
+    })
+    
     onLogged(created)
     onClose()
   }
