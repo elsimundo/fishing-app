@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { useCatch } from '../hooks/useCatch'
 import { useDeleteCatch } from '../hooks/useDeleteCatch'
 import { useAuth } from '../hooks/useAuth'
 import type { Catch } from '../types'
-import { Share2, Trash2, MoreHorizontal, Pencil, Bookmark } from 'lucide-react'
+import { Share2, Trash2, MoreHorizontal, Pencil, Bookmark, ArrowLeft } from 'lucide-react'
 import { ShareCatchToFeedModal } from '../components/catch/ShareCatchToFeedModal'
 import { ErrorState } from '../components/ui/ErrorState'
 import { useSavedMarks } from '../hooks/useSavedMarks'
@@ -53,9 +53,14 @@ export function CatchDetailPage() {
 
     return (
       <main className="min-h-screen bg-gray-50 px-4 py-6">
-        <Link to="/sessions" className="mb-4 inline-block text-xs text-navy-800 hover:underline">
-          Back to logbook
-        </Link>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="mb-4 inline-flex items-center gap-1 text-xs text-navy-800 hover:underline"
+        >
+          <ArrowLeft size={14} />
+          Back
+        </button>
         <ErrorState title="Failed to load catch" message={message} />
       </main>
     )
@@ -79,9 +84,14 @@ export function CatchDetailPage() {
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         {/* Back link */}
         <div className="flex items-center justify-between text-xs text-slate-600">
-          <Link to="/sessions" className="text-navy-800 hover:underline">
-            Back to logbook
-          </Link>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1 text-navy-800 hover:underline"
+          >
+            <ArrowLeft size={14} />
+            Back
+          </button>
         </div>
 
         {/* Catch hero card */}
@@ -181,7 +191,7 @@ export function CatchDetailPage() {
                               try {
                                 await deleteCatch(catchItem.id)
                                 toast.success('Catch deleted')
-                                navigate('/dashboard')
+                                navigate('/profile')
                               } catch {
                                 toast.error('Failed to delete catch')
                               }

@@ -49,17 +49,6 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
         navigate('/posts/new')
       },
     },
-    {
-      id: 'enter-competition',
-      icon: '🏆',
-      title: 'Enter Competition',
-      subtitle: 'Join or browse fishing competitions',
-      color: 'bg-yellow-100',
-      onClick: () => {
-        onClose()
-        navigate('/compete')
-      },
-    },
   ]
 
   return (

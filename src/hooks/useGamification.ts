@@ -448,3 +448,129 @@ export function useFeaturedChallenge() {
     staleTime: 60 * 60 * 1000, // 1 hour
   })
 }
+
+// Get a single challenge by slug
+export function useChallenge(slug: string | undefined) {
+  return useQuery({
+    queryKey: ['challenge', slug],
+    queryFn: async () => {
+      if (!slug) return null
+      const { data, error } = await supabase
+        .from('challenges')
+        .select('*')
+        .eq('slug', slug)
+        .single()
+      
+      if (error) throw error
+      return data as Challenge
+    },
+    enabled: !!slug,
+  })
+}
+
+// Get catches that contributed to a user challenge
+export function useChallengeCatches(userChallengeId: string | undefined) {
+  return useQuery({
+    queryKey: ['challenge-catches', userChallengeId],
+    queryFn: async () => {
+      if (!userChallengeId) return []
+      const { data, error } = await supabase
+        .from('challenge_catches')
+        .select(`
+          id,
+          catch_id,
+          created_at,
+          catches (
+            id,
+            species,
+            weight_kg,
+            length_cm,
+            photo_url,
+            location_name,
+            caught_at
+          )
+        `)
+        .eq('user_challenge_id', userChallengeId)
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!userChallengeId,
+  })
+}
+
+// Remove a catch from a challenge (recalculates progress)
+export function useRemoveCatchFromChallenge() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+  
+  return useMutation({
+    mutationFn: async ({ 
+      challengeCatchId, 
+      userChallengeId 
+    }: { 
+      challengeCatchId: string
+      userChallengeId: string 
+    }) => {
+      if (!user) throw new Error('Not authenticated')
+      
+      // Delete the challenge_catch record
+      const { error: deleteError } = await supabase
+        .from('challenge_catches')
+        .delete()
+        .eq('id', challengeCatchId)
+      
+      if (deleteError) throw deleteError
+      
+      // Get remaining catch count for this challenge
+      const { count } = await supabase
+        .from('challenge_catches')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_challenge_id', userChallengeId)
+      
+      // Get the user_challenge to check target
+      const { data: userChallenge } = await supabase
+        .from('user_challenges')
+        .select('target, completed_at, xp_awarded')
+        .eq('id', userChallengeId)
+        .single()
+      
+      if (!userChallenge) throw new Error('Challenge not found')
+      
+      const newProgress = count || 0
+      const wasCompleted = !!userChallenge.completed_at
+      const isNowComplete = newProgress >= userChallenge.target
+      
+      // Update progress (and potentially revoke completion)
+      const { error: updateError } = await supabase
+        .from('user_challenges')
+        .update({
+          progress: newProgress,
+          completed_at: isNowComplete ? userChallenge.completed_at : null,
+          xp_awarded: isNowComplete ? userChallenge.xp_awarded : 0,
+        })
+        .eq('id', userChallengeId)
+      
+      if (updateError) throw updateError
+      
+      // If challenge was completed but is now incomplete, revoke XP
+      if (wasCompleted && !isNowComplete && userChallenge.xp_awarded > 0) {
+        await supabase.rpc('award_xp', {
+          p_user_id: user.id,
+          p_amount: -userChallenge.xp_awarded,
+          p_reason: 'challenge_revoked',
+          p_reference_type: 'challenge',
+          p_reference_id: userChallengeId,
+        })
+      }
+      
+      return { newProgress, wasCompleted, isNowComplete }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['challenge-catches', variables.userChallengeId] })
+      queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['user-xp'] })
+    },
+  })
+}

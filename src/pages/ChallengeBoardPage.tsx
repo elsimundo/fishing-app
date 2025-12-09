@@ -156,6 +156,7 @@ export default function ChallengeBoardPage() {
                   <ChallengeCard 
                     challenge={featuredChallenge}
                     userProgress={userProgressMap.get(featuredChallenge.id)}
+                    onClick={() => navigate(`/challenges/${featuredChallenge.slug}`)}
                   />
                 </div>
               )}
@@ -225,6 +226,7 @@ export default function ChallengeBoardPage() {
                       key={challenge.id}
                       challenge={challenge}
                       userProgress={userProgressMap.get(challenge.id)}
+                      onClick={() => navigate(`/challenges/${challenge.slug}`)}
                     />
                   ))}
                 </div>

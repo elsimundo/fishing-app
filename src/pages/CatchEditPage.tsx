@@ -23,9 +23,13 @@ export function CatchEditPage() {
 
     return (
       <main className="min-h-screen bg-background px-4 py-6">
-        <Link to="/dashboard" className="mb-4 inline-block text-xs text-secondary hover:underline">
-          ← Back to logbook
-        </Link>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="mb-4 inline-block text-xs text-secondary hover:underline"
+        >
+          ← Back
+        </button>
         <ErrorState title="Failed to load catch for editing" message={message} />
       </main>
     )

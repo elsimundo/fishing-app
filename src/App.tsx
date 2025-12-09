@@ -30,6 +30,7 @@ import LakesPage from './pages/admin/LakesPage'
 import SubmitBusinessPage from './pages/SubmitBusinessPage'
 import MessagesPage from './pages/MessagesPage'
 import ChallengeBoardPage from './pages/ChallengeBoardPage'
+import { ChallengeDetailPage } from './pages/ChallengeDetailPage'
 import CatchesPage from './pages/CatchesPage'
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/messages/:conversationId" element={<MessagesPage />} />
         <Route path="/challenges" element={<ChallengeBoardPage />} />
+        <Route path="/challenges/:slug" element={<ChallengeDetailPage />} />
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<UsersPage />} />

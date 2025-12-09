@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
 import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant } from '../hooks/useSessionParticipants'
@@ -90,10 +90,14 @@ export function SessionDetailPage() {
     const message = error instanceof Error ? error.message : 'Please try again in a moment.'
     return (
       <main className="min-h-screen bg-gray-50 px-4 py-6">
-        <Link to="/dashboard" className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+        >
           <ArrowLeft size={16} />
-          Back to Logbook
-        </Link>
+          Back
+        </button>
         <ErrorState title="Failed to load session" message={message} />
       </main>
     )
@@ -134,9 +138,13 @@ export function SessionDetailPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-          <Link to="/dashboard" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
             <ArrowLeft size={20} />
-          </Link>
+          </button>
 
           <div className="flex items-center gap-2">
             {isOwner && (
@@ -644,7 +652,7 @@ export function SessionDetailPage() {
           try {
             await deleteSession(session!.id)
             toast.success('Session deleted')
-            navigate('/dashboard')
+            navigate('/profile')
           } catch {
             toast.error('Failed to delete session')
           }
@@ -677,7 +685,7 @@ export function SessionDetailPage() {
           try {
             await leaveSession({ participant_id: myParticipant.id, session_id: session!.id })
             toast.success('Left session')
-            navigate('/dashboard')
+            navigate('/profile')
           } catch {
             toast.error('Failed to leave session')
           }

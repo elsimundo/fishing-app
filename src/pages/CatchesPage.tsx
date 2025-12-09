@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { CatchCard } from '../components/catches/CatchCard'
 import { useCatches } from '../hooks/useCatches'
 import { ArrowLeft, Plus } from 'lucide-react'
 
 export default function CatchesPage() {
+  const navigate = useNavigate()
   const { catches, isLoading } = useCatches()
 
   return (
@@ -13,9 +14,13 @@ export default function CatchesPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="text-gray-500 hover:text-gray-700">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="text-gray-500 hover:text-gray-700"
+            >
               <ArrowLeft size={20} />
-            </Link>
+            </button>
             <h1 className="text-xl font-bold text-gray-900">All Catches</h1>
           </div>
           <Link

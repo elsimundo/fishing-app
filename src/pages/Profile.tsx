@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import { useProfile } from '../hooks/useProfile'
 import { supabase } from '../lib/supabase'
 
 export function Profile() {
+  const navigate = useNavigate()
   const { data: profile, isLoading, isError, error } = useProfile()
   const [email, setEmail] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -56,9 +57,13 @@ export function Profile() {
     <main className="min-h-screen bg-background px-4 py-4">
       <div className="mx-auto flex max-w-xl flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-slate-600">
-          <Link to="/dashboard" className="text-secondary hover:underline">
-            ← Back to logbook
-          </Link>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="text-secondary hover:underline"
+          >
+            ← Back
+          </button>
         </div>
 
         <header className="flex items-center gap-3">

@@ -252,7 +252,7 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   for (const m of milestones) {
     const current = m.type === 'catch' ? (totalCatches || 0) : speciesCount
     if (current >= m.value) {
-      await completeChallenge(userId, m.slug, current, m.value, completed)
+      await completeChallenge(userId, m.slug, current, m.value, completed, input.catchId)
     }
   }
   
@@ -260,7 +260,7 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   // 2. SPECIES-SPECIFIC CHALLENGES
   // ============================================
   const speciesSlug = `catch_${input.species.toLowerCase().replace(/\s+/g, '_')}`
-  await completeChallenge(userId, speciesSlug, 1, 1, completed)
+  await completeChallenge(userId, speciesSlug, 1, 1, completed, input.catchId)
   
   // ============================================
   // 3. PHOTO CHALLENGES
@@ -273,10 +273,10 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
       .not('photo_url', 'is', null)
     
     if (photoCount && photoCount >= 10) {
-      await completeChallenge(userId, 'photo_pro', photoCount, 10, completed)
+      await completeChallenge(userId, 'photo_pro', photoCount, 10, completed, input.catchId)
     }
     if (photoCount && photoCount >= 50) {
-      await completeChallenge(userId, 'photo_master', photoCount, 50, completed)
+      await completeChallenge(userId, 'photo_master', photoCount, 50, completed, input.catchId)
     }
   }
   
@@ -289,22 +289,22 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     
     // Dawn Patrol: Catch before 6am
     if (hour >= 4 && hour < 6) {
-      await incrementProgressChallenge(userId, 'dawn_patrol', 5, completed)
+      await incrementProgressChallenge(userId, 'dawn_patrol', 5, completed, input.catchId)
     }
     
     // Early Bird: Catch before 7am
     if (hour >= 5 && hour < 7) {
-      await incrementProgressChallenge(userId, 'early_bird', 10, completed)
+      await incrementProgressChallenge(userId, 'early_bird', 10, completed, input.catchId)
     }
     
     // Night Owl: Catch after 10pm or before 5am
     if (hour >= 22 || hour < 5) {
-      await incrementProgressChallenge(userId, 'night_owl', 5, completed)
+      await incrementProgressChallenge(userId, 'night_owl', 5, completed, input.catchId)
     }
     
     // Golden Hour: Catch during sunset (6pm-8pm)
     if (hour >= 18 && hour < 20) {
-      await incrementProgressChallenge(userId, 'golden_hour', 10, completed)
+      await incrementProgressChallenge(userId, 'golden_hour', 10, completed, input.catchId)
     }
   }
   
@@ -316,12 +316,12 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   if (weightKg && weightKg > 0) {
     // Big Fish: Catch a fish over 5kg (11lb)
     if (weightKg >= 5) {
-      await completeChallenge(userId, 'big_fish', 1, 1, completed)
+      await completeChallenge(userId, 'big_fish', 1, 1, completed, input.catchId)
     }
     
     // Monster Catch: Catch a fish over 10kg (22lb)
     if (weightKg >= 10) {
-      await completeChallenge(userId, 'monster_catch', 1, 1, completed)
+      await completeChallenge(userId, 'monster_catch', 1, 1, completed, input.catchId)
     }
     
     // Check for specimen weight (compare to species_info)
@@ -334,7 +334,7 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     if (speciesInfo?.specimen_weight_lb) {
       const specimenWeightKg = speciesInfo.specimen_weight_lb / 2.205
       if (weightKg >= specimenWeightKg) {
-        await incrementProgressChallenge(userId, 'specimen_hunter', 5, completed)
+        await incrementProgressChallenge(userId, 'specimen_hunter', 5, completed, input.catchId)
       }
     }
   }
@@ -357,17 +357,17 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
       
       // New Waters: Fish at 5 different locations
       if (uniqueLocations.size >= 5) {
-        await completeChallenge(userId, 'new_waters', uniqueLocations.size, 5, completed)
+        await completeChallenge(userId, 'new_waters', uniqueLocations.size, 5, completed, input.catchId)
       }
       
       // Explorer: Fish at 10 different locations
       if (uniqueLocations.size >= 10) {
-        await completeChallenge(userId, 'explorer', uniqueLocations.size, 10, completed)
+        await completeChallenge(userId, 'explorer', uniqueLocations.size, 10, completed, input.catchId)
       }
       
       // Adventurer: Fish at 25 different locations
       if (uniqueLocations.size >= 25) {
-        await completeChallenge(userId, 'adventurer', uniqueLocations.size, 25, completed)
+        await completeChallenge(userId, 'adventurer', uniqueLocations.size, 25, completed, input.catchId)
       }
     }
   }
@@ -385,28 +385,28 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     
     // Weather Warrior: Catch in rain
     if (condition.includes('rain') || condition.includes('drizzle') || condition.includes('shower')) {
-      await incrementProgressChallenge(userId, 'weather_warrior', 5, completed)
+      await incrementProgressChallenge(userId, 'weather_warrior', 5, completed, input.catchId)
     }
     
     // Storm Chaser: Catch during thunderstorm
     if (condition.includes('thunder') || condition.includes('storm')) {
-      await completeChallenge(userId, 'storm_chaser', 1, 1, completed)
+      await completeChallenge(userId, 'storm_chaser', 1, 1, completed, input.catchId)
     }
     
     // Fog Fisher: Catch in fog
     if (condition.includes('fog') || condition.includes('mist')) {
-      await completeChallenge(userId, 'fog_fisher', 1, 1, completed)
+      await completeChallenge(userId, 'fog_fisher', 1, 1, completed, input.catchId)
     }
     
     // Sunny Fisher: Catch on clear days
     if (condition.includes('clear') || condition.includes('sunny')) {
-      await incrementProgressChallenge(userId, 'sunny_fisher', 10, completed)
+      await incrementProgressChallenge(userId, 'sunny_fisher', 10, completed, input.catchId)
     }
   }
   
   // Wind Rider: Catch on windy day (15+ mph)
   if (input.windSpeed && input.windSpeed >= 15) {
-    await incrementProgressChallenge(userId, 'wind_rider', 5, completed)
+    await incrementProgressChallenge(userId, 'wind_rider', 5, completed, input.catchId)
   }
   
   // ============================================
@@ -415,12 +415,12 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   if (input.moonPhase) {
     // Full Moon catch
     if (input.moonPhase === 'Full Moon') {
-      await completeChallenge(userId, 'full_moon_catch', 1, 1, completed)
+      await completeChallenge(userId, 'full_moon_catch', 1, 1, completed, input.catchId)
     }
     
     // New Moon catch
     if (input.moonPhase === 'New Moon') {
-      await completeChallenge(userId, 'new_moon_catch', 1, 1, completed)
+      await completeChallenge(userId, 'new_moon_catch', 1, 1, completed, input.catchId)
     }
     
     // Track unique moon phases caught
@@ -435,7 +435,8 @@ async function incrementProgressChallenge(
   userId: string,
   slug: string,
   target: number,
-  completed: string[]
+  completed: string[],
+  catchId?: string
 ) {
   const { data: challenge } = await supabase
     .from('challenges')
@@ -459,7 +460,7 @@ async function incrementProgressChallenge(
   const newProgress = (existing?.progress || 0) + 1
   const isComplete = newProgress >= target
   
-  await supabase
+  const { data: upsertedChallenge } = await supabase
     .from('user_challenges')
     .upsert({
       user_id: userId,
@@ -469,6 +470,19 @@ async function incrementProgressChallenge(
       completed_at: isComplete ? new Date().toISOString() : null,
       xp_awarded: isComplete ? challenge.xp_reward : 0,
     }, { onConflict: 'user_id,challenge_id' })
+    .select('id')
+    .single()
+  
+  // Record the catch that contributed to this challenge
+  if (catchId && upsertedChallenge) {
+    await supabase
+      .from('challenge_catches')
+      .upsert({
+        user_challenge_id: upsertedChallenge.id,
+        catch_id: catchId,
+      }, { onConflict: 'user_challenge_id,catch_id' })
+      .select()
+  }
   
   if (isComplete) {
     await supabase.rpc('award_xp', {
@@ -570,7 +584,8 @@ async function completeChallenge(
   slug: string, 
   progress: number, 
   target: number,
-  completed: string[]
+  completed: string[],
+  catchId?: string
 ) {
   // Get challenge
   const { data: challenge } = await supabase
@@ -593,7 +608,7 @@ async function completeChallenge(
   if (existing?.completed_at) return
   
   // Complete the challenge
-  await supabase
+  const { data: upsertedChallenge } = await supabase
     .from('user_challenges')
     .upsert({
       user_id: userId,
@@ -603,6 +618,19 @@ async function completeChallenge(
       completed_at: new Date().toISOString(),
       xp_awarded: challenge.xp_reward,
     }, { onConflict: 'user_id,challenge_id' })
+    .select('id')
+    .single()
+  
+  // Record the catch that contributed to this challenge
+  if (catchId && upsertedChallenge) {
+    await supabase
+      .from('challenge_catches')
+      .upsert({
+        user_challenge_id: upsertedChallenge.id,
+        catch_id: catchId,
+      }, { onConflict: 'user_challenge_id,catch_id' })
+      .select()
+  }
   
   // Award challenge XP
   await supabase.rpc('award_xp', {
