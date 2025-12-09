@@ -114,11 +114,19 @@ export default function ProfilePage() {
         <div className="flex items-start gap-4">
           {/* Avatar + level badge */}
           <div className="relative">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-xl font-bold text-white shadow-sm">
-              {(profile.full_name || profile.username || 'U')
-                .slice(0, 1)
-                .toUpperCase()}
-            </div>
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name || profile.username || 'Avatar'}
+                className="h-16 w-16 rounded-full object-cover shadow-sm"
+              />
+            ) : (
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-xl font-bold text-white shadow-sm">
+                {(profile.full_name || profile.username || 'U')
+                  .slice(0, 1)
+                  .toUpperCase()}
+              </div>
+            )}
             <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-xs font-bold text-white shadow">
               {level}
             </div>
