@@ -61,16 +61,16 @@ export function Sidebar() {
             <span className="text-base">Explore</span>
           </button>
 
-          {/* Compete (coming soon) */}
+          {/* Challenges */}
           <button
             type="button"
-            onClick={() => navigate('/compete')}
+            onClick={() => navigate('/challenges')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/compete') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+              isActive('/challenges') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
             }`}
           >
             <Trophy size={28} className="text-gray-900" />
-            <span className="text-base">Compete</span>
+            <span className="text-base">Challenges</span>
           </button>
 
         <button

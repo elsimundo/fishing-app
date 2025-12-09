@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { BookOpen, Home, Map, PlusSquare, User } from 'lucide-react'
+import { Trophy, Home, Map, PlusSquare, User } from 'lucide-react'
 import { CreatePostModal } from '../post/CreatePostModal'
 
 export function BottomNav() {
@@ -66,10 +66,10 @@ export function BottomNav() {
             active={showCreateModal}
           />
           <NavButton
-            onClick={() => navigate('/dashboard')}
-            icon={BookOpen}
-            label="Logbook"
-            active={isActive('/dashboard')}
+            onClick={() => navigate('/challenges')}
+            icon={Trophy}
+            label="Challenges"
+            active={isActive('/challenges')}
           />
           <NavButton
             onClick={() => navigate('/profile')}
