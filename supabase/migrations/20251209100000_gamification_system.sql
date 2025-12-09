@@ -272,15 +272,19 @@ INSERT INTO challenges (slug, title, description, icon, category, difficulty, cr
 ('catch_cod', 'Cod Father', 'Catch a cod', '🎬', 'species', 'medium', '{"type": "catch_species", "species": "cod"}', 50, 29),
 
 -- TIME
-('early_bird', 'Early Bird', 'Log a catch before 6am', '🌅', 'time', 'medium', '{"type": "catch_time", "before": "06:00"}', 75, 30),
-('night_owl', 'Night Owl', 'Log a catch after 10pm', '🌙', 'time', 'medium', '{"type": "catch_time", "after": "22:00"}', 75, 31),
-('midnight_angler', 'Midnight Angler', 'Log a catch between midnight and 4am', '🦉', 'time', 'hard', '{"type": "catch_time", "after": "00:00", "before": "04:00"}', 100, 32),
-('weekend_warrior', 'Weekend Warrior', 'Log catches on 10 different weekends', '📅', 'time', 'medium', '{"type": "weekend_count", "value": 10}', 100, 33),
+('dawn_patrol', 'Dawn Patrol', 'Catch 5 fish between 4am and 6am', '🌅', 'time', 'medium', '{"type": "catch_time_count", "start": "04:00", "end": "06:00", "count": 5}', 100, 29),
+('early_bird', 'Early Bird', 'Catch 10 fish before 7am', '☀️', 'time', 'medium', '{"type": "catch_time_count", "before": "07:00", "count": 10}', 100, 30),
+('night_owl', 'Night Owl', 'Catch 5 fish after 10pm or before 5am', '🌙', 'time', 'medium', '{"type": "catch_time_count", "night": true, "count": 5}', 100, 31),
+('golden_hour', 'Golden Hour', 'Catch 10 fish during sunset (6pm-8pm)', '🌇', 'time', 'medium', '{"type": "catch_time_count", "start": "18:00", "end": "20:00", "count": 10}', 100, 32),
+('midnight_angler', 'Midnight Angler', 'Log a catch between midnight and 4am', '🦉', 'time', 'hard', '{"type": "catch_time", "after": "00:00", "before": "04:00"}', 100, 33),
+('weekend_warrior', 'Weekend Warrior', 'Log catches on 10 different weekends', '📅', 'time', 'medium', '{"type": "weekend_count", "value": 10}', 100, 34),
+('weekly_warrior', 'Weekly Warrior', 'Log catches for 4 consecutive weeks', '🔥', 'time', 'medium', '{"type": "consecutive_weeks", "value": 4}', 150, 35),
+('dedicated_angler', 'Dedicated Angler', 'Log catches for 8 consecutive weeks', '💎', 'time', 'hard', '{"type": "consecutive_weeks", "value": 8}', 300, 36),
 
 -- EXPLORATION
-('explorer_3', 'Explorer', 'Fish at 3 different locations', '🗺️', 'exploration', 'easy', '{"type": "location_count", "value": 3}', 50, 40),
-('explorer_10', 'Adventurer', 'Fish at 10 different locations', '🧭', 'exploration', 'medium', '{"type": "location_count", "value": 10}', 150, 41),
-('explorer_25', 'Wanderer', 'Fish at 25 different locations', '🌍', 'exploration', 'hard', '{"type": "location_count", "value": 25}', 300, 42),
+('new_waters', 'New Waters', 'Fish at 5 different locations', '🗺️', 'exploration', 'easy', '{"type": "location_count", "value": 5}', 50, 40),
+('explorer', 'Explorer', 'Fish at 10 different locations', '🧭', 'exploration', 'medium', '{"type": "location_count", "value": 10}', 150, 41),
+('adventurer', 'Adventurer', 'Fish at 25 different locations', '🌍', 'exploration', 'hard', '{"type": "location_count", "value": 25}', 300, 42),
 ('sea_legs', 'Sea Legs', 'Log a saltwater catch', '🌊', 'exploration', 'easy', '{"type": "water_type", "value": "saltwater"}', 50, 43),
 ('freshwater_fan', 'Freshwater Fan', 'Log a freshwater catch', '🏞️', 'exploration', 'easy', '{"type": "water_type", "value": "freshwater"}', 50, 44),
 
@@ -307,7 +311,9 @@ INSERT INTO challenges (slug, title, description, icon, category, difficulty, cr
 ('photo_master', 'Photo Master', 'Add photos to 50 catches', '🖼️', 'skill', 'medium', '{"type": "photo_count", "value": 50}', 150, 82),
 ('pb_hunter', 'PB Hunter', 'Set a personal best', '📈', 'skill', 'medium', '{"type": "pb_set", "value": 1}', 100, 83),
 ('double_figures', 'Double Figures', 'Catch a fish over 10lb', '💪', 'skill', 'hard', '{"type": "catch_weight", "min_lb": 10}', 150, 84),
-('specimen_hunter', 'Specimen Hunter', 'Catch a fish over 20lb', '🦣', 'skill', 'legendary', '{"type": "catch_weight", "min_lb": 20}', 300, 85),
+('big_fish', 'Big Fish', 'Catch a fish over 5kg (11lb)', '🐋', 'skill', 'medium', '{"type": "catch_weight", "min_kg": 5}', 100, 85),
+('monster_catch', 'Monster Catch', 'Catch a fish over 10kg (22lb)', '🦣', 'skill', 'hard', '{"type": "catch_weight", "min_kg": 10}', 200, 86),
+('specimen_hunter', 'Specimen Hunter', 'Catch 5 specimen-weight fish', '🏅', 'skill', 'legendary', '{"type": "specimen_count", "value": 5}', 500, 87),
 
 -- SESSIONS
 ('first_session', 'First Trip', 'Log your first fishing session', '🚗', 'sessions', 'easy', '{"type": "session_count", "value": 1}', 25, 90),

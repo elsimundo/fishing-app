@@ -185,4 +185,14 @@ DROP POLICY IF EXISTS "Anyone can view fishing zones" ON fishing_zones;
 CREATE POLICY "Anyone can view fishing zones"
   ON fishing_zones FOR SELECT USING (true);
 
+-- Allow authenticated users to insert zones (via get_or_create_zone function)
+DROP POLICY IF EXISTS "Authenticated users can insert zones" ON fishing_zones;
+CREATE POLICY "Authenticated users can insert zones"
+  ON fishing_zones FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Allow system to update zone stats
+DROP POLICY IF EXISTS "System can update zone stats" ON fishing_zones;
+CREATE POLICY "System can update zone stats"
+  ON fishing_zones FOR UPDATE USING (true);
+
 COMMENT ON TABLE fishing_zones IS 'Aggregated fishing activity by ~1km grid cells. Protects exact locations while showing community data.';

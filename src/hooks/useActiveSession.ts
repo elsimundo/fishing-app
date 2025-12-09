@@ -40,7 +40,7 @@ async function fetchActiveSessions(): Promise<Session[]> {
   const { data, error } = await supabase
     .from('sessions')
     .select('*')
-    .eq('created_by', userId)
+    .eq('user_id', userId)
     .is('ended_at', null)
     .order('started_at', { ascending: false })
 

@@ -170,9 +170,13 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     catchXP.mutate({
       catchId: created.id,
       species: created.species,
+      weightKg: created.weight_kg,
       weightLb: created.weight_kg ? created.weight_kg * 2.205 : null,
       sessionId: created.session_id,
       hasPhoto: !!created.photo_url,
+      caughtAt: created.caught_at,
+      latitude: created.latitude,
+      longitude: created.longitude,
     })
     
     onLogged(created)

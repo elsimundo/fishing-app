@@ -7,8 +7,12 @@ interface CatchXPInput {
   catchId: string
   species: string
   weightLb?: number | null
+  weightKg?: number | null
   sessionId?: string | null
   hasPhoto?: boolean
+  caughtAt?: string | null
+  latitude?: number | null
+  longitude?: number | null
 }
 
 interface XPBreakdown {
@@ -32,9 +36,15 @@ interface CatchXPResult {
 
 const XP_VALUES = {
   BASE_CATCH: 10,
+  BASE_CATCH_NO_PHOTO: 5, // 50% XP without photo
   PHOTO_BONUS: 5,
   WEIGHT_BONUS_PER_5LB: 5,
   NEW_SPECIES_BONUS: 25,
+}
+
+const RATE_LIMITS = {
+  MAX_CATCHES_PER_HOUR: 10,
+  MAX_CATCHES_PER_DAY: 50,
 }
 
 /**
@@ -48,8 +58,40 @@ export function useCatchXP() {
     mutationFn: async (input: CatchXPInput): Promise<CatchXPResult> => {
       if (!user) throw new Error('Not authenticated')
       
+      // Rate limiting check
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      
+      const { count: hourlyCount } = await supabase
+        .from('catches')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', oneHourAgo)
+      
+      const { count: dailyCount } = await supabase
+        .from('catches')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', oneDayAgo)
+      
+      // If rate limited, award no XP but don't error
+      if ((hourlyCount || 0) > RATE_LIMITS.MAX_CATCHES_PER_HOUR || 
+          (dailyCount || 0) > RATE_LIMITS.MAX_CATCHES_PER_DAY) {
+        console.log('Rate limited - no XP awarded')
+        return {
+          xpAwarded: 0,
+          breakdown: { base: 0, speciesBonus: 0, weightBonus: 0, photoBonus: 0, weeklySpeciesBonus: 0, total: 0 },
+          newXP: 0,
+          newLevel: 1,
+          leveledUp: false,
+          challengesCompleted: [],
+          weeklySpeciesPoints: 0,
+        }
+      }
+      
+      // Base XP depends on whether catch has photo
       const breakdown: XPBreakdown = {
-        base: XP_VALUES.BASE_CATCH,
+        base: input.hasPhoto ? XP_VALUES.BASE_CATCH : XP_VALUES.BASE_CATCH_NO_PHOTO,
         speciesBonus: 0,
         weightBonus: 0,
         photoBonus: 0,
@@ -96,7 +138,7 @@ export function useCatchXP() {
         .select('points, is_bonus')
         .eq('week_start', weekStartStr)
         .ilike('species', input.species)
-        .single()
+        .maybeSingle()
       
       if (weeklyPoints) {
         weeklySpeciesPoints = weeklyPoints.points
@@ -163,6 +205,10 @@ export function useCatchXP() {
         }, 1000)
       }
     },
+    onError: (error) => {
+      console.error('CatchXP error:', error)
+      // Don't show error toast - XP is a bonus feature, shouldn't block catch logging
+    },
   })
 }
 
@@ -184,7 +230,9 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   
   const speciesCount = new Set(speciesData?.map(c => c.species.toLowerCase())).size
   
-  // Check milestone challenges
+  // ============================================
+  // 1. MILESTONE CHALLENGES (catch count, species count)
+  // ============================================
   const milestones = [
     { slug: 'first_catch', type: 'catch', value: 1 },
     { slug: 'catch_10', type: 'catch', value: 10 },
@@ -203,11 +251,15 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     }
   }
   
-  // Check species-specific challenge
+  // ============================================
+  // 2. SPECIES-SPECIFIC CHALLENGES
+  // ============================================
   const speciesSlug = `catch_${input.species.toLowerCase().replace(/\s+/g, '_')}`
   await completeChallenge(userId, speciesSlug, 1, 1, completed)
   
-  // Check photo challenge if has photo
+  // ============================================
+  // 3. PHOTO CHALLENGES
+  // ============================================
   if (input.hasPhoto) {
     const { count: photoCount } = await supabase
       .from('catches')
@@ -218,7 +270,222 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     if (photoCount && photoCount >= 10) {
       await completeChallenge(userId, 'photo_pro', photoCount, 10, completed)
     }
+    if (photoCount && photoCount >= 50) {
+      await completeChallenge(userId, 'photo_master', photoCount, 50, completed)
+    }
   }
+  
+  // ============================================
+  // 4. TIME-BASED CHALLENGES (dawn, dusk, night)
+  // ============================================
+  if (input.caughtAt) {
+    const catchTime = new Date(input.caughtAt)
+    const hour = catchTime.getHours()
+    
+    // Dawn Patrol: Catch before 6am
+    if (hour >= 4 && hour < 6) {
+      await incrementProgressChallenge(userId, 'dawn_patrol', 5, completed)
+    }
+    
+    // Early Bird: Catch before 7am
+    if (hour >= 5 && hour < 7) {
+      await incrementProgressChallenge(userId, 'early_bird', 10, completed)
+    }
+    
+    // Night Owl: Catch after 10pm or before 5am
+    if (hour >= 22 || hour < 5) {
+      await incrementProgressChallenge(userId, 'night_owl', 5, completed)
+    }
+    
+    // Golden Hour: Catch during sunset (6pm-8pm)
+    if (hour >= 18 && hour < 20) {
+      await incrementProgressChallenge(userId, 'golden_hour', 10, completed)
+    }
+  }
+  
+  // ============================================
+  // 5. WEIGHT-BASED CHALLENGES
+  // ============================================
+  const weightKg = input.weightKg || (input.weightLb ? input.weightLb / 2.205 : null)
+  
+  if (weightKg && weightKg > 0) {
+    // Big Fish: Catch a fish over 5kg (11lb)
+    if (weightKg >= 5) {
+      await completeChallenge(userId, 'big_fish', 1, 1, completed)
+    }
+    
+    // Monster Catch: Catch a fish over 10kg (22lb)
+    if (weightKg >= 10) {
+      await completeChallenge(userId, 'monster_catch', 1, 1, completed)
+    }
+    
+    // Check for specimen weight (compare to species_info)
+    const { data: speciesInfo } = await supabase
+      .from('species_info')
+      .select('specimen_weight_lb')
+      .ilike('display_name', input.species)
+      .maybeSingle()
+    
+    if (speciesInfo?.specimen_weight_lb) {
+      const specimenWeightKg = speciesInfo.specimen_weight_lb / 2.205
+      if (weightKg >= specimenWeightKg) {
+        await incrementProgressChallenge(userId, 'specimen_hunter', 5, completed)
+      }
+    }
+  }
+  
+  // ============================================
+  // 6. LOCATION-BASED CHALLENGES
+  // ============================================
+  if (input.latitude && input.longitude) {
+    // Get unique locations (rounded to ~1km precision)
+    const { data: locations } = await supabase
+      .from('catches')
+      .select('latitude, longitude')
+      .eq('user_id', userId)
+      .not('latitude', 'is', null)
+    
+    if (locations) {
+      const uniqueLocations = new Set(
+        locations.map(l => `${Math.round(l.latitude * 100)},${Math.round(l.longitude * 100)}`)
+      )
+      
+      // New Waters: Fish at 5 different locations
+      if (uniqueLocations.size >= 5) {
+        await completeChallenge(userId, 'new_waters', uniqueLocations.size, 5, completed)
+      }
+      
+      // Explorer: Fish at 10 different locations
+      if (uniqueLocations.size >= 10) {
+        await completeChallenge(userId, 'explorer', uniqueLocations.size, 10, completed)
+      }
+      
+      // Adventurer: Fish at 25 different locations
+      if (uniqueLocations.size >= 25) {
+        await completeChallenge(userId, 'adventurer', uniqueLocations.size, 25, completed)
+      }
+    }
+  }
+  
+  // ============================================
+  // 7. STREAK/CONSISTENCY CHALLENGES
+  // ============================================
+  await checkStreakChallenges(userId, completed)
+}
+
+/**
+ * Increment progress on a challenge (for challenges that need multiple completions)
+ */
+async function incrementProgressChallenge(
+  userId: string,
+  slug: string,
+  target: number,
+  completed: string[]
+) {
+  const { data: challenge } = await supabase
+    .from('challenges')
+    .select('id, xp_reward')
+    .eq('slug', slug)
+    .maybeSingle()
+  
+  if (!challenge) return
+  
+  // Get current progress
+  const { data: existingRows } = await supabase
+    .from('user_challenges')
+    .select('progress, completed_at')
+    .eq('user_id', userId)
+    .eq('challenge_id', challenge.id)
+    .limit(1)
+  
+  const existing = existingRows?.[0]
+  if (existing?.completed_at) return // Already completed
+  
+  const newProgress = (existing?.progress || 0) + 1
+  const isComplete = newProgress >= target
+  
+  await supabase
+    .from('user_challenges')
+    .upsert({
+      user_id: userId,
+      challenge_id: challenge.id,
+      progress: newProgress,
+      target,
+      completed_at: isComplete ? new Date().toISOString() : null,
+      xp_awarded: isComplete ? challenge.xp_reward : 0,
+    }, { onConflict: 'user_id,challenge_id' })
+  
+  if (isComplete) {
+    await supabase.rpc('award_xp', {
+      p_user_id: userId,
+      p_amount: challenge.xp_reward,
+      p_reason: 'challenge_completed',
+      p_reference_type: 'challenge',
+      p_reference_id: challenge.id,
+    })
+    completed.push(slug)
+  }
+}
+
+/**
+ * Check streak-based challenges (weekly warrior, etc.)
+ */
+async function checkStreakChallenges(userId: string, completed: string[]) {
+  // Get catches grouped by week
+  const { data: catches } = await supabase
+    .from('catches')
+    .select('caught_at')
+    .eq('user_id', userId)
+    .order('caught_at', { ascending: false })
+    .limit(100)
+  
+  if (!catches || catches.length === 0) return
+  
+  // Calculate weeks with catches
+  const weeksWithCatches = new Set<string>()
+  catches.forEach(c => {
+    const date = new Date(c.caught_at)
+    const weekStart = getWeekStart(date)
+    weeksWithCatches.add(weekStart.toISOString().split('T')[0])
+  })
+  
+  // Check for consecutive weeks
+  const sortedWeeks = Array.from(weeksWithCatches).sort().reverse()
+  let consecutiveWeeks = 1
+  
+  for (let i = 1; i < sortedWeeks.length; i++) {
+    const prevWeek = new Date(sortedWeeks[i - 1])
+    const currWeek = new Date(sortedWeeks[i])
+    const diffDays = (prevWeek.getTime() - currWeek.getTime()) / (1000 * 60 * 60 * 24)
+    
+    if (diffDays === 7) {
+      consecutiveWeeks++
+    } else {
+      break
+    }
+  }
+  
+  // Weekly Warrior: Log catches for 4 consecutive weeks
+  if (consecutiveWeeks >= 4) {
+    await completeChallenge(userId, 'weekly_warrior', consecutiveWeeks, 4, completed)
+  }
+  
+  // Dedicated Angler: Log catches for 8 consecutive weeks
+  if (consecutiveWeeks >= 8) {
+    await completeChallenge(userId, 'dedicated_angler', consecutiveWeeks, 8, completed)
+  }
+}
+
+/**
+ * Get the Monday of the week for a given date
+ */
+function getWeekStart(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  d.setDate(diff)
+  d.setHours(0, 0, 0, 0)
+  return d
 }
 
 /**
@@ -236,18 +503,19 @@ async function completeChallenge(
     .from('challenges')
     .select('id, xp_reward')
     .eq('slug', slug)
-    .single()
+    .maybeSingle()
   
   if (!challenge) return
   
   // Check if already completed
-  const { data: existing } = await supabase
+  const { data: existingRows } = await supabase
     .from('user_challenges')
     .select('completed_at')
     .eq('user_id', userId)
     .eq('challenge_id', challenge.id)
-    .single()
+    .limit(1)
   
+  const existing = existingRows?.[0]
   if (existing?.completed_at) return
   
   // Complete the challenge
@@ -341,4 +609,82 @@ export function useSessionXP() {
       }
     },
   })
+}
+
+/**
+ * Hook to reverse XP when a catch is deleted
+ */
+export function useReverseCatchXP() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+  
+  return useMutation({
+    mutationFn: async (catchId: string) => {
+      if (!user) throw new Error('Not authenticated')
+      
+      // Find the XP transaction for this catch
+      const { data: transaction } = await supabase
+        .from('xp_transactions')
+        .select('id, amount')
+        .eq('user_id', user.id)
+        .eq('reference_type', 'catch')
+        .eq('reference_id', catchId)
+        .maybeSingle()
+      
+      if (!transaction || transaction.amount <= 0) {
+        return { reversed: false, amount: 0 }
+      }
+      
+      // Get current XP and subtract
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('xp')
+        .eq('id', user.id)
+        .single()
+      
+      const newXP = Math.max(0, (profile?.xp || 0) - transaction.amount)
+      
+      await supabase
+        .from('profiles')
+        .update({ xp: newXP, level: calculateLevel(newXP) })
+        .eq('id', user.id)
+      
+      // Mark transaction as reversed (negative amount)
+      await supabase
+        .from('xp_transactions')
+        .update({ amount: -transaction.amount })
+        .eq('id', transaction.id)
+      
+      return { reversed: true, amount: transaction.amount }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['user-xp'] })
+      queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
+      
+      if (data.reversed && data.amount > 0) {
+        toast(`-${data.amount} XP (catch deleted)`, { icon: '↩️', duration: 2000 })
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to reverse XP:', error)
+    },
+  })
+}
+
+/**
+ * Calculate level from XP (same formula as database)
+ */
+function calculateLevel(xp: number): number {
+  if (xp < 100) return 1
+  if (xp < 300) return 2
+  if (xp < 600) return 3
+  if (xp < 1000) return 4
+  if (xp < 1500) return 5
+  if (xp < 2100) return 6
+  if (xp < 2800) return 7
+  if (xp < 3600) return 8
+  if (xp < 4500) return 9
+  if (xp < 5500) return 10
+  // Beyond level 10: every 1000 XP
+  return 10 + Math.floor((xp - 5500) / 1000)
 }

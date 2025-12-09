@@ -253,9 +253,13 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       catchXP.mutate({
         catchId: data.id,
         species: data.species,
+        weightKg: data.weight_kg,
         weightLb: data.weight_kg ? data.weight_kg * 2.205 : null,
         sessionId: data.session_id,
         hasPhoto: !!data.photo_url,
+        caughtAt: data.caught_at,
+        latitude: data.latitude,
+        longitude: data.longitude,
       })
     } else {
       toast.success(isEdit ? 'Catch updated' : 'Catch added')

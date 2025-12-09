@@ -30,6 +30,7 @@ import LakesPage from './pages/admin/LakesPage'
 import SubmitBusinessPage from './pages/SubmitBusinessPage'
 import MessagesPage from './pages/MessagesPage'
 import ChallengeBoardPage from './pages/ChallengeBoardPage'
+import CatchesPage from './pages/CatchesPage'
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
         <Route path="/catches/new" element={<LogCatchPage />} />
         <Route path="/posts/new" element={<CreatePostPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/catches" element={<CatchesPage />} />
         <Route path="/catches/:id" element={<CatchDetailPage />} />
         <Route path="/catches/:id/edit" element={<CatchEditPage />} />
         <Route path="/sessions" element={<Dashboard />} />
