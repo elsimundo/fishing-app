@@ -202,6 +202,17 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       }
     }
 
+    // Get mark_id from the session if one exists
+    let markId: string | null = null
+    if (sessionId) {
+      const { data: sessionData } = await supabase
+        .from('sessions')
+        .select('mark_id')
+        .eq('id', sessionId)
+        .single()
+      markId = sessionData?.mark_id ?? null
+    }
+
     const payload = {
       user_id: user.id,
       species: values.species,
@@ -217,6 +228,7 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       photo_url: photoUrl,
       notes: values.notes ?? null,
       session_id: sessionId,
+      mark_id: markId,
     }
 
     console.log('CatchForm - Submitting payload with session_id:', payload.session_id)

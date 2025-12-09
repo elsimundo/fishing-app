@@ -9,7 +9,7 @@ if (token) {
   console.error('VITE_MAPBOX_TOKEN not found in environment variables')
 }
 
-export type ExploreMarkerType = 'session' | 'catch' | 'shop' | 'club' | 'charter' | 'lake' | 'mark' | 'shared-mark'
+export type ExploreMarkerType = 'session' | 'catch' | 'shop' | 'club' | 'charter' | 'lake' | 'mark' | 'shared-mark' | 'zone'
 
 export interface ExploreMarker {
   id: string
@@ -20,6 +20,9 @@ export interface ExploreMarker {
   distance?: number
   timestamp?: string
   weight?: number
+  // Zone-specific fields
+  totalCatches?: number
+  topSpecies?: string
 }
 
 interface ExploreMapProps {
@@ -41,6 +44,7 @@ const typeColors: Record<ExploreMarkerType, string> = {
   lake: '#0ea5e9', // Sky blue for lakes
   mark: '#dc2626', // Red for your marks
   'shared-mark': '#16a34a', // Green for shared marks
+  zone: '#8b5cf6', // Purple for fishing zones (aggregated catches)
 }
 
 export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onMarkerClick, onBoundsChange }: ExploreMapProps) {

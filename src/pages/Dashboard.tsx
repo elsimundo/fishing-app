@@ -155,11 +155,9 @@ export function Dashboard() {
               No sessions yet — start your first fishing session to see it here.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {recentSessions.map((session) => (
-                <div key={session.id} className="rounded-2xl bg-white p-3 text-xs text-slate-700 shadow-sm">
-                  <SessionCard session={session} />
-                </div>
+                <SessionCard key={session.id} session={session} />
               ))}
               {hasMoreSessions ? (
                 <p className="pt-1 text-[11px] text-slate-500">

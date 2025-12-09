@@ -69,7 +69,7 @@ export function CatchDetailPage() {
           </Link>
         </div>
 
-        <section className="overflow-hidden rounded-xl bg-surface p-4 text-xs text-slate-700 shadow">
+        <section className="rounded-xl bg-surface p-4 text-xs text-slate-700 shadow">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h1 className="text-base font-semibold text-slate-900">{catchItem.species}</h1>
@@ -100,8 +100,8 @@ export function CatchDetailPage() {
                   
                   {showMenu && (
                     <>
-                      <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                      <div className="absolute right-0 top-9 z-20 w-40 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                      <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                      <div className="absolute right-0 top-9 z-50 w-44 rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
                         <button
                           type="button"
                           onClick={() => {
@@ -113,7 +113,7 @@ export function CatchDetailPage() {
                           <Pencil size={14} />
                           <span>Edit Catch</span>
                         </button>
-                        {catchItem.latitude && catchItem.longitude && !savedMarks.some(m => 
+                        {catchItem.latitude != null && catchItem.longitude != null && !savedMarks.some(m => 
                           Math.abs(m.latitude - (catchItem.latitude || 0)) < 0.001 && 
                           Math.abs(m.longitude - (catchItem.longitude || 0)) < 0.001
                         ) && (
@@ -186,7 +186,7 @@ export function CatchDetailPage() {
             </div>
             <div className="rounded-lg bg-slate-50 px-2 py-2">
               <p className="text-[10px] text-slate-500">Bait</p>
-              <p className="text-sm font-semibold text-slate-900">{catchItem.bait || '—'}</p>
+              <p className="text-sm font-semibold text-slate-900">{catchItem.bait && catchItem.bait !== '0' ? catchItem.bait : '—'}</p>
             </div>
             <div className="rounded-lg bg-slate-50 px-2 py-2">
               <p className="text-[10px] text-slate-500">Rig</p>

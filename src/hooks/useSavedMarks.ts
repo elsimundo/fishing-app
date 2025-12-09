@@ -260,6 +260,96 @@ export function useSharedMarks() {
   })
 }
 
+// Hook to fetch shares for a specific mark (for owner to manage)
+export function useMarkShares(markId: string | undefined) {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  const { data: shares, isLoading } = useQuery({
+    queryKey: ['mark-shares-for-mark', markId],
+    queryFn: async () => {
+      if (!markId || !user) return []
+
+      const { data, error } = await supabase
+        .from('mark_shares')
+        .select(`
+          id,
+          mark_id,
+          shared_with,
+          can_edit,
+          created_at,
+          shared_with_user:profiles!mark_shares_shared_with_fkey(
+            id,
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('mark_id', markId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      
+      return (data || []).map((share) => ({
+        ...share,
+        shared_with_user: Array.isArray(share.shared_with_user) 
+          ? share.shared_with_user[0] 
+          : share.shared_with_user,
+      }))
+    },
+    enabled: !!markId && !!user,
+  })
+
+  // Remove a share (for owner)
+  const removeShare = useMutation({
+    mutationFn: async (shareId: string) => {
+      const { error } = await supabase
+        .from('mark_shares')
+        .delete()
+        .eq('id', shareId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mark-shares-for-mark', markId] })
+      queryClient.invalidateQueries({ queryKey: ['shared-marks'] })
+      toast.success('Access removed')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to remove access')
+    },
+  })
+
+  return { shares: shares || [], isLoading, removeShare }
+}
+
+// Hook for recipient to leave a shared mark
+export function useLeaveMark() {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (markId: string) => {
+      if (!user) throw new Error('Must be logged in')
+
+      const { error } = await supabase
+        .from('mark_shares')
+        .delete()
+        .eq('mark_id', markId)
+        .eq('shared_with', user.id)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shared-marks'] })
+      toast.success('Left shared mark')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to leave mark')
+    },
+  })
+}
+
 // Hook to fetch nearby public marks (for discovery)
 export function useNearbyPublicMarks(lat: number | null, lng: number | null, radiusKm = 50) {
   return useQuery({

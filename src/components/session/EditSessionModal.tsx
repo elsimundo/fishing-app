@@ -18,10 +18,17 @@ const WATER_TYPES = [
   'Pond',
 ]
 
+const PRIVACY_OPTIONS = [
+  { value: 'private', label: '🔒 Private', description: 'Location hidden from everyone' },
+  { value: 'general', label: '📍 General Area', description: 'Show approximate location (~5km offset)' },
+  { value: 'exact', label: '🎯 Exact Location', description: 'Show precise GPS coordinates' },
+]
+
 export function EditSessionModal({ session, onClose, onSuccess }: EditSessionModalProps) {
   const [title, setTitle] = useState(session.title || '')
   const [locationName, setLocationName] = useState(session.location_name || '')
   const [waterType, setWaterType] = useState(session.water_type || '')
+  const [locationPrivacy, setLocationPrivacy] = useState(session.location_privacy || 'general')
   const [notes, setNotes] = useState((session as any).notes || '')
 
   const { mutateAsync: updateSession, isPending } = useUpdateSession()
@@ -35,6 +42,7 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
         title: title || undefined,
         location_name: locationName,
         water_type: waterType || undefined,
+        location_privacy: locationPrivacy,
         notes: notes || undefined,
       } as any)
       toast.success('Session updated')
@@ -106,6 +114,37 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Location Privacy
+            </label>
+            <div className="space-y-2">
+              {PRIVACY_OPTIONS.map((option) => (
+                <label
+                  key={option.value}
+                  className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                    locationPrivacy === option.value
+                      ? 'border-navy-800 bg-navy-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="privacy"
+                    value={option.value}
+                    checked={locationPrivacy === option.value}
+                    onChange={(e) => setLocationPrivacy(e.target.value as 'private' | 'general' | 'exact')}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{option.label}</p>
+                    <p className="text-xs text-gray-500">{option.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
           </div>
 
           <div>

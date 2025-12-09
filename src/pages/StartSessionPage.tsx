@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import { Layout } from '../components/layout/Layout'
 import { LocationPicker } from '../components/map/LocationPicker'
 import { useLakes } from '../hooks/useLakes'
-import { useSavedMarks } from '../hooks/useSavedMarks'
+import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import type { Lake } from '../types'
 
 type WaterType = 'saltwater' | 'freshwater'
@@ -50,8 +50,12 @@ export default function StartSessionPage() {
     markId: null,
   })
 
-  // Fetch user's saved marks for saltwater sessions
+  // Fetch user's saved marks and shared marks for saltwater sessions
   const { marks: savedMarks } = useSavedMarks()
+  const { data: sharedMarks } = useSharedMarks()
+  
+  // Combine own marks and shared marks
+  const allMarks = [...savedMarks, ...(sharedMarks || [])]
 
   // Fetch nearby lakes for freshwater sessions
   const { data: nearbyLakes } = useLakes({
@@ -105,13 +109,33 @@ export default function StartSessionPage() {
     setStep(0)
     setShowSuccess(false)
     setLoading(true)
-    setLoadingMessage('Getting your location...')
+    
+    // Check if we have a pre-selected mark from navigation
+    const navState = location.state as { markId?: string; markName?: string } | null
+    const markFromList = navState?.markId ? allMarks.find(m => m.id === navState.markId) : null
+    
+    // If we have a markId but couldn't find it in allMarks, fetch it directly
+    let preSelectedMark = markFromList
+    if (navState?.markId && !markFromList) {
+      const { data: markData } = await supabase
+        .from('saved_marks')
+        .select('*')
+        .eq('id', navState.markId)
+        .single()
+      if (markData) {
+        preSelectedMark = markData
+      }
+    }
+    
+    if (preSelectedMark) {
+      setLoadingMessage(`Setting up at ${preSelectedMark.name}...`)
+    } else {
+      setLoadingMessage('Getting your location...')
+    }
 
-    await new Promise((r) => setTimeout(r, 1000))
-    setLoadingMessage('Detecting water type...')
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 600))
     setLoadingMessage('Setting up your session...')
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 600))
 
     const now = new Date()
     const title = `Fishing Session - ${now.toLocaleDateString('en-GB', {
@@ -120,19 +144,33 @@ export default function StartSessionPage() {
       year: 'numeric',
     })}`
 
+    // Use mark data if available, otherwise use defaults
+    const sessionData = preSelectedMark ? {
+      user_id: user.id,
+      title,
+      location_name: preSelectedMark.name,
+      water_type: preSelectedMark.water_type || 'saltwater',
+      location_privacy: 'general',
+      latitude: preSelectedMark.latitude,
+      longitude: preSelectedMark.longitude,
+      started_at: now.toISOString(),
+      is_public: true,
+      mark_id: preSelectedMark.id,
+    } : {
+      user_id: user.id,
+      title,
+      location_name: 'Current Location',
+      water_type: 'saltwater',
+      location_privacy: 'general',
+      latitude: 0,
+      longitude: 0,
+      started_at: now.toISOString(),
+      is_public: true,
+    }
+
     const { data, error } = await supabase
       .from('sessions')
-      .insert({
-        user_id: user.id,
-        title,
-        location_name: 'Current Location',
-        water_type: 'saltwater',
-        location_privacy: 'general',
-        latitude: 0,
-        longitude: 0,
-        started_at: now.toISOString(),
-        is_public: true,
-      })
+      .insert(sessionData)
       .select()
       .single()
 
@@ -349,11 +387,18 @@ export default function StartSessionPage() {
     )
   }
 
-  const renderChoiceStep = () => (
+  const renderChoiceStep = () => {
+    // Check if we have a pre-selected mark from navigation
+    const navState = location.state as { markId?: string; markName?: string } | null
+    const preSelectedMark = navState?.markId ? allMarks.find(m => m.id === navState.markId) : null
+    
+    return (
     <>
       <h2 className="mb-1 text-lg font-bold text-gray-900">Start your session</h2>
       <p className="mb-4 text-sm text-gray-600">
-        Choose how you'd like to begin your fishing session.
+        {preSelectedMark 
+          ? `Starting at ${preSelectedMark.name}` 
+          : 'Choose how you\'d like to begin your fishing session.'}
       </p>
 
       <div className="mb-4 grid gap-3 md:grid-cols-2">
@@ -367,7 +412,9 @@ export default function StartSessionPage() {
           </div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-gray-900">Quick Start</p>
-            <p className="mt-0.5 text-xs text-gray-600">Use current location & smart defaults</p>
+            <p className="mt-0.5 text-xs text-gray-600">
+              {preSelectedMark ? `Start at ${preSelectedMark.name}` : 'Use current location & smart defaults'}
+            </p>
           </div>
           <ChevronRight size={18} className="text-navy-800" />
         </button>
@@ -389,11 +436,12 @@ export default function StartSessionPage() {
       </div>
 
       <p className="text-xs text-gray-500">
-        💡 Quick Start defaults: Uses your current GPS location, general area privacy, and auto-detects water
-        type. You can edit everything later.
+        {preSelectedMark 
+          ? `💡 Quick Start will use your saved mark "${preSelectedMark.name}" as the location.`
+          : '💡 Quick Start defaults: Uses your current GPS location, general area privacy, and auto-detects water type. You can edit everything later.'}
       </p>
     </>
-  )
+  )}
 
   const renderStep1 = () => {
     const hasLocation =
@@ -556,7 +604,7 @@ export default function StartSessionPage() {
         )}
 
         {/* Saved mark selector for saltwater */}
-        {selected === 'saltwater' && savedMarks && savedMarks.length > 0 && (
+        {selected === 'saltwater' && allMarks && allMarks.length > 0 && (
           <div className="mt-4 rounded-xl border-2 border-gray-200 bg-white p-4">
             <label className="mb-2 block text-sm font-semibold text-gray-900">
               📍 Start at a saved mark (optional)
@@ -565,7 +613,7 @@ export default function StartSessionPage() {
               value={formData.markId ?? ''}
               onChange={(e) => {
                 const markId = e.target.value || null
-                const mark = savedMarks.find(m => m.id === markId)
+                const mark = allMarks.find(m => m.id === markId)
                 setFormData(prev => ({ 
                   ...prev, 
                   markId,
@@ -585,9 +633,18 @@ export default function StartSessionPage() {
                   {mark.name}
                 </option>
               ))}
+              {sharedMarks && sharedMarks.length > 0 && (
+                <optgroup label="Shared with me">
+                  {sharedMarks.map((mark) => (
+                    <option key={mark.id} value={mark.id}>
+                      {mark.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
             <p className="mt-1 text-xs text-gray-500">
-              Your saved fishing spots
+              Your saved spots and marks shared with you
             </p>
           </div>
         )}

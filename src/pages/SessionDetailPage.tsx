@@ -271,7 +271,19 @@ export function SessionDetailPage() {
               )}
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <MapPin size={14} />
-                <span>{privacyLabel}</span>
+                <span>{session.location_name || 'Unknown location'}</span>
+              </div>
+              {/* Privacy indicator */}
+              <div className="mt-1 flex items-center gap-1.5 text-[10px] text-gray-400">
+                {session.location_privacy === 'private' && (
+                  <>🔒 Location hidden</>
+                )}
+                {session.location_privacy === 'general' && (
+                  <>📍 Showing general area (~5km offset)</>
+                )}
+                {session.location_privacy === 'exact' && (
+                  <>🎯 Showing exact location</>
+                )}
               </div>
             </div>
 

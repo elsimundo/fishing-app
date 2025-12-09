@@ -18,6 +18,7 @@ import { MyMarksCard } from '../components/explore/MyMarksCard'
 import { MyLakesCard } from '../components/explore/MyLakesCard'
 import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
+import { useFishingZones } from '../hooks/useFishingZones'
 import { MapPin, Navigation, Store } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
@@ -43,6 +44,7 @@ const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; classN
   lake: { label: 'Lake', icon: '🏞️', className: 'bg-sky-100 text-sky-700' },
   mark: { label: 'My Mark', icon: '📍', className: 'bg-red-100 text-red-700' },
   'shared-mark': { label: 'Shared Mark', icon: '🤝', className: 'bg-green-100 text-green-700' },
+  zone: { label: 'Fishing Zone', icon: '🎯', className: 'bg-purple-100 text-purple-700' },
 }
 
 export default function ExplorePage() {
@@ -98,6 +100,14 @@ export default function ExplorePage() {
 
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
+  
+  // Fetch fishing zones for public catch data (aggregated, privacy-safe)
+  const { data: fishingZones } = useFishingZones({
+    bounds: appliedBounds || undefined,
+    minCatches: 1,
+    enabled: filters.catches,
+  })
+  
   const { data: lakes } = useLakes({
     lat: mapCenter?.lat,
     lng: mapCenter?.lng,
@@ -201,6 +211,23 @@ export default function ExplorePage() {
       }
     }
 
+    // Show fishing zones (aggregated public catch data) instead of individual catches
+    // This protects exact locations while showing community activity
+    if (filters.catches && fishingZones) {
+      for (const zone of fishingZones) {
+        items.push({
+          id: `zone-${zone.id}`,
+          type: 'zone',
+          lat: zone.center_lat,
+          lng: zone.center_lng,
+          title: zone.display_name || `${zone.total_catches} catches`,
+          totalCatches: zone.total_catches,
+          topSpecies: zone.top_species || undefined,
+        })
+      }
+    }
+    
+    // Also show user's own catches (they can see their own exact locations)
     if (filters.catches && catches) {
       for (const c of catches) {
         if (c.latitude == null || c.longitude == null) continue
@@ -288,7 +315,7 @@ export default function ExplorePage() {
         m.lng >= appliedBounds.west
       )
     })
-  }, [sessions, catches, shopsData, lakes, savedMarks, sharedMarks, filters, appliedBounds, fishingPreference])
+  }, [sessions, catches, shopsData, lakes, savedMarks, sharedMarks, fishingZones, filters, appliedBounds, fishingPreference])
 
   const markersWithDistance: ExploreMarker[] = useMemo(() => {
     if (!userLocation) return markers
@@ -691,11 +718,8 @@ export default function ExplorePage() {
           {/* My Marks / Watchlist - for any custom spots (sea, rivers, canals, etc.) */}
           <MyMarksCard
             onSelectMark={(mark) => {
-              // Open Google Maps directions to the mark
-              window.open(
-                `https://www.google.com/maps/dir/?api=1&destination=${mark.latitude},${mark.longitude}`,
-                '_blank'
-              )
+              // Navigate to mark detail page
+              navigate(`/marks/${mark.id}`)
             }}
           />
 
