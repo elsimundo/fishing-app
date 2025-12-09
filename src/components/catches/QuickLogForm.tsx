@@ -6,8 +6,9 @@ import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import type { Catch, Session } from '../../types'
 import { FISH_SPECIES } from '../../lib/constants'
-import { Camera, X } from 'lucide-react'
+import { Camera, X, Globe, Lock, Info } from 'lucide-react'
 import { useCatchXP } from '../../hooks/useCatchXP'
+import { compressPhoto } from '../../utils/imageCompression'
 
 const quickLogSchema = z.object({
   species: z.string().min(1, 'Species is required'),
@@ -48,6 +49,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isPublic, setIsPublic] = useState(true)
+  const [hideExactLocation, setHideExactLocation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const catchXP = useCatchXP()
 
@@ -62,8 +65,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       return
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image must be less than 10MB')
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Image must be less than 50MB')
       return
     }
 
@@ -84,13 +87,15 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
 
     setIsUploading(true)
     try {
-      const fileExt = photoFile.name.split('.').pop()
-      const fileName = `${userId}-${Date.now()}.${fileExt}`
+      // Compress the image before upload (max 2MB, 1920px)
+      const compressedFile = await compressPhoto(photoFile)
+      
+      const fileName = `${userId}-${Date.now()}.jpg`
       const filePath = `catches/${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('catches')
-        .upload(filePath, photoFile)
+        .upload(filePath, compressedFile)
 
       if (uploadError) throw uploadError
 
@@ -153,6 +158,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       fishing_style: null,
       photo_url: photoUrl,
       notes: values.notes ?? null,
+      is_public: isPublic,
+      hide_exact_location: hideExactLocation,
     }
 
     const { data, error } = await supabase.from('catches').insert(payload).select('*').single()
@@ -330,6 +337,63 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
             onChange={handlePhotoChange}
             className="hidden"
           />
+        </div>
+
+        {/* Privacy Settings */}
+        <div className="sm:col-span-2 space-y-2">
+          <p className="text-xs font-medium text-slate-700">Sharing</p>
+          
+          {/* Public/Private Toggle */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPublic(true)}
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-[11px] font-medium transition-colors ${
+                isPublic
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Globe size={12} />
+              Public
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPublic(false)}
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-[11px] font-medium transition-colors ${
+                !isPublic
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Lock size={12} />
+              Private
+            </button>
+          </div>
+
+          {/* Hide Location Option (only if public) */}
+          {isPublic && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hideExactLocation}
+                onChange={(e) => setHideExactLocation(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary"
+              />
+              <span className="text-[11px] text-slate-600">Hide exact location</span>
+            </label>
+          )}
+
+          {/* Privacy Info Box */}
+          <div className="rounded-lg bg-slate-50 p-2.5 text-[10px] text-slate-600">
+            <div className="flex items-start gap-1.5">
+              <Info size={12} className="mt-0.5 shrink-0 text-slate-400" />
+              <div className="space-y-1">
+                <p><span className="font-medium">Shared:</span> Species, weight, photo, general area</p>
+                <p><span className="font-medium">🔒 Never shared:</span> Exact GPS / fishing spot</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

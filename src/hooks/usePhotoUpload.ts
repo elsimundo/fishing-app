@@ -1,7 +1,8 @@
 import { supabase } from '../lib/supabase'
+import { compressPhoto } from '../utils/imageCompression'
 
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_FILE_SIZE_BEFORE_COMPRESSION = 50 * 1024 * 1024 // 50MB - modern phone photos can be large, we'll compress
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 
 export type PhotoUploadResult = {
   url: string
@@ -15,18 +16,20 @@ export async function uploadCatchPhoto(params: {
   const { file, userId } = params
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    throw new Error('Please upload a JPG, PNG, or WebP image.')
+    throw new Error('Please upload a JPG, PNG, WebP, or HEIC image.')
   }
 
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    throw new Error('Max file size is 5MB.')
+  if (file.size > MAX_FILE_SIZE_BEFORE_COMPRESSION) {
+    throw new Error('Image must be less than 20MB.')
   }
 
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const fileName = `${Date.now()}.${ext}`
+  // Compress the image before upload
+  const compressedFile = await compressPhoto(file)
+
+  const fileName = `${Date.now()}.jpg` // Always jpg after compression
   const filePath = `${userId}/${fileName}`
 
-  const { error } = await supabase.storage.from('catch-photos').upload(filePath, file)
+  const { error } = await supabase.storage.from('catch-photos').upload(filePath, compressedFile)
 
   if (error) {
     throw new Error(error.message)

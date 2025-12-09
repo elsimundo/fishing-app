@@ -17,8 +17,8 @@ export function useFeed(userId: string, pageLimit = 20, pageOffset = 0) {
       if (error) throw new Error(error.message)
       const basePosts = (data ?? []) as Post[]
 
-      const enrichedPosts: PostWithUser[] = await Promise.all(
-        basePosts.map(async (post) => {
+      const enrichedPosts = await Promise.all(
+        basePosts.map(async (post): Promise<PostWithUser | null> => {
           const { data: userData, error: userError } = await supabase
             .from('profiles')
             .select('id, username, full_name, avatar_url')
@@ -45,10 +45,16 @@ export function useFeed(userId: string, pageLimit = 20, pageOffset = 0) {
               .from('catches')
               .select('*')
               .eq('id', post.catch_id)
-              .single()
+              .eq('is_public', true) // Only show public catches in feed
+              .maybeSingle()
 
             if (catchError) throw new Error(catchError.message)
-            catchData = catchRow as Catch
+            catchData = catchRow as Catch | null
+          }
+
+          // Skip posts where the linked catch is private
+          if (post.catch_id && !catchData) {
+            return null
           }
 
           return {
@@ -68,7 +74,8 @@ export function useFeed(userId: string, pageLimit = 20, pageOffset = 0) {
         }),
       )
 
-      return enrichedPosts
+      // Filter out null entries (private catches)
+      return enrichedPosts.filter((post): post is PostWithUser => post !== null)
     },
     enabled: Boolean(userId),
   })

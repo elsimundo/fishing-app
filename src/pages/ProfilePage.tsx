@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
 import { useOwnPosts, useTogglePostVisibility } from '../hooks/usePosts'
 import { useUnreadCount } from '../hooks/useMessages'
+import { useCatches } from '../hooks/useCatches'
+import { useSessions } from '../hooks/useSessions'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
 import { ProfileStats } from '../components/profile/ProfileStats'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
@@ -28,6 +30,8 @@ export default function ProfilePage() {
   const { data: followCounts } = useFollowCounts(userId)
   const { data: posts, isLoading: postsLoading } = useOwnPosts(userId)
   const { mutate: toggleVisibility } = useTogglePostVisibility()
+  const { catches } = useCatches()
+  const { data: sessions } = useSessions()
 
   const preferenceLabels: Record<string, string> = {
     sea: 'Sea Fishing',
@@ -129,6 +133,37 @@ export default function ProfilePage() {
           <Trash2 size={18} />
           <span className="text-sm font-medium">Delete Account</span>
         </button>
+      </div>
+
+      {/* Logbook Section */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="px-5 py-3">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Logbook</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-3 px-5 pb-4">
+          {/* Catches Card */}
+          <button
+            type="button"
+            onClick={() => navigate('/catches')}
+            className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Fish size={24} className="mb-2 text-blue-600" />
+            <span className="text-2xl font-bold text-gray-900">{catches?.length ?? 0}</span>
+            <span className="text-xs font-medium text-gray-600">Catches</span>
+          </button>
+
+          {/* Sessions Card */}
+          <button
+            type="button"
+            onClick={() => navigate('/sessions')}
+            className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-green-50 to-green-100 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Calendar size={24} className="mb-2 text-green-600" />
+            <span className="text-2xl font-bold text-gray-900">{sessions?.length ?? 0}</span>
+            <span className="text-xs font-medium text-gray-600">Sessions</span>
+          </button>
+        </div>
       </div>
 
       <div className="p-5">

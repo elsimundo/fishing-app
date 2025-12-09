@@ -4,6 +4,7 @@ import { Layout } from '../components/layout/Layout'
 import { Image, X, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { compressPhoto } from '../utils/imageCompression'
 
 export default function CreatePostPage() {
   const navigate = useNavigate()
@@ -23,8 +24,8 @@ export default function CreatePostPage() {
       return
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Image must be less than 10MB')
+    if (file.size > 50 * 1024 * 1024) {
+      alert('Image must be less than 50MB')
       return
     }
 
@@ -43,13 +44,15 @@ export default function CreatePostPage() {
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile || !user) return null
 
-    const fileExt = imageFile.name.split('.').pop()
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`
+    // Compress the image before upload
+    const compressedFile = await compressPhoto(imageFile)
+    
+    const fileName = `${user.id}-${Date.now()}.jpg`
     const filePath = `posts/${fileName}`
 
     const { error: uploadError } = await supabase.storage
       .from('posts')
-      .upload(filePath, imageFile)
+      .upload(filePath, compressedFile)
 
     if (uploadError) throw uploadError
 

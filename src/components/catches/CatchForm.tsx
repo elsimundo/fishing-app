@@ -12,6 +12,7 @@ import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 import { FISH_SPECIES } from '../../lib/constants'
 import { getOrCreateSessionForCatch } from '../../lib/autoSession'
 import { useCatchXP } from '../../hooks/useCatchXP'
+import { Globe, Lock, Info } from 'lucide-react'
 
 const fishingStyles = [
   'Shore fishing',
@@ -89,6 +90,8 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
   console.log('CatchForm - targetSessionId:', targetSessionId)
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [isPublic, setIsPublic] = useState(true)
+  const [hideExactLocation, setHideExactLocation] = useState(false)
 
   const defaultNow = new Date().toISOString().slice(0, 16)
 
@@ -231,6 +234,8 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       notes: values.notes ?? null,
       session_id: sessionId,
       mark_id: markId,
+      is_public: isPublic,
+      hide_exact_location: hideExactLocation,
     }
 
     console.log('CatchForm - Submitting payload with session_id:', payload.session_id)
@@ -526,6 +531,73 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
           {errors.notes ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.notes.message}</p>
           ) : null}
+        </div>
+
+        {/* Privacy Settings */}
+        <div className="sm:col-span-2 space-y-3">
+          <p className="text-xs font-medium text-slate-700">Sharing</p>
+          
+          {/* Public/Private Toggle */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPublic(true)}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
+                isPublic
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Globe size={14} />
+              Public
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPublic(false)}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
+                !isPublic
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Lock size={14} />
+              Private
+            </button>
+          </div>
+
+          {/* Hide Location Option (only if public) */}
+          {isPublic && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hideExactLocation}
+                onChange={(e) => setHideExactLocation(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+              />
+              <span className="text-xs text-slate-600">Hide exact location (show region only)</span>
+            </label>
+          )}
+
+          {/* Privacy Info Box */}
+          <div className="rounded-lg bg-slate-50 p-3 text-[11px] text-slate-600">
+            <div className="flex items-start gap-2">
+              <Info size={14} className="mt-0.5 shrink-0 text-slate-400" />
+              <div className="space-y-1.5">
+                <p className="font-medium text-slate-700">What's shared publicly?</p>
+                <ul className="space-y-0.5 text-slate-500">
+                  <li>• Species, weight, and photo</li>
+                  <li>• General area (e.g. "Cornwall")</li>
+                  <li>• Date caught</li>
+                </ul>
+                <p className="font-medium text-slate-700 pt-1">🔒 Never shared:</p>
+                <ul className="space-y-0.5 text-slate-500">
+                  <li>• Exact GPS coordinates</li>
+                  <li>• Your precise fishing spot</li>
+                </ul>
+                <p className="text-slate-400 pt-1 italic">You can hide any catch from the feed later.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
