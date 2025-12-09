@@ -73,6 +73,7 @@ export function SessionDetailPage() {
   const { mutateAsync: changeParticipantRole } = useChangeParticipantRole()
   const { mutateAsync: removeParticipant } = useRemoveParticipant()
   const { mutateAsync: deleteSession, isPending: isDeleting } = useDeleteSession()
+  const sessionXP = useSessionXP()
 
   if (isLoading) {
     return (
@@ -106,11 +107,10 @@ export function SessionDetailPage() {
   const canLogCatches = isOwner || mySessionRole === 'contributor'
   const isActive = !session.ended_at
 
-  const myParticipant = participants.find(
-    (p) => p.user_id === currentUserId && (p.status === 'active' || p.status === 'pending'),
-  ) ?? null
-
-  const sessionXP = useSessionXP()
+  const myParticipant =
+    participants.find(
+      (p) => p.user_id === currentUserId && (p.status === 'active' || p.status === 'pending'),
+    ) ?? null
   
   const handleEndSession = async () => {
     if (!session || session.ended_at) return

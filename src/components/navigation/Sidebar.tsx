@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, Home, Map, Plus, Trophy, User, Settings, LogOut, MoreHorizontal } from 'lucide-react'
+import { Home, Map, Plus, Trophy, User, Settings, LogOut, MoreHorizontal } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { CreatePostModal } from '../post/CreatePostModal'
 import { NotificationBell } from '../notifications/NotificationBell'
@@ -23,7 +23,7 @@ export function Sidebar() {
           <NotificationBell align="left" />
         </div>
 
-        {/* Navigation Items */}
+        {/* Navigation Items - match bottom nav structure */}
         <nav className="flex flex-1 flex-col gap-1">
           {/* Feed */}
           <button
@@ -35,18 +35,6 @@ export function Sidebar() {
           >
             <Home size={28} className="text-gray-900" />
             <span className="text-base">Feed</span>
-          </button>
-
-          {/* Logbook */}
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard')}
-            className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/dashboard') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
-            }`}
-          >
-            <BookOpen size={28} className="text-gray-900" />
-            <span className="text-base">Logbook</span>
           </button>
 
           {/* Explore */}
