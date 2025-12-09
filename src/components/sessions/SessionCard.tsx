@@ -42,6 +42,12 @@ export function SessionCard({ session }: SessionCardProps) {
 
   const coverPhotoUrl = session.cover_photo_url || (biggest && (biggest as any).photo_url) || null
 
+  const hasConditions =
+    session.tide_state ||
+    session.weather_temp != null ||
+    session.weather_condition ||
+    session.wind_speed != null
+
   // Dynamic gradient based on status
   const headerGradient = !isCompleted
     ? 'from-emerald-500 to-teal-600'
@@ -121,14 +127,27 @@ export function SessionCard({ session }: SessionCardProps) {
           </div>
 
           {/* Footer */}
-          <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-              <MapPin size={12} />
-              <span className="line-clamp-1">{session.location_name}</span>
-            </div>
-            <div className="flex items-center gap-1 text-sm font-semibold text-emerald-600 group-hover:text-emerald-700">
-              <span>View</span>
-              <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            {hasConditions && (
+              <p className="mb-1 text-[11px] text-gray-500">
+                {session.tide_state && `🌊 ${session.tide_state}`}
+                {session.tide_state && (session.weather_temp != null || session.weather_condition || session.wind_speed != null) && ' · '}
+                {session.weather_temp != null && `${session.weather_temp.toFixed(1)}°C`}
+                {session.weather_temp != null && (session.weather_condition || session.wind_speed != null) && ' · '}
+                {session.weather_condition && session.weather_condition}
+                {session.weather_condition && session.wind_speed != null && ' · '}
+                {session.wind_speed != null && `${session.wind_speed.toFixed(1)} mph`}
+              </p>
+            )}
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <div className="flex items-center gap-1.5">
+                <MapPin size={12} />
+                <span className="line-clamp-1">{session.location_name}</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm font-semibold text-emerald-600 group-hover:text-emerald-700">
+                <span>View</span>
+                <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+              </div>
             </div>
           </div>
         </div>

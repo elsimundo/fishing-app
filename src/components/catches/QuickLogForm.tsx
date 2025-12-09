@@ -160,6 +160,11 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       notes: values.notes ?? null,
       is_public: isPublic,
       hide_exact_location: hideExactLocation,
+      // Copy weather snapshot from parent session
+      weather_temp: session.weather_temp ?? null,
+      weather_condition: session.weather_condition ?? null,
+      wind_speed: session.wind_speed ?? null,
+      moon_phase: session.moon_phase ?? null,
     }
 
     const { data, error } = await supabase.from('catches').insert(payload).select('*').single()
@@ -184,6 +189,10 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       caughtAt: created.caught_at,
       latitude: created.latitude,
       longitude: created.longitude,
+      // Environmental data for condition-based challenges
+      weatherCondition: created.weather_condition,
+      windSpeed: created.wind_speed,
+      moonPhase: created.moon_phase,
     })
     
     onLogged(created)

@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
-import { CloudSun, ChevronDown, ChevronUp, Wind, Gauge, Droplets, Loader2, Sunrise } from 'lucide-react'
+import { CloudSun, ChevronDown, ChevronUp, Wind, Gauge, Droplets, Loader2, Sunrise, Moon } from 'lucide-react'
 import { useWeatherData } from '../../hooks/useWeatherData'
 import { WEATHER_CODES } from '../../types/weather'
 import { calculateFishingConditions, getWindDirection, getWindArrow } from '../../services/fishing-conditions'
+import { getMoonPhase } from '../../utils/moonPhase'
 import { format } from 'date-fns'
 
 interface WeatherCardProps {
@@ -170,10 +171,42 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
             </div>
           </div>
 
+          {/* Moon Phase */}
+          {(() => {
+            const moonData = getMoonPhase()
+            const moonRatingColors = {
+              excellent: 'bg-green-50 border-green-200 text-green-700',
+              good: 'bg-blue-50 border-blue-200 text-blue-700',
+              fair: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+              poor: 'bg-red-50 border-red-200 text-red-700',
+            }
+            return (
+              <div className="mt-3 rounded-lg border bg-indigo-50 border-indigo-200 p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Moon size={16} className="text-indigo-600" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Moon Phase</span>
+                  </div>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold border ${moonRatingColors[moonData.fishingRating]}`}>
+                    {moonData.fishingRating}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center gap-3">
+                  <span className="text-3xl">{moonData.emoji}</span>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{moonData.phase}</p>
+                    <p className="text-xs text-gray-600">{moonData.illumination}% illuminated</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-gray-700">{moonData.fishingTip}</p>
+              </div>
+            )
+          })()}
+
           <div className="mt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">3-Day Forecast</p>
-            <div className="mt-2 flex gap-2">
-              {daily.time.slice(0, 3).map((day, idx) => {
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">5-Day Forecast</p>
+            <div className="mt-2 flex gap-1">
+              {daily.time.slice(0, 5).map((day, idx) => {
                 const dayWeather = WEATHER_CODES[daily.weatherCode[idx]] || WEATHER_CODES[0]
                 return (
                   <div key={day} className="flex-1 rounded-lg bg-gray-50 p-2 text-center">

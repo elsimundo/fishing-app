@@ -4,7 +4,7 @@ import { Layout } from '../components/layout/Layout'
 import { useChallenges, useUserChallenges, useFeaturedChallenge } from '../hooks/useGamification'
 import { ChallengeCard } from '../components/gamification/ChallengeCard'
 import { XPBar } from '../components/gamification/XPBar'
-import { WeeklySpeciesCard } from '../components/gamification/WeeklySpeciesCard'
+import { WeeklySpeciesBadge } from '../components/gamification/WeeklySpeciesCard'
 import { useSessions } from '../hooks/useSessions'
 import { SessionCard } from '../components/sessions/SessionCard'
 import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees } from 'lucide-react'
@@ -17,12 +17,12 @@ const CATEGORIES = [
   { id: 'skill', label: 'Skill', icon: Zap },
 ]
 
-type MainTab = 'activity' | 'challenges' | 'compete'
+type MainTab = 'challenges' | 'compete'
 type WaterType = 'saltwater' | 'freshwater'
 
 export default function ChallengeBoardPage() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<MainTab>('activity')
+  const [activeTab, setActiveTab] = useState<MainTab>('challenges')
   const [waterType, setWaterType] = useState<WaterType>('freshwater')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(true)
@@ -61,7 +61,6 @@ export default function ChallengeBoardPage() {
   
   // Main tabs config
   const mainTabs = [
-    { id: 'activity' as MainTab, label: 'Activity', icon: ClipboardList },
     { id: 'challenges' as MainTab, label: 'Challenges', icon: Trophy },
     { id: 'compete' as MainTab, label: 'Compete', icon: Swords },
   ]
@@ -82,6 +81,11 @@ export default function ChallengeBoardPage() {
           {/* XP Bar */}
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
             <XPBar size="md" />
+          </div>
+
+          {/* Weekly species XP badge */}
+          <div className="mt-2">
+            <WeeklySpeciesBadge />
           </div>
         </div>
         
@@ -111,66 +115,6 @@ export default function ChallengeBoardPage() {
         
         {/* Tab Content */}
         <div className="px-4 pt-4">
-          {/* ACTIVITY TAB */}
-          {activeTab === 'activity' && (
-            <div className="space-y-4">
-              {/* Quick Actions */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => navigate('/sessions/new')}
-                  className="flex items-center gap-3 p-3 bg-navy-800 text-white rounded-xl hover:bg-navy-900 transition-colors"
-                >
-                  <Plus size={20} />
-                  <span className="font-medium">Start Session</span>
-                </button>
-                <button
-                  onClick={() => navigate('/catches/new')}
-                  className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-colors"
-                >
-                  <Fish size={20} className="text-navy-800" />
-                  <span className="font-medium text-gray-900">Log Catch</span>
-                </button>
-              </div>
-              
-              {/* Recent Sessions */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Recent Sessions</h3>
-                {sessionsLoading ? (
-                  <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="h-24 bg-white rounded-xl animate-pulse" />
-                    ))}
-                  </div>
-                ) : sessions && sessions.length > 0 ? (
-                  <div className="space-y-3">
-                    {sessions.slice(0, 5).map(session => (
-                      <SessionCard key={session.id} session={session} />
-                    ))}
-                    {sessions.length > 5 && (
-                      <button
-                        onClick={() => navigate('/dashboard')}
-                        className="w-full py-2 text-sm text-navy-600 font-medium hover:text-navy-800"
-                      >
-                        View all {sessions.length} sessions →
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 bg-white rounded-xl">
-                    <ClipboardList size={40} className="mx-auto text-gray-300 mb-2" />
-                    <p className="text-gray-500 text-sm">No sessions yet</p>
-                    <button
-                      onClick={() => navigate('/sessions/new')}
-                      className="mt-3 px-4 py-2 bg-navy-800 text-white text-sm font-medium rounded-lg hover:bg-navy-900"
-                    >
-                      Start your first session
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
           {/* CHALLENGES TAB */}
           {activeTab === 'challenges' && (
             <div className="space-y-4">
@@ -199,9 +143,6 @@ export default function ChallengeBoardPage() {
                   Saltwater
                 </button>
               </div>
-              
-              {/* Weekly Species Points */}
-              <WeeklySpeciesCard waterType={waterType} limit={5} />
               
               {/* Featured Challenge */}
               {featuredChallenge && (

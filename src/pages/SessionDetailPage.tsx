@@ -125,6 +125,9 @@ export function SessionDetailPage() {
 
   const sessionDate = session.started_at ? format(new Date(session.started_at), 'EEEE, MMMM d, yyyy') : null
   const sessionTime = session.started_at ? format(new Date(session.started_at), 'h:mm a') : null
+  const sortedCatches = [...session.catches].sort(
+    (a, b) => new Date(b.caught_at).getTime() - new Date(a.caught_at).getTime(),
+  )
 
   return (
     <main className="min-h-screen bg-gray-50 pb-24">
@@ -255,54 +258,96 @@ export function SessionDetailPage() {
       </header>
 
       <div className="mx-auto max-w-2xl px-4 py-4">
-        {/* Session Hero */}
-        <div className="rounded-2xl bg-white p-5 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-                {isActive ? (
-                  <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
-                    Live
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                    Completed
-                  </span>
-                )}
-              </div>
+        {/* Hero image / cover */}
+        <div className="relative mb-4 overflow-hidden rounded-2xl bg-slate-900">
+          {session.cover_photo_url ? (
+            <img
+              src={session.cover_photo_url}
+              alt={title}
+              className="h-64 w-full object-cover"
+            />
+          ) : (
+            <div className="h-64 w-full bg-gradient-to-br from-cyan-600 to-emerald-500" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/70" />
+
+          {/* Hero badge */}
+          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-navy-900 shadow-sm">
+            <span>{typeof session.water_type === 'string' && session.water_type.includes('Sea') ? '🌊' : '🏞️'}</span>
+            <span>
+              {typeof session.water_type === 'string' ? session.water_type : 'Session'}
+            </span>
+            {isActive && (
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
+                Live
+              </span>
+            )}
+            {!isActive && (
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700">
+                Completed
+              </span>
+            )}
+          </div>
+
+          {/* Hero stats */}
+          <div className="absolute bottom-4 left-4 right-4 flex gap-2">
+            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-slate-900">{session.stats.total_catches}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Catches</p>
+            </div>
+            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-slate-900">{session.stats.duration_hours.toFixed(1)}h</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Duration</p>
+            </div>
+            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-slate-900">
+                {session.stats.biggest_catch?.weight_kg != null
+                  ? `${session.stats.biggest_catch.weight_kg.toFixed(1)}kg`
+                  : session.stats.total_weight_kg > 0
+                    ? `${session.stats.total_weight_kg.toFixed(1)}kg`
+                    : '—'}
+              </p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Biggest</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Info section */}
+        <div className="rounded-2xl bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <h1 className="text-lg font-bold text-gray-900">{title}</h1>
               {sessionDate && (
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-xs text-gray-500">
                   {sessionDate} · {sessionTime}
                 </p>
               )}
-              <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                <MapPin size={14} />
-                <span>{session.location_name || 'Unknown location'}</span>
-              </div>
-              {/* Privacy indicator */}
-              <div className="mt-1 flex items-center gap-1.5 text-[10px] text-gray-400">
-                {session.location_privacy === 'private' && (
-                  <>🔒 Location hidden</>
-                )}
-                {session.location_privacy === 'general' && (
-                  <>📍 Showing general area (~5km offset)</>
-                )}
-                {session.location_privacy === 'exact' && (
-                  <>🎯 Showing exact location</>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                <span className="inline-flex items-center gap-1">
+                  <MapPin size={13} />
+                  <span>{session.location_name || 'Unknown location'}</span>
+                </span>
+                {session.location_privacy !== 'exact' && (
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+                    {session.location_privacy === 'private'
+                      ? '🔒 Location hidden'
+                      : '📍 General area only'}
+                  </span>
                 )}
               </div>
             </div>
 
             <div className="text-right">
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                isOwner 
-                  ? 'bg-navy-800 text-white' 
-                  : mySessionRole === 'contributor'
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-gray-100 text-gray-600'
-              }`}>
+              <span
+                className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold ${
+                  isOwner
+                    ? 'bg-navy-800 text-white'
+                    : mySessionRole === 'contributor'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-gray-100 text-gray-600'
+                }`}
+              >
                 {isOwner ? 'Owner' : mySessionRole === 'contributor' ? 'Contributor' : 'Viewer'}
               </span>
               {myParticipant && !isOwner && (
@@ -310,7 +355,7 @@ export function SessionDetailPage() {
                   type="button"
                   disabled={isLeaving}
                   onClick={() => void leaveSession({ participant_id: myParticipant.id, session_id: session.id })}
-                  className="mt-2 block text-xs text-red-600 hover:underline"
+                  className="mt-2 block text-[11px] text-red-600 hover:underline"
                 >
                   {isLeaving ? 'Leaving…' : 'Leave session'}
                 </button>
@@ -318,33 +363,154 @@ export function SessionDetailPage() {
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="mt-5 grid grid-cols-4 gap-3">
-            <div className="rounded-xl bg-gray-50 p-3 text-center">
-              <Fish size={20} className="mx-auto text-gray-400" />
-              <p className="mt-1 text-lg font-bold text-gray-900">{session.stats.total_catches}</p>
-              <p className="text-[10px] text-gray-500">Catches</p>
-            </div>
-            <div className="rounded-xl bg-gray-50 p-3 text-center">
-              <Scale size={20} className="mx-auto text-gray-400" />
-              <p className="mt-1 text-lg font-bold text-gray-900">{session.stats.total_weight_kg.toFixed(1)}</p>
-              <p className="text-[10px] text-gray-500">kg Total</p>
-            </div>
-            <div className="rounded-xl bg-gray-50 p-3 text-center">
-              <div className="mx-auto h-5 w-5 text-center text-gray-400">🐟</div>
-              <p className="mt-1 text-lg font-bold text-gray-900">{Object.keys(session.stats.species_breakdown).length}</p>
-              <p className="text-[10px] text-gray-500">Species</p>
-            </div>
-            <div className="rounded-xl bg-gray-50 p-3 text-center">
-              <Clock size={20} className="mx-auto text-gray-400" />
-              <p className="mt-1 text-lg font-bold text-gray-900">{session.stats.duration_hours.toFixed(1)}</p>
-              <p className="text-[10px] text-gray-500">Hours</p>
-            </div>
-          </div>
+          {session.session_notes && (
+            <p className="mt-3 text-sm text-slate-700">
+              {session.session_notes}
+            </p>
+          )}
         </div>
 
-        {/* Quick Log Button */}
-        {canLogCatches && (
+        {/* Environmental conditions card */}
+        {(session.weather_temp != null || session.wind_speed != null || session.tide_state || session.moon_phase) && (
+          <div className="mt-4 rounded-2xl bg-gradient-to-br from-navy-900 to-blue-700 p-4 text-xs text-white">
+            <p className="mb-3 text-[13px] font-semibold opacity-90">📊 Conditions during session</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-white/10 p-3">
+                <p className="text-[11px] opacity-80">Temperature</p>
+                <p className="mt-1 text-base font-semibold">
+                  {session.weather_temp != null ? `${session.weather_temp.toFixed(1)}°C` : '—'}
+                </p>
+              </div>
+              <div className="rounded-xl bg-white/10 p-3">
+                <p className="text-[11px] opacity-80">Wind</p>
+                <p className="mt-1 text-base font-semibold">
+                  {session.wind_speed != null ? `${session.wind_speed.toFixed(1)} mph` : '—'}
+                </p>
+              </div>
+              <div className="rounded-xl bg-white/10 p-3">
+                <p className="text-[11px] opacity-80">Tide</p>
+                <p className="mt-1 text-base font-semibold">{session.tide_state || '—'}</p>
+              </div>
+              <div className="rounded-xl bg-white/10 p-3">
+                <p className="text-[11px] opacity-80">Weather</p>
+                <p className="mt-1 text-base font-semibold">
+                  {session.weather_condition || '—'}
+                </p>
+              </div>
+              {session.moon_phase && (
+                <div className="col-span-2 rounded-xl bg-white/10 p-3">
+                  <p className="text-[11px] opacity-80">Moon Phase</p>
+                  <p className="mt-1 text-base font-semibold">{session.moon_phase}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Active session banner + quick stats + timeline */}
+        {isActive && (
+          <>
+            {/* Active banner */}
+            <div className="mt-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 text-center text-white">
+              <p className="text-xs font-semibold tracking-wide text-emerald-100">
+                SESSION IN PROGRESS
+              </p>
+              <p className="text-2xl font-bold">
+                {session.stats.duration_hours.toFixed(1)}h
+              </p>
+              {sessionTime && (
+                <p className="text-xs text-emerald-100">Started at {sessionTime}</p>
+              )}
+            </div>
+
+            {/* Quick stats */}
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <div className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-center text-xs">
+                <div className="mb-1 text-lg">🐟</div>
+                <p className="text-base font-bold text-gray-900">{session.stats.total_catches}</p>
+                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Catches</p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-center text-xs">
+                <div className="mb-1 text-lg">⚖️</div>
+                <p className="text-base font-bold text-gray-900">
+                  {session.stats.biggest_catch?.weight_kg != null
+                    ? `${session.stats.biggest_catch.weight_kg.toFixed(1)}kg`
+                    : '—'}
+                </p>
+                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Biggest</p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-center text-xs">
+                <div className="mb-1 text-lg">📸</div>
+                <p className="text-base font-bold text-gray-900">
+                  {sortedCatches.filter((c) => c.photo_url).length}
+                </p>
+                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Photos</p>
+              </div>
+            </div>
+
+            {/* Log catch CTA (active) */}
+            {canLogCatches && (
+              <button
+                type="button"
+                onClick={() => setIsQuickLogOpen(true)}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
+              >
+                <Plus size={18} />
+                Log new catch
+              </button>
+            )}
+
+            {/* Timeline */}
+            <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-gray-900">Session timeline</h2>
+              {sortedCatches.length === 0 ? (
+                <div className="py-6 text-center text-xs text-gray-500">
+                  No catches yet. Log your first catch to start the timeline.
+                </div>
+              ) : (
+                <div className="relative">
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-gray-200" />
+                  <div className="space-y-4">
+                    {sortedCatches.map((c) => (
+                      <div key={c.id} className="relative flex items-start gap-3 pl-7">
+                        <div className="absolute left-0 top-2 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-navy-800 shadow" />
+                        {c.photo_url ? (
+                          <img
+                            src={c.photo_url}
+                            alt={c.species}
+                            className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-lg">
+                            🐟
+                          </div>
+                        )}
+                        <div className="flex-1 text-xs">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold text-gray-900">
+                              {c.species}
+                              {c.weight_kg != null && ` • ${c.weight_kg.toFixed(1)}kg`}
+                            </p>
+                            <span className="ml-2 text-[11px] text-gray-500">
+                              {format(new Date(c.caught_at), 'HH:mm')}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 text-[11px] text-gray-600">
+                            {c.bait && c.bait !== '0' ? c.bait : '—'}
+                            {c.released ? ' • Released' : ''}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Quick Log Button (completed sessions or fallback) */}
+        {!isActive && canLogCatches && (
           <button
             type="button"
             onClick={() => setIsQuickLogOpen(true)}
@@ -388,7 +554,12 @@ export function SessionDetailPage() {
         {canSeeExactLocation && session.latitude && session.longitude && (
           <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm">
             <div className="h-48 w-full">
-              <Map catches={session.catches} variant="mini" />
+              <Map 
+                catches={session.catches} 
+                variant="mini" 
+                center={{ lat: session.latitude, lng: session.longitude }}
+                showCenterMarker
+              />
             </div>
           </div>
         )}

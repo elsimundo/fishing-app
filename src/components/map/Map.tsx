@@ -8,9 +8,11 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string
 type MapProps = {
   catches: Catch[]
   variant?: 'full' | 'mini'
+  center?: { lat: number; lng: number }
+  showCenterMarker?: boolean
 }
 
-export function Map({ catches, variant = 'full' }: MapProps) {
+export function Map({ catches, variant = 'full', center, showCenterMarker = false }: MapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
 
@@ -88,23 +90,39 @@ export function Map({ catches, variant = 'full' }: MapProps) {
     if (markers.length === 1) {
       const lngLat = markers[0].getLngLat()
       const isMini = variant === 'mini'
-      const options: mapboxgl.EaseToOptions = {
+      map.easeTo({
         center: lngLat,
-        zoom: isMini ? 11 : 10,
-      }
-
-      if (isMini) {
-        // Push the map center slightly down so the marker appears higher in the mini map
-        ;(options as any).offset = [0, -200]
-      }
-
-      map.easeTo(options)
+        zoom: isMini ? 12 : 10,
+      })
     } else if (markers.length > 1) {
       const bounds = new mapboxgl.LngLatBounds()
       markers.forEach((m) => bounds.extend(m.getLngLat()))
       map.fitBounds(bounds, { padding: 40, maxZoom: 10 })
+    } else if (center) {
+      // No catches but we have a center point - zoom to it
+      map.easeTo({
+        center: [center.lng, center.lat],
+        zoom: variant === 'mini' ? 12 : 10,
+      })
     }
-  }, [catches, variant])
+
+    // Add center marker if requested and we have a center
+    if (showCenterMarker && center) {
+      // Remove existing center marker
+      const existingCenter = (map as any)._centerMarker as mapboxgl.Marker | undefined
+      existingCenter?.remove()
+
+      const el = document.createElement('div')
+      el.className = 'flex h-6 w-6 items-center justify-center rounded-full bg-navy-800 border-2 border-white shadow-lg'
+      el.innerHTML = '<span style="font-size:12px;">📍</span>'
+
+      const centerMarker = new mapboxgl.Marker({ element: el })
+        .setLngLat([center.lng, center.lat])
+        .addTo(map)
+
+      ;(map as any)._centerMarker = centerMarker
+    }
+  }, [catches, variant, center, showCenterMarker])
 
   useEffect(() => {
     mapRef.current?.resize()

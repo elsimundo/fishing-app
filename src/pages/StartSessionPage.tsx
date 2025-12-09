@@ -7,6 +7,10 @@ import { Layout } from '../components/layout/Layout'
 import { LocationPicker } from '../components/map/LocationPicker'
 import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
+import { getCompleteWeatherData } from '../services/open-meteo'
+import { getTideData } from '../services/tides'
+import { WEATHER_CODES } from '../types/weather'
+import { getMoonPhase } from '../utils/moonPhase'
 import type { Lake } from '../types'
 
 type WaterType = 'saltwater' | 'freshwater'
@@ -144,6 +148,42 @@ export default function StartSessionPage() {
       year: 'numeric',
     })}`
 
+    // Get coordinates for weather/tide fetch
+    const lat = preSelectedMark?.latitude ?? 0
+    const lng = preSelectedMark?.longitude ?? 0
+
+    // Fetch weather and tide snapshot
+    let weatherTemp: number | null = null
+    let weatherCondition: string | null = null
+    let windSpeed: number | null = null
+    let tideState: string | null = null
+
+    if (lat !== 0 && lng !== 0) {
+      setLoadingMessage('Fetching weather conditions...')
+      try {
+        const [weatherData, tideData] = await Promise.all([
+          getCompleteWeatherData(lat, lng).catch(() => null),
+          getTideData(lat, lng).catch(() => null),
+        ])
+
+        if (weatherData?.current) {
+          weatherTemp = weatherData.current.temperature
+          windSpeed = weatherData.current.windSpeed
+          const code = weatherData.current.weatherCode
+          weatherCondition = WEATHER_CODES[code]?.description || null
+        }
+
+        if (tideData?.current?.type) {
+          const t = tideData.current.type
+          tideState = t.charAt(0).toUpperCase() + t.slice(1)
+        }
+      } catch (e) {
+        console.warn('[StartSessionPage] Quick start - failed to fetch weather/tide:', e)
+      }
+    }
+
+    setLoadingMessage('Creating your session...')
+
     // Use mark data if available, otherwise use defaults
     const sessionData = preSelectedMark ? {
       user_id: user.id,
@@ -156,7 +196,12 @@ export default function StartSessionPage() {
       started_at: now.toISOString(),
       is_public: true,
       mark_id: preSelectedMark.id,
-    } : {
+      weather_temp: weatherTemp,
+      weather_condition: weatherCondition,
+      wind_speed: windSpeed,
+      tide_state: tideState,
+      moon_phase: getMoonPhase().phase,
+    } as const : {
       user_id: user.id,
       title,
       location_name: 'Current Location',
@@ -166,6 +211,11 @@ export default function StartSessionPage() {
       longitude: 0,
       started_at: now.toISOString(),
       is_public: true,
+      weather_temp: null,
+      weather_condition: null,
+      wind_speed: null,
+      tide_state: null,
+      moon_phase: getMoonPhase().phase,
     }
 
     const { data, error } = await supabase
@@ -239,9 +289,42 @@ export default function StartSessionPage() {
     }
 
     setLoading(true)
-    setLoadingMessage('Creating your session...')
+    setLoadingMessage('Fetching weather conditions...')
 
     const now = new Date()
+    const lat = formData.latitude ?? 0
+    const lng = formData.longitude ?? 0
+
+    // Fetch weather and tide snapshot
+    let weatherTemp: number | null = null
+    let weatherCondition: string | null = null
+    let windSpeed: number | null = null
+    let tideState: string | null = null
+
+    if (lat !== 0 && lng !== 0) {
+      try {
+        const [weatherData, tideData] = await Promise.all([
+          getCompleteWeatherData(lat, lng).catch(() => null),
+          getTideData(lat, lng).catch(() => null),
+        ])
+
+        if (weatherData?.current) {
+          weatherTemp = weatherData.current.temperature
+          windSpeed = weatherData.current.windSpeed
+          const code = weatherData.current.weatherCode
+          weatherCondition = WEATHER_CODES[code]?.description || null
+        }
+
+        if (tideData?.current?.type) {
+          const t = tideData.current.type
+          tideState = t.charAt(0).toUpperCase() + t.slice(1)
+        }
+      } catch (e) {
+        console.warn('[StartSessionPage] Failed to fetch weather/tide:', e)
+      }
+    }
+
+    setLoadingMessage('Creating your session...')
 
     const { data, error } = await supabase
       .from('sessions')
@@ -251,13 +334,18 @@ export default function StartSessionPage() {
         location_name: formData.locationName ?? 'Fishing spot',
         water_type: formData.waterType ?? 'saltwater',
         location_privacy: formData.privacy,
-        latitude: formData.latitude ?? 0,
-        longitude: formData.longitude ?? 0,
+        latitude: lat,
+        longitude: lng,
         started_at: now.toISOString(),
         is_public: true,
-        description: formData.notes ?? null,
+        session_notes: formData.notes ?? null,
         lake_id: formData.lakeId ?? null,
         mark_id: formData.markId ?? null,
+        weather_temp: weatherTemp,
+        weather_condition: weatherCondition,
+        wind_speed: windSpeed,
+        tide_state: tideState,
+        moon_phase: getMoonPhase().phase,
       })
       .select()
       .single()

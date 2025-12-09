@@ -13,6 +13,10 @@ interface CatchXPInput {
   caughtAt?: string | null
   latitude?: number | null
   longitude?: number | null
+  // Environmental data for condition-based challenges
+  weatherCondition?: string | null
+  windSpeed?: number | null
+  moonPhase?: string | null
 }
 
 interface XPBreakdown {
@@ -125,7 +129,7 @@ export function useCatchXP() {
         breakdown.photoBonus = XP_VALUES.PHOTO_BONUS
       }
       
-      // Weekly species points check
+      // Weekly species XP bonus check
       const now = new Date()
       const dayOfWeek = now.getDay()
       const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
@@ -141,8 +145,9 @@ export function useCatchXP() {
         .maybeSingle()
       
       if (weeklyPoints) {
+        // Treat points as direct XP bonus for this species this week
         weeklySpeciesPoints = weeklyPoints.points
-        breakdown.weeklySpeciesBonus = weeklyPoints.is_bonus ? 10 : 5
+        breakdown.weeklySpeciesBonus = weeklyPoints.points
       }
       
       // Calculate total
@@ -186,7 +191,7 @@ export function useCatchXP() {
       // Show XP toast
       if (data.xpAwarded > 0) {
         const bonusText = data.weeklySpeciesPoints > 0 
-          ? ` (+${data.weeklySpeciesPoints} species pts)` 
+          ? ` (includes +${data.weeklySpeciesPoints} bonus XP for weekly species)` 
           : ''
         toast.success(`+${data.xpAwarded} XP${bonusText}`, { icon: '⭐', duration: 3000 })
       }
@@ -371,6 +376,56 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   // 7. STREAK/CONSISTENCY CHALLENGES
   // ============================================
   await checkStreakChallenges(userId, completed)
+  
+  // ============================================
+  // 8. WEATHER-BASED CHALLENGES
+  // ============================================
+  if (input.weatherCondition) {
+    const condition = input.weatherCondition.toLowerCase()
+    
+    // Weather Warrior: Catch in rain
+    if (condition.includes('rain') || condition.includes('drizzle') || condition.includes('shower')) {
+      await incrementProgressChallenge(userId, 'weather_warrior', 5, completed)
+    }
+    
+    // Storm Chaser: Catch during thunderstorm
+    if (condition.includes('thunder') || condition.includes('storm')) {
+      await completeChallenge(userId, 'storm_chaser', 1, 1, completed)
+    }
+    
+    // Fog Fisher: Catch in fog
+    if (condition.includes('fog') || condition.includes('mist')) {
+      await completeChallenge(userId, 'fog_fisher', 1, 1, completed)
+    }
+    
+    // Sunny Fisher: Catch on clear days
+    if (condition.includes('clear') || condition.includes('sunny')) {
+      await incrementProgressChallenge(userId, 'sunny_fisher', 10, completed)
+    }
+  }
+  
+  // Wind Rider: Catch on windy day (15+ mph)
+  if (input.windSpeed && input.windSpeed >= 15) {
+    await incrementProgressChallenge(userId, 'wind_rider', 5, completed)
+  }
+  
+  // ============================================
+  // 9. MOON PHASE CHALLENGES
+  // ============================================
+  if (input.moonPhase) {
+    // Full Moon catch
+    if (input.moonPhase === 'Full Moon') {
+      await completeChallenge(userId, 'full_moon_catch', 1, 1, completed)
+    }
+    
+    // New Moon catch
+    if (input.moonPhase === 'New Moon') {
+      await completeChallenge(userId, 'new_moon_catch', 1, 1, completed)
+    }
+    
+    // Track unique moon phases caught
+    await checkMoonPhasesChallenge(userId, completed)
+  }
 }
 
 /**
@@ -473,6 +528,25 @@ async function checkStreakChallenges(userId: string, completed: string[]) {
   // Dedicated Angler: Log catches for 8 consecutive weeks
   if (consecutiveWeeks >= 8) {
     await completeChallenge(userId, 'dedicated_angler', consecutiveWeeks, 8, completed)
+  }
+}
+
+/**
+ * Check moon phases challenge (catch during 4 different phases)
+ */
+async function checkMoonPhasesChallenge(userId: string, completed: string[]) {
+  const { data: catches } = await supabase
+    .from('catches')
+    .select('moon_phase')
+    .eq('user_id', userId)
+    .not('moon_phase', 'is', null)
+  
+  if (!catches) return
+  
+  const uniquePhases = new Set(catches.map(c => c.moon_phase))
+  
+  if (uniquePhases.size >= 4) {
+    await completeChallenge(userId, 'moon_master', uniquePhases.size, 4, completed)
   }
 }
 

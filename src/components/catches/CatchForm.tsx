@@ -13,6 +13,9 @@ import { FISH_SPECIES } from '../../lib/constants'
 import { getOrCreateSessionForCatch } from '../../lib/autoSession'
 import { useCatchXP } from '../../hooks/useCatchXP'
 import { Globe, Lock, Info } from 'lucide-react'
+import { getCompleteWeatherData } from '../../services/open-meteo'
+import { WEATHER_CODES } from '../../types/weather'
+import { getMoonPhase } from '../../utils/moonPhase'
 
 const fishingStyles = [
   'Shore fishing',
@@ -207,15 +210,37 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       }
     }
 
-    // Get mark_id from the session if one exists
+    // Get mark_id and weather snapshot from the session if one exists
     let markId: string | null = null
+    let weatherTemp: number | null = null
+    let weatherCondition: string | null = null
+    let windSpeed: number | null = null
+
     if (sessionId) {
       const { data: sessionData } = await supabase
         .from('sessions')
-        .select('mark_id')
+        .select('mark_id, weather_temp, weather_condition, wind_speed')
         .eq('id', sessionId)
         .single()
       markId = sessionData?.mark_id ?? null
+      weatherTemp = sessionData?.weather_temp ?? null
+      weatherCondition = sessionData?.weather_condition ?? null
+      windSpeed = sessionData?.wind_speed ?? null
+    }
+
+    // If no session snapshot, fetch weather directly for this catch location
+    if (weatherTemp === null && typeof values.latitude === 'number' && typeof values.longitude === 'number') {
+      try {
+        const weatherData = await getCompleteWeatherData(values.latitude, values.longitude).catch(() => null)
+        if (weatherData?.current) {
+          weatherTemp = weatherData.current.temperature
+          windSpeed = weatherData.current.windSpeed
+          const code = weatherData.current.weatherCode
+          weatherCondition = WEATHER_CODES[code]?.description || null
+        }
+      } catch (e) {
+        console.warn('[CatchForm] Failed to fetch weather snapshot:', e)
+      }
     }
 
     const payload = {
@@ -236,6 +261,10 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       mark_id: markId,
       is_public: isPublic,
       hide_exact_location: hideExactLocation,
+      weather_temp: weatherTemp,
+      weather_condition: weatherCondition,
+      wind_speed: windSpeed,
+      moon_phase: getMoonPhase().phase,
     }
 
     console.log('CatchForm - Submitting payload with session_id:', payload.session_id)
@@ -265,6 +294,10 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
         caughtAt: data.caught_at,
         latitude: data.latitude,
         longitude: data.longitude,
+        // Environmental data for condition-based challenges
+        weatherCondition: data.weather_condition,
+        windSpeed: data.wind_speed,
+        moonPhase: data.moon_phase,
       })
     } else {
       toast.success(isEdit ? 'Catch updated' : 'Catch added')

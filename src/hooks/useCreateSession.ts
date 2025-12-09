@@ -24,6 +24,10 @@ async function createSession(payload: SessionFormData): Promise<Session> {
     session_notes: payload.session_notes ?? null,
     cover_photo_url: payload.cover_photo_url ?? null,
     tide_state: payload.tide_state ?? null,
+    weather_temp: payload.weather_temp ?? null,
+    weather_condition: payload.weather_condition ?? null,
+    wind_speed: payload.wind_speed ?? null,
+    moon_phase: payload.moon_phase ?? null,
   }
 
   const { data, error } = await supabase

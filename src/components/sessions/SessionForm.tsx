@@ -7,6 +7,10 @@ import { LocationPicker } from '../map/LocationPicker'
 import { WATER_TYPES, LOCATION_PRIVACY_OPTIONS, TIDE_STATES } from '../../lib/constants'
 import type { SessionFormData, Session } from '../../types'
 import { useCreateSession } from '../../hooks/useCreateSession'
+import { getCompleteWeatherData } from '../../services/open-meteo'
+import { getTideData } from '../../services/tides'
+import { WEATHER_CODES } from '../../types/weather'
+import { getMoonPhase } from '../../utils/moonPhase'
 
 const sessionFormSchema = z.object({
   title: z.string().max(80).optional(),
@@ -75,6 +79,35 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
   const onSubmit = async (values: SessionFormValues) => {
     setFormError(null)
 
+    // Fetch weather and tide snapshot (non-blocking errors)
+    let weatherTemp: number | null = null
+    let weatherCondition: string | null = null
+    let windSpeed: number | null = null
+    let tideState: string | undefined = values.tide_state || undefined
+
+    try {
+      const [weatherData, tideData] = await Promise.all([
+        getCompleteWeatherData(values.latitude, values.longitude).catch(() => null),
+        getTideData(values.latitude, values.longitude).catch(() => null),
+      ])
+
+      if (weatherData?.current) {
+        weatherTemp = weatherData.current.temperature
+        windSpeed = weatherData.current.windSpeed
+        const code = weatherData.current.weatherCode
+        weatherCondition = WEATHER_CODES[code]?.description || null
+      }
+
+      // Only use tide data if user didn't manually select a tide state
+      if (!tideState && tideData?.current?.type) {
+        // Capitalize first letter: "rising" -> "Rising"
+        const t = tideData.current.type
+        tideState = t.charAt(0).toUpperCase() + t.slice(1)
+      }
+    } catch (e) {
+      console.warn('[SessionForm] Failed to fetch weather/tide snapshot:', e)
+    }
+
     const payload: SessionFormData = {
       title: values.title || undefined,
       location_name: values.location_name,
@@ -87,7 +120,11 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
       ended_at: values.ended_at ? new Date(values.ended_at).toISOString() : undefined,
       session_notes: values.session_notes || undefined,
       cover_photo_url: values.cover_photo_url || undefined,
-      tide_state: values.tide_state || undefined,
+      tide_state: tideState as SessionFormData['tide_state'],
+      weather_temp: weatherTemp,
+      weather_condition: weatherCondition,
+      wind_speed: windSpeed,
+      moon_phase: getMoonPhase().phase,
     }
 
     try {

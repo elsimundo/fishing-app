@@ -101,7 +101,7 @@ export function WeeklySpeciesBadge() {
     <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-100 rounded-full">
       <Flame size={12} className="text-orange-500" />
       <span className="text-xs font-medium text-amber-800 capitalize">
-        {bonusSpecies.species}: {bonusSpecies.points}pts
+        {bonusSpecies.species}: +{bonusSpecies.points} XP
       </span>
     </div>
   )

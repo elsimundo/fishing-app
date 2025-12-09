@@ -55,6 +55,7 @@ export type Session = {
   weather_condition: string | null
   wind_speed: number | null
   tide_state: TideState | null
+  moon_phase: string | null
   created_at: string
   updated_at: string
 
@@ -94,6 +95,7 @@ export type Catch = {
   weather_temp: number | null
   weather_condition: string | null
   wind_speed: number | null
+  moon_phase: string | null
   released?: boolean | null
   created_at: string
   updated_at: string
@@ -132,6 +134,10 @@ export type SessionFormData = {
   session_notes?: string
   cover_photo_url?: string
   tide_state?: TideState
+  weather_temp?: number | null
+  weather_condition?: string | null
+  wind_speed?: number | null
+  moon_phase?: string | null
 }
 
 export type AuthUser = {

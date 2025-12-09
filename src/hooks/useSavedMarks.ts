@@ -228,11 +228,6 @@ export function useSharedMarks() {
             privacy_level,
             created_at,
             updated_at
-          ),
-          shared_by_user:profiles!mark_shares_shared_by_fkey(
-            id,
-            username,
-            avatar_url
           )
         `)
         .eq('shared_with', user.id)
@@ -240,14 +235,27 @@ export function useSharedMarks() {
 
       if (error) throw error
 
-      // Flatten the response - mark is an object, shared_by_user is an array with one item
+      // Get unique shared_by user IDs to fetch profiles
+      const sharedByIds = [...new Set((data || []).map(s => s.shared_by).filter(Boolean))]
+      let profilesMap: Record<string, { id: string; username: string | null; avatar_url: string | null }> = {}
+      
+      if (sharedByIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .in('id', sharedByIds)
+        
+        if (profiles) {
+          profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]))
+        }
+      }
+
+      // Flatten the response
       return (data || [])
         .filter((share) => share.mark) // Filter out any null marks
         .map((share) => {
           const mark = share.mark as unknown as SavedMark
-          const sharedByUser = Array.isArray(share.shared_by_user) 
-            ? share.shared_by_user[0] 
-            : share.shared_by_user
+          const sharedByUser = share.shared_by ? profilesMap[share.shared_by] || null : null
           return {
             ...mark,
             shared_by_user: sharedByUser,

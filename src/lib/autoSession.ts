@@ -1,4 +1,8 @@
 import { supabase } from './supabase'
+import { getCompleteWeatherData } from '../services/open-meteo'
+import { getTideData } from '../services/tides'
+import { WEATHER_CODES } from '../types/weather'
+import { getMoonPhase } from '../utils/moonPhase'
 
 /**
  * Auto-creates a session for a catch if no session exists.
@@ -58,6 +62,35 @@ export async function getOrCreateSessionForCatch({
   }
 
   // No matching session found, create a new one
+  // Fetch weather and tide snapshot for the new session
+  let weatherTemp: number | null = null
+  let weatherCondition: string | null = null
+  let windSpeed: number | null = null
+  let tideState: string | null = null
+
+  if (latitude && longitude) {
+    try {
+      const [weatherData, tideData] = await Promise.all([
+        getCompleteWeatherData(latitude, longitude).catch(() => null),
+        getTideData(latitude, longitude).catch(() => null),
+      ])
+
+      if (weatherData?.current) {
+        weatherTemp = weatherData.current.temperature
+        windSpeed = weatherData.current.windSpeed
+        const code = weatherData.current.weatherCode
+        weatherCondition = WEATHER_CODES[code]?.description || null
+      }
+
+      if (tideData?.current?.type) {
+        const t = tideData.current.type
+        tideState = t.charAt(0).toUpperCase() + t.slice(1)
+      }
+    } catch (e) {
+      console.warn('[autoSession] Failed to fetch weather/tide snapshot:', e)
+    }
+  }
+
   const { data: newSession, error } = await supabase
     .from('sessions')
     .insert({
@@ -71,6 +104,11 @@ export async function getOrCreateSessionForCatch({
       location_privacy: 'approximate', // Default to approximate for auto-sessions
       started_at: caughtAt, // Session starts at catch time
       ended_at: null, // Leave open
+      weather_temp: weatherTemp,
+      weather_condition: weatherCondition,
+      wind_speed: windSpeed,
+      tide_state: tideState,
+      moon_phase: getMoonPhase().phase,
     })
     .select('id')
     .single()
