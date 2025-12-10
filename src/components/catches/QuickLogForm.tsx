@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -6,8 +6,9 @@ import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import type { Catch, Session } from '../../types'
 import { FISH_SPECIES } from '../../lib/constants'
-import { Camera, X, Globe, Lock, Info } from 'lucide-react'
+import { Camera, X, Globe, Lock, Info, MapPin, ChevronDown } from 'lucide-react'
 import { useCatchXP } from '../../hooks/useCatchXP'
+import { useSavedMarks } from '../../hooks/useSavedMarks'
 import { compressPhoto } from '../../utils/imageCompression'
 
 const quickLogSchema = z.object({
@@ -44,6 +45,8 @@ type QuickLogFormProps = {
   onClose: () => void
 }
 
+type LocationSource = 'session' | 'mark' | 'current'
+
 export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) {
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
@@ -53,6 +56,70 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const [hideExactLocation, setHideExactLocation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const catchXP = useCatchXP()
+  const { marks = [] } = useSavedMarks()
+
+  // Location state
+  const hasSessionLocation = !!(session.latitude && session.longitude)
+  const [locationSource, setLocationSource] = useState<LocationSource>(hasSessionLocation ? 'session' : 'current')
+  const [selectedMarkId, setSelectedMarkId] = useState<string | null>(null)
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number; name: string } | null>(null)
+  const [showLocationPicker, setShowLocationPicker] = useState(false)
+
+  // Get current location if needed
+  useEffect(() => {
+    if (locationSource === 'current' && !currentLocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setCurrentLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            name: 'Current location',
+          })
+        },
+        () => {
+          // If geolocation fails and no session location, show picker
+          if (!hasSessionLocation) {
+            setShowLocationPicker(true)
+          }
+        }
+      )
+    }
+  }, [locationSource, currentLocation, hasSessionLocation])
+
+  // Compute active location based on source
+  const getActiveLocation = () => {
+    if (locationSource === 'session' && hasSessionLocation) {
+      return {
+        name: session.location_name || 'Session location',
+        lat: session.latitude,
+        lng: session.longitude,
+      }
+    }
+    if (locationSource === 'mark' && selectedMarkId) {
+      const mark = marks.find((m) => m.id === selectedMarkId)
+      if (mark) {
+        return {
+          name: mark.name,
+          lat: mark.latitude,
+          lng: mark.longitude,
+        }
+      }
+    }
+    if (locationSource === 'current' && currentLocation) {
+      return currentLocation
+    }
+    // Fallback to session if available
+    if (hasSessionLocation) {
+      return {
+        name: session.location_name || 'Session location',
+        lat: session.latitude,
+        lng: session.longitude,
+      }
+    }
+    return null
+  }
+
+  const activeLocation = getActiveLocation()
 
   const defaultNow = new Date().toISOString().slice(0, 16)
 
@@ -148,9 +215,9 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       session_id: session.id,
       species: values.species,
       caught_at: new Date(values.caught_at).toISOString(),
-      location_name: session.location_name,
-      latitude: session.latitude,
-      longitude: session.longitude,
+      location_name: activeLocation?.name || session.location_name || null,
+      latitude: activeLocation?.lat || session.latitude || null,
+      longitude: activeLocation?.lng || session.longitude || null,
       weight_kg: values.weight_kg ?? null,
       length_cm: values.length_cm ?? null,
       bait: null,
@@ -242,6 +309,98 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
           {errors.species ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.species.message}</p>
           ) : null}
+        </div>
+
+        {/* Location picker */}
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-xs font-medium text-slate-700">
+            Location
+          </label>
+          {showLocationPicker ? (
+            <div className="space-y-2">
+              {/* Session location option */}
+              {hasSessionLocation && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocationSource('session')
+                    setShowLocationPicker(false)
+                  }}
+                  className={`flex w-full items-center gap-2 rounded-lg border p-2 text-left text-xs transition-colors ${
+                    locationSource === 'session'
+                      ? 'border-navy-800 bg-navy-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <MapPin size={14} className="text-gray-500" />
+                  <div>
+                    <p className="font-medium text-gray-900">Session location</p>
+                    <p className="text-[10px] text-gray-500">{session.location_name || 'From session'}</p>
+                  </div>
+                </button>
+              )}
+
+              {/* Saved marks */}
+              {marks.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-medium text-gray-500 uppercase">My Marks</p>
+                  {marks.slice(0, 5).map((mark) => (
+                    <button
+                      key={mark.id}
+                      type="button"
+                      onClick={() => {
+                        setLocationSource('mark')
+                        setSelectedMarkId(mark.id)
+                        setShowLocationPicker(false)
+                      }}
+                      className={`flex w-full items-center gap-2 rounded-lg border p-2 text-left text-xs transition-colors ${
+                        locationSource === 'mark' && selectedMarkId === mark.id
+                          ? 'border-navy-800 bg-navy-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <MapPin size={14} className="text-blue-500" />
+                      <span className="font-medium text-gray-900">{mark.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Current location */}
+              <button
+                type="button"
+                onClick={() => {
+                  setLocationSource('current')
+                  setShowLocationPicker(false)
+                }}
+                className={`flex w-full items-center gap-2 rounded-lg border p-2 text-left text-xs transition-colors ${
+                  locationSource === 'current'
+                    ? 'border-navy-800 bg-navy-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <MapPin size={14} className="text-green-500" />
+                <div>
+                  <p className="font-medium text-gray-900">Current location</p>
+                  <p className="text-[10px] text-gray-500">Use GPS</p>
+                </div>
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowLocationPicker(true)}
+              className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs hover:border-gray-300"
+            >
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-gray-500" />
+                <span className="font-medium text-gray-900">
+                  {activeLocation?.name || 'Select location'}
+                </span>
+              </div>
+              <ChevronDown size={14} className="text-gray-400" />
+            </button>
+          )}
         </div>
 
         <div>

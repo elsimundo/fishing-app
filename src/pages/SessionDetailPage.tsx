@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
-import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant } from '../hooks/useSessionParticipants'
+import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant, useAcceptInvitation } from '../hooks/useSessionParticipants'
 import { useMarkSessionViewed } from '../hooks/useMarkSessionViewed'
 import { useSessionPosts, useDeletePost } from '../hooks/usePosts'
 import { Map } from '../components/map'
@@ -75,6 +75,7 @@ export function SessionDetailPage() {
   const { data: participants = [] } = useSessionParticipants(id)
   const { data: mySessionRole } = useMySessionRole(id)
   const { mutateAsync: leaveSession, isPending: isLeaving } = useLeaveSession()
+  const { mutateAsync: acceptInvitation, isPending: isAccepting } = useAcceptInvitation()
   const { mutateAsync: changeParticipantRole } = useChangeParticipantRole()
   const { mutateAsync: removeParticipant } = useRemoveParticipant()
   const { mutateAsync: deleteSession, isPending: isDeleting } = useDeleteSession()
@@ -140,6 +141,52 @@ export function SessionDetailPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 pb-24">
+      {/* Pending invite banner for invited users */}
+      {!isOwner && myParticipant && myParticipant.status === 'pending' && (
+        <div className="border-b border-amber-200 bg-amber-50/80">
+          <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3 text-xs">
+            <div className="text-amber-900">
+              <p className="font-semibold">Youve been invited to join this session</p>
+              <p className="text-[11px] text-amber-800/90">Accept to start logging catches and posting in this session.</p>
+            </div>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <button
+                type="button"
+                disabled={isAccepting || isLeaving}
+                onClick={async () => {
+                  try {
+                    await acceptInvitation({ participant_id: myParticipant.id, session_id: session.id })
+                    toast.success('You\'re now active in this session')
+                  } catch (err) {
+                    const message = err instanceof Error ? err.message : 'Failed to accept invite'
+                    toast.error(message)
+                  }
+                }}
+                className="rounded-full bg-primary px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-primary/90 disabled:bg-primary/60"
+              >
+                Accept
+              </button>
+              <button
+                type="button"
+                disabled={isAccepting || isLeaving}
+                onClick={async () => {
+                  try {
+                    await leaveSession({ participant_id: myParticipant.id, session_id: session.id })
+                    toast.success('You left this session')
+                    navigate('/logbook')
+                  } catch (err) {
+                    const message = err instanceof Error ? err.message : 'Failed to leave session'
+                    toast.error(message)
+                  }
+                }}
+                className="rounded-full border border-amber-300 px-3 py-1.5 text-[11px] font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-60"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">

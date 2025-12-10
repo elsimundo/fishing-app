@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { calculateDistance } from '../utils/distance'
 import { fetchLakesFromOSM } from '../services/overpass-lakes'
+import { useAuth } from './useAuth'
 import type { Lake } from '../types'
 
 interface Bounds {
@@ -32,6 +33,9 @@ export function useLakes({ lat, lng, bounds, radiusKm = 50, enabled = true }: Us
       // 1. Fetch from Supabase (claimed/verified lakes take priority)
       try {
         let query = supabase.from('lakes').select('*').order('name').limit(100)
+        
+        // Filter out hidden lakes (admin soft-hide)
+        query = query.eq('is_hidden', false)
         
         // Filter by bounds if provided
         if (bounds) {
@@ -160,5 +164,40 @@ export function useLakeBySlug(slug: string | undefined) {
     },
     enabled: !!slug,
     staleTime: 10 * 60 * 1000,
+  })
+}
+
+/**
+ * Admin-only mutation to toggle lake visibility (soft-hide)
+ * This hides/shows lakes from the Explore map without deleting them
+ */
+export function useToggleLakeVisibility() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  return useMutation({
+    mutationFn: async ({ lakeId, hide }: { lakeId: string; hide: boolean }) => {
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('lakes')
+        .update({
+          is_hidden: hide,
+          hidden_at: hide ? new Date().toISOString() : null,
+          hidden_by: hide ? user.id : null,
+        })
+        .eq('id', lakeId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      // Invalidate lakes queries to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['lakes'] })
+      queryClient.invalidateQueries({ queryKey: ['lake'] })
+      queryClient.invalidateQueries({ queryKey: ['lake-slug'] })
+    },
   })
 }

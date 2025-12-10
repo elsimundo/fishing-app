@@ -40,7 +40,7 @@ interface CatchXPResult {
 
 const XP_VALUES = {
   BASE_CATCH: 10,
-  BASE_CATCH_NO_PHOTO: 5, // 50% XP without photo
+  BASE_CATCH_NO_PHOTO: 3, // Reduced XP without photo (was 5)
   PHOTO_BONUS: 5,
   WEIGHT_BONUS_PER_5LB: 5,
   NEW_SPECIES_BONUS: 25,
@@ -50,6 +50,9 @@ const RATE_LIMITS = {
   MAX_CATCHES_PER_HOUR: 10,
   MAX_CATCHES_PER_DAY: 50,
 }
+
+// Anti-cheat: minimum session duration (in minutes) for location-based challenges
+const MIN_SESSION_DURATION_MINS = 15
 
 /**
  * Hook to process XP and challenge progress when a catch is logged
@@ -169,7 +172,13 @@ export function useCatchXP() {
       }
       
       // Check and update challenges
-      await checkChallenges(user.id, input, challengesCompleted)
+      // Anti-cheat: Only process challenges if catch has a photo
+      // This prevents gaming the system with fake catches
+      if (input.hasPhoto) {
+        await checkChallenges(user.id, input, challengesCompleted)
+      } else {
+        console.log('No photo - challenges not processed (add photo within 1 hour to earn challenge progress)')
+      }
       
       const result = xpResult?.[0] || { new_xp: 0, new_level: 1, leveled_up: false }
       
@@ -341,34 +350,58 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   
   // ============================================
   // 6. LOCATION-BASED CHALLENGES
+  // Anti-cheat: Only count if session was at least 15 minutes
   // ============================================
-  if (input.latitude && input.longitude) {
-    // Get unique locations (rounded to ~1km precision)
-    const { data: locations } = await supabase
-      .from('catches')
-      .select('latitude, longitude')
-      .eq('user_id', userId)
-      .not('latitude', 'is', null)
+  if (input.latitude && input.longitude && input.sessionId) {
+    // Check session duration first
+    const { data: sessionData } = await supabase
+      .from('sessions')
+      .select('started_at, ended_at')
+      .eq('id', input.sessionId)
+      .maybeSingle()
     
-    if (locations) {
-      const uniqueLocations = new Set(
-        locations.map(l => `${Math.round(l.latitude * 100)},${Math.round(l.longitude * 100)}`)
-      )
+    let sessionDurationMins = 0
+    if (sessionData?.started_at) {
+      const startTime = new Date(sessionData.started_at).getTime()
+      const endTime = sessionData.ended_at 
+        ? new Date(sessionData.ended_at).getTime() 
+        : Date.now() // Use current time if session still active
+      sessionDurationMins = (endTime - startTime) / (1000 * 60)
+    }
+    
+    // Only award location challenges if session >= 15 mins
+    if (sessionDurationMins >= MIN_SESSION_DURATION_MINS) {
+      // Get unique locations from catches with photos in sessions >= 15 mins
+      // (rounded to ~1km precision)
+      const { data: locations } = await supabase
+        .from('catches')
+        .select('latitude, longitude')
+        .eq('user_id', userId)
+        .not('latitude', 'is', null)
+        .not('photo_url', 'is', null) // Must have photo
       
-      // New Waters: Fish at 5 different locations
-      if (uniqueLocations.size >= 5) {
-        await completeChallenge(userId, 'new_waters', uniqueLocations.size, 5, completed, input.catchId)
+      if (locations) {
+        const uniqueLocations = new Set(
+          locations.map(l => `${Math.round(l.latitude * 100)},${Math.round(l.longitude * 100)}`)
+        )
+        
+        // New Waters: Fish at 5 different locations
+        if (uniqueLocations.size >= 5) {
+          await completeChallenge(userId, 'new_waters', uniqueLocations.size, 5, completed, input.catchId)
+        }
+        
+        // Explorer: Fish at 10 different locations
+        if (uniqueLocations.size >= 10) {
+          await completeChallenge(userId, 'explorer', uniqueLocations.size, 10, completed, input.catchId)
+        }
+        
+        // Adventurer: Fish at 25 different locations
+        if (uniqueLocations.size >= 25) {
+          await completeChallenge(userId, 'adventurer', uniqueLocations.size, 25, completed, input.catchId)
+        }
       }
-      
-      // Explorer: Fish at 10 different locations
-      if (uniqueLocations.size >= 10) {
-        await completeChallenge(userId, 'explorer', uniqueLocations.size, 10, completed, input.catchId)
-      }
-      
-      // Adventurer: Fish at 25 different locations
-      if (uniqueLocations.size >= 25) {
-        await completeChallenge(userId, 'adventurer', uniqueLocations.size, 25, completed, input.catchId)
-      }
+    } else {
+      console.log(`Location challenge skipped: session duration ${sessionDurationMins.toFixed(1)} mins < ${MIN_SESSION_DURATION_MINS} mins required`)
     }
   }
   
@@ -769,6 +802,104 @@ export function useReverseCatchXP() {
     },
     onError: (error) => {
       console.error('Failed to reverse XP:', error)
+    },
+  })
+}
+
+/**
+ * Hook to process XP bonus when a photo is added to a catch within the grace period
+ * This allows users to add photos after logging and still get full XP + challenge progress
+ */
+export function usePhotoAddedXP() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+  
+  return useMutation({
+    mutationFn: async (input: {
+      catchId: string
+      species: string
+      caughtAt: string
+      sessionId?: string | null
+      latitude?: number | null
+      longitude?: number | null
+      weightKg?: number | null
+      weatherCondition?: string | null
+      windSpeed?: number | null
+      moonPhase?: string | null
+    }) => {
+      if (!user) throw new Error('Not authenticated')
+      
+      // Check if within 1-hour grace period
+      const caughtTime = new Date(input.caughtAt).getTime()
+      const now = Date.now()
+      const hourInMs = 60 * 60 * 1000
+      
+      if (now - caughtTime > hourInMs) {
+        console.log('Photo added after 1-hour grace period - no bonus XP')
+        return { xpAwarded: 0, challengesProcessed: false }
+      }
+      
+      // Check if we already awarded full XP for this catch
+      const { data: existingTransaction } = await supabase
+        .from('xp_transactions')
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('reference_type', 'catch')
+        .eq('reference_id', input.catchId)
+        .maybeSingle()
+      
+      // If already got 10+ XP, they had a photo originally
+      if (existingTransaction && existingTransaction.amount >= XP_VALUES.BASE_CATCH) {
+        console.log('Full XP already awarded for this catch')
+        return { xpAwarded: 0, challengesProcessed: false }
+      }
+      
+      // Award the difference (full XP - reduced XP) + photo bonus
+      const bonusXP = (XP_VALUES.BASE_CATCH - XP_VALUES.BASE_CATCH_NO_PHOTO) + XP_VALUES.PHOTO_BONUS
+      
+      await supabase.rpc('award_xp', {
+        p_user_id: user.id,
+        p_amount: bonusXP,
+        p_reason: 'photo_added',
+        p_reference_type: 'catch',
+        p_reference_id: input.catchId,
+      })
+      
+      // Now process challenges since we have a photo
+      const challengesCompleted: string[] = []
+      await checkChallenges(user.id, {
+        catchId: input.catchId,
+        species: input.species,
+        hasPhoto: true,
+        caughtAt: input.caughtAt,
+        sessionId: input.sessionId,
+        latitude: input.latitude,
+        longitude: input.longitude,
+        weightKg: input.weightKg,
+        weightLb: input.weightKg ? input.weightKg * 2.205 : null,
+        weatherCondition: input.weatherCondition,
+        windSpeed: input.windSpeed,
+        moonPhase: input.moonPhase,
+      }, challengesCompleted)
+      
+      return { xpAwarded: bonusXP, challengesProcessed: true, challengesCompleted }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['user-xp'] })
+      queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
+      
+      if (data.xpAwarded > 0) {
+        toast.success(`+${data.xpAwarded} XP for adding photo!`, { icon: '📸', duration: 3000 })
+      }
+      
+      if (data.challengesCompleted && data.challengesCompleted.length > 0) {
+        setTimeout(() => {
+          toast.success(`Challenge completed! 🏅`, { duration: 4000 })
+        }, 500)
+      }
+    },
+    onError: (error) => {
+      console.error('PhotoAddedXP error:', error)
     },
   })
 }

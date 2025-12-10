@@ -35,6 +35,7 @@ import SubmitBusinessPage from './pages/SubmitBusinessPage'
 import MessagesPage from './pages/MessagesPage'
 import ChallengeBoardPage from './pages/ChallengeBoardPage'
 import { ChallengeDetailPage } from './pages/ChallengeDetailPage'
+import { ChallengeRulesPage } from './pages/ChallengeRulesPage'
 import CatchesPage from './pages/CatchesPage'
 import { FishIdentifierPage } from './pages/FishIdentifierPage'
 
@@ -74,6 +75,7 @@ function App() {
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/messages/:conversationId" element={<MessagesPage />} />
         <Route path="/challenges" element={<ChallengeBoardPage />} />
+        <Route path="/challenges/rules" element={<ChallengeRulesPage />} />
         <Route path="/challenges/:slug" element={<ChallengeDetailPage />} />
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboardPage />} />

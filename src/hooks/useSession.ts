@@ -10,8 +10,20 @@ async function fetchSession(id: string): Promise<SessionWithCatches> {
     .eq('id', id)
     .maybeSingle()
 
-  if (error || !data) {
-    throw new Error(error?.message ?? 'Session not found')
+  if (error) {
+    // If RLS or permission issues prevent access, show a clearer message
+    // rather than a generic "not found".
+    if (error.code === 'PGRST301' || error.code === '42501') {
+      throw new Error('You no longer have access to this session.')
+    }
+
+    throw new Error(error.message)
+  }
+
+  if (!data) {
+    // No row returned: either the session id is invalid or RLS hides it
+    // because the user is no longer a participant.
+    throw new Error('Session not found or you no longer have access to this session.')
   }
 
   const session = data as Session & { catches: Catch[] | null }

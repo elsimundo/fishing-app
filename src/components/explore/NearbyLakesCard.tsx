@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee, BadgeCheck, Crown, Heart } from 'lucide-react'
-import { useLakes } from '../../hooks/useLakes'
+import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee, BadgeCheck, Crown, Heart, EyeOff } from 'lucide-react'
+import { useLakes, useToggleLakeVisibility } from '../../hooks/useLakes'
 import { useAuth } from '../../hooks/useAuth'
+import { useAdminAuth } from '../../hooks/useAdminAuth'
 import { useSavedLakes } from '../../hooks/useSavedLakes'
 import { toast } from 'react-hot-toast'
 import { Link } from 'react-router-dom'
@@ -27,7 +28,9 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
   const [showAll, setShowAll] = useState(false)
   const [claimingLake, setClaimingLake] = useState<Lake | null>(null)
   const { user } = useAuth()
+  const { isAdmin } = useAdminAuth()
   const { isLakeSaved, toggleSave, isPending: isSavePending } = useSavedLakes()
+  const toggleVisibility = useToggleLakeVisibility()
   const { data: lakes, isLoading, error } = useLakes({
     lat,
     lng,
@@ -140,6 +143,16 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
                   isSaved={typeof lake.id === 'string' && !lake.id.startsWith('osm-') ? isLakeSaved(lake.id) : false}
                   onToggleSave={typeof lake.id === 'string' && !lake.id.startsWith('osm-') && user ? () => toggleSave(lake.id) : undefined}
                   isSaving={isSavePending}
+                  isAdmin={isAdmin}
+                  onHide={isAdmin && typeof lake.id === 'string' && !lake.id.startsWith('osm-') ? async () => {
+                    try {
+                      await toggleVisibility.mutateAsync({ lakeId: lake.id, hide: true })
+                      toast.success(`"${lake.name}" hidden from Explore`)
+                    } catch (err) {
+                      toast.error('Failed to hide lake')
+                    }
+                  } : undefined}
+                  isHiding={toggleVisibility.isPending}
                   onClaim={() => {
                     if (!user) {
                       toast.error('You need to be logged in to claim a venue')
@@ -206,9 +219,12 @@ interface LakeItemProps {
   isSaved?: boolean
   onToggleSave?: () => void
   isSaving?: boolean
+  isAdmin?: boolean
+  onHide?: () => void
+  isHiding?: boolean
 }
 
-function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, isSaving }: LakeItemProps) {
+function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, isSaving, isAdmin, onHide, isHiding }: LakeItemProps) {
   const handleClick = () => {
     onSelect?.(lake)
   }
@@ -369,6 +385,23 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
           >
             Details
           </Link>
+        )}
+
+        {/* Admin: Hide from map button */}
+        {isAdmin && onHide && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onHide()
+            }}
+            disabled={isHiding}
+            className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-[10px] font-semibold text-red-700 hover:bg-red-200 disabled:opacity-50"
+            title="Admin: Hide this lake from Explore (soft-delete)"
+          >
+            <EyeOff size={10} />
+            Hide from map
+          </button>
         )}
       </div>
     </div>

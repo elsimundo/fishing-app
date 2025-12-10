@@ -88,6 +88,9 @@ export default function ExplorePage() {
   const [pendingMarkNotes, setPendingMarkNotes] = useState('')
   const [isSavingQuickMark, setIsSavingQuickMark] = useState(false)
 
+  // Focus point for flying to a specific location on the map
+  const [focusPoint, setFocusPoint] = useState<{ lat: number; lng: number; zoom?: number } | null>(null)
+
   // Current map center for data cards
   // Use only appliedBounds (after "Search this area") to avoid refetching on every pan
   const mapCenter = useMemo(() => {
@@ -726,6 +729,7 @@ export default function ExplorePage() {
             markers={markers}
             initialBounds={appliedBounds ?? undefined}
             userLocation={userLocation ?? undefined}
+            focusPoint={focusPoint}
             onBoundsChange={setLiveBounds}
             onMarkerClick={handleMarkerClick}
             onMapClick={({ lat, lng }) => {
@@ -798,6 +802,12 @@ export default function ExplorePage() {
             onSelectMark={(mark) => {
               // Navigate to mark detail page
               navigate(`/marks/${mark.id}`)
+            }}
+            onShowOnMap={(mark) => {
+              // Fly to mark on map and scroll to map section
+              setFocusPoint({ lat: mark.latitude, lng: mark.longitude, zoom: 15 })
+              // Scroll to map (it's at the top of the page)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
             }}
           />
 

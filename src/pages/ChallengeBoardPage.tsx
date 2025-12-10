@@ -11,7 +11,7 @@ import { useSessions } from '../hooks/useSessions'
 import { SessionCard } from '../components/sessions/SessionCard'
 import { CompetitionCard } from '../components/compete/CompetitionCard'
 import { CompetitionCardSkeleton } from '../components/skeletons/CompetitionCardSkeleton'
-import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees } from 'lucide-react'
+import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees, HelpCircle } from 'lucide-react'
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: Trophy },
@@ -104,6 +104,15 @@ export default function ChallengeBoardPage() {
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
             <XPBar size="md" />
           </div>
+
+          {/* Rules Link */}
+          <button
+            onClick={() => navigate('/challenges/rules')}
+            className="mt-2 flex items-center gap-1.5 text-xs text-white/70 hover:text-white transition-colors"
+          >
+            <HelpCircle size={14} />
+            <span>View challenge rules & XP guide</span>
+          </button>
 
           {/* Weekly species XP badge */}
           <div className="mt-2">

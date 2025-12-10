@@ -74,7 +74,7 @@ async function fetchMySessionRole(sessionId: string): Promise<ParticipantRole | 
     .select('role, status')
     .eq('session_id', sessionId)
     .eq('user_id', userId)
-    .in('status', ['pending', 'active'])
+    .eq('status', 'active')
     .maybeSingle()
 
   if (error && error.code !== 'PGRST116') {
@@ -98,13 +98,23 @@ export function useInviteToSession() {
 
   return useMutation({
     mutationFn: async (input: { session_id: string; user_id: string; role: ParticipantRole }) => {
+      // Use upsert so re-inviting a user who previously left/was removed
+      // updates their row instead of violating the unique constraint on
+      // (session_id, user_id).
       const { data, error } = await supabase
         .from('session_participants')
-        .insert({
-          session_id: input.session_id,
-          user_id: input.user_id,
-          role: input.role,
-        })
+        .upsert(
+          {
+            session_id: input.session_id,
+            user_id: input.user_id,
+            role: input.role,
+            status: 'pending',
+            invited_at: new Date().toISOString(),
+            joined_at: null,
+            left_at: null,
+          },
+          { onConflict: 'session_id,user_id' },
+        )
         .select('*, user:profiles(*)')
         .single()
 

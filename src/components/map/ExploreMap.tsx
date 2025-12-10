@@ -31,6 +31,7 @@ interface ExploreMapProps {
   initialBounds?: { north: number; south: number; east: number; west: number }
   zoom?: number
   userLocation?: { lat: number; lng: number }
+  focusPoint?: { lat: number; lng: number; zoom?: number } | null // Fly to this point when set
   onMarkerClick?: (marker: ExploreMarker) => void
   onBoundsChange?: (bounds: { north: number; south: number; east: number; west: number }) => void
   onMapClick?: (coords: { lat: number; lng: number }) => void
@@ -48,7 +49,7 @@ const typeColors: Record<ExploreMarkerType, string> = {
   zone: '#8b5cf6', // Purple for fishing zones (aggregated catches)
 }
 
-export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onMarkerClick, onBoundsChange, onMapClick }: ExploreMapProps) {
+export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, focusPoint, onMarkerClick, onBoundsChange, onMapClick }: ExploreMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMapType | null>(null)
   const markersRef = useRef<Marker[]>([])
@@ -190,6 +191,18 @@ export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onM
     const marker = new mapboxgl.Marker(el).setLngLat([userLocation.lng, userLocation.lat]).addTo(map)
     userMarkerRef.current = marker
   }, [userLocation])
+
+  // Fly to focus point when set
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !focusPoint) return
+
+    map.flyTo({
+      center: [focusPoint.lng, focusPoint.lat],
+      zoom: focusPoint.zoom ?? 14,
+      duration: 1500,
+    })
+  }, [focusPoint])
 
   return <div ref={mapContainerRef} className="h-full w-full" />
 }

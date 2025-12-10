@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Plus, Trash2, Navigation, Loader2, X, Share2, MapPin } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Trash2, Navigation, Loader2, X, Share2, MapPin, Crosshair } from 'lucide-react'
 import { useSavedMarks, useSharedMarks } from '../../hooks/useSavedMarks'
 import type { CreateMarkInput } from '../../hooks/useSavedMarks'
 import type { SavedMark, SavedMarkWaterType, MarkPrivacyLevel } from '../../types'
@@ -31,9 +31,10 @@ const WATER_TYPE_ICONS: Record<SavedMarkWaterType, string> = {
 interface MyMarksCardProps {
   onSelectMark?: (mark: SavedMark) => void
   onAddMark?: () => void // Callback to open map for adding
+  onShowOnMap?: (mark: SavedMark) => void // Callback to center map on mark
 }
 
-export function MyMarksCard({ onSelectMark, onAddMark }: MyMarksCardProps) {
+export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [activeTab, setActiveTab] = useState<'mine' | 'shared'>('mine')
@@ -157,9 +158,11 @@ export function MyMarksCard({ onSelectMark, onAddMark }: MyMarksCardProps) {
                     onSelect={onSelectMark}
                     onDelete={() => deleteMark.mutate(mark.id)}
                     isDeleting={deleteMark.isPending}
-                    onShare={mark.privacy_level === 'friends' ? () => {
+                    // Always allow sharing for your own marks (private, public, or friends)
+                    onShare={() => {
                       setSharingMark(mark)
-                    } : undefined}
+                    }}
+                    onShowOnMap={onShowOnMap}
                   />
                 ))}
               </div>
@@ -185,6 +188,7 @@ export function MyMarksCard({ onSelectMark, onAddMark }: MyMarksCardProps) {
                     isDeleting={false}
                     isShared
                     sharedByName={(mark.shared_by_user as { username?: string } | undefined)?.username}
+                    onShowOnMap={onShowOnMap}
                   />
                 ))
               )}
@@ -212,9 +216,10 @@ interface MarkItemProps {
   onShare?: () => void
   isShared?: boolean
   sharedByName?: string
+  onShowOnMap?: (mark: SavedMark) => void
 }
 
-function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sharedByName }: MarkItemProps) {
+function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sharedByName, onShowOnMap }: MarkItemProps) {
   return (
     <div
       className="flex items-center gap-3 rounded-lg bg-gray-50 p-3 cursor-pointer hover:bg-gray-100"
@@ -258,12 +263,26 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
             <Share2 size={14} />
           </button>
         )}
+        {onShowOnMap && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onShowOnMap(mark)
+            }}
+            className="rounded-lg p-2 text-gray-400 hover:bg-blue-100 hover:text-blue-600"
+            title="Show on map"
+          >
+            <Crosshair size={14} />
+          </button>
+        )}
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${mark.latitude},${mark.longitude}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className="rounded-lg p-2 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+          title="Get directions"
         >
           <Navigation size={14} />
         </a>

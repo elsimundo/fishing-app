@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { Users, Store, TrendingUp, Clock, AlertCircle } from 'lucide-react'
+import { Users, Store, TrendingUp, Clock, AlertCircle, EyeOff, Eye, MapPin, Loader2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { toast } from 'react-hot-toast'
 
 export default function AdminDashboardPage() {
   // Fetch stats
@@ -70,6 +71,9 @@ export default function AdminDashboardPage() {
             loading={isLoading}
           />
         </div>
+
+        {/* Hidden Lakes */}
+        <HiddenLakesSection />
 
         {/* Recent Activity */}
         <RecentActivitySection />
@@ -176,6 +180,104 @@ function RecentActivitySection() {
         <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
           <AlertCircle size={16} />
           <span>No activity yet. Actions will appear here.</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function HiddenLakesSection() {
+  const queryClient = useQueryClient()
+  
+  const { data: hiddenLakes, isLoading } = useQuery({
+    queryKey: ['admin-hidden-lakes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lakes')
+        .select('id, name, region, hidden_at, hidden_by, profiles:hidden_by(username)')
+        .eq('is_hidden', true)
+        .order('hidden_at', { ascending: false })
+
+      if (error) throw error
+      return data || []
+    },
+  })
+
+  const unhideMutation = useMutation({
+    mutationFn: async (lakeId: string) => {
+      const { error } = await supabase
+        .from('lakes')
+        .update({ is_hidden: false, hidden_at: null, hidden_by: null })
+        .eq('id', lakeId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-hidden-lakes'] })
+      queryClient.invalidateQueries({ queryKey: ['lakes'] })
+      toast.success('Lake is now visible on Explore')
+    },
+    onError: () => {
+      toast.error('Failed to unhide lake')
+    },
+  })
+
+  return (
+    <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
+      <div className="mb-4 flex items-center gap-2">
+        <EyeOff size={20} className="text-red-500" />
+        <h2 className="text-lg font-bold text-gray-900 lg:text-xl">Hidden Lakes</h2>
+        {hiddenLakes && hiddenLakes.length > 0 && (
+          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+            {hiddenLakes.length}
+          </span>
+        )}
+      </div>
+      
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 size={24} className="animate-spin text-gray-400" />
+        </div>
+      ) : hiddenLakes && hiddenLakes.length > 0 ? (
+        <div className="space-y-2">
+          {hiddenLakes.map((lake: any) => (
+            <div
+              key={lake.id}
+              className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+            >
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">{lake.name}</p>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  {lake.region && (
+                    <span className="flex items-center gap-1">
+                      <MapPin size={10} />
+                      {lake.region}
+                    </span>
+                  )}
+                  {lake.hidden_at && (
+                    <span>
+                      Hidden {formatDistanceToNow(new Date(lake.hidden_at), { addSuffix: true })}
+                      {lake.profiles?.username && ` by @${lake.profiles.username}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => unhideMutation.mutate(lake.id)}
+                disabled={unhideMutation.isPending}
+                className="flex items-center gap-1 rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-200 disabled:opacity-50"
+              >
+                <Eye size={12} />
+                Show on map
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
+          <Eye size={16} className="text-green-500" />
+          <span>All lakes are visible. Hidden lakes will appear here.</span>
         </div>
       )}
     </div>
