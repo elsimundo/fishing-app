@@ -136,3 +136,137 @@ export async function getTackleShopsInBounds(bounds: {
     throw error
   }
 }
+
+/**
+ * Build Overpass QL query for fishing/angling clubs
+ */
+function buildClubsQuery(bounds: {
+  north: number
+  south: number
+  east: number
+  west: number
+}): string {
+  const { south, west, north, east } = bounds
+
+  // Search for angling clubs, fishing clubs, fishing societies
+  return `
+    [out:json][timeout:25];
+    (
+      node["club"="fishing"](${south},${west},${north},${east});
+      way["club"="fishing"](${south},${west},${north},${east});
+      node["sport"="fishing"]["leisure"="sports_centre"](${south},${west},${north},${east});
+      way["sport"="fishing"]["leisure"="sports_centre"](${south},${west},${north},${east});
+      node["leisure"="fishing"]["name"](${south},${west},${north},${east});
+      way["leisure"="fishing"]["name"](${south},${west},${north},${east});
+      node["name"~"angling|fishing club|angling club|fishing society",i](${south},${west},${north},${east});
+      way["name"~"angling|fishing club|angling club|fishing society",i](${south},${west},${north},${east});
+    );
+    out center;
+  `
+}
+
+/**
+ * Fetch fishing clubs from OpenStreetMap within bounds
+ */
+export async function getClubsInBounds(bounds: {
+  north: number
+  south: number
+  east: number
+  west: number
+}): Promise<TackleShopsResponse> {
+  try {
+    const query = buildClubsQuery(bounds)
+
+    const response = await fetch(OVERPASS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `data=${encodeURIComponent(query)}`,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Overpass API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const shops = parseOverpassResponse(data)
+
+    console.log(`[OSM] Found ${shops.length} fishing clubs in area`)
+
+    return {
+      shops,
+      fetchedAt: new Date().toISOString(),
+      bounds,
+    }
+  } catch (error) {
+    console.error('[OSM] Error fetching clubs:', error)
+    throw error
+  }
+}
+
+/**
+ * Build Overpass QL query for charter boats / fishing trips
+ */
+function buildChartersQuery(bounds: {
+  north: number
+  south: number
+  east: number
+  west: number
+}): string {
+  const { south, west, north, east } = bounds
+
+  // Search for charter boats, fishing trips, boat hire with fishing
+  return `
+    [out:json][timeout:25];
+    (
+      node["amenity"="boat_rental"]["sport"="fishing"](${south},${west},${north},${east});
+      way["amenity"="boat_rental"]["sport"="fishing"](${south},${west},${north},${east});
+      node["leisure"="fishing"]["boat"="yes"](${south},${west},${north},${east});
+      way["leisure"="fishing"]["boat"="yes"](${south},${west},${north},${east});
+      node["name"~"charter|fishing trip|boat trip|sea fishing",i](${south},${west},${north},${east});
+      way["name"~"charter|fishing trip|boat trip|sea fishing",i](${south},${west},${north},${east});
+    );
+    out center;
+  `
+}
+
+/**
+ * Fetch charter boats from OpenStreetMap within bounds
+ */
+export async function getChartersInBounds(bounds: {
+  north: number
+  south: number
+  east: number
+  west: number
+}): Promise<TackleShopsResponse> {
+  try {
+    const query = buildChartersQuery(bounds)
+
+    const response = await fetch(OVERPASS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `data=${encodeURIComponent(query)}`,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Overpass API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const shops = parseOverpassResponse(data)
+
+    console.log(`[OSM] Found ${shops.length} charter boats in area`)
+
+    return {
+      shops,
+      fetchedAt: new Date().toISOString(),
+      bounds,
+    }
+  } catch (error) {
+    console.error('[OSM] Error fetching charters:', error)
+    throw error
+  }
+}

@@ -57,7 +57,7 @@ export function LoginForm() {
     }
 
     toast.success('Signed in')
-    navigate('/dashboard', { replace: true })
+    navigate('/profile', { replace: true })
   }
 
   return (

@@ -14,6 +14,7 @@ import {
   Globe,
   AlertCircle,
   ExternalLink,
+  Plus,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { formatDistanceToNow } from 'date-fns'
@@ -49,6 +50,7 @@ export default function BusinessesPage() {
   const queryClient = useQueryClient()
   const [filter, setFilter] = useState<BusinessFilter>('pending')
   const [searchTerm, setSearchTerm] = useState('')
+  const [showAddModal, setShowAddModal] = useState(false)
 
   // Fetch businesses
   const { data: businesses, isLoading } = useQuery({
@@ -189,7 +191,16 @@ export default function BusinessesPage() {
     <AdminLayout>
       <div className="p-4 lg:p-8">
         <div className="mb-6 flex flex-col gap-4 lg:mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">Businesses</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">Businesses</h1>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
+            >
+              <Plus size={18} />
+              Add Business
+            </button>
+          </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Filter Tabs */}
@@ -258,8 +269,247 @@ export default function BusinessesPage() {
             <span>No businesses found for this filter</span>
           </div>
         )}
+
+        {/* Add Business Modal */}
+        {showAddModal && (
+          <AddBusinessModal
+            onClose={() => setShowAddModal(false)}
+            onSuccess={() => {
+              setShowAddModal(false)
+              queryClient.invalidateQueries({ queryKey: ['admin-businesses'] })
+            }}
+          />
+        )}
       </div>
     </AdminLayout>
+  )
+}
+
+function AddBusinessModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [name, setName] = useState('')
+  const [type, setType] = useState<BusinessType>('tackle_shop')
+  const [address, setAddress] = useState('')
+  const [city, setCity] = useState('')
+  const [phone, setPhone] = useState('')
+  const [website, setWebsite] = useState('')
+  const [description, setDescription] = useState('')
+  const [lat, setLat] = useState('')
+  const [lng, setLng] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!name.trim()) {
+      toast.error('Name is required')
+      return
+    }
+
+    if (!lat || !lng) {
+      toast.error('Latitude and longitude are required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('businesses').insert({
+        name: name.trim(),
+        type,
+        address: address.trim() || null,
+        city: city.trim() || null,
+        phone: phone.trim() || null,
+        website: website.trim() || null,
+        description: description.trim() || null,
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        source: 'admin',
+        status: 'approved',
+      })
+
+      if (error) throw error
+
+      toast.success('Business added successfully')
+      onSuccess()
+    } catch (error: any) {
+      console.error('Failed to add business:', error)
+      toast.error(error?.message || 'Failed to add business')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">Add Business</h2>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1 hover:bg-gray-100"
+          >
+            <X size={20} className="text-gray-500" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Business Name *
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              placeholder="e.g. Bob's Tackle Shop"
+            />
+          </div>
+
+          {/* Type */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Type *
+            </label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as BusinessType)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+            >
+              <option value="tackle_shop">Tackle Shop</option>
+              <option value="charter">Charter</option>
+              <option value="club">Club</option>
+              <option value="guide">Guide</option>
+            </select>
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Address
+            </label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              placeholder="123 High Street"
+            />
+          </div>
+
+          {/* City */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              City
+            </label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              placeholder="London"
+            />
+          </div>
+
+          {/* Lat/Lng */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Latitude *
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={lat}
+                onChange={(e) => setLat(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                placeholder="51.5074"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Longitude *
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={lng}
+                onChange={(e) => setLng(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                placeholder="-0.1278"
+              />
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Phone
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              placeholder="+44 20 1234 5678"
+            />
+          </div>
+
+          {/* Website */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Website
+            </label>
+            <input
+              type="url"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              placeholder="https://example.com"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              placeholder="Brief description of the business..."
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+            >
+              {isSubmitting ? 'Adding...' : 'Add Business'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 

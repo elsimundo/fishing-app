@@ -1,26 +1,21 @@
 import { useState } from 'react'
-import { Store, ChevronDown, ChevronUp, Phone, Globe, Navigation } from 'lucide-react'
-import { calculateDistance, formatDistance } from '../../utils/distance'
-import type { TackleShop } from '../../types/shops'
+import { Store, ChevronDown, ChevronUp, Phone, Globe, Navigation, CheckCircle } from 'lucide-react'
+import { ClaimBusinessModal } from '../business/ClaimBusinessModal'
+import { formatDistance } from '../../utils/distance'
+import type { BusinessFromDB } from '../../hooks/useTackleShops'
+import { useAuth } from '../../hooks/useAuth'
 
 interface TackleShopsCardProps {
-  lat: number | null
-  lng: number | null
-  shops: TackleShop[]
+  shops: BusinessFromDB[]
 }
 
-export function TackleShopsCard({ lat, lng, shops }: TackleShopsCardProps) {
+export function TackleShopsCard({ shops }: TackleShopsCardProps) {
+  const { user } = useAuth()
   const [expanded, setExpanded] = useState(false)
+  const [claimBusiness, setClaimBusiness] = useState<BusinessFromDB | null>(null)
 
-  // Calculate distances and sort by nearest
-  const shopsWithDistance = shops
-    .map((shop) => ({
-      ...shop,
-      distance: lat && lng ? calculateDistance(lat, lng, shop.lat, shop.lng) : undefined,
-    }))
-    .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
-
-  const nearbyShops = shopsWithDistance.filter((s) => s.distance === undefined || s.distance < 50) // Within 50km
+  // Already sorted by distance from hook, just filter to 50km
+  const nearbyShops = shops.filter((s) => s.distance === undefined || s.distance < 50)
 
   if (nearbyShops.length === 0) {
     return (
@@ -92,9 +87,6 @@ export function TackleShopsCard({ lat, lng, shops }: TackleShopsCardProps) {
                   <p className="mb-2 text-xs text-gray-600">{shop.address}</p>
                 )}
 
-                {shop.openingHours && (
-                  <p className="mb-2 text-xs text-gray-500">🕒 {shop.openingHours}</p>
-                )}
 
                 <div className="flex gap-2">
                   {shop.phone && (
@@ -130,6 +122,25 @@ export function TackleShopsCard({ lat, lng, shops }: TackleShopsCardProps) {
                     Directions
                   </a>
                 </div>
+
+                {/* Claim CTA or Claimed badge */}
+                {shop.is_claimed ? (
+                  <div className="mt-2 flex items-center gap-1 text-[11px] text-emerald-600">
+                    <CheckCircle size={12} />
+                    <span>{shop.owner_user_id === user?.id ? 'Claimed by you' : 'Claimed'}</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setClaimBusiness(shop)
+                    }}
+                    className="mt-2 text-[11px] font-medium text-navy-800 hover:underline"
+                  >
+                    Are you the owner? Claim this business
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -138,6 +149,9 @@ export function TackleShopsCard({ lat, lng, shops }: TackleShopsCardProps) {
             Data from OpenStreetMap contributors
           </p>
         </div>
+      )}
+      {claimBusiness && (
+        <ClaimBusinessModal business={claimBusiness} onClose={() => setClaimBusiness(null)} />
       )}
     </div>
   )

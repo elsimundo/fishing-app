@@ -33,6 +33,7 @@ interface ExploreMapProps {
   userLocation?: { lat: number; lng: number }
   onMarkerClick?: (marker: ExploreMarker) => void
   onBoundsChange?: (bounds: { north: number; south: number; east: number; west: number }) => void
+  onMapClick?: (coords: { lat: number; lng: number }) => void
 }
 
 const typeColors: Record<ExploreMarkerType, string> = {
@@ -43,19 +44,22 @@ const typeColors: Record<ExploreMarkerType, string> = {
   charter: '#e11d48',
   lake: '#0ea5e9', // Sky blue for lakes
   mark: '#dc2626', // Red for your marks
-  'shared-mark': '#16a34a', // Green for shared marks
+  'shared-mark': '#dc2626', // Shared marks also use red so all your spots are consistent
   zone: '#8b5cf6', // Purple for fishing zones (aggregated catches)
 }
 
-export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onMarkerClick, onBoundsChange }: ExploreMapProps) {
+export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onMarkerClick, onBoundsChange, onMapClick }: ExploreMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMapType | null>(null)
   const markersRef = useRef<Marker[]>([])
   const userMarkerRef = useRef<Marker | null>(null)
 
-  // Store onBoundsChange in a ref to avoid re-init on callback change
+  // Store callbacks in refs to avoid re-init on callback change
   const onBoundsChangeRef = useRef(onBoundsChange)
   onBoundsChangeRef.current = onBoundsChange
+
+  const onMapClickRef = useRef(onMapClick)
+  onMapClickRef.current = onMapClick
 
   // Init map - only runs once on mount
   useEffect(() => {
@@ -84,6 +88,8 @@ export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onM
 
     // Lock perspective so accidental tilts/rotations don't happen
     map.touchZoomRotate.disableRotation()
+    // Use double-click for dropping marks instead of zooming
+    map.doubleClickZoom.disable()
 
     map.on('error', (e) => {
       console.error('Map error:', e)
@@ -98,6 +104,11 @@ export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onM
         east: b.getEast(),
         west: b.getWest(),
       })
+    })
+
+    // Double-click / double-tap handler so parent can react to explicit add-mark action
+    map.on('dblclick', (e) => {
+      onMapClickRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng })
     })
 
     mapRef.current = map

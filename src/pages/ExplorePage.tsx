@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast'
 import { Layout } from '../components/layout/Layout'
 import { useSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
-import { useTackleShops } from '../hooks/useTackleShops'
+import { useTackleShops, useClubs, useCharters } from '../hooks/useTackleShops'
 import { useProfile } from '../hooks/useProfile'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -22,19 +22,10 @@ import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { useFishingZones } from '../hooks/useFishingZones'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
-import { MapPin, Navigation, Store } from 'lucide-react'
+import { MapPin, Navigation, Store, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
 
-// Static POIs for clubs and charters (future: fetch from API)
-const STATIC_POIS = {
-  clubs: [
-    { id: 'club-1', name: 'Brighton Sea Anglers', lat: 50.8175, lng: -0.115 },
-  ],
-  charters: [
-    { id: 'charter-1', name: 'Brighton Charter Boats', lat: 50.8125, lng: -0.103 },
-  ],
-}
 
 type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters' | 'lakes' | 'marks'
 
@@ -91,6 +82,12 @@ export default function ExplorePage() {
   const [showDefaultConfirm, setShowDefaultConfirm] = useState(false)
   const [isSavingDefault, setIsSavingDefault] = useState(false)
 
+  // Quick mark creation from map tap
+  const [pendingMark, setPendingMark] = useState<{ lat: number; lng: number } | null>(null)
+  const [pendingMarkName, setPendingMarkName] = useState('')
+  const [pendingMarkNotes, setPendingMarkNotes] = useState('')
+  const [isSavingQuickMark, setIsSavingQuickMark] = useState(false)
+
   // Current map center for data cards
   // Use only appliedBounds (after "Search this area") to avoid refetching on every pan
   const mapCenter = useMemo(() => {
@@ -128,8 +125,22 @@ export default function ExplorePage() {
     filters.shops
   )
 
-  // Fetch saved marks for map display
-  const { marks: savedMarks } = useSavedMarks()
+  // Fetch clubs from OpenStreetMap
+  const { data: clubsData } = useClubs(
+    appliedBounds,
+    userLocation,
+    filters.clubs
+  )
+
+  // Fetch charters from OpenStreetMap
+  const { data: chartersData } = useCharters(
+    appliedBounds,
+    userLocation,
+    filters.charters
+  )
+
+  // Fetch saved marks for map display + mutation for creating marks
+  const { marks: savedMarks, createMark } = useSavedMarks()
   const { data: sharedMarks } = useSharedMarks()
 
   // Load user's default location from profile or fall back to geolocation
@@ -228,6 +239,34 @@ export default function ExplorePage() {
     }
   }
 
+  const handleSaveQuickMark = () => {
+    if (!pendingMark || !user) return
+
+    const name = pendingMarkName.trim() || 'Saved spot'
+    const notes = pendingMarkNotes.trim() || undefined
+
+    setIsSavingQuickMark(true)
+    createMark.mutate(
+      {
+        name,
+        latitude: pendingMark.lat,
+        longitude: pendingMark.lng,
+        notes,
+      },
+      {
+        onSuccess: () => {
+          setPendingMark(null)
+          setPendingMarkName('')
+          setPendingMarkNotes('')
+          setIsSavingQuickMark(false)
+        },
+        onError: () => {
+          setIsSavingQuickMark(false)
+        },
+      },
+    )
+  }
+
   // Helper to check if a water type matches user preference
   const matchesWaterPreference = (waterType: string | null | undefined): boolean => {
     if (!fishingPreference || fishingPreference === 'both') return true
@@ -299,14 +338,14 @@ export default function ExplorePage() {
       }
     }
 
-    if (filters.clubs) {
-      for (const club of STATIC_POIS.clubs) {
+    if (filters.clubs && clubsData?.clubs) {
+      for (const club of clubsData.clubs) {
         items.push({ id: club.id, type: 'club', lat: club.lat, lng: club.lng, title: club.name })
       }
     }
 
-    if (filters.charters) {
-      for (const ch of STATIC_POIS.charters) {
+    if (filters.charters && chartersData?.charters) {
+      for (const ch of chartersData.charters) {
         items.push({ id: ch.id, type: 'charter', lat: ch.lat, lng: ch.lng, title: ch.name })
       }
     }
@@ -360,7 +399,7 @@ export default function ExplorePage() {
         m.lng >= appliedBounds.west
       )
     })
-  }, [sessions, catches, shopsData, lakes, savedMarks, sharedMarks, fishingZones, filters, appliedBounds, fishingPreference])
+  }, [sessions, catches, shopsData, clubsData, chartersData, lakes, savedMarks, sharedMarks, fishingZones, filters, appliedBounds, fishingPreference])
 
   const markersWithDistance: ExploreMarker[] = useMemo(() => {
     if (!userLocation) return markers
@@ -689,6 +728,12 @@ export default function ExplorePage() {
             userLocation={userLocation ?? undefined}
             onBoundsChange={setLiveBounds}
             onMarkerClick={handleMarkerClick}
+            onMapClick={({ lat, lng }) => {
+              setSelectedMarker(null)
+              setPendingMark({ lat, lng })
+              setPendingMarkName('New mark')
+              setPendingMarkNotes('')
+            }}
           />
         </section>
 
@@ -736,11 +781,7 @@ export default function ExplorePage() {
           <WeatherCard lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
 
           {/* Tackle Shops Card */}
-          <TackleShopsCard
-            lat={mapCenter?.lat ?? null}
-            lng={mapCenter?.lng ?? null}
-            shops={shopsData?.shops || []}
-          />
+          <TackleShopsCard shops={shopsData?.shops || []} />
 
           {/* Nearby Lakes Card - only for freshwater anglers */}
           {showFreshwater && (
@@ -803,6 +844,72 @@ export default function ExplorePage() {
         }}
         onCancel={() => setShowDefaultConfirm(false)}
       />
+
+      {/* Quick Save Mark Modal */}
+      {pendingMark && (
+        <div className="fixed inset-0 z-[65] flex items-end justify-center bg-black/40 px-4 pb-6 pt-12 md:items-center">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Save mark here?</h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  {pendingMark.lat.toFixed(4)}, {pendingMark.lng.toFixed(4)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingMark(null)}
+                className="rounded-full p-1 hover:bg-slate-100"
+              >
+                <X size={16} className="text-slate-500" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-700">Name</label>
+                <input
+                  type="text"
+                  value={pendingMarkName}
+                  onChange={(e) => setPendingMarkName(e.target.value)}
+                  maxLength={80}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+                  placeholder="Eg. Brighton Pier mark"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-700">Notes (optional)</label>
+                <textarea
+                  value={pendingMarkNotes}
+                  onChange={(e) => setPendingMarkNotes(e.target.value)}
+                  rows={3}
+                  maxLength={300}
+                  className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+                  placeholder="Tide, depth, structure, etc."
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPendingMark(null)}
+                className="flex-1 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveQuickMark}
+                disabled={isSavingQuickMark}
+                className="flex-1 rounded-xl bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+              >
+                {isSavingQuickMark ? 'Saving…' : 'Save mark'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   )
 }

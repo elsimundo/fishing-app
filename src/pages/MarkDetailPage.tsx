@@ -17,8 +17,10 @@ export default function MarkDetailPage() {
   const { user } = useAuth()
   const [showShareModal, setShowShareModal] = useState(false)
   const [showManageShares, setShowManageShares] = useState(false)
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const [isSavingCopy, setIsSavingCopy] = useState(false)
   
-  const { deleteMark } = useSavedMarks()
+  const { deleteMark, createMark } = useSavedMarks()
   const { shares, removeShare } = useMarkShares(markId)
   const leaveMark = useLeaveMark()
 
@@ -107,11 +109,36 @@ export default function MarkDetailPage() {
     })
   }
 
-  const handleLeave = async () => {
-    if (!confirm('Leave this shared mark? You will no longer have access.')) return
-    leaveMark.mutate(mark.id, {
-      onSuccess: () => navigate('/explore'),
-    })
+  const handleConfirmLeave = async (saveCopy: boolean) => {
+    if (!mark || !user) return
+
+    try {
+      if (saveCopy) {
+        setIsSavingCopy(true)
+        await createMark.mutateAsync({
+          name: mark.name,
+          latitude: mark.latitude,
+          longitude: mark.longitude,
+          water_type: mark.water_type || undefined,
+          notes: mark.notes || undefined,
+          privacy_level: 'private',
+        } as any)
+      }
+
+      leaveMark.mutate(mark.id, {
+        onSuccess: () => {
+          setShowLeaveModal(false)
+          navigate('/explore')
+        },
+        onError: () => {
+          setShowLeaveModal(false)
+        },
+      })
+    } catch (error) {
+      // createMark already toasts on error; nothing extra needed here
+      console.error('Failed to save personal mark before leaving:', error)
+      setIsSavingCopy(false)
+    }
   }
 
   return (
@@ -139,6 +166,54 @@ export default function MarkDetailPage() {
                 Your mark
               </span>
             )}
+
+      {/* Leave shared mark modal */}
+      {showLeaveModal && mark && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Leave this shared mark?</h2>
+                <p className="mt-1 text-xs text-slate-600">
+                  You&apos;ll lose access to <span className="font-semibold">{mark.name}</span>, but your
+                  own sessions and catches at this spot will stay in your logbook.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => !isSavingCopy && setShowLeaveModal(false)}
+                className="rounded-full p-1 hover:bg-slate-100 disabled:opacity-50"
+                disabled={isSavingCopy || leaveMark.isPending}
+              >
+                <X size={16} className="text-slate-500" />
+              </button>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              <button
+                type="button"
+                onClick={() => handleConfirmLeave(true)}
+                disabled={isSavingCopy || leaveMark.isPending}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+              >
+                {isSavingCopy ? 'Saving your mark…' : 'Save as my mark & leave'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleConfirmLeave(false)}
+                disabled={leaveMark.isPending}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {leaveMark.isPending ? 'Leaving…' : 'Just leave'}
+              </button>
+            </div>
+
+            <p className="mt-3 text-center text-[11px] text-slate-500">
+              Your existing sessions and catches at this location will not be deleted.
+            </p>
+          </div>
+        </div>
+      )}
           </div>
 
           {/* Coordinates */}
@@ -207,7 +282,7 @@ export default function MarkDetailPage() {
           {isSharedWithMe && (
             <button
               type="button"
-              onClick={handleLeave}
+              onClick={() => setShowLeaveModal(true)}
               disabled={leaveMark.isPending}
               className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
