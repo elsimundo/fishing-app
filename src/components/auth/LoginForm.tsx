@@ -57,7 +57,7 @@ export function LoginForm() {
     }
 
     toast.success('Signed in')
-    navigate('/profile', { replace: true })
+    navigate('/logbook', { replace: true })
   }
 
   return (
@@ -107,7 +107,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
+          className="flex w-full items-center justify-center rounded-md bg-navy-800 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400"
         >
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight, Calendar, Trophy } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -20,6 +20,7 @@ import { FishingPreferenceModal } from '../components/onboarding/FishingPreferen
 
 export default function ProfilePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
   const { data: profile, isLoading: profileLoading } = useProfile()
   const { data: xpData, isLoading: xpLoading } = useUserXP()
@@ -44,6 +45,13 @@ export default function ProfilePage() {
     freshwater: 'Freshwater Fishing',
     both: 'All Fishing',
   }
+
+  // If navigated via /logbook#settings, automatically open the settings (edit profile) modal
+  useEffect(() => {
+    if (location.hash === '#settings') {
+      setShowEditModal(true)
+    }
+  }, [location.hash])
 
   if (!user || profileLoading || !profile || xpLoading) {
     return (

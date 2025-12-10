@@ -10,7 +10,7 @@ export function Sidebar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, profile, signOut } = useAuth()
+  const { user, signOut } = useAuth()
 
   const isActive = (path: string) => location.pathname === path
 
@@ -117,7 +117,7 @@ export function Sidebar() {
                   <button
                     type="button"
                     onClick={() => {
-                      navigate('/logbook')
+                      navigate('/settings')
                       setShowProfileMenu(false)
                     }}
                     className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

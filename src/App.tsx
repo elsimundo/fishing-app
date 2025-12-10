@@ -21,12 +21,14 @@ import CreatePostPage from './pages/CreatePostPage'
 import LakeDetailPage from './pages/LakeDetailPage'
 import LakeOwnerDashboard from './pages/LakeOwnerDashboard'
 import MarkDetailPage from './pages/MarkDetailPage'
+import SettingsPage from './pages/SettingsPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 // Admin pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import UsersPage from './pages/admin/UsersPage'
 import BusinessesPage from './pages/admin/BusinessesPage'
 import LakesPage from './pages/admin/LakesPage'
+import AdminSettingsPage from './pages/admin/AdminSettingsPage'
 import SubmitBusinessPage from './pages/SubmitBusinessPage'
 import MessagesPage from './pages/MessagesPage'
 import ChallengeBoardPage from './pages/ChallengeBoardPage'
@@ -61,6 +63,7 @@ function App() {
         <Route path="/lakes/:slugOrId" element={<LakeDetailPage />} />
         <Route path="/lakes/:lakeId/dashboard" element={<LakeOwnerDashboard />} />
         <Route path="/marks/:markId" element={<MarkDetailPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/logbook" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<UserProfilePage />} />
         <Route path="/messages" element={<MessagesPage />} />
@@ -72,6 +75,7 @@ function App() {
         <Route path="/admin/users" element={<UsersPage />} />
         <Route path="/admin/businesses" element={<BusinessesPage />} />
         <Route path="/admin/lakes" element={<LakesPage />} />
+        <Route path="/admin/settings" element={<AdminSettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

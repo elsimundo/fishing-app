@@ -7,6 +7,7 @@ import { useSavedMarks, useMarkShares, useLeaveMark } from '../hooks/useSavedMar
 import { Layout } from '../components/layout/Layout'
 import { CatchCard } from '../components/catches/CatchCard'
 import { ShareMarkModal } from '../components/marks/ShareMarkModal'
+import { ExploreMap } from '../components/map/ExploreMap'
 import { ArrowLeft, Navigation, MapPin, Calendar, Fish, Clock, Share2, Trash2, Users, X, LogOut } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Session, Catch, SavedMark } from '../types'
@@ -219,7 +220,25 @@ export default function MarkDetailPage() {
           {/* Coordinates */}
           <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
             <MapPin size={14} />
-            <span>{mark.latitude.toFixed(5)}, {mark.longitude.toFixed(5)}</span>
+            <span>
+              {mark.latitude.toFixed(5)}, {mark.longitude.toFixed(5)}
+            </span>
+          </div>
+
+          {/* Map preview of this mark */}
+          <div className="mt-4 h-64 overflow-hidden rounded-xl border border-gray-200">
+            <ExploreMap
+              markers={[
+                {
+                  id: mark.id,
+                  type: 'mark',
+                  lat: mark.latitude,
+                  lng: mark.longitude,
+                  title: mark.name,
+                },
+              ]}
+              zoom={11}
+            />
           </div>
 
           {/* Actions */}
