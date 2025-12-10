@@ -31,6 +31,7 @@ export function SmartCatchPhoto({ onSpeciesIdentified, onPhotoChange }: SmartCat
   const handleSpeciesConfirm = (species: string) => {
     if (!result) return
     onSpeciesIdentified({ ...result, species })
+    reset()
   }
 
   const handleReject = () => {

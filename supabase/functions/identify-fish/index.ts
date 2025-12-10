@@ -3,6 +3,11 @@ import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
 const ANTHROPIC_MODEL = Deno.env.get('ANTHROPIC_MODEL') ?? 'claude-3-5-sonnet-latest'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 interface FishIdentificationResult {
   species: string
   scientificName: string
@@ -12,14 +17,19 @@ interface FishIdentificationResult {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
+    return new Response('Method not allowed', { status: 405, headers: corsHeaders })
   }
 
   if (!ANTHROPIC_API_KEY) {
     return new Response(JSON.stringify({ error: 'Missing Anthropic API key' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
@@ -29,7 +39,7 @@ serve(async (req) => {
     if (!imageBase64 || typeof imageBase64 !== 'string') {
       return new Response(JSON.stringify({ error: 'Invalid image payload' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -92,7 +102,7 @@ serve(async (req) => {
       const status = anthropicRes.status === 429 ? 429 : 502
       return new Response(JSON.stringify({ error: 'Upstream AI error' }), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -105,7 +115,7 @@ serve(async (req) => {
       console.error('Unexpected Anthropic response shape:', anthropicJson)
       return new Response(JSON.stringify({ error: 'Invalid AI response' }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -116,7 +126,7 @@ serve(async (req) => {
       console.error('Failed to parse AI JSON:', e, contentText)
       return new Response(JSON.stringify({ error: 'Parse error' }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -131,7 +141,7 @@ serve(async (req) => {
       console.error('Validation failed for AI result:', parsed)
       return new Response(JSON.stringify({ error: 'Invalid AI payload' }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -145,13 +155,13 @@ serve(async (req) => {
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
     console.error('identify-fish function error:', err)
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 })

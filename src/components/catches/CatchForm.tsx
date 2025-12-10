@@ -18,8 +18,6 @@ import { WEATHER_CODES } from '../../types/weather'
 import { getMoonPhase } from '../../utils/moonPhase'
 import { SmartCatchPhoto } from './SmartCatchPhoto'
 import type { FishIdentificationResult } from '../../types/fish'
-import { SmartCatchPhoto } from './SmartCatchPhoto'
-import type { FishIdentificationResult } from '../../types/fish'
 
 const fishingStyles = [
   'Shore fishing',
@@ -334,17 +332,9 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
             onSpeciesIdentified={(result: FishIdentificationResult) => {
               const speciesValue = result.species || ''
               setValue('species', speciesValue, { shouldValidate: true })
-            }}
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <SmartCatchPhoto
-            onPhotoChange={(file: File | null) => {
-              setPhotoFile(file)
-            }}
-            onSpeciesIdentified={(result: FishIdentificationResult) => {
-              const speciesValue = result.species || ''
-              setValue('species', speciesValue, { shouldValidate: true })
+              if (speciesValue) {
+                toast.success(`Species set to ${speciesValue}`)
+              }
             }}
           />
         </div>
