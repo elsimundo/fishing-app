@@ -7,6 +7,7 @@ export interface AwardInput {
   category: AwardCategory
   title: string
   prize: string
+  target_species: string  // Optional: specific species this award targets
 }
 
 interface AwardsStepProps {
@@ -88,6 +89,7 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
       category,
       title: categoryInfo.defaultTitle,
       prize: '',
+      target_species: '',
     }
 
     onChange({ awards: [...data.awards, newAward] })
@@ -168,6 +170,33 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
 
                     <div>
                       <label className="mb-1 block text-xs font-medium text-gray-700">
+                        Target Species (optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={award.target_species}
+                        onChange={(e) => {
+                          const species = e.target.value
+                          updateAward(award.id, { target_species: species })
+                          // Auto-update title if species is set
+                          if (species && info) {
+                            const baseTitle = info.label.replace('Fish', '').replace('Single', '').trim()
+                            updateAward(award.id, { 
+                              target_species: species,
+                              title: `${baseTitle} ${species}`.trim()
+                            })
+                          }
+                        }}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
+                        placeholder="e.g. Smoothhound, Cod, Skate"
+                      />
+                      <p className="mt-1 text-[10px] text-gray-400">
+                        Leave empty for any species, or enter a specific species name
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-gray-700">
                         Prize (optional)
                       </label>
                       <input
@@ -179,7 +208,14 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
                       />
                     </div>
 
-                    <p className="text-xs text-gray-500">{info?.description}</p>
+                    <p className="text-xs text-gray-500">
+                      {info?.description}
+                      {award.target_species && (
+                        <span className="ml-1 font-medium text-amber-600">
+                          • Only {award.target_species} catches count
+                        </span>
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>

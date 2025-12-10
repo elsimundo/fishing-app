@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight, Calendar, Trophy } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight, Calendar, Trophy, Swords } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
@@ -8,6 +8,7 @@ import { useOwnPosts, useTogglePostVisibility } from '../hooks/usePosts'
 import { useUnreadCount } from '../hooks/useMessages'
 import { useCatches } from '../hooks/useCatches'
 import { useSessions } from '../hooks/useSessions'
+import { useMyEnteredCompetitions } from '../hooks/useCompetitions'
 import { useUserXP, xpProgress } from '../hooks/useGamification'
 import { useUserChallenges, useFeaturedChallenge } from '../hooks/useGamification'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
@@ -39,6 +40,7 @@ export default function ProfilePage() {
   const { mutate: toggleVisibility } = useTogglePostVisibility()
   const { catches } = useCatches()
   const { data: sessions } = useSessions()
+  const { data: myCompetitions } = useMyEnteredCompetitions()
 
   const preferenceLabels: Record<string, string> = {
     sea: 'Sea Fishing',
@@ -435,85 +437,193 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Sessions tab */}
+        {/* Sessions tab - includes both sessions and competitions */}
         {activeTab === 'sessions' && (
           <div>
-            {!sessions || sessions.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No sessions yet</p>
-                <p className="text-xs text-gray-500">Start a session from Explore or the Logbook to track your fishing.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {sessions.map((session) => {
-                  const isActive = !session.ended_at
+            {(() => {
+              // Merge sessions and competitions into a unified list
+              type ListItem = 
+                | { type: 'session'; data: typeof sessions extends (infer T)[] | undefined ? T : never; date: Date }
+                | { type: 'competition'; data: NonNullable<typeof myCompetitions>[number]; date: Date }
+              
+              const items: ListItem[] = [
+                ...(sessions || []).map(s => ({ 
+                  type: 'session' as const, 
+                  data: s, 
+                  date: new Date(s.started_at) 
+                })),
+                ...(myCompetitions || []).map(c => ({ 
+                  type: 'competition' as const, 
+                  data: c, 
+                  date: new Date(c.starts_at) 
+                })),
+              ].sort((a, b) => b.date.getTime() - a.date.getTime())
 
-                  return (
-                    <button
-                      key={session.id}
-                      type="button"
-                      onClick={() => navigate(`/sessions/${session.id}`)}
-                      className={`w-full rounded-xl border p-3 text-left shadow-sm transition-colors ${
-                        isActive
-                          ? 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400'
-                          : 'border-gray-200 bg-white hover:border-navy-800/40'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        {session.cover_photo_url && (
-                          <img
-                            src={session.cover_photo_url}
-                            alt={session.title || session.location_name || 'Session cover'}
-                            className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
-                          />
-                        )}
+              if (items.length === 0) {
+                return (
+                  <div className="py-10 text-center text-sm text-gray-500">
+                    <p className="mb-1 font-medium text-gray-900">No sessions yet</p>
+                    <p className="text-xs text-gray-500">Start a session from Explore or the Logbook to track your fishing.</p>
+                  </div>
+                )
+              }
 
-                        <div className="flex-1">
-                          <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
-                                typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
-                                  ? isActive
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : 'bg-gray-100 text-gray-700'
-                                  : isActive
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
-                                ? '🌊 Saltwater'
-                                : '🏞️ Freshwater'}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              {isActive && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                                  Live
-                                </span>
-                              )}
-                              <span>
-                                {new Date(session.started_at).toLocaleDateString(undefined, {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
-                                })}
-                              </span>
+              return (
+                <div className="space-y-3">
+                  {items.map((item) => {
+                    if (item.type === 'session') {
+                      const session = item.data
+                      const isActive = !session.ended_at
+                      const isCompetition = Boolean(session.competition_id)
+
+                      return (
+                        <button
+                          key={`session-${session.id}`}
+                          type="button"
+                          onClick={() => navigate(`/sessions/${session.id}`)}
+                          className={`w-full rounded-xl border p-3 text-left shadow-sm transition-colors ${
+                            isActive
+                              ? 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400'
+                              : isCompetition
+                              ? 'border-amber-200 bg-amber-50/40 hover:border-amber-400'
+                              : 'border-gray-200 bg-white hover:border-navy-800/40'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {session.cover_photo_url && (
+                              <img
+                                src={session.cover_photo_url}
+                                alt={session.title || session.location_name || 'Session cover'}
+                                className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                              />
+                            )}
+
+                            <div className="flex-1">
+                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
+                                <div className="flex items-center gap-1.5">
+                                  {isCompetition && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">
+                                      <Swords size={10} />
+                                      Competition
+                                    </span>
+                                  )}
+                                  <span
+                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
+                                      typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
+                                        ? 'bg-gray-100 text-gray-700'
+                                        : 'bg-gray-100 text-gray-700'
+                                    }`}
+                                  >
+                                    {typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
+                                      ? '🌊 Saltwater'
+                                      : '🏞️ Freshwater'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {isActive && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                      Live
+                                    </span>
+                                  )}
+                                  <span>
+                                    {new Date(session.started_at).toLocaleDateString(undefined, {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {session.title || session.location_name || 'Fishing session'}
+                              </p>
+                              <p className="mt-0.5 text-xs text-gray-500">
+                                📍 {session.location_name || 'Unknown location'}
+                              </p>
                             </div>
                           </div>
-                          <p className="text-sm font-semibold text-gray-900">
-                            {session.title || session.location_name || 'Fishing session'}
-                          </p>
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            📍 {session.location_name || 'Unknown location'}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+                        </button>
+                      )
+                    } else {
+                      // Competition item
+                      const competition = item.data
+                      const isLive = competition.status === 'active'
+                      const isUpcoming = competition.status === 'upcoming'
+
+                      return (
+                        <button
+                          key={`competition-${competition.id}`}
+                          type="button"
+                          onClick={() => navigate(`/compete/${competition.id}`)}
+                          className={`w-full rounded-xl border p-3 text-left shadow-sm transition-colors ${
+                            isLive
+                              ? 'border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 hover:border-amber-400'
+                              : isUpcoming
+                              ? 'border-blue-200 bg-blue-50/40 hover:border-blue-400'
+                              : 'border-gray-200 bg-white hover:border-navy-800/40'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {competition.cover_image_url ? (
+                              <img
+                                src={competition.cover_image_url}
+                                alt={competition.title}
+                                className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                              />
+                            ) : (
+                              <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${
+                                isLive ? 'bg-amber-100' : isUpcoming ? 'bg-blue-100' : 'bg-gray-100'
+                              }`}>
+                                <Swords size={20} className={
+                                  isLive ? 'text-amber-600' : isUpcoming ? 'text-blue-600' : 'text-gray-400'
+                                } />
+                              </div>
+                            )}
+
+                            <div className="flex-1">
+                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">
+                                  <Trophy size={10} />
+                                  Competition
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  {isLive && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+                                      Live
+                                    </span>
+                                  )}
+                                  {isUpcoming && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                                      Upcoming
+                                    </span>
+                                  )}
+                                  <span>
+                                    {new Date(competition.starts_at).toLocaleDateString(undefined, {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {competition.title}
+                              </p>
+                              <p className="mt-0.5 text-xs text-gray-500">
+                                👥 {competition.participant_count ?? 0} anglers
+                                {competition.prize && ` · 🏆 ${competition.prize}`}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    }
+                  })}
+                </div>
+              )
+            })()}
           </div>
         )}
 

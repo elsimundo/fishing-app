@@ -10,13 +10,19 @@ export interface Challenge {
   description: string
   icon: string
   category: string
-  difficulty: 'easy' | 'medium' | 'hard' | 'legendary'
+  difficulty: 'easy' | 'medium' | 'hard' | 'legendary' | 'expert'
   criteria: Record<string, unknown>
   xp_reward: number
   sort_order: number
   is_featured: boolean
   featured_until: string | null
-  water_type: 'saltwater' | 'freshwater' | 'both'
+  water_type: 'saltwater' | 'freshwater' | 'both' | null
+  // Scope fields for country/region challenges
+  scope: 'global' | 'country' | 'region' | 'event'
+  scope_value: string | null
+  scope_countries: string[] | null
+  starts_at: string | null
+  ends_at: string | null
 }
 
 export interface UserChallenge {
@@ -133,27 +139,87 @@ export function useUserXP() {
   })
 }
 
+export type ChallengeScope = 'global' | 'country' | 'region' | 'event'
+
+interface UseChallengesOptions {
+  waterType?: 'saltwater' | 'freshwater' | 'both'
+  scope?: ChallengeScope | 'all'
+  countryCode?: string
+}
+
 // Fetch all active challenges
-export function useChallenges(waterType?: 'saltwater' | 'freshwater' | 'both') {
+export function useChallenges(options: UseChallengesOptions | 'saltwater' | 'freshwater' | 'both' = {}) {
+  // Support legacy call signature (just waterType string)
+  const opts: UseChallengesOptions = typeof options === 'string' 
+    ? { waterType: options } 
+    : options
+  
+  const { waterType, scope = 'all', countryCode } = opts
+  
   return useQuery({
-    queryKey: ['challenges', waterType],
+    queryKey: ['challenges', waterType, scope, countryCode],
     queryFn: async () => {
       let query = supabase
         .from('challenges')
         .select('*')
         .eq('is_active', true)
+        .order('scope')
         .order('sort_order')
       
       // Filter by water type if specified
       if (waterType && waterType !== 'both') {
-        query = query.or(`water_type.eq.${waterType},water_type.eq.both`)
+        query = query.or(`water_type.eq.${waterType},water_type.eq.both,water_type.is.null`)
       }
+      
+      // Filter by scope
+      if (scope === 'global') {
+        query = query.eq('scope', 'global')
+      } else if (scope === 'country' && countryCode) {
+        query = query.eq('scope', 'country').eq('scope_value', countryCode)
+      } else if (scope === 'event') {
+        query = query.eq('scope', 'event')
+      }
+      // 'all' returns everything
       
       const { data, error } = await query
       if (error) throw error
       return data as Challenge[]
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+// Fetch countries the user has fished in
+export function useUserCountries() {
+  const { user } = useAuth()
+  
+  return useQuery({
+    queryKey: ['user-countries', user?.id],
+    queryFn: async () => {
+      if (!user) return []
+      
+      // Get unique countries from user's catches
+      const { data, error } = await supabase
+        .from('catches')
+        .select('country_code')
+        .eq('user_id', user.id)
+        .not('country_code', 'is', null)
+      
+      if (error) throw error
+      
+      // Count catches per country and sort by count
+      const counts: Record<string, number> = {}
+      data?.forEach(c => {
+        if (c.country_code) {
+          counts[c.country_code] = (counts[c.country_code] || 0) + 1
+        }
+      })
+      
+      return Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([code, count]) => ({ code, count }))
+    },
+    enabled: !!user,
   })
 }
 

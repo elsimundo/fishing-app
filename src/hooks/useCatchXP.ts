@@ -17,6 +17,8 @@ interface CatchXPInput {
   weatherCondition?: string | null
   windSpeed?: number | null
   moonPhase?: string | null
+  // Country code for geographic challenges
+  countryCode?: string | null
 }
 
 interface XPBreakdown {
@@ -459,6 +461,13 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     // Track unique moon phases caught
     await checkMoonPhasesChallenge(userId, completed)
   }
+
+  // ============================================
+  // 10. COUNTRY-SCOPED CHALLENGES
+  // ============================================
+  if (input.countryCode) {
+    await checkCountryChallenges(userId, input.countryCode, input.species, completed, input.catchId)
+  }
 }
 
 /**
@@ -595,6 +604,111 @@ async function checkMoonPhasesChallenge(userId: string, completed: string[]) {
   if (uniquePhases.size >= 4) {
     await completeChallenge(userId, 'moon_master', uniquePhases.size, 4, completed)
   }
+}
+
+/**
+ * Check and complete country-scoped challenges
+ */
+async function checkCountryChallenges(
+  userId: string,
+  countryCode: string,
+  species: string,
+  completed: string[],
+  catchId?: string
+) {
+  const cc = countryCode.toLowerCase()
+  
+  // Get catch count for this country
+  const { count: countryCatches } = await supabase
+    .from('catches')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('country_code', countryCode)
+  
+  // Get unique species count for this country
+  const { data: countrySpeciesData } = await supabase
+    .from('catches')
+    .select('species')
+    .eq('user_id', userId)
+    .eq('country_code', countryCode)
+  
+  const countrySpeciesCount = new Set(countrySpeciesData?.map(c => c.species.toLowerCase())).size
+  
+  // Country-specific milestones
+  // First catch in country
+  if (countryCatches && countryCatches >= 1) {
+    await completeChallenge(userId, `${cc}_first_catch`, countryCatches, 1, completed, catchId)
+  }
+  
+  // 10 catches in country
+  if (countryCatches && countryCatches >= 10) {
+    await completeChallenge(userId, `${cc}_explorer_10`, countryCatches, 10, completed, catchId)
+  }
+  
+  // 50 catches in country
+  if (countryCatches && countryCatches >= 50) {
+    await completeChallenge(userId, `${cc}_explorer_50`, countryCatches, 50, completed, catchId)
+  }
+  
+  // 100 catches in country
+  if (countryCatches && countryCatches >= 100) {
+    await completeChallenge(userId, `${cc}_explorer_100`, countryCatches, 100, completed, catchId)
+  }
+  
+  // 5 species in country
+  if (countrySpeciesCount >= 5) {
+    await completeChallenge(userId, `${cc}_species_5`, countrySpeciesCount, 5, completed, catchId)
+  }
+  
+  // 10 species in country
+  if (countrySpeciesCount >= 10) {
+    await completeChallenge(userId, `${cc}_species_10`, countrySpeciesCount, 10, completed, catchId)
+  }
+  
+  // ============================================
+  // MULTI-COUNTRY CHALLENGES (World Traveler, etc.)
+  // ============================================
+  
+  // Get all unique countries the user has fished in
+  const { data: allCountries } = await supabase
+    .from('catches')
+    .select('country_code')
+    .eq('user_id', userId)
+    .not('country_code', 'is', null)
+  
+  const uniqueCountries = new Set(allCountries?.map(c => c.country_code)).size
+  
+  // International Angler: 3 countries
+  if (uniqueCountries >= 3) {
+    await completeChallenge(userId, 'world_traveler_3', uniqueCountries, 3, completed, catchId)
+  }
+  
+  // World Traveler: 5 countries
+  if (uniqueCountries >= 5) {
+    await completeChallenge(userId, 'world_traveler_5', uniqueCountries, 5, completed, catchId)
+  }
+  
+  // Globe Trotter: 10 countries
+  if (uniqueCountries >= 10) {
+    await completeChallenge(userId, 'world_traveler_10', uniqueCountries, 10, completed, catchId)
+  }
+  
+  // European Tour: 3 European countries
+  const europeanCountries = ['GB', 'PT', 'ES', 'FR', 'DE', 'NL', 'BE', 'IE', 'IT', 'GR', 'HR', 'PL', 'CZ', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI']
+  const userEuropeanCountries = new Set(
+    allCountries?.filter(c => europeanCountries.includes(c.country_code)).map(c => c.country_code)
+  ).size
+  
+  if (userEuropeanCountries >= 3) {
+    await completeChallenge(userId, 'european_tour', userEuropeanCountries, 3, completed, catchId)
+  }
+  
+  // Update user's countries_fished array in profile
+  const countriesArray = Array.from(new Set(allCountries?.map(c => c.country_code) || []))
+  await supabase
+    .from('profiles')
+    .update({ countries_fished: countriesArray })
+    .eq('id', userId)
 }
 
 /**

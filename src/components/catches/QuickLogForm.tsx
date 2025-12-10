@@ -10,6 +10,7 @@ import { Camera, X, Globe, Lock, Info, MapPin, ChevronDown } from 'lucide-react'
 import { useCatchXP } from '../../hooks/useCatchXP'
 import { useSavedMarks } from '../../hooks/useSavedMarks'
 import { compressPhoto } from '../../utils/imageCompression'
+import { getCountryFromCoords } from '../../utils/reverseGeocode'
 
 const quickLogSchema = z.object({
   species: z.string().min(1, 'Species is required'),
@@ -210,14 +211,28 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       }
     }
 
+    // Get coordinates for this catch
+    const catchLat = activeLocation?.lat || session.latitude || null
+    const catchLng = activeLocation?.lng || session.longitude || null
+
+    // Detect country from coordinates (don't block on this)
+    let countryCode: string | null = null
+    if (catchLat && catchLng) {
+      try {
+        countryCode = await getCountryFromCoords(catchLat, catchLng)
+      } catch (err) {
+        console.warn('Failed to detect country:', err)
+      }
+    }
+
     const payload = {
       user_id: userData.user.id,
       session_id: session.id,
       species: values.species,
       caught_at: new Date(values.caught_at).toISOString(),
       location_name: activeLocation?.name || session.location_name || null,
-      latitude: activeLocation?.lat || session.latitude || null,
-      longitude: activeLocation?.lng || session.longitude || null,
+      latitude: catchLat,
+      longitude: catchLng,
       weight_kg: values.weight_kg ?? null,
       length_cm: values.length_cm ?? null,
       bait: null,
@@ -232,6 +247,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       weather_condition: session.weather_condition ?? null,
       wind_speed: session.wind_speed ?? null,
       moon_phase: session.moon_phase ?? null,
+      // Country code for geographic challenges
+      country_code: countryCode,
     }
 
     const { data, error } = await supabase.from('catches').insert(payload).select('*').single()
@@ -260,6 +277,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       weatherCondition: created.weather_condition,
       windSpeed: created.wind_speed,
       moonPhase: created.moon_phase,
+      // Country code for geographic challenges
+      countryCode,
     })
     
     onLogged(created)

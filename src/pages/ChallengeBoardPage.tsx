@@ -1,17 +1,17 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
-import { useChallenges, useUserChallenges, useFeaturedChallenge, useWeeklyLeaderboard } from '../hooks/useGamification'
+import { useChallenges, useUserChallenges, useFeaturedChallenge, useWeeklyLeaderboard, useUserCountries } from '../hooks/useGamification'
 import { useActiveCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
 import { useAuth } from '../hooks/useAuth'
 import { ChallengeCard } from '../components/gamification/ChallengeCard'
 import { XPBar } from '../components/gamification/XPBar'
 import { WeeklySpeciesBadge } from '../components/gamification/WeeklySpeciesCard'
-import { useSessions } from '../hooks/useSessions'
-import { SessionCard } from '../components/sessions/SessionCard'
 import { CompetitionCard } from '../components/compete/CompetitionCard'
 import { CompetitionCardSkeleton } from '../components/skeletons/CompetitionCardSkeleton'
-import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees, HelpCircle } from 'lucide-react'
+import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees, HelpCircle, Globe, Flag, ChevronDown, ChevronUp } from 'lucide-react'
+import type { Challenge, UserChallenge } from '../hooks/useGamification'
+import { getCountryFlag, getCountryName } from '../utils/reverseGeocode'
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: Trophy },
@@ -23,6 +23,7 @@ const CATEGORIES = [
 
 type MainTab = 'challenges' | 'leaderboards' | 'compete'
 type WaterType = 'saltwater' | 'freshwater'
+type ScopeTab = 'all' | 'global' | 'countries' | 'events'
 
 export default function ChallengeBoardPage() {
   const navigate = useNavigate()
@@ -30,12 +31,14 @@ export default function ChallengeBoardPage() {
   const [waterType, setWaterType] = useState<WaterType>('freshwater')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(true)
+  const [scopeTab, setScopeTab] = useState<ScopeTab>('all')
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   
   // Data hooks
-  const { data: sessions, isLoading: sessionsLoading } = useSessions()
-  const { data: challenges, isLoading: challengesLoading } = useChallenges(waterType)
+  const { data: challenges, isLoading: challengesLoading } = useChallenges({ waterType })
   const { data: userChallenges, isLoading: userChallengesLoading } = useUserChallenges()
   const { data: featuredChallenge } = useFeaturedChallenge()
+  const { data: userCountries } = useUserCountries()
   const {
     data: allActiveCompetitions,
     isLoading: activeCompetitionsLoading,
@@ -54,18 +57,30 @@ export default function ChallengeBoardPage() {
     return map
   }, [userChallenges])
   
-  // Filter challenges
+  // Filter challenges by scope, category, and completion status
   const filteredChallenges = useMemo(() => {
     if (!challenges) return []
     return challenges.filter(c => {
+      // Scope filter
+      if (scopeTab === 'global' && c.scope !== 'global') return false
+      if (scopeTab === 'countries') {
+        if (c.scope !== 'country') return false
+        // If a specific country is selected, filter to that country
+        if (selectedCountry && c.scope_value !== selectedCountry) return false
+      }
+      if (scopeTab === 'events' && c.scope !== 'event') return false
+      
+      // Category filter
       if (selectedCategory !== 'all' && c.category !== selectedCategory) return false
+      
+      // Completion filter
       if (!showCompleted) {
         const progress = userProgressMap.get(c.id)
         if (progress?.completed_at) return false
       }
       return true
     })
-  }, [challenges, selectedCategory, showCompleted, userProgressMap])
+  }, [challenges, selectedCategory, showCompleted, userProgressMap, scopeTab, selectedCountry])
   
   // Stats
   const completedCount = userChallenges?.filter(uc => uc.completed_at).length || 0
@@ -174,6 +189,80 @@ export default function ChallengeBoardPage() {
                   Saltwater
                 </button>
               </div>
+
+              {/* Scope Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                <button
+                  onClick={() => { setScopeTab('all'); setSelectedCountry(null) }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    scopeTab === 'all'
+                      ? 'bg-navy-800 text-white'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <Trophy size={14} />
+                  All
+                </button>
+                <button
+                  onClick={() => { setScopeTab('global'); setSelectedCountry(null) }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    scopeTab === 'global'
+                      ? 'bg-navy-800 text-white'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <Globe size={14} />
+                  Global
+                </button>
+                
+                {/* User's countries */}
+                {userCountries && userCountries.length > 0 && (
+                  <>
+                    {userCountries.slice(0, 3).map(({ code, count }) => (
+                      <button
+                        key={code}
+                        onClick={() => { setScopeTab('countries'); setSelectedCountry(code) }}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                          scopeTab === 'countries' && selectedCountry === code
+                            ? 'bg-navy-800 text-white'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span>{getCountryFlag(code)}</span>
+                        {getCountryName(code)}
+                        <span className="text-xs opacity-70">({count})</span>
+                      </button>
+                    ))}
+                  </>
+                )}
+                
+                {/* All countries button if user has fished in multiple */}
+                {userCountries && userCountries.length > 1 && (
+                  <button
+                    onClick={() => { setScopeTab('countries'); setSelectedCountry(null) }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                      scopeTab === 'countries' && !selectedCountry
+                        ? 'bg-navy-800 text-white'
+                        : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Flag size={14} />
+                    All Countries
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => { setScopeTab('events'); setSelectedCountry(null) }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    scopeTab === 'events'
+                      ? 'bg-navy-800 text-white'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  🌍
+                  Events
+                </button>
+              </div>
               
               {/* Featured Challenge */}
               {featuredChallenge && (
@@ -230,7 +319,7 @@ export default function ChallengeBoardPage() {
                 </label>
               </div>
               
-              {/* Challenge grid */}
+              {/* Challenge sections grouped by scope */}
               {challengesLoading || userChallengesLoading ? (
                 <div className="grid gap-3">
                   {[...Array(6)].map((_, i) => (
@@ -251,15 +340,60 @@ export default function ChallengeBoardPage() {
                   )}
                 </div>
               ) : (
-                <div className="grid gap-3">
-                  {filteredChallenges.map(challenge => (
-                    <ChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      userProgress={userProgressMap.get(challenge.id)}
-                      onClick={() => navigate(`/challenges/${challenge.slug}`)}
-                    />
-                  ))}
+                <div className="space-y-4">
+                  {/* Group challenges by scope */}
+                  {(() => {
+                    // Group challenges
+                    const groups: Record<string, typeof filteredChallenges> = {}
+                    filteredChallenges.forEach(c => {
+                      const key = c.scope === 'country' ? `country_${c.scope_value}` : c.scope
+                      if (!groups[key]) groups[key] = []
+                      groups[key].push(c)
+                    })
+                    
+                    const getSectionTitle = (key: string) => {
+                      if (key === 'global') return { icon: '🌐', title: 'Global Challenges', subtitle: 'Available everywhere' }
+                      if (key === 'event') return { icon: '🌍', title: 'World Events', subtitle: 'Multi-country achievements' }
+                      if (key.startsWith('country_')) {
+                        const code = key.replace('country_', '')
+                        return { 
+                          icon: getCountryFlag(code), 
+                          title: `${getCountryName(code)} Challenges`,
+                          subtitle: `Fish in ${getCountryName(code)} to progress`
+                        }
+                      }
+                      return { icon: '🏆', title: 'Challenges', subtitle: '' }
+                    }
+                    
+                    // Sort: global first, then countries alphabetically, then events
+                    const sortedKeys = Object.keys(groups).sort((a, b) => {
+                      if (a === 'global') return -1
+                      if (b === 'global') return 1
+                      if (a === 'event') return 1
+                      if (b === 'event') return -1
+                      return a.localeCompare(b)
+                    })
+                    
+                    return sortedKeys.map(key => {
+                      const section = getSectionTitle(key)
+                      const challenges = groups[key]
+                      const completedInSection = challenges.filter(c => userProgressMap.get(c.id)?.completed_at).length
+                      
+                      return (
+                        <ChallengeSection
+                          key={key}
+                          icon={section.icon}
+                          title={section.title}
+                          subtitle={section.subtitle}
+                          completedCount={completedInSection}
+                          totalCount={challenges.length}
+                          challenges={challenges}
+                          userProgressMap={userProgressMap}
+                          onChallengeClick={(slug) => navigate(`/challenges/${slug}`)}
+                        />
+                      )
+                    })
+                  })()}
                 </div>
               )}
             </div>
@@ -510,5 +644,82 @@ export default function ChallengeBoardPage() {
         </div>
       </div>
     </Layout>
+  )
+}
+
+// Collapsible challenge section component
+interface ChallengeSectionProps {
+  icon: string
+  title: string
+  subtitle: string
+  completedCount: number
+  totalCount: number
+  challenges: Challenge[]
+  userProgressMap: Map<string, UserChallenge>
+  onChallengeClick: (slug: string) => void
+}
+
+function ChallengeSection({
+  icon,
+  title,
+  subtitle,
+  completedCount,
+  totalCount,
+  challenges,
+  userProgressMap,
+  onChallengeClick,
+}: ChallengeSectionProps) {
+  const [expanded, setExpanded] = useState(true)
+  const allCompleted = completedCount === totalCount && totalCount > 0
+  
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+      {/* Section Header */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{icon}</span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900">{title}</h3>
+              {allCompleted && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                  ✓ Complete
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500">{subtitle}</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-sm font-semibold text-gray-900">{completedCount}/{totalCount}</p>
+            <p className="text-[10px] text-gray-500">completed</p>
+          </div>
+          {expanded ? (
+            <ChevronUp size={20} className="text-gray-400" />
+          ) : (
+            <ChevronDown size={20} className="text-gray-400" />
+          )}
+        </div>
+      </button>
+      
+      {/* Challenges List */}
+      {expanded && (
+        <div className="border-t border-gray-100 p-3 space-y-2">
+          {challenges.map(challenge => (
+            <ChallengeCard
+              key={challenge.id}
+              challenge={challenge}
+              userProgress={userProgressMap.get(challenge.id)}
+              onClick={() => onChallengeClick(challenge.slug)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

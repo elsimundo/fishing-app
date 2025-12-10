@@ -22,6 +22,7 @@ import { SPECIES } from '../../types/species'
 import { getLegalSizeStatus } from '../../lib/legalSizes'
 import type { RegionCode } from '../../types/species'
 import type { PhotoMetadata } from '../../utils/exifExtractor'
+import { getCountryFromCoords } from '../../utils/reverseGeocode'
 
 const fishingStyles = [
   'Shore fishing',
@@ -413,6 +414,17 @@ export function CatchForm({
       photo_exif_timestamp: photoMetadata?.timestamp ?? null,
       photo_camera_make: photoMetadata?.cameraMake ?? null,
       photo_camera_model: photoMetadata?.cameraModel ?? null,
+      // Country code for geographic challenges (will be set below)
+      country_code: null as string | null,
+    }
+
+    // Detect country from coordinates
+    if (values.latitude && values.longitude) {
+      try {
+        payload.country_code = await getCountryFromCoords(values.latitude, values.longitude)
+      } catch (err) {
+        console.warn('Failed to detect country:', err)
+      }
     }
 
     console.log('CatchForm - Submitting payload with session_id:', payload.session_id)
@@ -446,6 +458,8 @@ export function CatchForm({
         weatherCondition: data.weather_condition,
         windSpeed: data.wind_speed,
         moonPhase: data.moon_phase,
+        // Country code for geographic challenges
+        countryCode: payload.country_code,
       })
     } else {
       toast.success(isEdit ? 'Catch updated' : 'Catch added')

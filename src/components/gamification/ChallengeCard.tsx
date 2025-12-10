@@ -14,14 +14,15 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
   const target = userProgress?.target || (challenge.criteria as any)?.value || 1
   const progressPercent = Math.min(100, Math.round((progress / target) * 100))
   
-  const difficultyConfig = {
+  const difficultyConfig: Record<string, { color: string; bg: string; label: string }> = {
     easy: { color: 'text-green-600', bg: 'bg-green-100', label: 'Easy' },
     medium: { color: 'text-yellow-600', bg: 'bg-yellow-100', label: 'Medium' },
     hard: { color: 'text-orange-600', bg: 'bg-orange-100', label: 'Hard' },
+    expert: { color: 'text-red-600', bg: 'bg-red-100', label: 'Expert' },
     legendary: { color: 'text-purple-600', bg: 'bg-purple-100', label: 'Legendary' },
   }
   
-  const difficulty = difficultyConfig[challenge.difficulty]
+  const difficulty = difficultyConfig[challenge.difficulty] || difficultyConfig.medium
   
   if (compact) {
     return (

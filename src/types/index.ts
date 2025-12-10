@@ -371,6 +371,7 @@ export interface CompetitionAward {
   title: string
   prize: string | null
   position: number
+  target_species: string | null  // Optional: specific species this award targets (e.g., "Smoothhound", "Cod")
   created_at: string
 }
 

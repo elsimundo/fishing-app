@@ -87,6 +87,11 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-gray-500">#{index + 1}</span>
                   <p className="text-sm font-semibold text-gray-900">{award.title}</p>
+                  {award.target_species && (
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+                      🐟 {award.target_species}
+                    </span>
+                  )}
                 </div>
                 {award.prize && (
                   <p className="text-xs text-gray-500">🏆 {award.prize}</p>

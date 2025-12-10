@@ -109,6 +109,13 @@ export function SessionDetailPage() {
     )
   }
 
+  // If this session is a competition, redirect to the competition page
+  // The competition page IS the session page for competitions
+  if (session.competition_id) {
+    navigate(`/compete/${session.competition_id}`, { replace: true })
+    return null
+  }
+
   const title = session.title || session.location_name || 'Fishing Session'
   const privacyLabel = getLocationPrivacyLabel(session)
   const isOwner = currentUserId != null && currentUserId === session.user_id

@@ -31,6 +31,7 @@ import BusinessesPage from './pages/admin/BusinessesPage'
 import LakesPage from './pages/admin/LakesPage'
 import PartnersPage from './pages/admin/PartnersPage'
 import AdminSettingsPage from './pages/admin/AdminSettingsPage'
+import AdminChallengesPage from './pages/admin/ChallengesPage'
 import SubmitBusinessPage from './pages/SubmitBusinessPage'
 import MessagesPage from './pages/MessagesPage'
 import ChallengeBoardPage from './pages/ChallengeBoardPage'
@@ -83,6 +84,7 @@ function App() {
         <Route path="/admin/businesses" element={<BusinessesPage />} />
         <Route path="/admin/lakes" element={<LakesPage />} />
         <Route path="/admin/partners" element={<PartnersPage />} />
+        <Route path="/admin/challenges" element={<AdminChallengesPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />

@@ -105,6 +105,7 @@ export default function CreateCompetitionPage() {
           category: a.category as AwardCategory,
           title: a.title,
           prize: a.prize || '',
+          target_species: a.target_species || '',
         })),
       }))
     }
@@ -221,6 +222,7 @@ export default function CreateCompetitionPage() {
           category: award.category,
           title: award.title,
           prize: award.prize || null,
+          target_species: award.target_species || null,
           position: index + 1,
         }))
 
