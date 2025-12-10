@@ -4,17 +4,19 @@ import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
 import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant } from '../hooks/useSessionParticipants'
 import { useMarkSessionViewed } from '../hooks/useMarkSessionViewed'
+import { useSessionPosts, useDeletePost } from '../hooks/usePosts'
 import { Map } from '../components/map'
 import { CatchCard } from '../components/catches/CatchCard'
 import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil, LogOut, Bookmark } from 'lucide-react'
+import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil, LogOut, Bookmark, MessageSquare, X as XIcon } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 import { EditSessionModal } from '../components/session/EditSessionModal'
 import { ParticipantsList } from '../components/session/ParticipantsList'
 import { InviteToSessionModal } from '../components/session/InviteToSessionModal'
+import { AddSessionPostModal } from '../components/session/AddSessionPostModal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { ErrorState } from '../components/ui/ErrorState'
 import { useDeleteSession } from '../hooks/useDeleteSession'
@@ -32,6 +34,7 @@ export function SessionDetailPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const [showActions, setShowActions] = useState(false)
+  const [showAddPostModal, setShowAddPostModal] = useState(false)
 
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -40,6 +43,8 @@ export function SessionDetailPage() {
   const { mutateAsync: updateSession, isPending: isEnding } = useUpdateSession()
   const markViewed = useMarkSessionViewed()
   const { createMark, marks: savedMarks } = useSavedMarks()
+  const { data: sessionPosts = [] } = useSessionPosts(id)
+  const { mutateAsync: deletePost } = useDeletePost()
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
@@ -271,6 +276,18 @@ export function SessionDetailPage() {
           )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/70" />
 
+          {/* Owner quick action: change cover photo */}
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setShowEditModal(true)}
+              className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm backdrop-blur hover:bg-black/60"
+            >
+              <Pencil size={14} />
+              <span className="hidden sm:inline">Change cover</span>
+            </button>
+          )}
+
           {/* Hero badge */}
           <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-navy-900 shadow-sm">
             <span>{typeof session.water_type === 'string' && session.water_type.includes('Sea') ? '🌊' : '🏞️'}</span>
@@ -462,46 +479,126 @@ export function SessionDetailPage() {
 
             {/* Timeline */}
             <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-gray-900">Session timeline</h2>
-              {sortedCatches.length === 0 ? (
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-gray-900">Session timeline</h2>
+                {canLogCatches && (session.allow_posts || session.allow_comments) && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddPostModal(true)}
+                    className="flex items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                  >
+                    <MessageSquare size={14} />
+                    Add post
+                  </button>
+                )}
+              </div>
+              {sortedCatches.length === 0 && sessionPosts.length === 0 ? (
                 <div className="py-6 text-center text-xs text-gray-500">
-                  No catches yet. Log your first catch to start the timeline.
+                  No activity yet. Log a catch or add a post to start the timeline.
                 </div>
               ) : (
                 <div className="relative">
                   <div className="absolute left-3 top-2 bottom-2 w-px bg-gray-200" />
                   <div className="space-y-4">
-                    {sortedCatches.map((c) => (
-                      <div key={c.id} className="relative flex items-start gap-3 pl-7">
-                        <div className="absolute left-0 top-2 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-navy-800 shadow" />
-                        {c.photo_url ? (
-                          <img
-                            src={c.photo_url}
-                            alt={c.species}
-                            className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-lg">
-                            🐟
-                          </div>
-                        )}
-                        <div className="flex-1 text-xs">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-gray-900">
-                              {c.species}
-                              {c.weight_kg != null && ` • ${c.weight_kg.toFixed(1)}kg`}
-                            </p>
-                            <span className="ml-2 text-[11px] text-gray-500">
-                              {format(new Date(c.caught_at), 'HH:mm')}
-                            </span>
-                          </div>
-                          <p className="mt-0.5 text-[11px] text-gray-600">
-                            {c.bait && c.bait !== '0' ? c.bait : '—'}
-                            {c.released ? ' • Released' : ''}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                    {/* Merge catches and posts, sort by time */}
+                    {[
+                      ...sortedCatches.map((c) => ({ type: 'catch' as const, data: c, time: new Date(c.caught_at) })),
+                      ...sessionPosts.map((p) => ({ type: 'post' as const, data: p, time: new Date(p.created_at) })),
+                    ]
+                      .sort((a, b) => b.time.getTime() - a.time.getTime())
+                      .map((item) => {
+                        if (item.type === 'catch') {
+                          const c = item.data
+                          return (
+                            <button
+                              key={`catch-${c.id}`}
+                              type="button"
+                              onClick={() => navigate(`/catches/${c.id}`)}
+                              className="relative flex w-full items-start gap-3 pl-7 text-left transition-opacity hover:opacity-70"
+                            >
+                              <div className="absolute left-0 top-2 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-navy-800 shadow" />
+                              {c.photo_url ? (
+                                <img
+                                  src={c.photo_url}
+                                  alt={c.species}
+                                  className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-lg">
+                                  🐟
+                                </div>
+                              )}
+                              <div className="flex-1 text-xs">
+                                <div className="flex items-center justify-between">
+                                  <p className="text-sm font-semibold text-gray-900">
+                                    {c.species}
+                                    {c.weight_kg != null && ` • ${c.weight_kg.toFixed(1)}kg`}
+                                  </p>
+                                  <span className="ml-2 text-[11px] text-gray-500">
+                                    {format(new Date(c.caught_at), 'HH:mm')}
+                                  </span>
+                                </div>
+                                <p className="mt-0.5 text-[11px] text-gray-600">
+                                  {c.bait && c.bait !== '0' ? c.bait : '—'}
+                                  {c.released ? ' • Released' : ''}
+                                </p>
+                              </div>
+                            </button>
+                          )
+                        } else {
+                          const p = item.data
+                          const canDeletePost = currentUserId === p.user_id || isOwner
+                          return (
+                            <div key={`post-${p.id}`} className="group relative flex w-full items-start gap-3 pl-7">
+                              <div className="absolute left-0 top-2 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-blue-500 shadow" />
+                              {p.photo_url ? (
+                                <img
+                                  src={p.photo_url}
+                                  alt="Post"
+                                  className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-lg">
+                                  💬
+                                </div>
+                              )}
+                              <div className="flex-1 text-xs">
+                                <div className="flex items-center justify-between">
+                                  <p className="text-xs font-medium text-gray-700">
+                                    {p.user.full_name || p.user.username}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[11px] text-gray-500">
+                                      {format(new Date(p.created_at), 'HH:mm')}
+                                    </span>
+                                    {canDeletePost && (
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          if (confirm('Delete this post?')) {
+                                            try {
+                                              await deletePost(p.id)
+                                              toast.success('Post deleted')
+                                            } catch {
+                                              toast.error('Failed to delete post')
+                                            }
+                                          }
+                                        }}
+                                        className="opacity-0 group-hover:opacity-100 rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 transition-opacity"
+                                      >
+                                        <XIcon size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                                {p.caption && (
+                                  <p className="mt-0.5 text-[11px] text-gray-900">{p.caption}</p>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        }
+                      })}
                   </div>
                 </div>
               )}
@@ -610,7 +707,7 @@ export function SessionDetailPage() {
           session={session}
           onClose={() => setShowShareModal(false)}
           onSuccess={() => {
-            window.alert('Session shared!')
+            toast.success('Session shared to your feed!')
           }}
         />
       )}
@@ -618,6 +715,11 @@ export function SessionDetailPage() {
       {/* Invite modal */}
       {showInviteModal && (
         <InviteToSessionModal sessionId={session.id} onClose={() => setShowInviteModal(false)} />
+      )}
+
+      {/* Add post modal */}
+      {showAddPostModal && session && (
+        <AddSessionPostModal sessionId={session.id} onClose={() => setShowAddPostModal(false)} />
       )}
 
       {/* End session confirm */}

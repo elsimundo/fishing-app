@@ -459,44 +459,56 @@ export default function ProfilePage() {
                           : 'border-gray-200 bg-white hover:border-navy-800/40'
                       }`}
                     >
-                      <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
-                            typeof session.water_type === 'string' && session.water_type.toLowerCase().includes('salt')
-                              ? isActive
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-gray-100 text-gray-700'
-                              : isActive
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-gray-100 text-gray-700'
-                          }`}
-                        >
-                          {typeof session.water_type === 'string' && session.water_type.toLowerCase().includes('salt')
-                            ? '🌊 Saltwater'
-                            : '🏞️ Freshwater'}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          {isActive && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                              Live
+                      <div className="flex items-start gap-3">
+                        {session.cover_photo_url && (
+                          <img
+                            src={session.cover_photo_url}
+                            alt={session.title || session.location_name || 'Session cover'}
+                            className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                          />
+                        )}
+
+                        <div className="flex-1">
+                          <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
+                                typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
+                                  ? isActive
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : 'bg-gray-100 text-gray-700'
+                                  : isActive
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : 'bg-gray-100 text-gray-700'
+                              }`}
+                            >
+                              {typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
+                                ? '🌊 Saltwater'
+                                : '🏞️ Freshwater'}
                             </span>
-                          )}
-                          <span>
-                            {new Date(session.started_at).toLocaleDateString(undefined, {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </span>
+                            <div className="flex items-center gap-2">
+                              {isActive && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                  Live
+                                </span>
+                              )}
+                              <span>
+                                {new Date(session.started_at).toLocaleDateString(undefined, {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {session.title || session.location_name || 'Fishing session'}
+                          </p>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            📍 {session.location_name || 'Unknown location'}
+                          </p>
                         </div>
                       </div>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {session.title || session.location_name || 'Fishing session'}
-                      </p>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        📍 {session.location_name || 'Unknown location'}
-                      </p>
                     </button>
                   )
                 })}

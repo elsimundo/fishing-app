@@ -77,6 +77,10 @@ export type Session = {
   participants?: SessionParticipant[]
   participant_count?: number
   my_role?: ParticipantRole
+
+  // Post/comment settings
+  allow_posts?: boolean
+  allow_comments?: boolean
 }
 
 export type Catch = {

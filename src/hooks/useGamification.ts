@@ -440,9 +440,9 @@ export function useFeaturedChallenge() {
         .select('*')
         .eq('is_featured', true)
         .eq('is_active', true)
-        .single()
+        .maybeSingle()
       
-      if (error && error.code !== 'PGRST116') throw error
+      if (error) throw error
       return data as Challenge | null
     },
     staleTime: 60 * 60 * 1000, // 1 hour

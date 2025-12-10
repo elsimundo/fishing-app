@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
-import { useChallenges, useUserChallenges, useFeaturedChallenge } from '../hooks/useGamification'
+import { useChallenges, useUserChallenges, useFeaturedChallenge, useWeeklyLeaderboard } from '../hooks/useGamification'
 import { useActiveCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
+import { useAuth } from '../hooks/useAuth'
 import { ChallengeCard } from '../components/gamification/ChallengeCard'
 import { XPBar } from '../components/gamification/XPBar'
 import { WeeklySpeciesBadge } from '../components/gamification/WeeklySpeciesCard'
@@ -20,7 +21,7 @@ const CATEGORIES = [
   { id: 'skill', label: 'Skill', icon: Zap },
 ]
 
-type MainTab = 'challenges' | 'compete'
+type MainTab = 'challenges' | 'leaderboards' | 'compete'
 type WaterType = 'saltwater' | 'freshwater'
 
 export default function ChallengeBoardPage() {
@@ -78,8 +79,13 @@ export default function ChallengeBoardPage() {
   // Main tabs config
   const mainTabs = [
     { id: 'challenges' as MainTab, label: 'Challenges', icon: Trophy },
+    { id: 'leaderboards' as MainTab, label: 'Leaderboards', icon: ClipboardList },
     { id: 'compete' as MainTab, label: 'Compete', icon: Swords },
   ]
+
+  // Leaderboard data from Supabase
+  const { data: weeklyLeaderboard, isLoading: leaderboardLoading } = useWeeklyLeaderboard(20)
+  const { user } = useAuth()
   
   return (
     <Layout>
@@ -250,6 +256,171 @@ export default function ChallengeBoardPage() {
             </div>
           )}
           
+          {/* LEADERBOARDS TAB */}
+          {activeTab === 'leaderboards' && (
+            <div className="space-y-4">
+              {/* Info banner */}
+              <div className="rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                <p className="font-medium">📊 Global leaderboard</p>
+                <p className="mt-0.5 text-blue-700">Showing top anglers by XP earned this week. Resets every Monday.</p>
+              </div>
+
+              {/* XP Leaderboard */}
+              <section className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100">
+                    <Trophy size={14} className="text-emerald-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Top anglers this week</h3>
+                </div>
+
+                {leaderboardLoading ? (
+                  <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
+                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-navy-800" />
+                    <p className="mt-2 text-xs text-gray-500">Loading leaderboard...</p>
+                  </div>
+                ) : !weeklyLeaderboard || weeklyLeaderboard.length === 0 ? (
+                  <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
+                    <Trophy size={32} className="mx-auto text-gray-300" />
+                    <p className="mt-2 text-sm font-medium text-gray-900">No data yet</p>
+                    <p className="text-xs text-gray-500">Start fishing to appear on the leaderboard!</p>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-gray-200 bg-white">
+                    <ul className="divide-y divide-gray-100">
+                      {weeklyLeaderboard.map((entry) => {
+                        const isYou = user?.id === entry.user_id
+                        return (
+                          <li
+                            key={entry.user_id}
+                            className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm ${
+                              entry.rank === 1
+                                ? 'bg-amber-50'
+                                : isYou
+                                  ? 'bg-blue-50/40'
+                                  : ''
+                            }`}
+                          >
+                            <div className="flex w-8 justify-center">
+                              <span
+                                className={`inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full text-[11px] font-semibold ${
+                                  entry.rank === 1
+                                    ? 'bg-amber-500 text-white'
+                                    : entry.rank === 2
+                                      ? 'bg-gray-200 text-gray-800'
+                                      : entry.rank === 3
+                                        ? 'bg-orange-200 text-orange-900'
+                                        : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
+                                #{entry.rank}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-1 items-center gap-2">
+                              <img
+                                src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
+                                alt={entry.display_name || entry.username}
+                                className="h-8 w-8 rounded-full bg-gray-100 object-cover"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                  <p className="truncate text-xs font-semibold text-gray-900 sm:text-sm">
+                                    {entry.display_name || entry.username}
+                                  </p>
+                                  {isYou && (
+                                    <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                                      You
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="truncate text-[11px] text-gray-500">
+                                  Level {entry.level}
+                                </p>
+                              </div>
+
+                              <div className="text-right text-[11px] sm:text-xs">
+                                <p className="font-semibold text-emerald-700">
+                                  {entry.xp.toLocaleString()} XP
+                                </p>
+                                <p className="text-[11px] text-gray-500">{entry.species_points} species pts</p>
+                              </div>
+                            </div>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </section>
+
+              {/* Top species hunters */}
+              <section className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100">
+                    <Star size={14} className="text-amber-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Top species hunters</h3>
+                </div>
+
+                {leaderboardLoading ? (
+                  <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center">
+                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-4 border-gray-200 border-t-amber-600" />
+                  </div>
+                ) : !weeklyLeaderboard || weeklyLeaderboard.length === 0 ? (
+                  <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center">
+                    <Star size={24} className="mx-auto text-gray-300" />
+                    <p className="mt-1 text-xs text-gray-500">No data yet</p>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-gray-200 bg-white">
+                    <ul className="divide-y divide-gray-100">
+                      {[...weeklyLeaderboard]
+                        .sort((a, b) => b.species_points - a.species_points)
+                        .slice(0, 5)
+                        .map((entry, index) => {
+                          const isYou = user?.id === entry.user_id
+                          return (
+                            <li key={entry.user_id} className="flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm">
+                              <div className="flex w-8 justify-center">
+                                <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-100 text-[11px] font-semibold text-amber-800">
+                                  #{index + 1}
+                                </span>
+                              </div>
+                              <div className="flex flex-1 items-center gap-2">
+                                <img
+                                  src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
+                                  alt={entry.display_name || entry.username}
+                                  className="h-8 w-8 rounded-full bg-gray-100 object-cover"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1">
+                                    <p className="truncate text-xs font-semibold text-gray-900 sm:text-sm">
+                                      {entry.display_name || entry.username}
+                                    </p>
+                                    {isYou && (
+                                      <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                                        You
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="truncate text-[11px] text-gray-500">Level {entry.level}</p>
+                                </div>
+                                <div className="text-right text-[11px] sm:text-xs">
+                                  <p className="font-semibold text-amber-700">{entry.species_points} pts</p>
+                                  <p className="text-[11px] text-gray-500">{entry.xp.toLocaleString()} XP</p>
+                                </div>
+                              </div>
+                            </li>
+                          )
+                        })}
+                    </ul>
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
+
           {/* COMPETE TAB */}
           {activeTab === 'compete' && (
             <div className="space-y-4">

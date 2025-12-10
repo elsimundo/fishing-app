@@ -246,6 +246,54 @@ export function useOwnPosts(userId: string) {
   })
 }
 
+// Fetch posts for a specific session
+export function useSessionPosts(sessionId: string | undefined) {
+  return useQuery<PostWithUser[]>({
+    queryKey: ['posts', 'session', sessionId],
+    queryFn: async () => {
+      if (!sessionId) return []
+
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw new Error(error.message)
+
+      const basePosts = (data ?? []) as Post[]
+
+      const enrichedPosts: PostWithUser[] = await Promise.all(
+        basePosts.map(async (post): Promise<PostWithUser> => {
+          const { data: userData, error: userError } = await supabase
+            .from('profiles')
+            .select('id, username, full_name, avatar_url')
+            .eq('id', post.user_id)
+            .single()
+
+          if (userError) throw new Error(userError.message)
+
+          return {
+            ...post,
+            user: {
+              id: userData.id,
+              username: userData.username,
+              full_name: userData.full_name,
+              avatar_url: userData.avatar_url ?? null,
+            },
+            like_count: 0,
+            comment_count: 0,
+            is_liked_by_user: false,
+          }
+        }),
+      )
+
+      return enrichedPosts
+    },
+    enabled: Boolean(sessionId),
+  })
+}
+
 // Create a new post (share a session to feed)
 export function useCreatePost() {
   const queryClient = useQueryClient()
@@ -271,18 +319,27 @@ export function useCreatePost() {
         .from('posts')
         .insert({
           user_id: user.id,
-          ...newPost,
+          type: newPost.type,
+          session_id: newPost.session_id ?? null,
+          catch_id: newPost.catch_id ?? null,
+          photo_url: newPost.photo_url ?? null,
+          caption: newPost.caption ?? null,
+          location_privacy: newPost.location_privacy ?? null,
           is_public: newPost.isPublic ?? true,
         })
         .select()
         .single()
 
-      if (error) throw new Error(error.message)
+      if (error) {
+        console.error('Post creation error:', error)
+        throw new Error(error.message)
+      }
       return data as Post
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] })
       queryClient.invalidateQueries({ queryKey: ['posts', 'user'] })
+      queryClient.invalidateQueries({ queryKey: ['posts', 'session'] })
     },
   })
 }
