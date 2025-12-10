@@ -25,7 +25,15 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
         value.lat ?? DEFAULT_MAP_CENTER.lat,
       ],
       zoom: DEFAULT_MAP_ZOOM,
+      bearing: 0,
+      pitch: 0,
+      maxPitch: 0,
+      dragRotate: false,
+      pitchWithRotate: false,
     })
+
+    // Prevent accidental tilt/rotation while picking a location
+    map.touchZoomRotate.disableRotation()
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
     map.doubleClickZoom.disable()

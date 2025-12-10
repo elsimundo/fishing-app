@@ -10,6 +10,9 @@ export type Profile = {
   cover_photo_url?: string | null
   location?: string | null
   fishing_preference?: FishingPreference | null
+  is_private?: boolean
+  default_latitude?: number | null
+  default_longitude?: number | null
   created_at: string
 }
 

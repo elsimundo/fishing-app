@@ -68,6 +68,14 @@ const AWARD_CATEGORIES: {
 ]
 
 export function AwardsStep({ data, onChange }: AwardsStepProps) {
+  const generateId = () => {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID()
+    }
+    // Fallback for browsers without crypto.randomUUID
+    return `award-${Math.random().toString(36).slice(2)}`
+  }
+
   // Show picker by default when no awards exist
   const [showPicker, setShowPicker] = useState(data.awards.length === 0)
 
@@ -76,7 +84,7 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
     if (!categoryInfo) return
 
     const newAward: AwardInput = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       category,
       title: categoryInfo.defaultTitle,
       prize: '',

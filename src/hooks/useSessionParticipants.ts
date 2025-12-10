@@ -2,6 +2,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { ParticipantRole, SessionParticipant } from '../types'
 
+// Helper to rank participant statuses so we can pick the "best" one
+// when there are multiple rows for the same user.
+function statusPriority(status: string | null): number {
+  switch (status) {
+    case 'active':
+      return 0
+    case 'pending':
+      return 1
+    case 'left':
+      return 2
+    case 'removed':
+      return 3
+    default:
+      return 4
+  }
+}
+
 async function fetchSessionParticipants(sessionId: string): Promise<SessionParticipant[]> {
   const { data, error } = await supabase
     .from('session_participants')
@@ -10,7 +27,32 @@ async function fetchSessionParticipants(sessionId: string): Promise<SessionParti
     .order('invited_at', { ascending: true })
 
   if (error) throw new Error(error.message)
-  return (data ?? []) as SessionParticipant[]
+
+  const rows = (data ?? []) as SessionParticipant[]
+
+  // Deduplicate by user_id and choose the row with the best status.
+  // This prevents showing both a pending invite and an active row
+  // for the same user once they have joined.
+  const byUser = new Map<string, SessionParticipant>()
+
+  for (const row of rows) {
+    if (!row.user_id) continue
+
+    const existing = byUser.get(row.user_id)
+    if (!existing) {
+      byUser.set(row.user_id, row)
+      continue
+    }
+
+    const existingPriority = statusPriority((existing as any).status)
+    const newPriority = statusPriority((row as any).status)
+
+    if (newPriority < existingPriority) {
+      byUser.set(row.user_id, row)
+    }
+  }
+
+  return Array.from(byUser.values())
 }
 
 export function useSessionParticipants(sessionId: string | undefined) {

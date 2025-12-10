@@ -20,7 +20,7 @@ export function Header() {
           Sessions
         </Link>
         <Link
-          to="/profile"
+          to="/logbook"
           className="hidden sm:inline truncate max-w-[140px] text-secondary hover:underline"
           title={user?.email ?? ''}
         >

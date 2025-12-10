@@ -72,10 +72,10 @@ export function BottomNav() {
             active={isActive('/challenges')}
           />
           <NavButton
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/logbook')}
             icon={User}
-            label="Profile"
-            active={isActive('/profile')}
+            label="Logbook"
+            active={isActive('/logbook')}
             filled
           />
         </div>

@@ -62,12 +62,12 @@ export function MobileHeader() {
               <button
                 type="button"
                 onClick={() => {
-                  navigate('/profile')
+                  navigate('/logbook')
                   setShowMenu(false)
                 }}
                 className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg"
               >
-                Settings
+                Logbook
               </button>
               <button
                 type="button"

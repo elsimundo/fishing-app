@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, Share2, User2, X } from 'lucide-react'
+import { Loader2, Share2, X } from 'lucide-react'
 import { useCreatePost } from '../../hooks/usePosts'
 import type { SessionWithCatches } from '../../types'
 
@@ -7,10 +7,9 @@ interface ShareToFeedModalProps {
   session: SessionWithCatches
   onClose: () => void
   onSuccess: () => void
-  mode?: 'feed' | 'profile'
 }
 
-export function ShareToFeedModal({ session, onClose, onSuccess, mode = 'feed' }: ShareToFeedModalProps) {
+export function ShareToFeedModal({ session, onClose, onSuccess }: ShareToFeedModalProps) {
   const [caption, setCaption] = useState('')
   const { mutate: createPost, isPending } = useCreatePost()
 
@@ -24,7 +23,7 @@ export function ShareToFeedModal({ session, onClose, onSuccess, mode = 'feed' }:
         photo_url: session.cover_photo_url || undefined,
         caption: caption.trim() || undefined,
         location_privacy: session.location_privacy || 'general',
-        isPublic: mode === 'profile' ? false : true,
+        isPublic: true,
       },
       {
         onSuccess: () => {
@@ -37,8 +36,8 @@ export function ShareToFeedModal({ session, onClose, onSuccess, mode = 'feed' }:
 
   const catchCount = session.catches?.length ?? 0
 
-  const title = mode === 'profile' ? 'Share to Profile' : 'Share to Feed'
-  const primaryLabel = mode === 'profile' ? 'Share to Profile' : 'Share to Feed'
+  const title = 'Share Session'
+  const primaryLabel = 'Share'
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
@@ -125,11 +124,7 @@ export function ShareToFeedModal({ session, onClose, onSuccess, mode = 'feed' }:
               </>
             ) : (
               <>
-                {mode === 'profile' ? (
-                  <User2 className="h-4 w-4" />
-                ) : (
-                  <Share2 className="h-4 w-4" />
-                )}
+                <Share2 className="h-4 w-4" />
                 <span>{primaryLabel}</span>
               </>
             )}

@@ -6,6 +6,8 @@ import { useSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
 import { useTackleShops } from '../hooks/useTackleShops'
 import { useProfile } from '../hooks/useProfile'
+import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
 import { calculateDistance, formatDistance } from '../utils/distance'
 import { TideCard } from '../components/explore/TideCard'
@@ -19,6 +21,7 @@ import { MyLakesCard } from '../components/explore/MyLakesCard'
 import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { useFishingZones } from '../hooks/useFishingZones'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { MapPin, Navigation, Store } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
@@ -49,7 +52,8 @@ const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; classN
 
 export default function ExplorePage() {
   const navigate = useNavigate()
-  const { data: profile } = useProfile()
+  const { user } = useAuth()
+  const { data: profile, refetch: refetchProfile } = useProfile()
   
   // Determine what content to show based on fishing preference
   const fishingPreference = profile?.fishing_preference
@@ -84,19 +88,20 @@ export default function ExplorePage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
   const [hasDefaultArea, setHasDefaultArea] = useState(false)
+  const [showDefaultConfirm, setShowDefaultConfirm] = useState(false)
+  const [isSavingDefault, setIsSavingDefault] = useState(false)
 
   // Current map center for data cards
+  // Use only appliedBounds (after "Search this area") to avoid refetching on every pan
   const mapCenter = useMemo(() => {
-    // Use liveBounds (from map movement), then appliedBounds, then userLocation
-    const bounds = liveBounds || appliedBounds
-    if (bounds) {
+    if (appliedBounds) {
       return {
-        lat: (bounds.north + bounds.south) / 2,
-        lng: (bounds.east + bounds.west) / 2,
+        lat: (appliedBounds.north + appliedBounds.south) / 2,
+        lng: (appliedBounds.east + appliedBounds.west) / 2,
       }
     }
     return userLocation
-  }, [liveBounds, appliedBounds, userLocation])
+  }, [appliedBounds, userLocation])
 
   const { data: sessions } = useSessions()
   const { catches } = useCatches()
@@ -127,16 +132,36 @@ export default function ExplorePage() {
   const { marks: savedMarks } = useSavedMarks()
   const { data: sharedMarks } = useSharedMarks()
 
-  // Load saved default area or get user location on first load
+  // Load user's default location from profile or fall back to geolocation
   useEffect(() => {
-    // Check for saved default area first
+    // Check for profile default location first
+    if (profile?.default_latitude != null && profile?.default_longitude != null) {
+      const lat = profile.default_latitude
+      const lng = profile.default_longitude
+      const delta = 0.08 // ~8km radius - tighter zoom
+      setAppliedBounds({
+        north: lat + delta,
+        south: lat - delta,
+        east: lng + delta,
+        west: lng - delta,
+      })
+      setHasDefaultArea(true)
+      // Still get user location for the blue dot
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {},
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+      )
+      return
+    }
+
+    // Fall back to localStorage (legacy support)
     const savedArea = localStorage.getItem('explore-default-area')
     if (savedArea) {
       try {
         const bounds = JSON.parse(savedArea)
         setAppliedBounds(bounds)
         setHasDefaultArea(true)
-        // Still get user location for the blue dot
         navigator.geolocation?.getCurrentPosition(
           (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
           () => {},
@@ -155,8 +180,8 @@ export default function ExplorePage() {
         const lat = pos.coords.latitude
         const lng = pos.coords.longitude
         setUserLocation({ lat, lng })
-        // Set initial bounds around user location (~20km radius)
-        const delta = 0.2
+        // Set initial bounds around user location (~8km radius)
+        const delta = 0.08
         setAppliedBounds({
           north: lat + delta,
           south: lat - delta,
@@ -167,20 +192,40 @@ export default function ExplorePage() {
       () => {},
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     )
-  }, [])
+  }, [profile?.default_latitude, profile?.default_longitude])
 
-  const saveAsDefaultArea = () => {
+  const saveAsDefaultArea = async () => {
     const boundsToSave = liveBounds || appliedBounds
-    if (!boundsToSave) return
-    localStorage.setItem('explore-default-area', JSON.stringify(boundsToSave))
-    setHasDefaultArea(true)
-    toast.success('Default area saved')
-  }
+    if (!boundsToSave || !user) return
 
-  const clearDefaultArea = () => {
-    localStorage.removeItem('explore-default-area')
-    setHasDefaultArea(false)
-    toast.success('Default area cleared')
+    setIsSavingDefault(true)
+    try {
+      // Calculate center of bounds
+      const lat = (boundsToSave.north + boundsToSave.south) / 2
+      const lng = (boundsToSave.east + boundsToSave.west) / 2
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          default_latitude: lat,
+          default_longitude: lng,
+        })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      // Also save to localStorage for faster loading
+      localStorage.setItem('explore-default-area', JSON.stringify(boundsToSave))
+      setHasDefaultArea(true)
+      setShowDefaultConfirm(false)
+      refetchProfile()
+      toast.success('Default area saved')
+    } catch (error) {
+      console.error('Failed to save default area:', error)
+      toast.error('Failed to save default area')
+    } finally {
+      setIsSavingDefault(false)
+    }
   }
 
   // Helper to check if a water type matches user preference
@@ -662,22 +707,14 @@ export default function ExplorePage() {
             
             {/* Default area buttons */}
             <div className="flex items-center gap-2">
-              {(liveBounds || appliedBounds) && !hasDefaultArea && (
+              {(liveBounds || appliedBounds) && (
                 <button
                   type="button"
-                  onClick={saveAsDefaultArea}
-                  className="rounded-full bg-navy-800 px-3 py-1 text-[11px] font-medium text-white hover:bg-navy-900"
+                  onClick={() => hasDefaultArea ? setShowDefaultConfirm(true) : saveAsDefaultArea()}
+                  disabled={isSavingDefault}
+                  className="rounded-full bg-navy-800 px-3 py-1 text-[11px] font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
                 >
-                  ⭐ Set as default
-                </button>
-              )}
-              {hasDefaultArea && (
-                <button
-                  type="button"
-                  onClick={clearDefaultArea}
-                  className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-medium text-amber-700 hover:bg-amber-100"
-                >
-                  ✕ Clear default
+                  {isSavingDefault ? '...' : '⭐ Set as default'}
                 </button>
               )}
             </div>
@@ -754,6 +791,18 @@ export default function ExplorePage() {
           />
         </section>
       </main>
+
+      {/* Confirm replace default area */}
+      <ConfirmDialog
+        isOpen={showDefaultConfirm}
+        title="Replace Default Area?"
+        message="This will replace your current default map area with the area you're viewing now."
+        confirmLabel="Replace"
+        onConfirm={() => {
+          saveAsDefaultArea()
+        }}
+        onCancel={() => setShowDefaultConfirm(false)}
+      />
     </Layout>
   )
 }

@@ -61,7 +61,7 @@ function App() {
         <Route path="/lakes/:slugOrId" element={<LakeDetailPage />} />
         <Route path="/lakes/:lakeId/dashboard" element={<LakeOwnerDashboard />} />
         <Route path="/marks/:markId" element={<MarkDetailPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/logbook" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<UserProfilePage />} />
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/messages/:conversationId" element={<MessagesPage />} />

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight, Calendar } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight, Calendar, Trophy } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
@@ -29,7 +29,7 @@ export default function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
-  const [activeTab, setActiveTab] = useState<'posts' | 'sessions' | 'catches' | 'achievements'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'sessions' | 'catches' | 'achievements'>('sessions')
   const unreadCount = useUnreadCount()
 
   const userId = user?.id ?? ''
@@ -352,7 +352,10 @@ export default function ProfilePage() {
               activeTab === 'posts' ? 'text-navy-800' : 'text-gray-500'
             }`}
           >
-            📸 Posts
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <MessageCircle size={14} />
+              <span>Posts</span>
+            </span>
           </button>
           <button
             type="button"
@@ -361,7 +364,10 @@ export default function ProfilePage() {
               activeTab === 'sessions' ? 'text-navy-800' : 'text-gray-500'
             }`}
           >
-            📅 Sessions
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <Calendar size={14} />
+              <span>Sessions</span>
+            </span>
           </button>
           <button
             type="button"
@@ -370,7 +376,10 @@ export default function ProfilePage() {
               activeTab === 'catches' ? 'text-navy-800' : 'text-gray-500'
             }`}
           >
-            🐟 Catches
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <Fish size={14} />
+              <span>Catches</span>
+            </span>
           </button>
           <button
             type="button"
@@ -379,7 +388,10 @@ export default function ProfilePage() {
               activeTab === 'achievements' ? 'text-navy-800' : 'text-gray-500'
             }`}
           >
-            🏆 Achievements
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <Trophy size={14} />
+              <span>Achievements</span>
+            </span>
           </button>
         </div>
       </div>
@@ -425,35 +437,61 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {sessions.map((session) => (
-                  <button
-                    key={session.id}
-                    type="button"
-                    onClick={() => navigate(`/sessions/${session.id}`)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm hover:border-navy-800/40"
-                  >
-                    <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700">
-                        {typeof session.water_type === 'string' && session.water_type.toLowerCase().includes('salt')
-                          ? '🌊 Saltwater'
-                          : '🏞️ Freshwater'}
-                      </span>
-                      <span>
-                        {new Date(session.started_at).toLocaleDateString(undefined, {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {session.title || session.location_name || 'Fishing session'}
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      📍 {session.location_name || 'Unknown location'}
-                    </p>
-                  </button>
-                ))}
+                {sessions.map((session) => {
+                  const isActive = !session.ended_at
+
+                  return (
+                    <button
+                      key={session.id}
+                      type="button"
+                      onClick={() => navigate(`/sessions/${session.id}`)}
+                      className={`w-full rounded-xl border p-3 text-left shadow-sm transition-colors ${
+                        isActive
+                          ? 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400'
+                          : 'border-gray-200 bg-white hover:border-navy-800/40'
+                      }`}
+                    >
+                      <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
+                            typeof session.water_type === 'string' && session.water_type.toLowerCase().includes('salt')
+                              ? isActive
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-gray-100 text-gray-700'
+                              : isActive
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {typeof session.water_type === 'string' && session.water_type.toLowerCase().includes('salt')
+                            ? '🌊 Saltwater'
+                            : '🏞️ Freshwater'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {isActive && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                              Live
+                            </span>
+                          )}
+                          <span>
+                            {new Date(session.started_at).toLocaleDateString(undefined, {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {session.title || session.location_name || 'Fishing session'}
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        📍 {session.location_name || 'Unknown location'}
+                      </p>
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -494,12 +532,14 @@ export default function ProfilePage() {
                 const completed = Boolean(uc.completed_at)
                 const pct = Math.min(100, Math.round((uc.progress / (uc.target || 1)) * 100))
                 return (
-                  <div
+                  <button
                     key={uc.id}
-                    className={`flex items-center gap-3 rounded-xl border p-3 text-sm shadow-sm ${
+                    type="button"
+                    onClick={() => navigate(`/challenges/${uc.challenge?.slug}`)}
+                    className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm shadow-sm transition-colors ${
                       completed
-                        ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100'
-                        : 'border-gray-200 bg-white'
+                        ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-150'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     <div
@@ -535,7 +575,7 @@ export default function ProfilePage() {
                         </p>
                       )}
                     </div>
-                  </div>
+                  </button>
                 )
               })}
           </div>

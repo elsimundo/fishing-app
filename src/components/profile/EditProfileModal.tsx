@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Loader2, X, Camera } from 'lucide-react'
+import { Loader2, X, Camera, Lock, Globe } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { compressAvatar } from '../../utils/imageCompression'
 import type { Profile } from '../../types'
@@ -17,6 +17,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
   const [avatarUrl] = useState(profile.avatar_url ?? '')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [isPrivate, setIsPrivate] = useState(profile.is_private ?? false)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [usernameError, setUsernameError] = useState<string | null>(null)
@@ -140,6 +141,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
           full_name: fullName.trim() || null,
           bio: bio.trim() || null,
           avatar_url: newAvatarUrl,
+          is_private: isPrivate,
         })
         .eq('id', profile.id)
 
@@ -248,6 +250,46 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
               placeholder="Tell others about yourself…"
             />
             <p className="mt-1 text-right text-xs text-gray-500">{bio.length}/200</p>
+          </div>
+
+          {/* Privacy Toggle */}
+          <div className="rounded-xl border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {isPrivate ? (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+                    <Lock size={20} className="text-amber-600" />
+                  </div>
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                    <Globe size={20} className="text-emerald-600" />
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {isPrivate ? 'Private Account' : 'Public Account'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {isPrivate
+                      ? 'Only followers can see your posts in the feed'
+                      : 'Anyone can see your posts in the feed'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPrivate(!isPrivate)}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  isPrivate ? 'bg-amber-500' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                    isPrivate ? 'left-[22px]' : 'left-0.5'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
         </div>

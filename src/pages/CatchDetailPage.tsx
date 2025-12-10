@@ -20,7 +20,7 @@ export function CatchDetailPage() {
   const { mutateAsync: deleteCatch, isPending: isDeleting } = useDeleteCatch()
   const { createMark, marks: savedMarks } = useSavedMarks()
   const [catchItem, setCatchItem] = useState<Catch | null>(null)
-  const [shareMode, setShareMode] = useState<'feed' | 'profile' | null>(null)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function CatchDetailPage() {
     if (normalized !== '1' && normalized !== 'true') return
     if (!data) return
 
-    setShareMode('feed')
+    setShowShareModal(true)
   }, [searchParams, data])
 
   if (isLoading) {
@@ -129,7 +129,7 @@ export function CatchDetailPage() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setShareMode('feed')}
+                  onClick={() => setShowShareModal(true)}
                   className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
                 >
                   <Share2 size={14} />
@@ -191,7 +191,7 @@ export function CatchDetailPage() {
                               try {
                                 await deleteCatch(catchItem.id)
                                 toast.success('Catch deleted')
-                                navigate('/profile')
+                                navigate('/logbook')
                               } catch {
                                 toast.error('Failed to delete catch')
                               }
@@ -296,17 +296,12 @@ export function CatchDetailPage() {
           </div>
         </section>
 
-        {shareMode && catchItem ? (
+        {showShareModal && catchItem ? (
           <ShareCatchToFeedModal
             catchItem={catchItem}
-            mode={shareMode}
-            onClose={() => setShareMode(null)}
+            onClose={() => setShowShareModal(false)}
             onSuccess={() => {
-              if (shareMode === 'profile') {
-                window.alert('Catch shared to your profile!')
-              } else {
-                window.alert('Catch shared to your feed!')
-              }
+              window.alert('Catch shared!')
             }}
           />
         ) : null}

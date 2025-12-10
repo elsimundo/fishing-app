@@ -63,13 +63,15 @@ export function Sidebar() {
 
         <button
           type="button"
-          onClick={() => navigate('/profile')}
+          onClick={() => navigate('/logbook')}
           className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-            isActive('/profile') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+            isActive('/logbook') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
           }`}
         >
           <User size={28} className="text-gray-900" />
-          <span className="text-base">Profile</span>
+          <div className="flex flex-col items-start">
+            <span>Logbook</span>
+          </div>
         </button>
 
         {/* Post Button */}
@@ -115,7 +117,7 @@ export function Sidebar() {
                   <button
                     type="button"
                     onClick={() => {
-                      navigate('/profile')
+                      navigate('/logbook')
                       setShowProfileMenu(false)
                     }}
                     className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

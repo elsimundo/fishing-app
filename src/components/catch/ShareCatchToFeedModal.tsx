@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, Share2, User2, X } from 'lucide-react'
+import { Loader2, Share2, X } from 'lucide-react'
 import { useCreatePost } from '../../hooks/usePosts'
 import type { Catch } from '../../types'
 
@@ -7,10 +7,9 @@ interface ShareCatchToFeedModalProps {
   catchItem: Catch
   onClose: () => void
   onSuccess: () => void
-  mode?: 'feed' | 'profile'
 }
 
-export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess, mode = 'feed' }: ShareCatchToFeedModalProps) {
+export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess }: ShareCatchToFeedModalProps) {
   const [caption, setCaption] = useState('')
   const { mutate: createPost, isPending } = useCreatePost()
 
@@ -23,7 +22,7 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess, mode = 'f
         catch_id: catchItem.id,
         photo_url: catchItem.photo_url || undefined,
         caption: caption.trim() || undefined,
-        isPublic: mode === 'profile' ? false : true,
+        isPublic: true,
       },
       {
         onSuccess: () => {
@@ -34,8 +33,8 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess, mode = 'f
     )
   }
 
-  const title = mode === 'profile' ? 'Share catch to profile' : 'Share catch to feed'
-  const primaryLabel = mode === 'profile' ? 'Share to Profile' : 'Share to Feed'
+  const title = 'Share Catch'
+  const primaryLabel = 'Share'
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
@@ -113,11 +112,7 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess, mode = 'f
               </>
             ) : (
               <>
-                {mode === 'profile' ? (
-                  <User2 className="h-4 w-4" />
-                ) : (
-                  <Share2 className="h-4 w-4" />
-                )}
+                <Share2 className="h-4 w-4" />
                 <span>{primaryLabel}</span>
               </>
             )}

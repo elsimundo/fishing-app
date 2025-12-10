@@ -75,7 +75,15 @@ export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, onM
       style: 'mapbox://styles/mapbox/outdoors-v12',
       center: [defaultCenter.lng, defaultCenter.lat],
       zoom,
+      bearing: 0,
+      pitch: 0,
+      maxPitch: 0,
+      dragRotate: false,
+      pitchWithRotate: false,
     })
+
+    // Lock perspective so accidental tilts/rotations don't happen
+    map.touchZoomRotate.disableRotation()
 
     map.on('error', (e) => {
       console.error('Map error:', e)

@@ -2,11 +2,14 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { useChallenges, useUserChallenges, useFeaturedChallenge } from '../hooks/useGamification'
+import { useActiveCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
 import { ChallengeCard } from '../components/gamification/ChallengeCard'
 import { XPBar } from '../components/gamification/XPBar'
 import { WeeklySpeciesBadge } from '../components/gamification/WeeklySpeciesCard'
 import { useSessions } from '../hooks/useSessions'
 import { SessionCard } from '../components/sessions/SessionCard'
+import { CompetitionCard } from '../components/compete/CompetitionCard'
+import { CompetitionCardSkeleton } from '../components/skeletons/CompetitionCardSkeleton'
 import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees } from 'lucide-react'
 
 const CATEGORIES = [
@@ -32,6 +35,14 @@ export default function ChallengeBoardPage() {
   const { data: challenges, isLoading: challengesLoading } = useChallenges(waterType)
   const { data: userChallenges, isLoading: userChallengesLoading } = useUserChallenges()
   const { data: featuredChallenge } = useFeaturedChallenge()
+  const {
+    data: allActiveCompetitions,
+    isLoading: activeCompetitionsLoading,
+  } = useActiveCompetitions()
+  const {
+    data: enteredCompetitions,
+    isLoading: enteredCompetitionsLoading,
+  } = useMyEnteredCompetitions()
   
   // Create a map of user progress by challenge ID
   const userProgressMap = useMemo(() => {
@@ -58,6 +69,11 @@ export default function ChallengeBoardPage() {
   // Stats
   const completedCount = userChallenges?.filter(uc => uc.completed_at).length || 0
   const totalCount = challenges?.length || 0
+  const yourCompetitions = enteredCompetitions || []
+  const availableCompetitions = (allActiveCompetitions || []).filter(
+    comp => !yourCompetitions.some(entered => entered.id === comp.id)
+  )
+  const competitionsLoading = activeCompetitionsLoading || enteredCompetitionsLoading
   
   // Main tabs config
   const mainTabs = [
@@ -245,18 +261,70 @@ export default function ChallengeBoardPage() {
                 <Plus size={20} />
                 <span className="font-medium">Create Competition</span>
               </button>
-              
-              {/* Link to full competitions page */}
-              <div className="text-center py-8 bg-white rounded-xl">
-                <Swords size={40} className="mx-auto text-gray-300 mb-2" />
-                <p className="text-gray-500 text-sm mb-3">View and join competitions</p>
-                <button
-                  onClick={() => navigate('/compete')}
-                  className="px-4 py-2 bg-navy-800 text-white text-sm font-medium rounded-lg hover:bg-navy-900"
-                >
-                  Browse Competitions
-                </button>
-              </div>
+
+              {/* Your Competitions */}
+              <section className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100">
+                    <Trophy size={14} className="text-emerald-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Your Competitions</h3>
+                  {yourCompetitions.length > 0 && (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                      {yourCompetitions.length}
+                    </span>
+                  )}
+                </div>
+                {competitionsLoading ? (
+                  <div className="space-y-3">
+                    <CompetitionCardSkeleton />
+                    <CompetitionCardSkeleton />
+                  </div>
+                ) : yourCompetitions.length > 0 ? (
+                  <div className="space-y-3">
+                    {yourCompetitions.map((competition) => (
+                      <CompetitionCard key={competition.id} competition={competition} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
+                    <p className="text-sm font-semibold text-gray-900">No active competitions</p>
+                    <p className="text-xs text-gray-500">Join one below to get started</p>
+                  </div>
+                )}
+              </section>
+
+              {/* Available Competitions */}
+              <section className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
+                    <Target size={14} className="text-blue-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Available to Join</h3>
+                  {availableCompetitions.length > 0 && (
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                      {availableCompetitions.length}
+                    </span>
+                  )}
+                </div>
+                {competitionsLoading ? (
+                  <div className="space-y-3">
+                    <CompetitionCardSkeleton />
+                    <CompetitionCardSkeleton />
+                  </div>
+                ) : availableCompetitions.length > 0 ? (
+                  <div className="space-y-3">
+                    {availableCompetitions.map((competition) => (
+                      <CompetitionCard key={competition.id} competition={competition} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
+                    <p className="text-sm font-semibold text-gray-900">No competitions available</p>
+                    <p className="text-xs text-gray-500">Check back soon or create your own</p>
+                  </div>
+                )}
+              </section>
             </div>
           )}
         </div>

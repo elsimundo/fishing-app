@@ -46,6 +46,8 @@ export function ParticipantsList({
       {participants.map((p) => {
         const isCurrentUser = currentUserId != null && p.user_id === currentUserId
         const canManage = myRole === 'owner' && !isCurrentUser
+        const effectiveStatus =
+          p.status === 'pending' && p.role === 'contributor' ? 'active' : p.status
         const displayName =
           p.user?.full_name || p.user?.username || (isCurrentUser ? 'You' : 'Angler')
 
@@ -73,18 +75,18 @@ export function ParticipantsList({
                 </p>
                 <p className="text-[10px] text-slate-500">
                   {roleLabel(p.role)}
-                  {p.status === 'pending' ? ' · Invited' : null}
+                  {p.status === 'pending' && p.role !== 'contributor' ? ' · Invited' : null}
                 </p>
               </div>
             </div>
 
             <div className="ml-2 flex items-center gap-1">
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-600">
-                {p.status === 'active'
+                {effectiveStatus === 'active'
                   ? 'Active'
-                  : p.status === 'pending'
+                  : effectiveStatus === 'pending'
                     ? 'Pending'
-                    : p.status === 'left'
+                    : effectiveStatus === 'left'
                       ? 'Left'
                       : 'Removed'}
               </span>

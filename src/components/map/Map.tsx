@@ -24,7 +24,15 @@ export function Map({ catches, variant = 'full', center, showCenterMarker = fals
       style: 'mapbox://styles/mapbox/outdoors-v12',
       center: [DEFAULT_MAP_CENTER.lng, DEFAULT_MAP_CENTER.lat],
       zoom: DEFAULT_MAP_ZOOM,
+      bearing: 0,
+      pitch: 0,
+      maxPitch: 0,
+      dragRotate: false,
+      pitchWithRotate: false,
     })
+
+    // Keep map in a straight-down view
+    map.touchZoomRotate.disableRotation()
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
 

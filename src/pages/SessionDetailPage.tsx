@@ -25,7 +25,7 @@ import { format } from 'date-fns'
 
 export function SessionDetailPage() {
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false)
-  const [shareMode, setShareMode] = useState<'feed' | 'profile' | null>(null)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -64,7 +64,7 @@ export function SessionDetailPage() {
     if (normalized !== '1' && normalized !== 'true') return
     if (!session || !currentUserId) return
     if (session.user_id !== currentUserId) return
-    setShareMode('feed')
+    setShowShareModal(true)
   }, [searchParams, session, currentUserId])
 
   const { data: participants = [] } = useSessionParticipants(id)
@@ -150,7 +150,7 @@ export function SessionDetailPage() {
             {isOwner && (
               <button
                 type="button"
-                onClick={() => setShareMode('feed')}
+                onClick={() => setShowShareModal(true)}
                 className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
               >
                 <Share2 size={20} />
@@ -181,19 +181,11 @@ export function SessionDetailPage() {
             </button>
             <button
               type="button"
-              onClick={() => { setShareMode('feed'); setShowActions(false) }}
+              onClick={() => { setShowShareModal(true); setShowActions(false) }}
               className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               <Share2 size={16} />
-              Share to Feed
-            </button>
-            <button
-              type="button"
-              onClick={() => { setShareMode('profile'); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <Users size={16} />
-              Share to Profile
+              Share
             </button>
             <button
               type="button"
@@ -613,13 +605,12 @@ export function SessionDetailPage() {
       )}
 
       {/* Share modal */}
-      {isOwner && shareMode && (
+      {isOwner && showShareModal && (
         <ShareToFeedModal
           session={session}
-          mode={shareMode}
-          onClose={() => setShareMode(null)}
+          onClose={() => setShowShareModal(false)}
           onSuccess={() => {
-            window.alert(shareMode === 'profile' ? 'Session shared to your profile!' : 'Session shared to your feed!')
+            window.alert('Session shared!')
           }}
         />
       )}
@@ -652,7 +643,7 @@ export function SessionDetailPage() {
           try {
             await deleteSession(session!.id)
             toast.success('Session deleted')
-            navigate('/profile')
+            navigate('/logbook')
           } catch {
             toast.error('Failed to delete session')
           }
@@ -685,7 +676,7 @@ export function SessionDetailPage() {
           try {
             await leaveSession({ participant_id: myParticipant.id, session_id: session!.id })
             toast.success('Left session')
-            navigate('/profile')
+            navigate('/logbook')
           } catch {
             toast.error('Failed to leave session')
           }

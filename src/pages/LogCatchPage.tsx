@@ -41,7 +41,7 @@ export default function LogCatchPage() {
           <div className="rounded-2xl bg-white p-5 shadow-sm">
             <CatchForm
               onSuccess={() => {
-                navigate('/profile')
+                navigate('/logbook')
               }}
             />
           </div>
