@@ -1,23 +1,48 @@
-import { useState } from 'react'
-import { Camera, Loader2, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Camera, Loader2, AlertCircle, MapPin, Clock } from 'lucide-react'
 import type { FishIdentificationResult } from '../../types/fish'
 import { useFishIdentification } from '../../hooks/useFishIdentification'
 import { SpeciesConfirmation } from './SpeciesConfirmation'
+import { extractPhotoMetadata, type PhotoMetadata } from '../../utils/exifExtractor'
 
 interface SmartCatchPhotoProps {
   onSpeciesIdentified: (result: FishIdentificationResult) => void
   onPhotoChange: (file: File | null) => void
+  onMetadataExtracted?: (metadata: PhotoMetadata) => void
+  initialPhotoFile?: File | null
+  initialMetadata?: PhotoMetadata | null
 }
 
-export function SmartCatchPhoto({ onSpeciesIdentified, onPhotoChange }: SmartCatchPhotoProps) {
+export function SmartCatchPhoto({ 
+  onSpeciesIdentified, 
+  onPhotoChange, 
+  onMetadataExtracted,
+  initialPhotoFile,
+  initialMetadata,
+}: SmartCatchPhotoProps) {
   const { identifyFish, loading, result, error, reset } = useFishIdentification()
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [metadata, setMetadata] = useState<PhotoMetadata | null>(initialMetadata || null)
+
+  // Set initial photo if provided
+  useEffect(() => {
+    if (initialPhotoFile) {
+      const objectUrl = URL.createObjectURL(initialPhotoFile)
+      setPreviewUrl(objectUrl)
+      onPhotoChange(initialPhotoFile)
+      
+      return () => {
+        URL.revokeObjectURL(objectUrl)
+      }
+    }
+  }, [initialPhotoFile, onPhotoChange])
 
   const handleFileChange = async (file: File | null) => {
     onPhotoChange(file)
 
     if (!file) {
       setPreviewUrl(null)
+      setMetadata(null)
       reset()
       return
     }
@@ -25,7 +50,17 @@ export function SmartCatchPhoto({ onSpeciesIdentified, onPhotoChange }: SmartCat
     const objectUrl = URL.createObjectURL(file)
     setPreviewUrl(objectUrl)
 
-    await identifyFish(file)
+    // Extract EXIF metadata in parallel with AI identification
+    const metadataPromise = extractPhotoMetadata(file)
+    const aiPromise = identifyFish(file)
+
+    const [extractedMetadata] = await Promise.all([metadataPromise, aiPromise])
+    
+    console.log('[SmartCatchPhoto] EXIF metadata extracted:', extractedMetadata)
+    setMetadata(extractedMetadata)
+    if (onMetadataExtracted) {
+      onMetadataExtracted(extractedMetadata)
+    }
   }
 
   const handleSpeciesConfirm = (species: string) => {
@@ -97,6 +132,35 @@ export function SmartCatchPhoto({ onSpeciesIdentified, onPhotoChange }: SmartCat
         ) : null}
 
         {result ? <SpeciesConfirmation result={result} onConfirm={handleSpeciesConfirm} onReject={handleReject} /> : null}
+
+        {metadata ? (
+          metadata.hasGPS || metadata.hasTimestamp ? (
+            <div className="rounded-lg bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
+              <p className="font-medium mb-1">📸 Photo metadata detected:</p>
+              <div className="space-y-0.5 text-emerald-700">
+                {metadata.hasGPS ? (
+                  <div className="flex items-center gap-1">
+                    <MapPin size={12} />
+                    <span>GPS location found - auto-filled below</span>
+                  </div>
+                ) : null}
+                {metadata.hasTimestamp ? (
+                  <div className="flex items-center gap-1">
+                    <Clock size={12} />
+                    <span>Photo timestamp found - auto-filled below</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+              <p className="font-medium mb-1">📍 No location data in photo</p>
+              <p className="text-amber-700">
+                Mobile browsers remove location data for privacy. Use the "Use my current location" button or map picker below to set your location.
+              </p>
+            </div>
+          )
+        ) : null}
       </div>
     </div>
   )

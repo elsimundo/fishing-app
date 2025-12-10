@@ -1,10 +1,20 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { CatchForm } from '../components/catches/CatchForm'
 import { ArrowLeft, Fish } from 'lucide-react'
+import type { FishIdentificationResult } from '../types/fish'
+import type { PhotoMetadata } from '../utils/exifExtractor'
 
 export default function LogCatchPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Get pre-filled data from Fish Identifier if available
+  const state = location.state as {
+    aiResult?: FishIdentificationResult
+    photoFile?: File
+    metadata?: PhotoMetadata
+  } | null
 
   return (
     <Layout>
@@ -43,6 +53,9 @@ export default function LogCatchPage() {
               onSuccess={() => {
                 navigate('/logbook')
               }}
+              prefilledAiResult={state?.aiResult}
+              prefilledPhotoFile={state?.photoFile}
+              prefilledMetadata={state?.metadata}
             />
           </div>
         </div>

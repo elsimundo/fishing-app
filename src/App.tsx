@@ -36,6 +36,7 @@ import MessagesPage from './pages/MessagesPage'
 import ChallengeBoardPage from './pages/ChallengeBoardPage'
 import { ChallengeDetailPage } from './pages/ChallengeDetailPage'
 import CatchesPage from './pages/CatchesPage'
+import { FishIdentifierPage } from './pages/FishIdentifierPage'
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
         <Route path="/compete/:competitionId/edit" element={<CreateCompetitionPage />} />
         <Route path="/compete/:competitionId" element={<CompetitionDetailPage />} />
         <Route path="/sessions/new" element={<StartSessionPage />} />
+        <Route path="/identify" element={<FishIdentifierPage />} />
         <Route path="/catches/new" element={<LogCatchPage />} />
         <Route path="/posts/new" element={<CreatePostPage />} />
         <Route path="/dashboard" element={<Dashboard />} />

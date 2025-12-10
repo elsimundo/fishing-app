@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,6 +18,10 @@ import { WEATHER_CODES } from '../../types/weather'
 import { getMoonPhase } from '../../utils/moonPhase'
 import { SmartCatchPhoto } from './SmartCatchPhoto'
 import type { FishIdentificationResult } from '../../types/fish'
+import { SPECIES } from '../../types/species'
+import { getLegalSizeStatus } from '../../lib/legalSizes'
+import type { RegionCode } from '../../types/species'
+import type { PhotoMetadata } from '../../utils/exifExtractor'
 
 const fishingStyles = [
   'Shore fishing',
@@ -74,9 +78,93 @@ type CatchFormProps = {
   mode?: 'create' | 'edit'
   catchId?: string
   initialCatch?: Catch
+  // Pre-filled data from Fish Identifier
+  prefilledAiResult?: FishIdentificationResult
+  prefilledPhotoFile?: File
+  prefilledMetadata?: PhotoMetadata
 }
 
-export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }: CatchFormProps) {
+function normaliseSpeciesName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+function mapAiSpeciesToOption(aiSpecies: string): string {
+  if (!aiSpecies) return ''
+
+  const aiNorm = normaliseSpeciesName(aiSpecies)
+
+  // Common manual mappings for UK species
+  const manualMap: Record<string, string> = {
+    'atlantic mackerel': 'Mackerel',
+    mackerel: 'Mackerel',
+    'european seabass': 'Bass (Sea)',
+    'european sea bass': 'Bass (Sea)',
+    'sea bass': 'Bass (Sea)',
+    seabass: 'Bass (Sea)',
+    'atlantic salmon': 'Salmon (Atlantic)',
+    'brown trout': 'Trout (Brown)',
+    'rainbow trout': 'Trout (Rainbow)',
+  }
+
+  if (manualMap[aiNorm]) {
+    return manualMap[aiNorm]
+  }
+
+  const allOptions = [
+    ...FISH_SPECIES.SALTWATER,
+    ...FISH_SPECIES.COARSE,
+    ...FISH_SPECIES.GAME,
+  ]
+
+  // 1) Exact (case-insensitive) match
+  const exact = allOptions.find((opt) => opt.toLowerCase() === aiSpecies.toLowerCase())
+  if (exact) return exact
+
+  // 2) Normalised match ignoring qualifiers like (Sea)
+  const exactNorm = allOptions.find((opt) => normaliseSpeciesName(opt) === aiNorm)
+  if (exactNorm) return exactNorm
+
+  // 3) Contains match: AI name contains option base or vice versa
+  const contains = allOptions.find((opt) => {
+    const optNorm = normaliseSpeciesName(opt)
+    return aiNorm.includes(optNorm) || optNorm.includes(aiNorm)
+  })
+  if (contains) return contains
+
+  // 4) Fallback: use raw AI species label
+  return aiSpecies
+}
+
+function mapAiResultToDisplayName(result: FishIdentificationResult): string {
+  const aiSpecies = result.species || ''
+  const aiScientific = result.scientificName || ''
+
+  const sciNorm = aiScientific.trim().toLowerCase()
+
+  if (sciNorm) {
+    const sciMatch = SPECIES.find(
+      (s) => s.scientificName.trim().toLowerCase() === sciNorm,
+    )
+    if (sciMatch) return sciMatch.displayName
+  }
+
+  const mapped = mapAiSpeciesToOption(aiSpecies)
+  return mapped || aiSpecies
+}
+
+export function CatchForm({ 
+  onSuccess, 
+  mode = 'create', 
+  catchId, 
+  initialCatch,
+  prefilledAiResult,
+  prefilledPhotoFile,
+  prefilledMetadata,
+}: CatchFormProps) {
   const { user } = useAuth()
   const { data: activeSession } = useActiveSession()
   const catchXP = useCatchXP()
@@ -94,9 +182,17 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
   console.log('CatchForm - activeSession?.id:', activeSession?.id)
   console.log('CatchForm - targetSessionId:', targetSessionId)
   const [formError, setFormError] = useState<string | null>(null)
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoFile, setPhotoFile] = useState<File | null>(prefilledPhotoFile || null)
   const [isPublic, setIsPublic] = useState(true)
   const [hideExactLocation, setHideExactLocation] = useState(false)
+  
+  // Legal size tracking
+  const [speciesId, setSpeciesId] = useState<string | null>(null)
+  const [returned, setReturned] = useState(false)
+  const REGION_FOR_RULES: RegionCode = 'uk_england'
+  
+  // EXIF metadata from photo
+  const [photoMetadata, setPhotoMetadata] = useState<PhotoMetadata | null>(prefilledMetadata || null)
 
   const defaultNow = new Date().toISOString().slice(0, 16)
 
@@ -147,6 +243,8 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
 
   const watchedLat = watch('latitude')
   const watchedLng = watch('longitude')
+  const watchedSpecies = watch('species')
+  const watchedLength = watch('length_cm')
 
   const latNumber =
     watchedLat === undefined || watchedLat === null || watchedLat === ''
@@ -162,6 +260,45 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
     lat: Number.isNaN(latNumber ?? NaN) ? null : latNumber,
     lng: Number.isNaN(lngNumber ?? NaN) ? null : lngNumber,
   }
+
+  // Track species changes to update speciesId
+  useEffect(() => {
+    const species = SPECIES.find((s) => s.displayName === watchedSpecies)
+    setSpeciesId(species?.id ?? null)
+  }, [watchedSpecies])
+
+  // Handle prefilled data from Fish Identifier
+  useEffect(() => {
+    if (prefilledAiResult) {
+      const speciesValue = mapAiResultToDisplayName(prefilledAiResult) || ''
+      setValue('species', speciesValue, { shouldValidate: true })
+      
+      const species = SPECIES.find((s) => s.displayName === speciesValue)
+      setSpeciesId(species?.id ?? null)
+    }
+
+    if (prefilledMetadata) {
+      // Auto-fill GPS location if available
+      if (prefilledMetadata.hasGPS && prefilledMetadata.latitude && prefilledMetadata.longitude) {
+        setValue('latitude', prefilledMetadata.latitude.toString(), { shouldValidate: true })
+        setValue('longitude', prefilledMetadata.longitude.toString(), { shouldValidate: true })
+      }
+      
+      // Auto-fill timestamp if available
+      if (prefilledMetadata.hasTimestamp && prefilledMetadata.timestamp) {
+        const localDateTime = new Date(prefilledMetadata.timestamp).toISOString().slice(0, 16)
+        setValue('caught_at', localDateTime, { shouldValidate: true })
+      }
+    }
+  }, [prefilledAiResult, prefilledMetadata, setValue])
+
+  // Compute legal size status
+  const lengthNumber = watchedLength && watchedLength !== '' ? Number(watchedLength) : null
+  const legalStatus = getLegalSizeStatus({
+    speciesId,
+    region: REGION_FOR_RULES,
+    lengthCm: lengthNumber,
+  })
 
   const onSubmit = async (values: CatchFormValues) => {
     if (!user) {
@@ -267,6 +404,15 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       weather_condition: weatherCondition,
       wind_speed: windSpeed,
       moon_phase: getMoonPhase().phase,
+      species_id: speciesId,
+      region: REGION_FOR_RULES,
+      returned: returned,
+      // EXIF metadata for verification
+      photo_exif_latitude: photoMetadata?.latitude ?? null,
+      photo_exif_longitude: photoMetadata?.longitude ?? null,
+      photo_exif_timestamp: photoMetadata?.timestamp ?? null,
+      photo_camera_make: photoMetadata?.cameraMake ?? null,
+      photo_camera_model: photoMetadata?.cameraModel ?? null,
     }
 
     console.log('CatchForm - Submitting payload with session_id:', payload.session_id)
@@ -326,14 +472,46 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <SmartCatchPhoto
+            initialPhotoFile={prefilledPhotoFile}
+            initialMetadata={prefilledMetadata}
             onPhotoChange={(file: File | null) => {
               setPhotoFile(file)
+              if (!file) {
+                setPhotoMetadata(null)
+              }
             }}
             onSpeciesIdentified={(result: FishIdentificationResult) => {
-              const speciesValue = result.species || ''
+              console.log('[CatchForm] AI Result received:', result)
+              const speciesValue = mapAiResultToDisplayName(result) || ''
+              console.log('[CatchForm] Mapped to display name:', speciesValue)
+              
               setValue('species', speciesValue, { shouldValidate: true })
+              
+              // Also set speciesId for legal size checks
+              const species = SPECIES.find((s) => s.displayName === speciesValue)
+              setSpeciesId(species?.id ?? null)
+              console.log('[CatchForm] Found species ID:', species?.id)
+              
               if (speciesValue) {
                 toast.success(`Species set to ${speciesValue}`)
+              }
+            }}
+            onMetadataExtracted={(metadata: PhotoMetadata) => {
+              console.log('[CatchForm] EXIF metadata extracted:', metadata)
+              setPhotoMetadata(metadata)
+              
+              // Auto-fill GPS location if available
+              if (metadata.hasGPS && metadata.latitude && metadata.longitude) {
+                setValue('latitude', metadata.latitude.toString(), { shouldValidate: true })
+                setValue('longitude', metadata.longitude.toString(), { shouldValidate: true })
+                toast.success('Location auto-filled from photo')
+              }
+              
+              // Auto-fill timestamp if available
+              if (metadata.hasTimestamp && metadata.timestamp) {
+                const localDateTime = new Date(metadata.timestamp).toISOString().slice(0, 16)
+                setValue('caught_at', localDateTime, { shouldValidate: true })
+                toast.success('Date & time auto-filled from photo')
               }
             }}
           />
@@ -454,31 +632,6 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
           ) : null}
         </div>
 
-        <div className="sm:col-span-2 space-y-1">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="photo">
-            Photo (optional)
-          </label>
-          <input
-            id="photo"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="block w-full text-[11px] text-slate-600 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-slate-50 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-slate-700 hover:file:bg-slate-100"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              setPhotoFile(file ?? null)
-            }}
-          />
-          {photoFile ? (
-            <div className="mt-1 inline-flex items-center gap-2">
-              <span className="text-[11px] text-slate-600">Selected:</span>
-              <span className="truncate text-[11px] text-slate-700 max-w-[160px]">
-                {photoFile.name}
-              </span>
-            </div>
-          ) : null}
-          <p className="mt-1 text-[11px] text-slate-500">JPG, PNG, or WebP up to 5MB.</p>
-        </div>
-
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="weight_kg">
             Weight (kg)
@@ -510,6 +663,28 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
           />
           {errors.length_cm ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.length_cm.message as string}</p>
+          ) : null}
+          
+          {/* Legal size status */}
+          {legalStatus.status === 'undersized' && legalStatus.rule?.minLengthCm ? (
+            <div className="mt-2 space-y-2">
+              <p className="text-[11px] text-red-600 font-medium">
+                ⚠️ Undersized for this region (minimum {legalStatus.rule.minLengthCm} cm). Please return this fish.
+              </p>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={returned}
+                  onChange={(e) => setReturned(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-navy-800 focus:ring-navy-800"
+                />
+                <span className="text-xs text-slate-700">I returned this fish to the water</span>
+              </label>
+            </div>
+          ) : legalStatus.status === 'legal' ? (
+            <p className="mt-1 text-[11px] text-emerald-600">
+              ✓ Meets suggested minimum size for this region
+            </p>
           ) : null}
         </div>
 

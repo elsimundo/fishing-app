@@ -28,6 +28,17 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       },
     },
     {
+      id: 'fish-identifier',
+      icon: '🔍',
+      title: 'Fish Identifier',
+      subtitle: 'Identify a fish with AI and optionally log it',
+      color: 'bg-amber-100',
+      onClick: () => {
+        onClose()
+        navigate('/identify')
+      },
+    },
+    {
       id: 'log-catch',
       icon: '🐟',
       title: 'Log a Catch',

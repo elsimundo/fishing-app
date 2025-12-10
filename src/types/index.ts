@@ -103,6 +103,18 @@ export type Catch = {
   created_at: string
   updated_at: string
 
+  // Legal size tracking
+  species_id?: string | null
+  region?: string | null
+  returned?: boolean
+
+  // EXIF metadata from photo (for verification)
+  photo_exif_latitude?: number | null
+  photo_exif_longitude?: number | null
+  photo_exif_timestamp?: string | null
+  photo_camera_make?: string | null
+  photo_camera_model?: string | null
+
   // Link to a saved mark (fishing spot) - can differ from session mark if angler moved
   mark_id?: string | null
   mark?: SavedMark
