@@ -214,6 +214,10 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
                     <span className="text-lg">{dayWeather.icon}</span>
                     <p className="text-xs font-bold text-gray-900">{Math.round(daily.temperatureMax[idx])}°</p>
                     <p className="text-[10px] text-gray-500">{Math.round(daily.temperatureMin[idx])}°</p>
+                    <div className="mt-1 flex items-center justify-center gap-0.5">
+                      <Wind size={10} className="text-gray-500" />
+                      <p className="text-[10px] font-medium text-gray-600">{Math.round(daily.windSpeedMax[idx])}</p>
+                    </div>
                   </div>
                 )
               })}

@@ -591,7 +591,7 @@ export default function ExplorePage() {
             <button
               type="button"
               onClick={applyBounds}
-              className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-navy-800 px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-navy-900"
+              className="absolute left-1/2 top-3 z-[5] -translate-x-1/2 rounded-full bg-navy-800 px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-navy-900"
             >
               Search this area
               {visibleMarkersCount > 0 && (

@@ -16,6 +16,10 @@ import { Globe, Lock, Info } from 'lucide-react'
 import { getCompleteWeatherData } from '../../services/open-meteo'
 import { WEATHER_CODES } from '../../types/weather'
 import { getMoonPhase } from '../../utils/moonPhase'
+import { SmartCatchPhoto } from './SmartCatchPhoto'
+import type { FishIdentificationResult } from '../../types/fish'
+import { SmartCatchPhoto } from './SmartCatchPhoto'
+import type { FishIdentificationResult } from '../../types/fish'
 
 const fishingStyles = [
   'Shore fishing',
@@ -322,6 +326,28 @@ export function CatchForm({ onSuccess, mode = 'create', catchId, initialCatch }:
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <SmartCatchPhoto
+            onPhotoChange={(file: File | null) => {
+              setPhotoFile(file)
+            }}
+            onSpeciesIdentified={(result: FishIdentificationResult) => {
+              const speciesValue = result.species || ''
+              setValue('species', speciesValue, { shouldValidate: true })
+            }}
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <SmartCatchPhoto
+            onPhotoChange={(file: File | null) => {
+              setPhotoFile(file)
+            }}
+            onSpeciesIdentified={(result: FishIdentificationResult) => {
+              const speciesValue = result.species || ''
+              setValue('species', speciesValue, { shouldValidate: true })
+            }}
+          />
+        </div>
         <div className="sm:col-span-2">
           <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="species">
             Species

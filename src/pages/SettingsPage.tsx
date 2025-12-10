@@ -9,6 +9,7 @@ export default function SettingsPage() {
   const [showFishingPrefs, setShowFishingPrefs] = useState(false)
 
   type IdlePrefs = {
+    // All values are in HOURS in the UI/storage
     seaWarn: number
     seaEnd: number
     lakeWarn: number
@@ -25,13 +26,19 @@ export default function SettingsPage() {
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as Partial<IdlePrefs>
+        // Backwards-compat: if old values were stored in minutes, convert to hours
+        const toHours = (value: number | undefined, fallback: number) => {
+          if (value == null) return fallback
+          // Heuristic: anything above 24 is almost certainly minutes
+          return value > 24 ? value / 60 : value
+        }
         setIdlePrefs({
-          seaWarn: parsed.seaWarn ?? 240,
-          seaEnd: parsed.seaEnd ?? 360,
-          lakeWarn: parsed.lakeWarn ?? 120,
-          lakeEnd: parsed.lakeEnd ?? 240,
-          riverWarn: parsed.riverWarn ?? 90,
-          riverEnd: parsed.riverEnd ?? 180,
+          seaWarn: toHours(parsed.seaWarn, 4),
+          seaEnd: toHours(parsed.seaEnd, 6),
+          lakeWarn: toHours(parsed.lakeWarn, 2),
+          lakeEnd: toHours(parsed.lakeEnd, 4),
+          riverWarn: toHours(parsed.riverWarn, 1.5),
+          riverEnd: toHours(parsed.riverEnd, 3),
         })
         return
       } catch {
@@ -40,24 +47,24 @@ export default function SettingsPage() {
     }
 
     setIdlePrefs({
-      seaWarn: 240,
-      seaEnd: 360,
-      lakeWarn: 120,
-      lakeEnd: 240,
-      riverWarn: 90,
-      riverEnd: 180,
+      seaWarn: 4,
+      seaEnd: 6,
+      lakeWarn: 2,
+      lakeEnd: 4,
+      riverWarn: 1.5,
+      riverEnd: 3,
     })
   }, [])
 
   const updateIdlePref = (key: keyof IdlePrefs, value: number) => {
     setIdlePrefs((prev) => {
       const next = {
-        seaWarn: 240,
-        seaEnd: 360,
-        lakeWarn: 120,
-        lakeEnd: 240,
-        riverWarn: 90,
-        riverEnd: 180,
+        seaWarn: 4,
+        seaEnd: 6,
+        lakeWarn: 2,
+        lakeEnd: 4,
+        riverWarn: 1.5,
+        riverEnd: 3,
         ...(prev ?? {}),
         [key]: value,
       }
@@ -93,8 +100,9 @@ export default function SettingsPage() {
               <div>
                 <h2 className="text-sm font-semibold text-gray-900">Session idle time</h2>
                 <p className="mt-1 text-xs text-gray-500">
-                  Control how long we keep a session running with no activity before warning you and auto-ending
-                  it. Times are in minutes. We&apos;ll use sensible defaults if you leave these alone.
+                  Control how long we keep a session running with no activity before warning you and then
+                  automatically ending it. Times are in <span className="font-semibold">hours</span>. We&apos;ll use
+                  sensible defaults if you leave these alone.
                 </p>
               </div>
             </div>
@@ -107,24 +115,24 @@ export default function SettingsPage() {
                   <p className="text-[11px] text-gray-500">Longer sessions, slower logging.</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after</label>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
                   <input
                     type="number"
-                    min={30}
-                    max={720}
-                    step={15}
+                    min={1}
+                    max={12}
+                    step={0.5}
                     value={idlePrefs.seaWarn}
                     onChange={(e) => updateIdlePref('seaWarn', Number(e.target.value) || 0)}
                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after</label>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
                   <input
                     type="number"
-                    min={60}
-                    max={1440}
-                    step={15}
+                    min={2}
+                    max={24}
+                    step={0.5}
                     value={idlePrefs.seaEnd}
                     onChange={(e) => updateIdlePref('seaEnd', Number(e.target.value) || 0)}
                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
@@ -139,24 +147,24 @@ export default function SettingsPage() {
                   <p className="text-[11px] text-gray-500">Typical carp/coarse sessions.</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after</label>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
                   <input
                     type="number"
-                    min={30}
-                    max={720}
-                    step={15}
+                    min={0.5}
+                    max={12}
+                    step={0.5}
                     value={idlePrefs.lakeWarn}
                     onChange={(e) => updateIdlePref('lakeWarn', Number(e.target.value) || 0)}
                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after</label>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
                   <input
                     type="number"
-                    min={60}
-                    max={1440}
-                    step={15}
+                    min={1}
+                    max={24}
+                    step={0.5}
                     value={idlePrefs.lakeEnd}
                     onChange={(e) => updateIdlePref('lakeEnd', Number(e.target.value) || 0)}
                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
@@ -171,24 +179,24 @@ export default function SettingsPage() {
                   <p className="text-[11px] text-gray-500">Usually shorter mobile sessions.</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after</label>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
                   <input
                     type="number"
-                    min={15}
-                    max={720}
-                    step={15}
+                    min={0.25}
+                    max={12}
+                    step={0.25}
                     value={idlePrefs.riverWarn}
                     onChange={(e) => updateIdlePref('riverWarn', Number(e.target.value) || 0)}
                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after</label>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
                   <input
                     type="number"
-                    min={30}
-                    max={1440}
-                    step={15}
+                    min={0.5}
+                    max={24}
+                    step={0.25}
                     value={idlePrefs.riverEnd}
                     onChange={(e) => updateIdlePref('riverEnd', Number(e.target.value) || 0)}
                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"

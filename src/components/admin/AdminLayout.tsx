@@ -10,6 +10,7 @@ import {
   Loader2,
   Menu,
   X,
+  Handshake,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -45,6 +46,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { to: '/admin/users', icon: Users, label: 'Users' },
     { to: '/admin/businesses', icon: Store, label: 'Businesses' },
     { to: '/admin/lakes', icon: Store, label: 'Lakes' },
+    { to: '/admin/partners', icon: Handshake, label: 'Partners' },
     { to: '/admin/settings', icon: Settings, label: 'Settings' },
   ]
 
