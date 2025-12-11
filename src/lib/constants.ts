@@ -96,9 +96,9 @@ export const WATER_TYPES = [
 ] as const
 
 export const LOCATION_PRIVACY_OPTIONS = [
-  { value: 'private', label: 'Private (hidden)', description: 'Only you can see location' },
-  { value: 'general', label: 'General area', description: 'Pin offset by ~5km' },
-  { value: 'exact', label: 'Exact location', description: 'Full GPS (friends only)' },
+  { value: 'general', label: 'General area (recommended)', description: 'Approximate location shown (±5km offset)' },
+  { value: 'exact', label: 'Exact location', description: 'Full GPS coordinates visible' },
+  { value: 'private', label: 'Hidden', description: 'Location completely hidden from map' },
 ] as const
 
 export const TIDE_STATES = ['High', 'Low', 'Rising', 'Falling', 'Unknown'] as const

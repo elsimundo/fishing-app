@@ -37,9 +37,13 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
   const isLoading = activeTab === 'followers' ? loadingFollowers : loadingFollowing
   const users = activeTab === 'followers' ? followers : following
 
-  const handleUserClick = (profileId: string) => {
+  const handleUserClick = (user: FollowUser) => {
     onClose()
-    navigate(`/profile/${profileId}`)
+    if (user.username) {
+      navigate(`/${user.username}`)
+    } else {
+      navigate(`/profile/${user.id}`)
+    }
   }
 
   return (
@@ -111,7 +115,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                     className="relative flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50"
                   >
                     <button
-                      onClick={() => handleUserClick(user.id)}
+                      onClick={() => handleUserClick(user)}
                       className="flex flex-1 items-center gap-3 text-left"
                     >
                       {user.avatar_url ? (

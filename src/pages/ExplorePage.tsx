@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import { Layout } from '../components/layout/Layout'
-import { useSessions } from '../hooks/useSessions'
+import { usePublicSessions } from '../hooks/useSessions'
 import { useCatches } from '../hooks/useCatches'
 import { useTackleShops, useClubs, useCharters } from '../hooks/useTackleShops'
 import { useProfile } from '../hooks/useProfile'
@@ -18,6 +18,7 @@ import { LocalIntelCard } from '../components/explore/LocalIntelCard'
 import { NearbyLakesCard } from '../components/explore/NearbyLakesCard'
 import { MyMarksCard } from '../components/explore/MyMarksCard'
 import { MyLakesCard } from '../components/explore/MyLakesCard'
+import { ZoneCatchesPanel } from '../components/explore/ZoneCatchesPanel'
 import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { useFishingZones } from '../hooks/useFishingZones'
@@ -27,7 +28,7 @@ import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
 
 
-type ExploreFilterKey = 'sessions' | 'catches' | 'shops' | 'clubs' | 'charters' | 'lakes' | 'marks'
+type ExploreFilterKey = 'zones' | 'shops' | 'clubs' | 'charters' | 'lakes' | 'marks'
 
 const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; className: string }> = {
   session: { label: 'Session', icon: '🎣', className: 'bg-emerald-100 text-emerald-700' },
@@ -52,8 +53,7 @@ export default function ExplorePage() {
   const showFreshwater = !fishingPreference || fishingPreference === 'freshwater' || fishingPreference === 'both'
 
   const [filters, setFilters] = useState<Record<ExploreFilterKey, boolean>>({
-    sessions: true,
-    catches: true,
+    zones: true,
     shops: true,
     clubs: true,
     charters: true,
@@ -82,6 +82,12 @@ export default function ExplorePage() {
   const [showDefaultConfirm, setShowDefaultConfirm] = useState(false)
   const [isSavingDefault, setIsSavingDefault] = useState(false)
 
+  // One-time hint for dropping marks on the map
+  const [showMarkHint, setShowMarkHint] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return localStorage.getItem('explore-mark-hint-dismissed') !== 'true'
+  })
+
   // Quick mark creation from map tap
   const [pendingMark, setPendingMark] = useState<{ lat: number; lng: number } | null>(null)
   const [pendingMarkName, setPendingMarkName] = useState('')
@@ -90,6 +96,9 @@ export default function ExplorePage() {
 
   // Focus point for flying to a specific location on the map
   const [focusPoint, setFocusPoint] = useState<{ lat: number; lng: number; zoom?: number } | null>(null)
+
+  // Selected zone for showing catches in that zone
+  const [selectedZone, setSelectedZone] = useState<{ id: string; totalCatches: number; topSpecies?: string } | null>(null)
 
   // Current map center for data cards
   // Use only appliedBounds (after "Search this area") to avoid refetching on every pan
@@ -103,14 +112,18 @@ export default function ExplorePage() {
     return userLocation
   }, [appliedBounds, userLocation])
 
-  const { data: sessions } = useSessions()
+  // Note: LocalIntelCard has its own useLocalIntel hook, so we don't need one here
+
+  // Sessions and catches for the SessionsCatchesCard (not shown on map, just in card)
+  const { data: sessions } = usePublicSessions()
   const { catches } = useCatches()
   
   // Fetch fishing zones for public catch data (aggregated, privacy-safe)
+  // Use liveBounds as fallback so zones show before clicking "Search this area"
   const { data: fishingZones } = useFishingZones({
-    bounds: appliedBounds || undefined,
+    bounds: appliedBounds || liveBounds || undefined,
     minCatches: 1,
-    enabled: filters.catches,
+    enabled: filters.zones,
   })
   
   const { data: lakes } = useLakes({
@@ -270,38 +283,14 @@ export default function ExplorePage() {
     )
   }
 
-  // Helper to check if a water type matches user preference
-  const matchesWaterPreference = (waterType: string | null | undefined): boolean => {
-    if (!fishingPreference || fishingPreference === 'both') return true
-    if (!waterType) return true // Show if unknown
-    
-    const isSaltwater = waterType === 'Sea/Coastal'
-    if (fishingPreference === 'sea') return isSaltwater
-    if (fishingPreference === 'freshwater') return !isSaltwater
-    return true
-  }
-
   const markers: ExploreMarker[] = useMemo(() => {
     const items: ExploreMarker[] = []
 
-    if (filters.sessions && sessions) {
-      for (const s of sessions) {
-        if (!s.latitude || !s.longitude) continue
-        if (!matchesWaterPreference(s.water_type)) continue
-        items.push({
-          id: `session-${s.id}`,
-          type: 'session',
-          lat: s.latitude,
-          lng: s.longitude,
-          title: s.title || s.location_name,
-        })
-      }
-    }
-
-    // Show fishing zones (aggregated public catch data) instead of individual catches
+    // Show fishing zones (aggregated public catch data) instead of individual catches/sessions
     // This protects exact locations while showing community activity
-    if (filters.catches && fishingZones) {
+    if (filters.zones && fishingZones) {
       for (const zone of fishingZones) {
+        // Show all zones with catches (can increase threshold later for privacy)
         items.push({
           id: `zone-${zone.id}`,
           type: 'zone',
@@ -310,21 +299,6 @@ export default function ExplorePage() {
           title: zone.display_name || `${zone.total_catches} catches`,
           totalCatches: zone.total_catches,
           topSpecies: zone.top_species || undefined,
-        })
-      }
-    }
-    
-    // Also show user's own catches (they can see their own exact locations)
-    if (filters.catches && catches) {
-      for (const c of catches) {
-        if (c.latitude == null || c.longitude == null) continue
-        if (!matchesWaterPreference(c.water_type)) continue
-        items.push({
-          id: `catch-${c.id}`,
-          type: 'catch',
-          lat: c.latitude,
-          lng: c.longitude,
-          title: c.species,
         })
       }
     }
@@ -442,8 +416,7 @@ export default function ExplorePage() {
 
   const markerCounts = useMemo(
     () => ({
-      session: markersWithDistance.filter((m) => m.type === 'session').length,
-      catch: markersWithDistance.filter((m) => m.type === 'catch').length,
+      zone: markersWithDistance.filter((m) => m.type === 'zone').length,
       shop: markersWithDistance.filter((m) => m.type === 'shop').length,
       lake: markersWithDistance.filter((m) => m.type === 'lake').length,
       club: markersWithDistance.filter((m) => m.type === 'club').length,
@@ -465,7 +438,19 @@ export default function ExplorePage() {
   }
 
   const handleMarkerClick = (marker: ExploreMarker) => {
-    setSelectedMarker(marker)
+    if (marker.type === 'zone') {
+      // For zones, show the zone catches panel
+      const zoneId = marker.id.replace('zone-', '')
+      setSelectedZone({
+        id: zoneId,
+        totalCatches: marker.totalCatches || 0,
+        topSpecies: marker.topSpecies,
+      })
+      setSelectedMarker(null) // Clear any other selection
+    } else {
+      setSelectedMarker(marker)
+      setSelectedZone(null) // Clear zone selection
+    }
   }
 
   const handleSelectLakeFromCard = (lake: Lake) => {
@@ -511,8 +496,7 @@ export default function ExplorePage() {
 
   // Chip colors matching marker colors
   const chipColors: Record<ExploreFilterKey, { active: string; inactive: string }> = {
-    sessions: { active: 'bg-teal-700 text-white', inactive: 'bg-teal-100 text-teal-700 hover:bg-teal-200' },
-    catches: { active: 'bg-blue-600 text-white', inactive: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
+    zones: { active: 'bg-blue-600 text-white', inactive: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
     shops: { active: 'bg-orange-500 text-white', inactive: 'bg-orange-100 text-orange-700 hover:bg-orange-200' },
     lakes: { active: 'bg-sky-500 text-white', inactive: 'bg-sky-100 text-sky-700 hover:bg-sky-200' },
     clubs: { active: 'bg-violet-600 text-white', inactive: 'bg-violet-100 text-violet-700 hover:bg-violet-200' },
@@ -541,8 +525,9 @@ export default function ExplorePage() {
   // Prepare data for cards
   const sessionsForCard = (sessions || []).map((s) => ({
     id: s.id,
-    title: s.title,
+    title: s.title ?? undefined,
     location_name: s.location_name,
+    photo_url: (s as any).catches?.[0]?.photo_url ?? null,
     latitude: s.latitude,
     longitude: s.longitude,
     started_at: s.started_at,
@@ -551,6 +536,7 @@ export default function ExplorePage() {
   const catchesForCard = (catches || []).map((c) => ({
     id: c.id,
     species: c.species,
+    photo_url: c.photo_url,
     latitude: c.latitude ?? undefined,
     longitude: c.longitude ?? undefined,
     caught_at: c.caught_at,
@@ -578,8 +564,7 @@ export default function ExplorePage() {
 
           {/* Filter chips */}
           <div className="flex flex-wrap gap-1.5">
-            {renderFilterChip('sessions', 'Sessions', markerCounts.session)}
-            {renderFilterChip('catches', 'Catches', markerCounts.catch)}
+            {renderFilterChip('zones', 'Zones', markerCounts.zone)}
             {renderFilterChip('shops', 'Shops', markerCounts.shop)}
             {showFreshwater && renderFilterChip('lakes', 'Lakes', markerCounts.lake)}
             {renderFilterChip('marks', 'Marks', (markerCounts.mark || 0) + (markerCounts['shared-mark'] || 0))}
@@ -725,6 +710,32 @@ export default function ExplorePage() {
             </div>
           )}
 
+          {showMarkHint && (
+            <div className="absolute left-3 bottom-24 z-20 max-w-[260px] rounded-2xl bg-white/95 px-3 py-2 text-[11px] text-gray-700 shadow-md backdrop-blur">
+              <div className="flex items-start gap-2">
+                <span className="mt-0.5 text-lg">💡</span>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-gray-900">Drop a private mark</p>
+                  <p className="mt-0.5 text-[11px] text-gray-600">
+                    Double tap the map to quickly save your own fishing spot.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMarkHint(false)
+                    try {
+                      localStorage.setItem('explore-mark-hint-dismissed', 'true')
+                    } catch {}
+                  }}
+                  className="ml-1 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
           <ExploreMap
             markers={markers}
             initialBounds={appliedBounds ?? undefined}
@@ -734,11 +745,22 @@ export default function ExplorePage() {
             onMarkerClick={handleMarkerClick}
             onMapClick={({ lat, lng }) => {
               setSelectedMarker(null)
+              setSelectedZone(null)
               setPendingMark({ lat, lng })
               setPendingMarkName('New mark')
               setPendingMarkNotes('')
             }}
           />
+
+          {/* Zone catches panel */}
+          {selectedZone && (
+            <ZoneCatchesPanel
+              zoneId={selectedZone.id}
+              totalCatches={selectedZone.totalCatches}
+              topSpecies={selectedZone.topSpecies}
+              onClose={() => setSelectedZone(null)}
+            />
+          )}
         </section>
 
         {/* Data Cards */}
@@ -772,7 +794,8 @@ export default function ExplorePage() {
           {/* Local Intel Card */}
           <LocalIntelCard 
             lat={mapCenter?.lat ?? null} 
-            lng={mapCenter?.lng ?? null} 
+            lng={mapCenter?.lng ?? null}
+            bounds={liveBounds || appliedBounds}
             waterPreference={fishingPreference}
           />
 

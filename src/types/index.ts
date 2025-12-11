@@ -13,6 +13,7 @@ export type Profile = {
   is_private?: boolean
   default_latitude?: number | null
   default_longitude?: number | null
+  share_data_for_insights?: boolean
   created_at: string
 }
 
@@ -30,13 +31,26 @@ export interface SessionParticipant {
   id: string
   session_id: string
   user_id: string
-  role: ParticipantRole
-  status: ParticipantStatus
-  invited_at: string
-  joined_at: string | null
-  left_at: string | null
+  role?: ParticipantRole
+  status?: ParticipantStatus
+  invited_at?: string
+  joined_at?: string | null
+  left_at?: string | null
 
+  // Per-angler spot context (where this participant is fishing)
+  spot_name?: string | null
+  mark_id?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  water_type?: string | null
+  location_privacy?: LocationPrivacy | null
+
+  created_at?: string
+  updated_at?: string
+
+  // Relations
   user?: Profile
+  mark?: SavedMark
 }
 
 export type Session = {
@@ -199,7 +213,7 @@ export type SessionShare = {
 export interface Post {
   id: string
   user_id: string
-  type: 'session' | 'catch' | 'photo'
+  type: 'session' | 'catch' | 'photo' | 'badge'
   session_id?: string
   catch_id?: string
   caption?: string

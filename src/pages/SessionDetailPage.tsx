@@ -244,7 +244,32 @@ export function SessionDetailPage() {
               className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               <Share2 size={16} />
-              Share
+              Share to Feed
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                const url = `${window.location.origin}/sessions/${id}`
+                if (navigator.share) {
+                  try {
+                    await navigator.share({
+                      title: session?.title || 'Fishing Session',
+                      text: `Check out this fishing session: ${session?.title || 'Fishing Session'}`,
+                      url,
+                    })
+                  } catch (e) {
+                    // User cancelled or share failed
+                  }
+                } else {
+                  await navigator.clipboard.writeText(url)
+                  toast.success('Link copied!')
+                }
+                setShowActions(false)
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Share2 size={16} />
+              Share Link
             </button>
             <button
               type="button"

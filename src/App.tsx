@@ -73,6 +73,8 @@ function App() {
         <Route path="/partner/apply" element={<PartnerApplicationPage />} />
         <Route path="/logbook" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<UserProfilePage />} />
+        {/* Public profile route by username slug, e.g. /anglername */}
+        <Route path="/:username" element={<UserProfilePage />} />
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/messages/:conversationId" element={<MessagesPage />} />
         <Route path="/challenges" element={<ChallengeBoardPage />} />

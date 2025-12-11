@@ -62,6 +62,41 @@ export interface XPResult {
   leveled_up: boolean
 }
 
+// Auto-post badge/achievement to feed & profile when profile is public
+async function autoPostBadgeForUser(userId: string, caption: string) {
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('is_private')
+      .eq('id', userId)
+      .single()
+
+    if (error) {
+      // Don't block XP/achievements if this fails
+      // eslint-disable-next-line no-console
+      console.warn('[autoPostBadgeForUser] Failed to load profile:', error)
+      return
+    }
+
+    if (!profile || profile.is_private) return
+
+    const { error: postError } = await supabase.from('posts').insert({
+      user_id: userId,
+      type: 'badge',
+      caption,
+      is_public: true,
+    })
+
+    if (postError) {
+      // eslint-disable-next-line no-console
+      console.warn('[autoPostBadgeForUser] Failed to create badge post:', postError)
+    }
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('[autoPostBadgeForUser] Unexpected error:', err)
+  }
+}
+
 export interface LeaderboardEntry {
   user_id: string
   username: string
@@ -386,6 +421,11 @@ export function useAwardXP() {
       // Invalidate user XP query
       queryClient.invalidateQueries({ queryKey: ['user-xp'] })
       queryClient.invalidateQueries({ queryKey: ['user-weekly-stats'] })
+
+      // Auto-post level-up badge if applicable
+      if (user && data?.leveled_up) {
+        void autoPostBadgeForUser(user.id, `Reached level ${data.new_level}!`)
+      }
       
       // Return level up info for celebration
       return data
@@ -486,6 +526,23 @@ export function useCompleteChallenge() {
           total_challenges_completed: supabase.rpc('increment_challenges_completed')
         })
         .eq('id', user.id)
+
+      // Auto-post challenge completion badge (fire-and-forget)
+      try {
+        const { data: challenge } = await supabase
+          .from('challenges')
+          .select('title')
+          .eq('id', challengeId)
+          .single()
+
+        if (user) {
+          const title = challenge?.title ?? 'a challenge'
+          void autoPostBadgeForUser(user.id, `Completed challenge: ${title}`)
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[useCompleteChallenge] Failed to auto-post challenge badge:', err)
+      }
       
       return xpData[0] as XPResult
     },

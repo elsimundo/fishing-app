@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { CatchCard } from '../components/catches/CatchCard'
 import { useCatches } from '../hooks/useCatches'
-import { useSessions } from '../hooks/useSessions'
+import { useMySessions } from '../hooks/useSessions'
 import { SessionCardSkeleton } from '../components/skeletons/SessionCardSkeleton'
 import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
 import { ActiveCompetitionBanner } from '../components/compete/ActiveCompetitionBanner'
@@ -11,7 +11,7 @@ import { SessionCard } from '../components/sessions/SessionCard'
 export function Dashboard() {
   const navigate = useNavigate()
   const { catches } = useCatches()
-  const { data: sessions } = useSessions()
+  const { data: sessions } = useMySessions()
 
   const completedSessions = sessions ?? []
   const totalSessions = completedSessions.length

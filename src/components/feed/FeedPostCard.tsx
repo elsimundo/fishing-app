@@ -97,7 +97,13 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
       <PostHeader
         user={post.user}
         createdAt={post.created_at}
-        onUserClick={() => navigate(`/profile/${post.user.id}`)}
+        onUserClick={() => {
+          if (post.user.username) {
+            navigate(`/${post.user.username}`)
+          } else {
+            navigate(`/profile/${post.user.id}`)
+          }
+        }}
       />
 
       {showVisibility ? (

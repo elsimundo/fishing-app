@@ -25,7 +25,7 @@ const sessionFormSchema = z.object({
     .refine((val) => !Number.isNaN(val), { message: 'Longitude must be a number' }),
   water_type: z.string().optional(),
   is_public: z.boolean().default(false),
-  location_privacy: z.enum(['private', 'general', 'exact']).default('private'),
+  location_privacy: z.enum(['private', 'general', 'exact']).default('general'),
   started_at: z.string().min(1, 'Start time is required'),
   ended_at: z.string().optional(),
   session_notes: z
@@ -59,7 +59,7 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
     defaultValues: {
       started_at: defaultNow,
       is_public: false,
-      location_privacy: 'private',
+      location_privacy: 'general',
     },
   })
 

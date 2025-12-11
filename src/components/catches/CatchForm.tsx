@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useActiveSession } from '../../hooks/useActiveSession'
+import { useSessionParticipant } from '../../hooks/useSessionParticipant'
 import type { Catch, CatchFormInput } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
@@ -23,6 +24,7 @@ import { getLegalSizeStatus } from '../../lib/legalSizes'
 import type { RegionCode } from '../../types/species'
 import type { PhotoMetadata } from '../../utils/exifExtractor'
 import { getCountryFromCoords } from '../../utils/reverseGeocode'
+import { useSavedMarks } from '../../hooks/useSavedMarks'
 
 const fishingStyles = [
   'Shore fishing',
@@ -177,11 +179,18 @@ export function CatchForm({
   // Use requested session if provided, otherwise fall back to active session
   const targetSessionId = requestedSessionId || activeSession?.id
   
+  // Fetch participant's spot for this session (per-angler location context)
+  const { data: participantSpot } = useSessionParticipant(targetSessionId)
+  
+  // Fetch saved marks for quick location selection
+  const { marks: savedMarks } = useSavedMarks()
+  
   // Debug logging
   console.log('CatchForm - URL params:', window.location.search)
   console.log('CatchForm - requestedSessionId:', requestedSessionId)
   console.log('CatchForm - activeSession?.id:', activeSession?.id)
   console.log('CatchForm - targetSessionId:', targetSessionId)
+  console.log('CatchForm - participantSpot:', participantSpot)
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(prefilledPhotoFile || null)
   const [isPublic, setIsPublic] = useState(true)
@@ -219,16 +228,20 @@ export function CatchForm({
       }
     : {
         caught_at: defaultNow,
-        // When creating a brand new catch, prefill from active session if available
-        location_name: activeSession?.location_name ?? undefined,
+        // When creating a brand new catch, prefill from participant spot first, then session
+        location_name: participantSpot?.spot_name ?? activeSession?.location_name ?? undefined,
         latitude:
-          activeSession?.latitude != null && !Number.isNaN(activeSession.latitude)
-            ? activeSession.latitude.toString()
-            : undefined,
+          (participantSpot?.latitude != null && !Number.isNaN(participantSpot.latitude))
+            ? participantSpot.latitude.toString()
+            : (activeSession?.latitude != null && !Number.isNaN(activeSession.latitude))
+              ? activeSession.latitude.toString()
+              : undefined,
         longitude:
-          activeSession?.longitude != null && !Number.isNaN(activeSession.longitude)
-            ? activeSession.longitude.toString()
-            : undefined,
+          (participantSpot?.longitude != null && !Number.isNaN(participantSpot.longitude))
+            ? participantSpot.longitude.toString()
+            : (activeSession?.longitude != null && !Number.isNaN(activeSession.longitude))
+              ? activeSession.longitude.toString()
+              : undefined,
       }
 
   const {
@@ -461,6 +474,34 @@ export function CatchForm({
         // Country code for geographic challenges
         countryCode: payload.country_code,
       })
+
+      // Auto-post to feed if catch is public and user has a public profile
+      if (isPublic) {
+        try {
+          // Check if user's profile is public
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_private')
+            .eq('id', user.id)
+            .single()
+
+          if (profile && !profile.is_private) {
+            // Create a post for this catch
+            await supabase.from('posts').insert({
+              user_id: user.id,
+              type: 'catch',
+              catch_id: data.id,
+              caption: null, // User can edit caption later if they want
+              photo_url: data.photo_url,
+              is_public: true,
+            })
+            console.log('Auto-posted catch to feed')
+          }
+        } catch (postErr) {
+          // Don't fail the catch creation if auto-post fails
+          console.warn('Failed to auto-post catch to feed:', postErr)
+        }
+      }
     } else {
       toast.success(isEdit ? 'Catch updated' : 'Catch added')
     }
@@ -480,6 +521,11 @@ export function CatchForm({
         <div className="rounded-md bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
           This catch will be added to your active session:{' '}
           <span className="font-semibold">{activeSession.title || activeSession.location_name}</span>.
+          {participantSpot?.spot_name && (
+            <span className="block mt-1">
+              📍 Using your session spot: <span className="font-semibold">{participantSpot.spot_name}</span>
+            </span>
+          )}
         </div>
       ) : null}
 
@@ -582,6 +628,35 @@ export function CatchForm({
             <p className="mt-1 text-[11px] text-red-600">{errors.caught_at.message}</p>
           ) : null}
         </div>
+
+        {/* Quick mark picker */}
+        {savedMarks.length > 0 && (
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-xs font-medium text-slate-700">
+              Use a saved mark (optional)
+            </label>
+            <select
+              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              onChange={(e) => {
+                const markId = e.target.value
+                if (!markId) return
+                const mark = savedMarks.find((m) => m.id === markId)
+                if (!mark) return
+                setValue('location_name', mark.name, { shouldValidate: true })
+                setValue('latitude', mark.latitude.toString(), { shouldValidate: true })
+                setValue('longitude', mark.longitude.toString(), { shouldValidate: true })
+              }}
+              defaultValue=""
+            >
+              <option value="">Select a mark to auto-fill location...</option>
+              {savedMarks.map((mark) => (
+                <option key={mark.id} value={mark.id}>
+                  {mark.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="location_name">

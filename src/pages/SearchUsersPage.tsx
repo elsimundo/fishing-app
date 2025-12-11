@@ -72,7 +72,13 @@ function SearchResultRow({ profile }: { profile: any }) {
     <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 shadow-sm">
       <button
         type="button"
-        onClick={() => navigate(`/profile/${profile.id}`)}
+        onClick={() => {
+          if (profile.username) {
+            navigate(`/${profile.username}`)
+          } else {
+            navigate(`/profile/${profile.id}`)
+          }
+        }}
         className="flex flex-1 items-center gap-3 text-left"
       >
         {profile.avatar_url ? (

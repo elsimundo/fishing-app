@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { FishingPreferenceModal } from '../components/onboarding/FishingPreferenceModal'
+import { supabase } from '../lib/supabase'
+import { toast } from 'react-hot-toast'
+import { LOCATION_PRIVACY_OPTIONS } from '../lib/constants'
 
 export default function SettingsPage() {
   const { user } = useAuth()
-  const { data: profile } = useProfile()
+  const { data: profile, refetch: refetchProfile } = useProfile()
   const [showFishingPrefs, setShowFishingPrefs] = useState(false)
+  const [isSavingPrivacy, setIsSavingPrivacy] = useState(false)
 
   type IdlePrefs = {
     // All values are in HOURS in the UI/storage
@@ -75,6 +79,28 @@ export default function SettingsPage() {
 
       return next
     })
+  }
+
+  const updateDataSharing = async (shareData: boolean) => {
+    if (!user) return
+    
+    setIsSavingPrivacy(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ share_data_for_insights: shareData })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      await refetchProfile()
+      toast.success(shareData ? 'Data sharing enabled' : 'Data sharing disabled')
+    } catch (error) {
+      console.error('Failed to update data sharing:', error)
+      toast.error('Failed to update privacy settings')
+    } finally {
+      setIsSavingPrivacy(false)
+    }
   }
 
   if (!user || !profile) {
@@ -233,6 +259,78 @@ export default function SettingsPage() {
             >
               Choose style
             </button>
+          </div>
+        </section>
+
+        {/* Privacy & Data Sharing */}
+        <section className="rounded-2xl bg-white p-4 shadow-sm">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-gray-900">Privacy & Data Sharing</h2>
+            <p className="mt-1 text-xs text-gray-500">
+              Control how your fishing data is used and displayed.
+            </p>
+          </div>
+
+          {/* Default Location Privacy */}
+          <div className="mb-4 rounded-lg border border-gray-200 p-3">
+            <h3 className="text-xs font-semibold text-gray-900 mb-2">Default Location Privacy</h3>
+            <p className="text-xs text-gray-600 mb-3">
+              This controls how your session locations appear on the map. You can change this per-session when creating it.
+            </p>
+            <div className="space-y-2">
+              {LOCATION_PRIVACY_OPTIONS.map((option) => (
+                <div key={option.value} className="flex items-start gap-2">
+                  <div className="flex h-5 items-center">
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-gray-300">
+                      {option.value === 'general' && (
+                        <div className="h-2 w-2 rounded-full bg-navy-800" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-900">{option.label}</p>
+                    <p className="text-[11px] text-gray-500">{option.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[11px] text-blue-600 bg-blue-50 rounded-lg p-2">
+              💡 <strong>Recommended:</strong> General area protects your secret spots while still contributing to community insights.
+            </p>
+          </div>
+
+          {/* Data Sharing Toggle */}
+          <div className="rounded-lg border border-gray-200 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <h3 className="text-xs font-semibold text-gray-900">Community Data Sharing</h3>
+                <p className="mt-1 text-xs text-gray-600">
+                  Help other anglers by contributing anonymized data to Local Intel and fishing insights. Your exact locations are never shared - only aggregated stats like species caught, baits used, and best times.
+                </p>
+                <p className="mt-2 text-[11px] text-gray-500">
+                  <strong>What's shared:</strong> Species, baits, catch times, weather conditions (all anonymized)
+                  <br />
+                  <strong>What's NOT shared:</strong> Your exact locations, personal info, or session details
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => updateDataSharing(!(profile?.share_data_for_insights ?? true))}
+                disabled={isSavingPrivacy}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-navy-800 focus:ring-offset-2 ${
+                  profile?.share_data_for_insights ?? true ? 'bg-navy-800' : 'bg-gray-200'
+                } ${isSavingPrivacy ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profile?.share_data_for_insights ?? true ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+            <p className="mt-3 text-[11px] text-emerald-600 bg-emerald-50 rounded-lg p-2">
+              ✅ <strong>Currently {profile?.share_data_for_insights ?? true ? 'enabled' : 'disabled'}:</strong> {profile?.share_data_for_insights ?? true ? 'Your anonymized data helps the community' : 'Your data is completely private'}
+            </p>
           </div>
         </section>
 

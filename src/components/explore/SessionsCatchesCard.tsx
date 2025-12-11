@@ -8,6 +8,7 @@ interface Session {
   id: string
   title?: string
   location_name?: string
+  photo_url?: string | null
   latitude?: number
   longitude?: number
   started_at?: string
@@ -16,6 +17,7 @@ interface Session {
 interface Catch {
   id: string
   species: string
+  photo_url?: string | null
   latitude?: number
   longitude?: number
   caught_at?: string
@@ -114,9 +116,17 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                     className="flex w-full items-center justify-between rounded-lg bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
-                        <span className="text-sm">🎣</span>
-                      </div>
+                      {session.photo_url ? (
+                        <img
+                          src={session.photo_url}
+                          alt={session.title || session.location_name || 'Fishing session'}
+                          className="h-8 w-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
+                          <span className="text-sm">🎣</span>
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
                           {session.title || session.location_name || 'Fishing Session'}
@@ -153,9 +163,17 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                     className="flex w-full items-center justify-between rounded-lg bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100">
-                        <span className="text-sm">🐟</span>
-                      </div>
+                      {c.photo_url ? (
+                        <img
+                          src={c.photo_url}
+                          alt={c.species}
+                          className="h-8 w-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100">
+                          <span className="text-sm">🐟</span>
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{c.species}</p>
                         {c.caught_at && (

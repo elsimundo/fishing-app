@@ -7,13 +7,17 @@ import { useFollowCounts } from '../hooks/useFollows'
 import { useOwnPosts, useTogglePostVisibility } from '../hooks/usePosts'
 import { useUnreadCount } from '../hooks/useMessages'
 import { useCatches } from '../hooks/useCatches'
-import { useSessions } from '../hooks/useSessions'
+import { useMySessions } from '../hooks/useSessions'
 import { useMyEnteredCompetitions } from '../hooks/useCompetitions'
-import { useUserXP, xpProgress } from '../hooks/useGamification'
+import { useUserXP } from '../hooks/useGamification'
 import { useUserChallenges, useFeaturedChallenge } from '../hooks/useGamification'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { CatchCard } from '../components/catches/CatchCard'
-import { XPBar } from '../components/gamification/XPBar'
+import { ProfileHero } from '../components/profile/ProfileHero'
+import { ProfileStatsGrid } from '../components/profile/ProfileStatsGrid'
+import { BadgesSummaryCard } from '../components/profile/BadgesSummaryCard'
+import { BadgesModal } from '../components/profile/BadgesModal'
+import { LifetimeStatsCard } from '../components/profile/LifetimeStatsCard'
 import { EditProfileModal } from '../components/profile/EditProfileModal'
 import { FollowersModal } from '../components/profile/FollowersModal'
 import { DeleteAccountModal } from '../components/profile/DeleteAccountModal'
@@ -31,6 +35,7 @@ export default function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
+  const [showBadgesModal, setShowBadgesModal] = useState(false)
   const [activeTab, setActiveTab] = useState<'posts' | 'sessions' | 'catches' | 'achievements'>('sessions')
   const unreadCount = useUnreadCount()
 
@@ -39,7 +44,7 @@ export default function ProfilePage() {
   const { data: posts, isLoading: postsLoading } = useOwnPosts(userId)
   const { mutate: toggleVisibility } = useTogglePostVisibility()
   const { catches } = useCatches()
-  const { data: sessions } = useSessions()
+  const { data: sessions } = useMySessions()
   const { data: myCompetitions } = useMyEnteredCompetitions()
 
   const preferenceLabels: Record<string, string> = {
@@ -69,10 +74,8 @@ export default function ProfilePage() {
 
   const xp = xpData?.xp ?? 0
   const level = xpData?.level ?? 1
-  const xpProg = xpProgress(xp, level)
 
   const completedChallenges = userChallenges.filter((uc) => uc.completed_at)
-  const totalBadges = (completedChallenges.length ?? 0) + 12 // simple target for now
 
   // Lifetime stats calculations
   const completedSessions = sessions ?? []
@@ -157,155 +160,38 @@ export default function ProfilePage() {
 
       {/* Profile hero & gamification */}
       <div className="border-b border-gray-200 bg-white px-5 py-4">
-        <div className="flex items-start gap-4">
-          {/* Avatar + level badge */}
-          <div className="relative">
-            {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile.full_name || profile.username || 'Avatar'}
-                className="h-16 w-16 rounded-full object-cover shadow-sm"
-              />
-            ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-xl font-bold text-white shadow-sm">
-                {(profile.full_name || profile.username || 'U')
-                  .slice(0, 1)
-                  .toUpperCase()}
-              </div>
-            )}
-            <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-xs font-bold text-white shadow">
-              {level}
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-2">
-            <div>
-              <p className="text-sm font-semibold text-gray-900">{profile.full_name || 'Angler'}</p>
-              <p className="text-xs text-gray-500">@{profile.username || 'angler'}</p>
-              {profile.bio && (
-                <p className="mt-1 text-xs text-gray-600 line-clamp-2">{profile.bio}</p>
-              )}
-            </div>
-
-            {/* Rank pill */}
-            <div className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-800">
-              <span>⚡</span>
-              <span>
-                {level < 5
-                  ? 'Beginner Angler'
-                  : level < 10
-                    ? 'Developing Angler'
-                    : 'Seasoned Angler'}
-              </span>
-            </div>
-
-            {/* XP bar inline */}
-            <div className="mt-1">
-              <div className="mb-1 flex justify-between text-[11px] text-gray-500">
-                <span>Level {level}</span>
-                <span>
-                  {xpProg.current}/{xpProg.needed} XP to level {level + 1}
-                </span>
-              </div>
-              <XPBar showLevel={false} size="sm" />
-            </div>
-          </div>
-        </div>
+        <ProfileHero profile={profile} level={level} xp={xp} />
 
         {/* Stats grid */}
-        <div className="mt-4 grid grid-cols-4 gap-2">
-          <div className="rounded-xl bg-gray-50 px-2.5 py-2 text-center">
-            <p className="text-base font-bold text-gray-900">{postCount}</p>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Posts</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setFollowersModalTab('followers')}
-            className="rounded-xl bg-gray-50 px-2.5 py-2 text-center hover:bg-gray-100"
-          >
-            <p className="text-base font-bold text-gray-900">{followCounts?.follower_count ?? 0}</p>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Followers</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => setFollowersModalTab('following')}
-            className="rounded-xl bg-gray-50 px-2.5 py-2 text-center hover:bg-gray-100"
-          >
-            <p className="text-base font-bold text-gray-900">{followCounts?.following_count ?? 0}</p>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Following</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/sessions')}
-            className="rounded-xl bg-gray-50 px-2.5 py-2 text-center hover:bg-gray-100"
-          >
-            <p className="text-base font-bold text-gray-900">{sessionCount}</p>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Sessions</p>
-          </button>
+        <div className="mt-4">
+          <ProfileStatsGrid
+            postCount={postCount}
+            followerCount={followCounts?.follower_count ?? 0}
+            followingCount={followCounts?.following_count ?? 0}
+            fourthStat={{ label: 'Sessions', value: sessionCount }}
+            onFollowersClick={() => setFollowersModalTab('followers')}
+            onFollowingClick={() => setFollowersModalTab('following')}
+            onFourthClick={() => navigate('/sessions')}
+          />
         </div>
 
         {/* Badges summary */}
-        <div className="mt-4 rounded-xl bg-gradient-to-br from-navy-900 to-blue-600 p-3 text-xs text-white">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[13px] font-semibold">🏆 Badges</p>
-            <p className="text-[11px] text-blue-100">
-              {completedChallenges.length}/{totalBadges} earned
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {completedChallenges.slice(0, 3).map((uc) => (
-              <div
-                key={uc.id}
-                className="flex-1 rounded-lg bg-white/10 p-2 text-[11px] backdrop-blur"
-              >
-                <div className="mb-1 text-lg">{uc.challenge?.icon || '🎣'}</div>
-                <p className="font-semibold leading-tight">
-                  {uc.challenge?.title || 'Challenge'}
-                </p>
-              </div>
-            ))}
-            {completedChallenges.length === 0 && (
-              <p className="text-[11px] text-blue-100">
-                Start logging catches and sessions to earn your first badge.
-              </p>
-            )}
-          </div>
+        <div className="mt-4">
+          <BadgesSummaryCard
+            completedChallenges={completedChallenges}
+            onClick={() => setShowBadgesModal(true)}
+          />
         </div>
 
         {/* Lifetime Stats */}
-        <div className="mt-4 overflow-hidden rounded-xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 text-xs text-slate-100 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Lifetime stats</p>
-              <p className="mt-1 text-sm font-semibold text-white">Your fishing at a glance</p>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] sm:text-xs">
-            <div className="rounded-xl bg-white/5 px-2 py-2">
-              <p className="text-[10px] text-slate-300">Sessions</p>
-              <p className="text-base font-semibold text-white">{sessionCount}</p>
-            </div>
-            <div className="rounded-xl bg-white/5 px-2 py-2">
-              <p className="text-[10px] text-slate-300">Catches</p>
-              <p className="text-base font-semibold text-white">{catchesCount}</p>
-            </div>
-            <div className="rounded-xl bg-white/5 px-2 py-2">
-              <p className="text-[10px] text-slate-300">Total weight</p>
-              <p className="text-base font-semibold text-white">{totalWeight.toFixed(1)} kg</p>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-1 gap-2 text-[11px] sm:grid-cols-2 sm:text-xs">
-            <div className="rounded-xl bg-white/5 px-2 py-2">
-              <p className="text-[10px] text-slate-300">Personal best</p>
-              <p className="text-[11px] font-semibold text-white sm:text-xs">{personalBestLabel}</p>
-            </div>
-            <div className="rounded-xl bg-white/5 px-2 py-2">
-              <p className="text-[10px] text-slate-300">Top species</p>
-              <p className="text-[11px] font-semibold text-white sm:text-xs">{topSpeciesLabel}</p>
-            </div>
-          </div>
+        <div className="mt-4">
+          <LifetimeStatsCard
+            sessionCount={sessionCount}
+            catchesCount={catchesCount}
+            totalWeightKg={totalWeight}
+            personalBestLabel={personalBestLabel}
+            topSpeciesLabel={topSpeciesLabel}
+          />
         </div>
 
         {/* This week's challenge */}
@@ -741,6 +627,14 @@ export default function ProfilePage() {
             setShowPreferenceModal(false)
             window.location.reload()
           }} 
+        />
+      )}
+
+      {showBadgesModal && (
+        <BadgesModal
+          completedChallenges={completedChallenges}
+          onClose={() => setShowBadgesModal(false)}
+          isOwnProfile
         />
       )}
     </div>

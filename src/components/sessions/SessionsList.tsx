@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { isToday, isYesterday } from 'date-fns'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
-import { useSessions } from '../../hooks/useSessions'
+import { useMySessions } from '../../hooks/useSessions'
 import { SessionCard } from './SessionCard'
 
 export function SessionsList() {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
-  const { data, isLoading, isError, error } = useSessions()
+  const { data, isLoading, isError, error } = useMySessions()
 
   if (isLoading) {
     return (

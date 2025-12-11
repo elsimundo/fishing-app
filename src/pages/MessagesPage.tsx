@@ -83,7 +83,13 @@ export default function MessagesPage() {
               </button>
               {otherUser && (
                 <button
-                  onClick={() => navigate(`/profile/${otherUser.id}`)}
+                  onClick={() => {
+                    if (otherUser.username) {
+                      navigate(`/${otherUser.username}`)
+                    } else {
+                      navigate(`/profile/${otherUser.id}`)
+                    }
+                  }}
                   className="flex items-center gap-3"
                 >
                   {otherUser.avatar_url ? (

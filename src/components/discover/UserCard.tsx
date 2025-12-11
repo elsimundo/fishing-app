@@ -20,7 +20,11 @@ export function UserCard({ user }: UserCardProps) {
   const { data: followCounts } = useFollowCounts(user.id)
 
   const handleCardClick = () => {
-    navigate(`/profile/${user.id}`)
+    if (user.username) {
+      navigate(`/${user.username}`)
+    } else {
+      navigate(`/profile/${user.id}`)
+    }
   }
 
   const handleFollowClick: React.MouseEventHandler<HTMLDivElement> = (e) => {

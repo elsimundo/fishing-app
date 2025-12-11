@@ -46,7 +46,7 @@ const typeColors: Record<ExploreMarkerType, string> = {
   lake: '#0ea5e9', // Sky blue for lakes
   mark: '#dc2626', // Red for your marks
   'shared-mark': '#dc2626', // Shared marks also use red so all your spots are consistent
-  zone: '#8b5cf6', // Purple for fishing zones (aggregated catches)
+  zone: '#2563eb', // Blue for fishing zones - matches catches filter pill
 }
 
 export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, focusPoint, onMarkerClick, onBoundsChange, onMapClick }: ExploreMapProps) {
@@ -149,14 +149,55 @@ export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, foc
       if (Number.isNaN(m.lat) || Number.isNaN(m.lng)) return
 
       const el = document.createElement('div')
-      el.className = 'rounded-full border border-white shadow-md'
-      el.style.width = '16px'
-      el.style.height = '16px'
-      el.style.backgroundColor = typeColors[m.type]
+      
+      // Zone markers get a larger badge with catch count
+      if (m.type === 'zone') {
+        el.className = 'flex items-center justify-center rounded-full border-2 border-white shadow-lg'
+        el.style.backgroundColor = typeColors[m.type]
+        el.style.minWidth = '28px'
+        el.style.height = '28px'
+        el.style.padding = '0 6px'
+        
+        // Add catch count text inside the marker
+        const countText = document.createElement('span')
+        countText.textContent = String(m.totalCatches || '?')
+        countText.style.color = 'white'
+        countText.style.fontSize = '11px'
+        countText.style.fontWeight = '600'
+        countText.style.lineHeight = '1'
+        el.appendChild(countText)
+      } else {
+        el.className = 'rounded-full border border-white shadow-md'
+        el.style.width = '16px'
+        el.style.height = '16px'
+        el.style.backgroundColor = typeColors[m.type]
+      }
 
       if (onMarkerClick) {
         el.style.cursor = 'pointer'
         el.addEventListener('click', () => onMarkerClick(m))
+      }
+
+      // Add tooltip with catch information for zones
+      let popup: mapboxgl.Popup | undefined
+      if (m.type === 'zone' && (m.totalCatches || m.topSpecies)) {
+        const popupContent = `
+          <div style="padding: 8px; min-width: 160px;">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Fishing Zone</div>
+            <div style="font-size: 11px; color: #6b7280; margin-bottom: 6px;">~1km hotspot · exact marks private</div>
+            ${m.totalCatches ? `<div style="font-size: 12px; color: #059669; margin-bottom: 2px;">🐟 ${m.totalCatches} catches logged</div>` : ''}
+            ${m.topSpecies ? `<div style="font-size: 12px; color: #6366f1;">Top: ${m.topSpecies}</div>` : ''}
+            <div style="font-size: 11px; color: #9ca3af; margin-top: 6px;">Click to see catches</div>
+          </div>
+        `
+        popup = new mapboxgl.Popup({ 
+          offset: 18,
+          closeButton: false,
+          closeOnClick: false,
+        }).setHTML(popupContent)
+        
+        el.addEventListener('mouseenter', () => popup?.addTo(map))
+        el.addEventListener('mouseleave', () => popup?.remove())
       }
 
       const marker = new mapboxgl.Marker(el).setLngLat([m.lng, m.lat]).addTo(map)

@@ -3,10 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Loader2, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useProfile } from '../hooks/useProfile'
 import { Layout } from '../components/layout/Layout'
 import { LocationPicker } from '../components/map/LocationPicker'
 import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
+import { useUpsertSessionParticipant } from '../hooks/useSessionParticipant'
 import { getCompleteWeatherData } from '../services/open-meteo'
 import { getTideData } from '../services/tides'
 import { WEATHER_CODES } from '../types/weather'
@@ -32,6 +34,7 @@ export default function StartSessionPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const { data: profile } = useProfile()
 
   const [step, setStep] = useState(0) // 0 = choice, 1-4 = full setup
   const [loading, setLoading] = useState(false)
@@ -55,8 +58,9 @@ export default function StartSessionPage() {
   })
 
   // Fetch user's saved marks and shared marks for saltwater sessions
-  const { marks: savedMarks } = useSavedMarks()
+  const { marks: savedMarks, createMark } = useSavedMarks()
   const { data: sharedMarks } = useSharedMarks()
+  const { mutateAsync: upsertParticipant } = useUpsertSessionParticipant()
   
   // Combine own marks and shared marks
   const allMarks = [...savedMarks, ...(sharedMarks || [])]
@@ -231,6 +235,21 @@ export default function StartSessionPage() {
       return
     }
 
+    // Create participant record with spot data
+    try {
+      await upsertParticipant({
+        sessionId: data.id,
+        spotName: preSelectedMark?.name ?? 'Current Location',
+        markId: preSelectedMark?.id ?? null,
+        latitude: lat,
+        longitude: lng,
+        waterType: preSelectedMark?.water_type ?? 'saltwater',
+        locationPrivacy: 'general',
+      })
+    } catch (e) {
+      console.warn('Failed to create participant record:', e)
+    }
+
     setCreatedSessionId(data.id)
     setLoading(false)
     setShowSuccess(true)
@@ -261,7 +280,7 @@ export default function StartSessionPage() {
 
   const handleNext = async () => {
     if (step === 1) {
-      if (!formData.locationName || !formData.title.trim()) return
+      if (!formData.locationName) return
       setStep(2)
       return
     }
@@ -326,11 +345,14 @@ export default function StartSessionPage() {
 
     setLoadingMessage('Creating your session...')
 
+    // Generate auto title if user left it blank
+    const autoTitle = formData.title.trim() || `${formData.locationName || 'Fishing'} · ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+
     const { data, error } = await supabase
       .from('sessions')
       .insert({
         user_id: user.id,
-        title: formData.title.trim(),
+        title: autoTitle,
         location_name: formData.locationName ?? 'Fishing spot',
         water_type: formData.waterType ?? 'saltwater',
         location_privacy: formData.privacy,
@@ -357,6 +379,21 @@ export default function StartSessionPage() {
       return
     }
 
+    // Create participant record with spot data
+    try {
+      await upsertParticipant({
+        sessionId: data.id,
+        spotName: formData.locationName ?? 'Fishing spot',
+        markId: formData.markId ?? null,
+        latitude: lat,
+        longitude: lng,
+        waterType: formData.waterType ?? 'saltwater',
+        locationPrivacy: formData.privacy,
+      })
+    } catch (e) {
+      console.warn('Failed to create participant record:', e)
+    }
+
     setCreatedSessionId(data.id)
     setLoading(false)
     setShowSuccess(true)
@@ -372,12 +409,30 @@ export default function StartSessionPage() {
     }
   }, [step, formData.privacy])
 
+  const fallbackToDefaultLocation = () => {
+    if (profile?.default_latitude != null && profile?.default_longitude != null) {
+      const latitude = profile.default_latitude
+      const longitude = profile.default_longitude
+
+      setLocationCoords({ lat: latitude, lng: longitude })
+      setFormData((prev) => ({
+        ...prev,
+        latitude,
+        longitude,
+        locationName: prev.locationName ?? 'Default home spot',
+      }))
+      setLocationError(null)
+    } else {
+      setLocationError('Could not get your current location. Drag the pin to set your spot.')
+    }
+  }
+
   const openLocationPicker = () => {
     setIsLocationPickerOpen(true)
     setLocationError(null)
 
     if (!navigator.geolocation) {
-      setLocationError('Geolocation is not available. Drag the pin to set your spot.')
+      fallbackToDefaultLocation()
       return
     }
 
@@ -393,7 +448,7 @@ export default function StartSessionPage() {
         }))
       },
       () => {
-        setLocationError('Could not get your current location. Drag the pin instead.')
+        fallbackToDefaultLocation()
       },
       { enableHighAccuracy: true, timeout: 10000 },
     )
@@ -536,7 +591,6 @@ export default function StartSessionPage() {
       Boolean(formData.locationName) &&
       formData.latitude != null &&
       formData.longitude != null
-    const hasTitle = Boolean(formData.title.trim())
     
     // Check if we came from a mark
     const preSelectedMark = formData.markId ? savedMarks.find(m => m.id === formData.markId) : null
@@ -566,6 +620,45 @@ export default function StartSessionPage() {
           </div>
         )}
 
+        {/* Choose from existing saved marks */}
+        {savedMarks.length > 0 && (
+          <div className="mb-4">
+            <label className="mb-1 block text-xs font-medium text-gray-700">Use one of your marks</label>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              value={formData.markId ?? ''}
+              onChange={(e) => {
+                const value = e.target.value
+                if (!value) {
+                  setFormData((prev) => ({ ...prev, markId: null }))
+                  return
+                }
+
+                const mark = savedMarks.find((m) => m.id === value)
+                if (!mark) return
+
+                setFormData((prev) => ({
+                  ...prev,
+                  markId: mark.id,
+                  latitude: mark.latitude,
+                  longitude: mark.longitude,
+                  locationName: mark.name,
+                  waterType: 'saltwater',
+                }))
+                setLocationCoords({ lat: mark.latitude, lng: mark.longitude })
+              }}
+            >
+              <option value="">Select a saved mark (optional)</option>
+              {savedMarks.map((mark) => (
+                <option key={mark.id} value={mark.id}>
+                  {mark.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-[11px] text-gray-500">Well reuse this marks name and coordinates.</p>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={openLocationPicker}
@@ -592,7 +685,7 @@ export default function StartSessionPage() {
         </button>
 
         <div className="mb-1">
-          <label className="mb-1 block text-xs font-medium text-gray-700">Session Title *</label>
+          <label className="mb-1 block text-xs font-medium text-gray-700">Session Title (optional)</label>
           <input
             type="text"
             value={formData.title}
@@ -600,15 +693,15 @@ export default function StartSessionPage() {
               setFormData((prev) => ({ ...prev, title: e.target.value }))
             }
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
-            placeholder="e.g., Morning Bass Session"
+            placeholder={`${formData.locationName || 'Fishing'} · ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
           />
         </div>
-        <p className="mb-4 text-xs text-gray-500">💡 Give your session a memorable name</p>
+        <p className="mb-4 text-xs text-gray-500">💡 Leave blank for auto-generated name based on location & date</p>
 
         <button
           type="button"
           onClick={handleNext}
-          disabled={!hasLocation || !hasTitle}
+          disabled={!hasLocation}
           className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           Continue
@@ -887,10 +980,43 @@ export default function StartSessionPage() {
     </div>
   )
 
+  const [showSaveMarkInput, setShowSaveMarkInput] = useState(false)
+  const [newMarkName, setNewMarkName] = useState('')
+  const [isSavingMark, setIsSavingMark] = useState(false)
+
+  const handleSaveAsMark = async () => {
+    if (!newMarkName.trim() || locationCoords.lat == null || locationCoords.lng == null) return
+    
+    setIsSavingMark(true)
+    try {
+      const newMark = await createMark.mutateAsync({
+        name: newMarkName.trim(),
+        latitude: locationCoords.lat,
+        longitude: locationCoords.lng,
+        water_type: formData.waterType === 'freshwater' ? 'lake' : 'sea',
+      })
+      
+      // Update form to use this new mark
+      setFormData((prev) => ({
+        ...prev,
+        markId: newMark.id,
+        locationName: newMark.name,
+      }))
+      
+      setShowSaveMarkInput(false)
+      setNewMarkName('')
+    } catch (e) {
+      console.error('Failed to save mark:', e)
+    } finally {
+      setIsSavingMark(false)
+    }
+  }
+
   const renderLocationModal = () => {
     if (!isLocationPickerOpen) return null
 
     const canConfirm = locationCoords.lat != null && locationCoords.lng != null
+    const isNewLocation = !formData.markId && canConfirm
 
     return (
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
@@ -915,6 +1041,52 @@ export default function StartSessionPage() {
           <div className="overflow-hidden rounded-lg border border-gray-200">
             <LocationPicker value={locationCoords} onChange={handleLocationChange} />
           </div>
+
+          {/* Save as mark option */}
+          {isNewLocation && !showSaveMarkInput && (
+            <button
+              type="button"
+              onClick={() => setShowSaveMarkInput(true)}
+              className="mt-3 w-full rounded-lg border border-dashed border-emerald-400 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+            >
+              📍 Save this spot as a mark for future sessions
+            </button>
+          )}
+
+          {/* Save mark input */}
+          {showSaveMarkInput && (
+            <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+              <label className="mb-1 block text-xs font-medium text-emerald-800">Name this spot</label>
+              <input
+                type="text"
+                value={newMarkName}
+                onChange={(e) => setNewMarkName(e.target.value)}
+                placeholder="e.g., Southend Pier, My secret spot"
+                className="mb-2 w-full rounded-lg border border-emerald-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSaveMarkInput(false)
+                    setNewMarkName('')
+                  }}
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAsMark}
+                  disabled={!newMarkName.trim() || isSavingMark}
+                  className="flex-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:bg-emerald-400"
+                >
+                  {isSavingMark ? 'Saving...' : 'Save Mark'}
+                </button>
+              </div>
+            </div>
+          )}
 
           <button
             type="button"
