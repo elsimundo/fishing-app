@@ -94,7 +94,6 @@ export function ZombieSessionChecker() {
 
     if (sessionsToAutoEnd.length > 0) {
       hasAutoEnded.current = true
-      setAutoEndingCount(sessionsToAutoEnd.length)
 
       // Auto-end each session at its last activity time (or 4 hours after start if no catches)
       Promise.all(
@@ -106,6 +105,7 @@ export function ZombieSessionChecker() {
           try {
             await updateSession({ id: session.id, ended_at: endTime })
             markAsAutoEnded(session.id)
+            console.log(`Auto-ended stale session: ${session.id}`)
           } catch (error) {
             console.error('Failed to auto-end session:', session.id, error)
           }
@@ -113,7 +113,6 @@ export function ZombieSessionChecker() {
       ).then(() => {
         queryClient.invalidateQueries({ queryKey: ['sessions'] })
         refetch()
-        setAutoEndingCount(0)
       })
     }
   }, [zombieSessions, updateSession, queryClient, refetch])
