@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Scale, Ruler, MapPin, Calendar, Clock, Trophy, Users, Fish, Anchor, Target, Loader2, Database } from 'lucide-react'
 import { getSpeciesInfo, getSpeciesBaits, getSpeciesRigs, getSpeciesLegalSize } from '../../lib/speciesInfo'
 import { useAppRecord, useSpeciesCatchCount, useSpeciesAnglerCount } from '../../hooks/useAppRecord'
 import { useFishBaseData, formatFishBaseDescription, getFishBaseMaxSize, getFishBaseWaterType } from '../../hooks/useFishBase'
+import { useWikidataImage } from '../../hooks/useWikidataImage'
 import type { RegionCode } from '../../types/species'
 
 interface SpeciesInfoCardProps {
@@ -27,6 +29,10 @@ export function SpeciesInfoCard({
   const { data: catchCount } = useSpeciesCatchCount(speciesName)
   const { data: anglerCount } = useSpeciesAnglerCount(speciesName)
   
+  // Fetch species image from Wikidata/Wikimedia Commons
+  const { data: wikidataImage } = useWikidataImage(speciesName)
+  const [imageError, setImageError] = useState(false)
+  
   // Fallback to FishBase API if we don't have local data
   const { data: fishBaseData, isLoading: fishBaseLoading } = useFishBaseData(
     !speciesInfo ? speciesName : null
@@ -50,6 +56,21 @@ export function SpeciesInfoCard({
     
     return (
       <div className="space-y-4">
+        {/* Species Image from Wikidata */}
+        {wikidataImage?.thumbnailUrl && !imageError && (
+          <div className="relative overflow-hidden rounded-xl">
+            <img
+              src={wikidataImage.thumbnailUrl}
+              alt={speciesName}
+              className="h-48 w-full object-cover"
+              onError={() => setImageError(true)}
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+              <p className="text-xs text-white/70">{wikidataImage.attribution}</p>
+            </div>
+          </div>
+        )}
+        
         {/* Header - FishBase data */}
         <div className="rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 p-4 text-white">
           <div className="flex items-start justify-between">
@@ -173,6 +194,21 @@ export function SpeciesInfoCard({
 
   return (
     <div className="space-y-4">
+      {/* Species Image from Wikidata */}
+      {wikidataImage?.thumbnailUrl && !imageError && (
+        <div className="relative overflow-hidden rounded-xl">
+          <img
+            src={wikidataImage.thumbnailUrl}
+            alt={speciesName}
+            className="h-48 w-full object-cover"
+            onError={() => setImageError(true)}
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+            <p className="text-xs text-white/70">{wikidataImage.attribution}</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="rounded-xl bg-gradient-to-br from-cyan-600 to-blue-700 p-4 text-white">
         <h3 className="text-xl font-bold">{speciesInfo.commonName}</h3>
