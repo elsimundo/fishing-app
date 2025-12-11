@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { useChallenges, useUserChallenges, useFeaturedChallenge, useWeeklyLeaderboard, useUserCountries } from '../hooks/useGamification'
 import { useActiveCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
 import { useAuth } from '../hooks/useAuth'
+import { useProfile } from '../hooks/useProfile'
 import { ChallengeCard } from '../components/gamification/ChallengeCard'
 import { XPBar } from '../components/gamification/XPBar'
 import { WeeklySpeciesBadge } from '../components/gamification/WeeklySpeciesCard'
@@ -27,12 +28,35 @@ type ScopeTab = 'all' | 'global' | 'countries' | 'events'
 
 export default function ChallengeBoardPage() {
   const navigate = useNavigate()
+  const { data: profile } = useProfile()
+  
+  // Determine default water type from user's fishing preference
+  const getDefaultWaterType = (): WaterType => {
+    if (profile?.fishing_preference === 'sea') return 'saltwater'
+    if (profile?.fishing_preference === 'freshwater') return 'freshwater'
+    return 'saltwater' // Default to saltwater for 'both' or undefined
+  }
+  
   const [activeTab, setActiveTab] = useState<MainTab>('challenges')
-  const [waterType, setWaterType] = useState<WaterType>('freshwater')
+  const [waterType, setWaterType] = useState<WaterType>(getDefaultWaterType())
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(true)
   const [scopeTab, setScopeTab] = useState<ScopeTab>('all')
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
+  const [hasSetInitialWaterType, setHasSetInitialWaterType] = useState(false)
+  
+  // Set water type from profile preference once loaded
+  useEffect(() => {
+    if (profile?.fishing_preference && !hasSetInitialWaterType) {
+      if (profile.fishing_preference === 'sea') {
+        setWaterType('saltwater')
+      } else if (profile.fishing_preference === 'freshwater') {
+        setWaterType('freshwater')
+      }
+      // For 'both', keep whatever is currently selected
+      setHasSetInitialWaterType(true)
+    }
+  }, [profile?.fishing_preference, hasSetInitialWaterType])
   
   // Data hooks
   const { data: challenges, isLoading: challengesLoading } = useChallenges({ waterType })
@@ -131,7 +155,7 @@ export default function ChallengeBoardPage() {
 
           {/* Weekly species XP badge */}
           <div className="mt-2">
-            <WeeklySpeciesBadge />
+            <WeeklySpeciesBadge waterType={waterType} />
           </div>
         </div>
         
@@ -164,31 +188,33 @@ export default function ChallengeBoardPage() {
           {/* CHALLENGES TAB */}
           {activeTab === 'challenges' && (
             <div className="space-y-4">
-              {/* Water Type Toggle */}
-              <div className="flex bg-gray-100 rounded-xl p-1">
-                <button
-                  onClick={() => setWaterType('freshwater')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    waterType === 'freshwater'
-                      ? 'bg-white text-navy-800 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  <Trees size={16} />
-                  Freshwater
-                </button>
-                <button
-                  onClick={() => setWaterType('saltwater')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    waterType === 'saltwater'
-                      ? 'bg-white text-navy-800 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  <Waves size={16} />
-                  Saltwater
-                </button>
-              </div>
+              {/* Water Type Toggle - only show if user fishes both or has no preference */}
+              {(!profile?.fishing_preference || profile.fishing_preference === 'both') && (
+                <div className="flex bg-gray-100 rounded-xl p-1">
+                  <button
+                    onClick={() => setWaterType('freshwater')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      waterType === 'freshwater'
+                        ? 'bg-white text-navy-800 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <Trees size={16} />
+                    Freshwater
+                  </button>
+                  <button
+                    onClick={() => setWaterType('saltwater')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      waterType === 'saltwater'
+                        ? 'bg-white text-navy-800 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <Waves size={16} />
+                    Saltwater
+                  </button>
+                </div>
+              )}
 
               {/* Scope Tabs */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">

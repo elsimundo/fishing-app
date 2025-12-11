@@ -91,8 +91,12 @@ export function WeeklySpeciesCard({ limit = 5, showCountdown = true, waterType, 
 }
 
 // Compact inline version for headers
-export function WeeklySpeciesBadge() {
-  const { data: speciesPoints } = useWeeklySpeciesPoints()
+interface WeeklySpeciesBadgeProps {
+  waterType?: 'saltwater' | 'freshwater'
+}
+
+export function WeeklySpeciesBadge({ waterType }: WeeklySpeciesBadgeProps = {}) {
+  const { data: speciesPoints } = useWeeklySpeciesPoints(waterType)
   const bonusSpecies = speciesPoints?.find(s => s.is_bonus)
   
   if (!bonusSpecies) return null

@@ -5,6 +5,7 @@ import { useProfile } from '../../hooks/useProfile'
 import { ResponsiveLayout } from '../../components/layout/ResponsiveLayout'
 import { FishingPreferenceModal } from '../onboarding/FishingPreferenceModal'
 import { DefaultLocationModal } from '../onboarding/DefaultLocationModal'
+import { ZombieSessionChecker } from '../sessions/ZombieSessionChecker'
 
 type OnboardingStep = 'fishing_preference' | 'default_location' | null
 
@@ -62,6 +63,8 @@ export function ProtectedRoute() {
       {onboardingStep === 'default_location' && (
         <DefaultLocationModal onComplete={handleLocationComplete} />
       )}
+      {/* Check for stale/zombie sessions and prompt user to end them */}
+      {!onboardingStep && <ZombieSessionChecker />}
     </ResponsiveLayout>
   )
 }

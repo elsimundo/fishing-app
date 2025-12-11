@@ -1,18 +1,38 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Camera, Loader2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Camera, Loader2, AlertCircle, Search } from 'lucide-react'
 import { useFishIdentification } from '../hooks/useFishIdentification'
 import { SpeciesConfirmation } from '../components/catches/SpeciesConfirmation'
+import { SpeciesInfoCard } from '../components/fish/SpeciesInfoCard'
+import { FISH_SPECIES } from '../lib/constants'
 import type { FishIdentificationResult } from '../types/fish'
 import { extractPhotoMetadata, type PhotoMetadata } from '../utils/exifExtractor'
+
+// Combine all species for dropdown
+const ALL_SPECIES = [
+  ...FISH_SPECIES.SALTWATER,
+  ...FISH_SPECIES.COARSE,
+  ...FISH_SPECIES.GAME,
+].sort()
+
+type Mode = 'choose' | 'photo' | 'search'
 
 export function FishIdentifierPage() {
   const navigate = useNavigate()
   const { identifyFish, loading, result, error, reset } = useFishIdentification()
+  const [mode, setMode] = useState<Mode>('choose')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [metadata, setMetadata] = useState<PhotoMetadata | null>(null)
   const [confirmedResult, setConfirmedResult] = useState<FishIdentificationResult | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null)
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  // Filter species based on search query
+  const filteredSpecies = searchQuery.trim()
+    ? ALL_SPECIES.filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+    : ALL_SPECIES
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -55,8 +75,21 @@ export function FishIdentifierPage() {
     })
   }
 
-  const handleDone = () => {
-    navigate(-1)
+  const handleSelectSpecies = (species: string) => {
+    setSelectedSpecies(species)
+    setSearchQuery(species)
+    setShowDropdown(false)
+  }
+
+  const handleReset = () => {
+    setMode('choose')
+    setPreviewUrl(null)
+    setPhotoFile(null)
+    setMetadata(null)
+    setConfirmedResult(null)
+    setSelectedSpecies(null)
+    setSearchQuery('')
+    reset()
   }
 
   return (
@@ -78,19 +111,131 @@ export function FishIdentifierPage() {
       {/* Content */}
       <div className="mx-auto max-w-2xl p-4">
         <div className="rounded-xl bg-white p-6 shadow-sm">
-          {/* Upload Section */}
-          {!previewUrl ? (
+          {/* Mode Selection */}
+          {mode === 'choose' && (
             <div className="space-y-4">
               <div className="text-center">
                 <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100">
-                  <Camera size={32} className="text-amber-600" />
+                  <Search size={32} className="text-amber-600" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Identify Your Fish</h2>
+                <h2 className="text-xl font-bold text-gray-900">Fish Identifier</h2>
                 <p className="mt-2 text-sm text-gray-600">
-                  Upload a photo and our AI will identify the species for you
+                  Identify a fish and learn about legal sizes, best baits, rigs, and records
                 </p>
               </div>
 
+              {/* Option 1: AI Photo */}
+              <button
+                type="button"
+                onClick={() => setMode('photo')}
+                className="flex w-full items-center gap-4 rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-colors hover:border-amber-400 hover:bg-amber-50"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
+                  <Camera size={24} className="text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Upload a Photo</p>
+                  <p className="text-sm text-gray-600">AI will identify the species for you</p>
+                </div>
+              </button>
+
+              {/* Option 2: Search */}
+              <button
+                type="button"
+                onClick={() => setMode('search')}
+                className="flex w-full items-center gap-4 rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-colors hover:border-cyan-400 hover:bg-cyan-50"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100">
+                  <Search size={24} className="text-cyan-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Search by Name</p>
+                  <p className="text-sm text-gray-600">Browse our species database</p>
+                </div>
+              </button>
+            </div>
+          )}
+
+          {/* Search Mode */}
+          {mode === 'search' && !selectedSpecies && (
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setShowDropdown(true)
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  placeholder="Search for a species..."
+                  className="w-full rounded-xl border border-gray-300 py-3 pl-10 pr-4 text-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                  autoFocus
+                />
+              </div>
+
+              {/* Species Dropdown */}
+              {showDropdown && (
+                <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+                  {filteredSpecies.length > 0 ? (
+                    filteredSpecies.map((species) => (
+                      <button
+                        key={species}
+                        type="button"
+                        onClick={() => handleSelectSpecies(species)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-gray-50"
+                      >
+                        <span className="text-lg">🐟</span>
+                        <span className="text-gray-900">{species}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-6 text-center text-sm text-gray-500">
+                      No species found matching "{searchQuery}"
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleReset}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                ← Back
+              </button>
+            </div>
+          )}
+
+          {/* Search Result - Species Info */}
+          {mode === 'search' && selectedSpecies && (
+            <div className="space-y-4">
+              <SpeciesInfoCard
+                speciesName={selectedSpecies}
+                showLogButton
+                onLogCatch={() => {
+                  navigate('/catches/new', {
+                    state: {
+                      aiResult: { species: selectedSpecies },
+                    },
+                  })
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={handleReset}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Search Another Species
+              </button>
+            </div>
+          )}
+
+          {/* Photo Upload Mode */}
+          {mode === 'photo' && !previewUrl && (
+            <div className="space-y-4">
               <label className="block">
                 <input
                   type="file"
@@ -101,10 +246,11 @@ export function FishIdentifierPage() {
                 />
                 <label
                   htmlFor="fish-photo"
-                  className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-8 transition-colors hover:border-amber-400 hover:bg-amber-50"
+                  className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-12 transition-colors hover:border-amber-400 hover:bg-amber-50"
                 >
-                  <Camera size={20} className="text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">Choose Photo</span>
+                  <Camera size={40} className="text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700">Tap to choose a photo</span>
+                  <span className="text-xs text-gray-500">JPG, PNG or WebP</span>
                 </label>
               </label>
 
@@ -116,8 +262,19 @@ export function FishIdentifierPage() {
                   <li>• Avoid blurry or dark images</li>
                 </ul>
               </div>
+
+              <button
+                type="button"
+                onClick={handleReset}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                ← Back
+              </button>
             </div>
-          ) : (
+          )}
+
+          {/* Photo Preview & AI Results */}
+          {mode === 'photo' && previewUrl && (
             <div className="space-y-4">
               {/* Preview */}
               <div className="relative overflow-hidden rounded-lg">
@@ -156,32 +313,11 @@ export function FishIdentifierPage() {
                 />
               ) : null}
 
-              {/* Confirmed Result */}
+              {/* Confirmed Result - Show Species Info Card */}
               {confirmedResult ? (
                 <div className="space-y-4">
-                  <div className="rounded-lg bg-emerald-50 p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="text-2xl">✅</div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-emerald-900">
-                          Fish Identified!
-                        </p>
-                        <p className="mt-1 text-lg font-bold text-emerald-900">
-                          {confirmedResult.species}
-                        </p>
-                        {confirmedResult.scientificName ? (
-                          <p className="mt-0.5 text-xs italic text-emerald-700">
-                            {confirmedResult.scientificName}
-                          </p>
-                        ) : null}
-                        {confirmedResult.confidence ? (
-                          <p className="mt-2 text-xs text-emerald-700">
-                            {Math.round(confirmedResult.confidence * 100)}% confidence
-                          </p>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
+                  {/* Species Info Card */}
+                  <SpeciesInfoCard speciesName={confirmedResult.species} />
 
                   {/* EXIF Metadata Info */}
                   {metadata && (metadata.hasGPS || metadata.hasTimestamp) ? (
@@ -199,16 +335,16 @@ export function FishIdentifierPage() {
                     <button
                       type="button"
                       onClick={handleLogCatch}
-                      className="w-full rounded-lg bg-navy-800 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900"
+                      className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
                     >
                       Log as Catch
                     </button>
                     <button
                       type="button"
-                      onClick={handleDone}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                      onClick={handleReset}
+                      className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
                     >
-                      Done
+                      Identify Another Fish
                     </button>
                   </div>
                 </div>
@@ -218,12 +354,7 @@ export function FishIdentifierPage() {
               {!loading && !confirmedResult ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    setPreviewUrl(null)
-                    setPhotoFile(null)
-                    setMetadata(null)
-                    reset()
-                  }}
+                  onClick={handleReset}
                   className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   Try Another Photo
