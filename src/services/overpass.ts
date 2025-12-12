@@ -13,15 +13,21 @@ function buildTackleShopQuery(bounds: {
 }): string {
   const { south, west, north, east } = bounds
 
-  // Overpass QL query
-  // Searches for: fishing/tackle shops only (no outdoor/sports stores)
+  // Overpass QL query - expanded to find more fishing-related shops
+  // Searches for: fishing shops, tackle shops, bait shops, and outdoor shops with fishing in name
   return `
     [out:json][timeout:25];
     (
       node["shop"="fishing"](${south},${west},${north},${east});
       way["shop"="fishing"](${south},${west},${north},${east});
-      node["shop"]["name"~"tackle|bait|angling",i](${south},${west},${north},${east});
-      way["shop"]["name"~"tackle|bait|angling",i](${south},${west},${north},${east});
+      node["shop"="outdoor"]["name"~"fish|tackle|bait|angling",i](${south},${west},${north},${east});
+      way["shop"="outdoor"]["name"~"fish|tackle|bait|angling",i](${south},${west},${north},${east});
+      node["shop"="sports"]["name"~"fish|tackle|bait|angling",i](${south},${west},${north},${east});
+      way["shop"="sports"]["name"~"fish|tackle|bait|angling",i](${south},${west},${north},${east});
+      node["shop"]["name"~"tackle|bait|angling|fishing supplies",i](${south},${west},${north},${east});
+      way["shop"]["name"~"tackle|bait|angling|fishing supplies",i](${south},${west},${north},${east});
+      node["craft"="fishing_tackle"](${south},${west},${north},${east});
+      way["craft"="fishing_tackle"](${south},${west},${north},${east});
     );
     out center;
   `

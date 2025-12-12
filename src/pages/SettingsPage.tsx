@@ -5,12 +5,14 @@ import { FishingPreferenceModal } from '../components/onboarding/FishingPreferen
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 import { LOCATION_PRIVACY_OPTIONS } from '../lib/constants'
+import { useFreshwaterEnabled } from '../hooks/useFeatureFlags'
 
 export default function SettingsPage() {
   const { user } = useAuth()
   const { data: profile, refetch: refetchProfile } = useProfile()
   const [showFishingPrefs, setShowFishingPrefs] = useState(false)
   const [isSavingPrivacy, setIsSavingPrivacy] = useState(false)
+  const freshwaterEnabled = useFreshwaterEnabled()
 
   type IdlePrefs = {
     // All values are in HOURS in the UI/storage
@@ -137,8 +139,8 @@ export default function SettingsPage() {
               {/* Sea / saltwater */}
               <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-gray-100 pt-3 first:border-t-0 first:pt-0">
                 <div>
-                  <p className="font-semibold text-gray-900">Sea / Boat / Beach</p>
-                  <p className="text-[11px] text-gray-500">Longer sessions, slower logging.</p>
+                  <p className="font-semibold text-gray-900">Sea fishing</p>
+                  <p className="text-[11px] text-gray-500">Pier, boat, beach, shore sessions.</p>
                 </div>
                 <div>
                   <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
@@ -166,69 +168,73 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Lakes / stillwater */}
-              <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-gray-100 pt-3">
-                <div>
-                  <p className="font-semibold text-gray-900">Lakes & stillwaters</p>
-                  <p className="text-[11px] text-gray-500">Typical carp/coarse sessions.</p>
+              {/* Lakes / stillwater - only show when freshwater enabled */}
+              {freshwaterEnabled && (
+                <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-gray-100 pt-3">
+                  <div>
+                    <p className="font-semibold text-gray-900">Lakes & stillwaters</p>
+                    <p className="text-[11px] text-gray-500">Typical carp/coarse sessions.</p>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
+                    <input
+                      type="number"
+                      min={0.5}
+                      max={12}
+                      step={0.5}
+                      value={idlePrefs.lakeWarn}
+                      onChange={(e) => updateIdlePref('lakeWarn', Number(e.target.value) || 0)}
+                      className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={24}
+                      step={0.5}
+                      value={idlePrefs.lakeEnd}
+                      onChange={(e) => updateIdlePref('lakeEnd', Number(e.target.value) || 0)}
+                      className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
-                  <input
-                    type="number"
-                    min={0.5}
-                    max={12}
-                    step={0.5}
-                    value={idlePrefs.lakeWarn}
-                    onChange={(e) => updateIdlePref('lakeWarn', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={24}
-                    step={0.5}
-                    value={idlePrefs.lakeEnd}
-                    onChange={(e) => updateIdlePref('lakeEnd', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
-                  />
-                </div>
-              </div>
+              )}
 
-              {/* Rivers / canals */}
-              <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-gray-100 pt-3">
-                <div>
-                  <p className="font-semibold text-gray-900">Rivers & canals</p>
-                  <p className="text-[11px] text-gray-500">Usually shorter mobile sessions.</p>
+              {/* Rivers / canals - only show when freshwater enabled */}
+              {freshwaterEnabled && (
+                <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-gray-100 pt-3">
+                  <div>
+                    <p className="font-semibold text-gray-900">Rivers & canals</p>
+                    <p className="text-[11px] text-gray-500">Usually shorter mobile sessions.</p>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
+                    <input
+                      type="number"
+                      min={0.25}
+                      max={12}
+                      step={0.25}
+                      value={idlePrefs.riverWarn}
+                      onChange={(e) => updateIdlePref('riverWarn', Number(e.target.value) || 0)}
+                      className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
+                    <input
+                      type="number"
+                      min={0.5}
+                      max={24}
+                      step={0.25}
+                      value={idlePrefs.riverEnd}
+                      onChange={(e) => updateIdlePref('riverEnd', Number(e.target.value) || 0)}
+                      className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
-                  <input
-                    type="number"
-                    min={0.25}
-                    max={12}
-                    step={0.25}
-                    value={idlePrefs.riverWarn}
-                    onChange={(e) => updateIdlePref('riverWarn', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
-                  <input
-                    type="number"
-                    min={0.5}
-                    max={24}
-                    step={0.25}
-                    value={idlePrefs.riverEnd}
-                    onChange={(e) => updateIdlePref('riverEnd', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
-                  />
-                </div>
-              </div>
+              )}
 
               <p className="mt-2 text-[11px] text-gray-500">
                 We&apos;ll store these on this device for now. Later we can sync them to your account so they follow
@@ -238,29 +244,31 @@ export default function SettingsPage() {
           </section>
         )}
 
-        {/* Fishing style */}
-        <section className="rounded-2xl bg-white p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold text-gray-900">Fishing style</h2>
-              <p className="mt-1 text-xs text-gray-500">
-                Tell us what kind of fishing you do most so we can tune sessions, challenges, and recommendations.
-              </p>
-              {profile.fishing_preference && (
-                <p className="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                  Current: {profile.fishing_preference === 'sea' ? 'Sea fishing' : profile.fishing_preference === 'freshwater' ? 'Freshwater' : 'All fishing'}
+        {/* Fishing style - only show when freshwater is enabled */}
+        {freshwaterEnabled && (
+          <section className="rounded-2xl bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-gray-900">Fishing style</h2>
+                <p className="mt-1 text-xs text-gray-500">
+                  Tell us what kind of fishing you do most so we can tune sessions, challenges, and recommendations.
                 </p>
-              )}
+                {profile.fishing_preference && (
+                  <p className="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                    Current: {profile.fishing_preference === 'sea' ? 'Sea fishing' : profile.fishing_preference === 'freshwater' ? 'Freshwater' : 'All fishing'}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFishingPrefs(true)}
+                className="rounded-lg bg-navy-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy-900"
+              >
+                Choose style
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowFishingPrefs(true)}
-              className="rounded-lg bg-navy-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy-900"
-            >
-              Choose style
-            </button>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Privacy & Data Sharing */}
         <section className="rounded-2xl bg-white p-4 shadow-sm">

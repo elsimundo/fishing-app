@@ -22,11 +22,11 @@ function getCommonsImageUrl(filename: string, width: number = 400): { full: stri
 }
 
 // Common name to scientific name mapping for better Wikidata search
+// Keys should be lowercase and handle both "Bass (Sea)" -> "bass sea" format
 const SCIENTIFIC_NAMES: Record<string, string> = {
-  'smoothhound': 'Mustelus mustelus',
-  'smooth hound': 'Mustelus mustelus',
-  'tope': 'Galeorhinus galeus',
-  'bass': 'Dicentrarchus labrax',
+  // Saltwater - with parenthetical format
+  'bass sea': 'Dicentrarchus labrax',
+  'bass (sea)': 'Dicentrarchus labrax',
   'sea bass': 'Dicentrarchus labrax',
   'european sea bass': 'Dicentrarchus labrax',
   'cod': 'Gadus morhua',
@@ -35,45 +35,96 @@ const SCIENTIFIC_NAMES: Record<string, string> = {
   'atlantic mackerel': 'Scomber scombrus',
   'pollack': 'Pollachius pollachius',
   'pollock': 'Pollachius pollachius',
-  'carp': 'Cyprinus carpio',
-  'common carp': 'Cyprinus carpio',
-  'pike': 'Esox lucius',
-  'northern pike': 'Esox lucius',
-  'perch': 'Perca fluviatilis',
-  'european perch': 'Perca fluviatilis',
-  'roach': 'Rutilus rutilus',
-  'bream': 'Abramis brama',
-  'common bream': 'Abramis brama',
-  'tench': 'Tinca tinca',
-  'trout': 'Salmo trutta',
-  'brown trout': 'Salmo trutta',
-  'rainbow trout': 'Oncorhynchus mykiss',
-  'salmon': 'Salmo salar',
-  'atlantic salmon': 'Salmo salar',
+  'coalfish': 'Pollachius virens',
+  'wrasse ballan': 'Labrus bergylta',
+  'wrasse (ballan)': 'Labrus bergylta',
+  'ballan wrasse': 'Labrus bergylta',
+  'wrasse corkwing': 'Symphodus melops',
+  'wrasse (corkwing)': 'Symphodus melops',
   'plaice': 'Pleuronectes platessa',
   'flounder': 'Platichthys flesus',
   'sole': 'Solea solea',
   'dover sole': 'Solea solea',
+  'dab': 'Limanda limanda',
   'turbot': 'Scophthalmus maximus',
-  'ray': 'Raja clavata',
-  'thornback ray': 'Raja clavata',
-  'conger': 'Conger conger',
-  'conger eel': 'Conger conger',
-  'ling': 'Molva molva',
-  'wrasse': 'Labrus bergylta',
-  'ballan wrasse': 'Labrus bergylta',
-  'mullet': 'Chelon labrosus',
-  'grey mullet': 'Chelon labrosus',
-  'garfish': 'Belone belone',
-  'gurnard': 'Chelidonichthys lucerna',
-  'red gurnard': 'Chelidonichthys cuculus',
-  'dogfish': 'Scyliorhinus canicula',
+  'brill': 'Scophthalmus rhombus',
+  'dogfish lesser spotted': 'Scyliorhinus canicula',
+  'dogfish (lesser spotted)': 'Scyliorhinus canicula',
   'lesser spotted dogfish': 'Scyliorhinus canicula',
+  'dogfish greater spotted': 'Scyliorhinus stellaris',
+  'dogfish (greater spotted)': 'Scyliorhinus stellaris',
   'bull huss': 'Scyliorhinus stellaris',
-  'spurdog': 'Squalus acanthias',
+  'smoothhound': 'Mustelus mustelus',
+  'smooth hound': 'Mustelus mustelus',
+  'tope': 'Galeorhinus galeus',
+  'rays thornback': 'Raja clavata',
+  'rays (thornback)': 'Raja clavata',
+  'thornback ray': 'Raja clavata',
+  'rays blonde': 'Raja brachyura',
+  'rays (blonde)': 'Raja brachyura',
+  'rays small-eyed': 'Raja microocellata',
+  'rays (small-eyed)': 'Raja microocellata',
+  'conger eel': 'Conger conger',
+  'conger': 'Conger conger',
+  'mullet thick-lipped': 'Chelon labrosus',
+  'mullet (thick-lipped)': 'Chelon labrosus',
+  'mullet thin-lipped': 'Chelon ramada',
+  'mullet (thin-lipped)': 'Chelon ramada',
+  'garfish': 'Belone belone',
+  'scad horse mackerel': 'Trachurus trachurus',
+  'scad (horse mackerel)': 'Trachurus trachurus',
+  'black bream': 'Spondyliosoma cantharus',
+  'red bream': 'Pagellus bogaraveo',
+  'gurnard red': 'Chelidonichthys cuculus',
+  'gurnard (red)': 'Chelidonichthys cuculus',
+  'red gurnard': 'Chelidonichthys cuculus',
+  'gurnard grey': 'Eutrigla gurnardus',
+  'gurnard (grey)': 'Eutrigla gurnardus',
   'whiting': 'Merlangius merlangus',
   'pouting': 'Trisopterus luscus',
-  'dab': 'Limanda limanda',
+  'rockling': 'Ciliata mustela',
+  'ling': 'Molva molva',
+  'haddock': 'Melanogrammus aeglefinus',
+  'hake': 'Merluccius merluccius',
+  'trigger fish': 'Balistes capriscus',
+  'john dory': 'Zeus faber',
+  'sea trout': 'Salmo trutta',
+  
+  // Coarse/Freshwater
+  'carp common': 'Cyprinus carpio',
+  'carp (common)': 'Cyprinus carpio',
+  'common carp': 'Cyprinus carpio',
+  'carp mirror': 'Cyprinus carpio',
+  'carp (mirror)': 'Cyprinus carpio',
+  'carp leather': 'Cyprinus carpio',
+  'carp (leather)': 'Cyprinus carpio',
+  'pike': 'Esox lucius',
+  'northern pike': 'Esox lucius',
+  'zander': 'Sander lucioperca',
+  'perch': 'Perca fluviatilis',
+  'european perch': 'Perca fluviatilis',
+  'roach': 'Rutilus rutilus',
+  'rudd': 'Scardinius erythrophthalmus',
+  'bream common': 'Abramis brama',
+  'bream (common)': 'Abramis brama',
+  'common bream': 'Abramis brama',
+  'tench': 'Tinca tinca',
+  'barbel': 'Barbus barbus',
+  'chub': 'Squalius cephalus',
+  'dace': 'Leuciscus leuciscus',
+  'eel': 'Anguilla anguilla',
+  
+  // Game
+  'trout brown': 'Salmo trutta',
+  'trout (brown)': 'Salmo trutta',
+  'brown trout': 'Salmo trutta',
+  'trout rainbow': 'Oncorhynchus mykiss',
+  'trout (rainbow)': 'Oncorhynchus mykiss',
+  'rainbow trout': 'Oncorhynchus mykiss',
+  'salmon atlantic': 'Salmo salar',
+  'salmon (atlantic)': 'Salmo salar',
+  'atlantic salmon': 'Salmo salar',
+  'grayling': 'Thymallus thymallus',
 }
 
 async function searchWikidata(searchTerm: string): Promise<{ id: string } | null> {
@@ -88,45 +139,53 @@ async function searchWikidata(searchTerm: string): Promise<{ id: string } | null
     })
 
     const url = `https://www.wikidata.org/w/api.php?${searchParams.toString()}`
-    console.log('Wikidata search URL:', url)
-    
     const searchResponse = await fetch(url)
     
-    if (!searchResponse.ok) {
-      console.log('Wikidata search failed:', searchResponse.status)
-      return null
-    }
+    if (!searchResponse.ok) return null
 
     const searchData = await searchResponse.json()
-    console.log('Wikidata search results for', searchTerm, ':', searchData)
-    
     if (!searchData.search || searchData.search.length === 0) return null
 
     // Try to find a fish-related entity
     for (const result of searchData.search) {
       const desc = (result.description || '').toLowerCase()
       if (desc.includes('fish') || desc.includes('species') || desc.includes('shark') || desc.includes('ray')) {
-        console.log('Found fish entity:', result.id)
         return { id: result.id }
       }
     }
     
     // Fall back to first result
-    console.log('Using first result:', searchData.search[0].id)
     return { id: searchData.search[0].id }
-  } catch (error) {
-    console.error('Wikidata search error:', error)
+  } catch {
     return null
   }
 }
 
 async function fetchWikidataImage(speciesName: string): Promise<WikidataImageResult> {
-  console.log('fetchWikidataImage called for:', speciesName)
   
-  // Try scientific name first if we have a mapping
+  // Normalize the species name for lookup
   const lowerName = speciesName.toLowerCase()
-  const scientificName = SCIENTIFIC_NAMES[lowerName]
-  console.log('Scientific name mapping:', lowerName, '->', scientificName)
+  
+  // Try multiple formats for lookup:
+  // 1. Exact lowercase: "bass (sea)"
+  // 2. Without parentheses: "bass sea"  
+  // 3. Reversed parenthetical: "sea bass"
+  let scientificName = SCIENTIFIC_NAMES[lowerName]
+  
+  if (!scientificName) {
+    // Try without parentheses: "Bass (Sea)" -> "bass sea"
+    const withoutParens = lowerName.replace(/[()]/g, '').replace(/\s+/g, ' ').trim()
+    scientificName = SCIENTIFIC_NAMES[withoutParens]
+  }
+  
+  if (!scientificName) {
+    // Try extracting and reversing: "Bass (Sea)" -> "sea bass"
+    const match = lowerName.match(/^(.+?)\s*\((.+?)\)$/)
+    if (match) {
+      const reversed = `${match[2]} ${match[1]}`.trim()
+      scientificName = SCIENTIFIC_NAMES[reversed]
+    }
+  }
   
   let entity: { id: string } | null = null
   

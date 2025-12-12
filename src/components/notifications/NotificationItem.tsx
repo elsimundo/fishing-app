@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Trophy, Check, X, Heart, MessageCircle, UserPlus, Fish } from 'lucide-react'
+import { Trophy, Check, X, Heart, MessageCircle, UserPlus, Fish, Share2 } from 'lucide-react'
 import type { Notification } from '../../hooks/useNotifications'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -26,6 +26,8 @@ function getNotificationIcon(type: Notification['type']) {
       return <UserPlus size={20} className="text-purple-500" />
     case 'session_catch':
       return <Fish size={20} className="text-teal-500" />
+    case 'share':
+      return <Share2 size={20} className="text-cyan-500" />
     default:
       return <Fish size={20} className="text-gray-500" />
   }

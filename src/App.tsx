@@ -43,7 +43,7 @@ import { FishIdentifierPage } from './pages/FishIdentifierPage'
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/feed" replace />} />
+      <Route path="/" element={<Navigate to="/logbook" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route element={<ProtectedRoute />}>

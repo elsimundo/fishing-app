@@ -373,6 +373,13 @@ export function useRepost() {
       if (authError) throw new Error(authError.message)
       if (!user) throw new Error('Not authenticated')
 
+      // Get the current user's username for the notification
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single()
+
       const { data: original, error: fetchError } = await supabase
         .from('posts')
         .select('*')
@@ -400,6 +407,25 @@ export function useRepost() {
         .single()
 
       if (error) throw new Error(error.message)
+
+      // Notify the original content owner (if it's not the same user)
+      if (base.user_id && base.user_id !== user.id) {
+        const username = currentUserProfile?.username || 'Someone'
+        const contentType = base.type === 'catch' ? 'catch' : base.type === 'session' ? 'session' : 'post'
+        
+        await supabase.from('notifications').insert({
+          user_id: base.user_id,
+          type: 'share',
+          title: 'Your content was shared!',
+          message: `${username} shared your ${contentType} to their feed`,
+          related_user_id: user.id,
+          related_post_id: postId,
+          related_session_id: base.session_id,
+          related_catch_id: base.catch_id,
+          action_url: `/${currentUserProfile?.username || user.id}`,
+        })
+      }
+
       return data as Post
     },
     onSuccess: () => {
