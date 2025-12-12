@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { Shield, Bell, Globe, Save, CreditCard, Eye, EyeOff } from 'lucide-react'
+import { Shield, Save, CreditCard, Eye, EyeOff, ToggleLeft, Fish, Store, Users, Swords, Camera, Loader2 } from 'lucide-react'
+import { useFeatureFlags, useUpdateFeatureFlag } from '../../hooks/useFeatureFlags'
 
 export default function AdminSettingsPage() {
   const [autoApprovePremium, setAutoApprovePremium] = useState(false)
   const [notifyOnSubmissions, setNotifyOnSubmissions] = useState(true)
   const [publicMode, setPublicMode] = useState(true)
+  
+  // Feature flags
+  const { data: featureFlags, isLoading: flagsLoading } = useFeatureFlags()
+  const { mutate: updateFlag, isPending: isUpdating } = useUpdateFeatureFlag()
 
   // Stripe settings
   const [stripeSandboxMode, setStripeSandboxMode] = useState(true)
@@ -70,6 +75,73 @@ export default function AdminSettingsPage() {
               Save (coming soon)
             </button>
           </SettingCard>
+        </div>
+
+        {/* Feature Flags */}
+        <div className="mt-8">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 text-cyan-700">
+              <ToggleLeft size={20} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Feature Flags</h2>
+              <p className="text-sm text-gray-600">Enable or disable app features for launch phases</p>
+            </div>
+          </div>
+
+          {flagsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <div className="grid gap-4 lg:grid-cols-2">
+              <FeatureFlagCard
+                icon={<Fish size={20} />}
+                title="Freshwater Fishing"
+                description="Enable freshwater species, challenges, and filters. Currently sea fishing only."
+                enabled={featureFlags?.find(f => f.key === 'feature_freshwater_enabled')?.value ?? false}
+                onChange={(val) => updateFlag({ key: 'feature_freshwater_enabled', value: val })}
+                isUpdating={isUpdating}
+                color="blue"
+              />
+              <FeatureFlagCard
+                icon={<Store size={20} />}
+                title="Tackle Shops"
+                description="Enable tackle shop listings and directory features."
+                enabled={featureFlags?.find(f => f.key === 'feature_tackle_shops_enabled')?.value ?? false}
+                onChange={(val) => updateFlag({ key: 'feature_tackle_shops_enabled', value: val })}
+                isUpdating={isUpdating}
+                color="green"
+              />
+              <FeatureFlagCard
+                icon={<Users size={20} />}
+                title="Fishing Clubs"
+                description="Enable fishing club listings and membership features."
+                enabled={featureFlags?.find(f => f.key === 'feature_clubs_enabled')?.value ?? false}
+                onChange={(val) => updateFlag({ key: 'feature_clubs_enabled', value: val })}
+                isUpdating={isUpdating}
+                color="amber"
+              />
+              <FeatureFlagCard
+                icon={<Swords size={20} />}
+                title="Competitions"
+                description="Enable fishing competitions and leaderboards."
+                enabled={featureFlags?.find(f => f.key === 'feature_competitions_enabled')?.value ?? false}
+                onChange={(val) => updateFlag({ key: 'feature_competitions_enabled', value: val })}
+                isUpdating={isUpdating}
+                color="purple"
+              />
+              <FeatureFlagCard
+                icon={<Camera size={20} />}
+                title="AI Fish Identifier"
+                description="Enable AI-powered fish species identification from photos."
+                enabled={featureFlags?.find(f => f.key === 'feature_ai_identifier_enabled')?.value ?? false}
+                onChange={(val) => updateFlag({ key: 'feature_ai_identifier_enabled', value: val })}
+                isUpdating={isUpdating}
+                color="rose"
+              />
+            </div>
+          )}
         </div>
 
         {/* Stripe Integration */}
@@ -271,5 +343,66 @@ function Toggle({
       />
       <span className="text-sm text-gray-800">{label}</span>
     </label>
+  )
+}
+
+function FeatureFlagCard({
+  icon,
+  title,
+  description,
+  enabled,
+  onChange,
+  isUpdating,
+  color,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+  enabled: boolean
+  onChange: (val: boolean) => void
+  isUpdating: boolean
+  color: 'blue' | 'green' | 'amber' | 'purple' | 'rose'
+}) {
+  const colorClasses = {
+    blue: enabled ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400',
+    green: enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400',
+    amber: enabled ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400',
+    purple: enabled ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-400',
+    rose: enabled ? 'bg-rose-100 text-rose-700' : 'bg-gray-100 text-gray-400',
+  }
+
+  return (
+    <div className={`rounded-xl border p-4 shadow-sm transition-colors ${
+      enabled ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
+    }`}>
+      <div className="flex items-start gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${colorClasses[color]}`}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <h3 className={`font-semibold ${enabled ? 'text-gray-900' : 'text-gray-500'}`}>{title}</h3>
+            <button
+              type="button"
+              onClick={() => onChange(!enabled)}
+              disabled={isUpdating}
+              className={`relative h-6 w-11 rounded-full transition-colors ${
+                enabled ? 'bg-emerald-500' : 'bg-gray-300'
+              } ${isUpdating ? 'opacity-50' : ''}`}
+            >
+              <span
+                className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                  enabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+          <p className={`mt-1 text-sm ${enabled ? 'text-gray-600' : 'text-gray-400'}`}>{description}</p>
+          <p className={`mt-2 text-xs font-medium ${enabled ? 'text-emerald-600' : 'text-gray-400'}`}>
+            {enabled ? '✓ Enabled' : '○ Disabled'}
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }

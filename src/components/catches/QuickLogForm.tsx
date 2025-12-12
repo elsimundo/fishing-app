@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import type { Catch, Session } from '../../types'
-import { FISH_SPECIES } from '../../lib/constants'
+import { getSpeciesByCategory } from '../../lib/constants'
+import { useFreshwaterEnabled } from '../../hooks/useFeatureFlags'
 import { Camera, X, Globe, Lock, Info, MapPin, ChevronDown } from 'lucide-react'
 import { useCatchXP } from '../../hooks/useCatchXP'
 import { useSavedMarks } from '../../hooks/useSavedMarks'
@@ -58,6 +59,10 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const catchXP = useCatchXP()
   const { marks = [] } = useSavedMarks()
+  const freshwaterEnabled = useFreshwaterEnabled()
+  
+  // Get species categories based on freshwater feature flag
+  const speciesCategories = getSpeciesByCategory(freshwaterEnabled)
 
   // Location state
   const hasSessionLocation = !!(session.latitude && session.longitude)
@@ -303,26 +308,30 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
           >
             <option value="">Select species</option>
             <optgroup label="Saltwater">
-              {FISH_SPECIES.SALTWATER.map((s) => (
+              {speciesCategories.saltwater.map((s: string) => (
                 <option key={s} value={s}>
                   {s}
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Coarse">
-              {FISH_SPECIES.COARSE.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="Game">
-              {FISH_SPECIES.GAME.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </optgroup>
+            {speciesCategories.coarse.length > 0 && (
+              <optgroup label="Coarse">
+                {speciesCategories.coarse.map((s: string) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {speciesCategories.game.length > 0 && (
+              <optgroup label="Game">
+                {speciesCategories.game.map((s: string) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </optgroup>
+            )}
             <option value="Other">Other / not listed</option>
           </select>
           {errors.species ? (

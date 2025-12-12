@@ -4,22 +4,17 @@ import { ArrowLeft, Camera, Loader2, AlertCircle, Search } from 'lucide-react'
 import { useFishIdentification } from '../hooks/useFishIdentification'
 import { SpeciesConfirmation } from '../components/catches/SpeciesConfirmation'
 import { SpeciesInfoCard } from '../components/fish/SpeciesInfoCard'
-import { FISH_SPECIES } from '../lib/constants'
+import { getAllSpecies } from '../lib/constants'
+import { useFreshwaterEnabled } from '../hooks/useFeatureFlags'
 import type { FishIdentificationResult } from '../types/fish'
 import { extractPhotoMetadata, type PhotoMetadata } from '../utils/exifExtractor'
-
-// Combine all species for dropdown
-const ALL_SPECIES = [
-  ...FISH_SPECIES.SALTWATER,
-  ...FISH_SPECIES.COARSE,
-  ...FISH_SPECIES.GAME,
-].sort()
 
 type Mode = 'choose' | 'photo' | 'search'
 
 export function FishIdentifierPage() {
   const navigate = useNavigate()
   const { identifyFish, loading, result, error, reset } = useFishIdentification()
+  const freshwaterEnabled = useFreshwaterEnabled()
   const [mode, setMode] = useState<Mode>('choose')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
@@ -29,10 +24,13 @@ export function FishIdentifierPage() {
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
 
+  // Get species list based on freshwater feature flag
+  const allSpecies = getAllSpecies(freshwaterEnabled)
+
   // Filter species based on search query
   const filteredSpecies = searchQuery.trim()
-    ? ALL_SPECIES.filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
-    : ALL_SPECIES
+    ? allSpecies.filter((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()))
+    : allSpecies
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

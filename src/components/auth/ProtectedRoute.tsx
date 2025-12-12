@@ -3,11 +3,11 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useProfile } from '../../hooks/useProfile'
 import { ResponsiveLayout } from '../../components/layout/ResponsiveLayout'
-import { FishingPreferenceModal } from '../onboarding/FishingPreferenceModal'
 import { DefaultLocationModal } from '../onboarding/DefaultLocationModal'
 import { ZombieSessionChecker } from '../sessions/ZombieSessionChecker'
+import { supabase } from '../../lib/supabase'
 
-type OnboardingStep = 'fishing_preference' | 'default_location' | null
+type OnboardingStep = 'default_location' | null
 
 export function ProtectedRoute() {
   const { user, loading } = useAuth()
@@ -15,15 +15,19 @@ export function ProtectedRoute() {
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(null)
 
   useEffect(() => {
-    if (!profile) return
+    if (!profile || !user) return
 
-    // Step 1: Fishing preference
+    // Auto-set fishing preference to 'sea' if not set (sea-only launch)
     if (!profile.fishing_preference) {
-      setOnboardingStep('fishing_preference')
+      supabase
+        .from('profiles')
+        .update({ fishing_preference: 'sea' })
+        .eq('id', user.id)
+        .then(() => refetch())
       return
     }
 
-    // Step 2: Default location
+    // Default location step
     if (profile.default_latitude == null || profile.default_longitude == null) {
       setOnboardingStep('default_location')
       return
@@ -31,7 +35,7 @@ export function ProtectedRoute() {
 
     // All onboarding complete
     setOnboardingStep(null)
-  }, [profile])
+  }, [profile, user, refetch])
 
   if (loading || profileLoading) {
     return (
@@ -45,10 +49,6 @@ export function ProtectedRoute() {
     return <Navigate to="/login" replace />
   }
 
-  const handleFishingPreferenceComplete = () => {
-    refetch() // This will trigger the useEffect to check for next step
-  }
-
   const handleLocationComplete = () => {
     setOnboardingStep(null)
     refetch()
@@ -57,9 +57,6 @@ export function ProtectedRoute() {
   return (
     <ResponsiveLayout>
       <Outlet />
-      {onboardingStep === 'fishing_preference' && (
-        <FishingPreferenceModal onComplete={handleFishingPreferenceComplete} />
-      )}
       {onboardingStep === 'default_location' && (
         <DefaultLocationModal onComplete={handleLocationComplete} />
       )}

@@ -1,14 +1,8 @@
 import { useState } from 'react'
 import type { FishIdentificationResult } from '../../types/fish'
 import { Check, Search } from 'lucide-react'
-import { FISH_SPECIES } from '../../lib/constants'
-
-// All species for manual selection
-const ALL_SPECIES = [
-  ...FISH_SPECIES.SALTWATER,
-  ...FISH_SPECIES.COARSE,
-  ...FISH_SPECIES.GAME,
-].sort()
+import { getAllSpecies } from '../../lib/constants'
+import { useFreshwaterEnabled } from '../../hooks/useFeatureFlags'
 
 interface SpeciesConfirmationProps {
   result: FishIdentificationResult
@@ -20,14 +14,18 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
   const { species, scientificName, confidence, alternatives } = result
   const [showManualPicker, setShowManualPicker] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const freshwaterEnabled = useFreshwaterEnabled()
+
+  // Get species list based on freshwater feature flag
+  const allSpecies = getAllSpecies(freshwaterEnabled)
 
   const confidenceColor =
     confidence >= 80 ? 'bg-emerald-100 text-emerald-800' : confidence >= 60 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'
 
   // Filter species based on search
   const filteredSpecies = searchQuery.trim()
-    ? ALL_SPECIES.filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
-    : ALL_SPECIES
+    ? allSpecies.filter((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()))
+    : allSpecies
 
   const handleSelectManual = (selectedSpecies: string) => {
     setShowManualPicker(false)
@@ -50,7 +48,7 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
     
     for (const keyword of keywords) {
       if (speciesLower.includes(keyword)) {
-        const related = ALL_SPECIES.filter(s => 
+        const related = allSpecies.filter((s: string) => 
           s.toLowerCase().includes(keyword) && 
           s !== species && 
           !similar.includes(s)

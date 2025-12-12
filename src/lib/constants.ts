@@ -134,3 +134,28 @@ export const RIG_SUGGESTIONS: Record<string, string[]> = {
 
   'Trout (Brown)': ['Fly line', 'Spinner rig', 'Float rig'],
 }
+
+// Helper to get all species as a flat array
+export function getAllSpecies(includeFreshwater: boolean = true): string[] {
+  const saltwater = [...FISH_SPECIES.SALTWATER]
+  
+  if (includeFreshwater) {
+    return [...saltwater, ...FISH_SPECIES.COARSE, ...FISH_SPECIES.GAME].sort()
+  }
+  
+  // Sea-only: include saltwater and sea trout (already in saltwater)
+  return saltwater.sort()
+}
+
+// Helper to get species by category
+export function getSpeciesByCategory(includeFreshwater: boolean = true): {
+  saltwater: string[]
+  coarse: string[]
+  game: string[]
+} {
+  return {
+    saltwater: [...FISH_SPECIES.SALTWATER],
+    coarse: includeFreshwater ? [...FISH_SPECIES.COARSE] : [],
+    game: includeFreshwater ? [...FISH_SPECIES.GAME] : [],
+  }
+}
