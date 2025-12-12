@@ -9,6 +9,7 @@ export async function ensureProfile({
   username?: string | null
   email?: string | null
 }) {
+  // First check if profile already exists
   const { data: existing, error: fetchError } = await supabase
     .from('profiles')
     .select('id')
@@ -16,11 +17,16 @@ export async function ensureProfile({
     .maybeSingle()
 
   if (fetchError) {
-    throw fetchError
+    console.error('[ensureProfile] Error checking existing profile:', fetchError)
+    // Don't throw on fetch error - profile might exist but RLS is blocking read
   }
 
-  if (existing) return
+  if (existing) {
+    console.log('[ensureProfile] Profile already exists for user:', userId)
+    return
+  }
 
+  // Try to insert the profile
   const { error: insertError } = await supabase.from('profiles').insert({
     id: userId,
     username: username ?? null,
@@ -28,6 +34,15 @@ export async function ensureProfile({
   })
 
   if (insertError) {
+    // If it's a duplicate key error, the profile was created by the trigger - that's fine
+    if (insertError.code === '23505') {
+      console.log('[ensureProfile] Profile already exists (created by trigger):', userId)
+      return
+    }
+    
+    console.error('[ensureProfile] Error inserting profile:', insertError)
     throw insertError
   }
+  
+  console.log('[ensureProfile] Profile created successfully for user:', userId)
 }

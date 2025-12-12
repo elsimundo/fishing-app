@@ -65,15 +65,15 @@ export function SignupForm() {
     const authUser = data.user
 
     if (authUser) {
+      // Try to create profile, but don't block signup if it fails
+      // The database trigger should create the profile automatically
+      // This is just a fallback in case the trigger hasn't run yet
       try {
         await ensureProfile({ userId: authUser.id, username: normalizedUsername, email: values.email })
       } catch (profileErr) {
-        const message = profileErr instanceof Error ? profileErr.message : 'Profile creation failed.'
-        console.error('Profile creation failed after signup', message)
-        setFormError(
-          'Account created but profile failed. Please try signing in again to finish setup or contact support.',
-        )
-        return
+        // Log but don't show error - the trigger will create the profile
+        // and ensureProfile will be called again on login
+        console.warn('Profile creation attempt failed (trigger may handle it):', profileErr)
       }
     }
 
