@@ -74,14 +74,14 @@ export function Sidebar() {
           </div>
         </button>
 
-        {/* Post Button */}
+        {/* Cast Button */}
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
           className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-blue-700"
         >
           <Plus size={20} strokeWidth={3} />
-          <span>Post</span>
+          <span>Cast</span>
         </button>
       </nav>
 

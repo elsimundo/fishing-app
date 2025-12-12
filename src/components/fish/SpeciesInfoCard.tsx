@@ -30,8 +30,11 @@ export function SpeciesInfoCard({
   const { data: anglerCount } = useSpeciesAnglerCount(speciesName)
   
   // Fetch species image from Wikidata/Wikimedia Commons
-  const { data: wikidataImage } = useWikidataImage(speciesName)
+  const { data: wikidataImage, isLoading: imageLoading, error: imageQueryError } = useWikidataImage(speciesName)
   const [imageError, setImageError] = useState(false)
+  
+  // Debug logging
+  console.log('Wikidata image for', speciesName, ':', { wikidataImage, imageLoading, imageQueryError, imageError })
   
   // Fallback to FishBase API if we don't have local data
   const { data: fishBaseData, isLoading: fishBaseLoading } = useFishBaseData(

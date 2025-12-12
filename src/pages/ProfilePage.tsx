@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Trash2, Fish, ChevronRight, Calendar, Trophy, Swords } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Fish, Calendar, Trophy, Swords } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
@@ -9,6 +9,7 @@ import { useUnreadCount } from '../hooks/useMessages'
 import { useCatches } from '../hooks/useCatches'
 import { useMySessions } from '../hooks/useSessions'
 import { useMyEnteredCompetitions } from '../hooks/useCompetitions'
+import { useMyCompetitionPlacements } from '../hooks/useCompetitionPlacements'
 import { useUserXP } from '../hooks/useGamification'
 import { useUserChallenges, useFeaturedChallenge } from '../hooks/useGamification'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
@@ -22,6 +23,7 @@ import { EditProfileModal } from '../components/profile/EditProfileModal'
 import { FollowersModal } from '../components/profile/FollowersModal'
 import { DeleteAccountModal } from '../components/profile/DeleteAccountModal'
 import { FishingPreferenceModal } from '../components/onboarding/FishingPreferenceModal'
+import { SpeciesCollectionTab } from '../components/profile/SpeciesCollectionTab'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
@@ -36,7 +38,7 @@ export default function ProfilePage() {
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
   const [showBadgesModal, setShowBadgesModal] = useState(false)
-  const [activeTab, setActiveTab] = useState<'posts' | 'sessions' | 'catches' | 'achievements'>('sessions')
+  const [activeTab, setActiveTab] = useState<'posts' | 'sessions' | 'catches' | 'species' | 'achievements'>('sessions')
   const unreadCount = useUnreadCount()
 
   const userId = user?.id ?? ''
@@ -46,6 +48,7 @@ export default function ProfilePage() {
   const { catches } = useCatches()
   const { data: sessions } = useMySessions()
   const { data: myCompetitions } = useMyEnteredCompetitions()
+  const { data: competitionPlacements = [] } = useMyCompetitionPlacements()
 
   const preferenceLabels: Record<string, string> = {
     sea: 'Sea Fishing',
@@ -240,12 +243,12 @@ export default function ProfilePage() {
 
       {/* Tabs */}
       <div className="sticky top-0 z-10 mt-2 border-b border-gray-200 bg-white">
-        <div className="flex text-xs font-semibold text-gray-500">
+        <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-gray-500">
           <button
             type="button"
             onClick={() => setActiveTab('posts')}
-            className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'posts' ? 'text-navy-800' : 'text-gray-500'
+            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
+              activeTab === 'posts' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -256,8 +259,8 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setActiveTab('sessions')}
-            className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'sessions' ? 'text-navy-800' : 'text-gray-500'
+            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
+              activeTab === 'sessions' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -268,8 +271,8 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setActiveTab('catches')}
-            className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'catches' ? 'text-navy-800' : 'text-gray-500'
+            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
+              activeTab === 'catches' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -279,9 +282,21 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab('species')}
+            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
+              activeTab === 'species' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
+            }`}
+          >
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <Fish size={14} />
+              <span>Species</span>
+            </span>
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('achievements')}
-            className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'achievements' ? 'text-navy-800' : 'text-gray-500'
+            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
+              activeTab === 'achievements' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -531,13 +546,77 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Species tab */}
+        {activeTab === 'species' && (
+          <SpeciesCollectionTab catches={catches || []} />
+        )}
+
         {/* Achievements tab */}
         {activeTab === 'achievements' && (
-          <div className="space-y-3">
-            {userChallenges.length === 0 && (
+          <div className="space-y-4">
+            {/* Competition Placements */}
+            {competitionPlacements.length > 0 && (
+              <div>
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <Trophy className="h-4 w-4 text-amber-500" />
+                  Competition Wins
+                </h3>
+                <div className="space-y-2">
+                  {competitionPlacements.map((placement) => {
+                    const positionEmoji = placement.position === 1 ? '🥇' : placement.position === 2 ? '🥈' : '🥉'
+                    const positionLabel = placement.position === 1 ? '1st Place' : placement.position === 2 ? '2nd Place' : '3rd Place'
+                    const bgColor = placement.position === 1 
+                      ? 'border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50' 
+                      : placement.position === 2 
+                      ? 'border-gray-300 bg-gradient-to-r from-gray-50 to-slate-100'
+                      : 'border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50'
+                    
+                    return (
+                      <button
+                        key={placement.competitionId}
+                        type="button"
+                        onClick={() => navigate(`/compete/${placement.competitionId}`)}
+                        className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left shadow-sm transition-colors hover:shadow-md ${bgColor}`}
+                      >
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/80 text-2xl shadow-sm">
+                          {positionEmoji}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-900">{placement.competitionTitle}</p>
+                          <p className="text-xs text-gray-600">
+                            {positionLabel}
+                            {placement.totalWeight ? ` · ${placement.totalWeight.toFixed(2)} kg` : ''}
+                            {placement.catchCount ? ` · ${placement.catchCount} catches` : ''}
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-gray-500">
+                            {new Date(placement.endedAt).toLocaleDateString(undefined, {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </p>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Challenge Badges Section */}
+            {userChallenges.length > 0 && (
+              <div>
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <Swords className="h-4 w-4 text-cyan-600" />
+                  Challenge Badges
+                </h3>
+              </div>
+            )}
+
+            {userChallenges.length === 0 && competitionPlacements.length === 0 && (
               <div className="py-10 text-center text-sm text-gray-500">
                 <p className="mb-1 font-medium text-gray-900">No achievements yet</p>
-                <p className="text-xs text-gray-500">Complete challenges by logging catches and sessions to unlock badges.</p>
+                <p className="text-xs text-gray-500">Complete challenges and win competitions to unlock achievements.</p>
               </div>
             )}
 

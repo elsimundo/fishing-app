@@ -62,7 +62,7 @@ export function BottomNav() {
           <NavButton
             onClick={() => setShowCreateModal(true)}
             icon={PlusSquare}
-            label="Post"
+            label="Cast"
             active={showCreateModal}
           />
           <NavButton
