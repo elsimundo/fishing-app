@@ -39,6 +39,8 @@ import { ChallengeDetailPage } from './pages/ChallengeDetailPage'
 import { ChallengeRulesPage } from './pages/ChallengeRulesPage'
 import CatchesPage from './pages/CatchesPage'
 import { FishIdentifierPage } from './pages/FishIdentifierPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 function App() {
   return (
@@ -46,6 +48,8 @@ function App() {
       <Route path="/" element={<Navigate to="/logbook" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/feed" element={<FeedView />} />
         <Route path="/search" element={<SearchUsersPage />} />

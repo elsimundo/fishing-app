@@ -243,7 +243,7 @@ export default function ProfilePage() {
 
       {/* Tabs */}
       <div className="sticky top-0 z-10 mt-2 border-b border-gray-200 bg-white">
-        <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-gray-500">
+        <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-gray-500 md:justify-center">
           <button
             type="button"
             onClick={() => setActiveTab('posts')}
