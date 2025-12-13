@@ -834,12 +834,10 @@ export default function ExplorePage() {
             }}
           />
 
-          {/* My Lakes / Watchlist - for freshwater venues */}
-          {showFreshwater && (
-            <MyLakesCard
-              onSelectLake={handleSelectLakeFromCard}
-            />
-          )}
+          {/* My Lakes / Watchlist - always show saved lakes */}
+          <MyLakesCard
+            onSelectLake={handleSelectLakeFromCard}
+          />
 
           {/* List Your Business Banner */}
           <Link

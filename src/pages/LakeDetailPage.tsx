@@ -5,10 +5,13 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import type { Lake, Catch } from '../types'
 import { Layout } from '../components/layout/Layout'
-import { MapPin, ArrowLeft, Globe, Phone, Car, Coffee, Crown, BadgeCheck, Fish, Navigation, Loader2, BarChart3 } from 'lucide-react'
+import { MapPin, ArrowLeft, Globe, Phone, Car, Coffee, Crown, BadgeCheck, Fish, Navigation, Loader2, BarChart3, Heart, Play, Users, Shield, Flag, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ClaimLakeModal } from '../components/lakes/ClaimLakeModal'
 import { toast } from 'react-hot-toast'
+import { useSavedLakes } from '../hooks/useSavedLakes'
+import { useLakeTeam, useLakeRole } from '../hooks/useLakeTeam'
+import { useSubmitLakeReport, REPORT_REASON_LABELS, type LakeReportReason } from '../hooks/useLakeReports'
 
 export default function LakeDetailPage() {
   const { slugOrId } = useParams<{ slugOrId: string }>()
@@ -18,6 +21,16 @@ export default function LakeDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showClaimModal, setShowClaimModal] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
+
+  // Saved lakes functionality
+  const { isLakeSaved, toggleSave, isPending: isSavePending } = useSavedLakes()
+  
+  // Lake team/role (for showing owner/team section and dashboard access)
+  const { data: userRole } = useLakeRole(lake?.id)
+  const { data: teamData } = useLakeTeam(lake?.id)
+  
+  const canAccessDashboard = userRole === 'owner' || userRole === 'manager' || userRole === 'bailiff'
 
   useEffect(() => {
     if (!slugOrId) return
@@ -125,11 +138,27 @@ export default function LakeDetailPage() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  {/* Owner dashboard link */}
-                  {lake.claimed_by === user?.id && (
+                  {/* Save/Heart button */}
+                  {user && (
+                    <button
+                      type="button"
+                      onClick={() => toggleSave(lake.id)}
+                      disabled={isSavePending}
+                      className={`flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                        isLakeSaved(lake.id)
+                          ? 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Heart size={14} fill={isLakeSaved(lake.id) ? 'currentColor' : 'none'} />
+                      {isLakeSaved(lake.id) ? 'Saved' : 'Save'}
+                    </button>
+                  )}
+                  {/* Owner/Team dashboard link - role-based access */}
+                  {canAccessDashboard && (
                     <Link
                       to={`/lakes/${lake.id}/dashboard`}
-                      className="flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-white hover:bg-primary/90"
+                      className="flex items-center gap-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
                     >
                       <BarChart3 size={14} />
                       Dashboard
@@ -227,6 +256,17 @@ export default function LakeDetailPage() {
                 </div>
               )}
 
+              {/* Start Session Here button */}
+              {user && (
+                <Link
+                  to={`/sessions/new?lakeId=${lake.id}&lakeName=${encodeURIComponent(lake.name)}&lat=${lake.latitude}&lng=${lake.longitude}`}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-navy-800 px-4 py-3 text-sm font-semibold text-white hover:bg-navy-900"
+                >
+                  <Play size={16} />
+                  Start Session Here
+                </Link>
+              )}
+
               {/* Claim CTA (unclaimed lakes) */}
               {!lake.claimed_by && user && (
                 <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
@@ -237,13 +277,59 @@ export default function LakeDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowClaimModal(true)}
-                    className="mt-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90"
+                    className="mt-2 rounded-lg bg-navy-800 px-4 py-2 text-xs font-semibold text-white hover:bg-navy-900"
                   >
                     Claim this venue
                   </button>
                 </div>
               )}
             </div>
+
+            {/* Owner & Team Section (for claimed lakes) */}
+            {lake.claimed_by && teamData && (
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Users size={16} className="text-gray-400" />
+                  Venue Team
+                </h2>
+                <div className="space-y-2">
+                  {/* Owner */}
+                  {teamData.owner && (
+                    <div className="flex items-center gap-3 p-2 rounded-lg bg-amber-50">
+                      <div className="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 font-bold text-xs">
+                        {(teamData.owner as any).display_name?.[0] || (teamData.owner as any).username?.[0] || '?'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {(teamData.owner as any).display_name || (teamData.owner as any).username || 'Owner'}
+                        </p>
+                        <p className="text-xs text-amber-700 flex items-center gap-1">
+                          <Crown size={10} /> Owner
+                        </p>
+                      </div>
+                      <BadgeCheck size={16} className="text-blue-500" />
+                    </div>
+                  )}
+                  {/* Team members */}
+                  {teamData.team && teamData.team.length > 0 && teamData.team.map((member) => (
+                    <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs">
+                        {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {member.profile?.display_name || member.profile?.username || 'Team Member'}
+                        </p>
+                        <p className="text-xs text-gray-500 flex items-center gap-1">
+                          <Shield size={10} />
+                          {member.role === 'manager' ? 'Manager' : 'Bailiff'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Community Stats */}
             <div className="rounded-2xl bg-white p-5 shadow-sm">
@@ -309,6 +395,18 @@ export default function LakeDetailPage() {
             {lake.claimed_by && (
               <RecentCatches lakeId={lake.id} isPremium={lake.is_premium} />
             )}
+
+            {/* Report a Problem */}
+            {user && (
+              <button
+                type="button"
+                onClick={() => setShowReportModal(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600 hover:bg-gray-50"
+              >
+                <Flag size={16} />
+                Report a problem with this listing
+              </button>
+            )}
           </div>
         )}
 
@@ -324,8 +422,144 @@ export default function LakeDetailPage() {
             }}
           />
         )}
+
+        {/* Report Problem Modal */}
+        {showReportModal && lake && user && (
+          <ReportProblemModal
+            lakeId={lake.id}
+            lakeName={lake.name}
+            onClose={() => setShowReportModal(false)}
+          />
+        )}
       </main>
     </Layout>
+  )
+}
+
+// Report Problem Modal
+function ReportProblemModal({
+  lakeId,
+  lakeName,
+  onClose,
+}: {
+  lakeId: string
+  lakeName: string
+  onClose: () => void
+}) {
+  const [reason, setReason] = useState<LakeReportReason | ''>('')
+  const [details, setDetails] = useState('')
+  const submitReport = useSubmitLakeReport()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!reason) {
+      toast.error('Please select a reason')
+      return
+    }
+
+    submitReport.mutate(
+      { lakeId, reason, details },
+      {
+        onSuccess: () => {
+          toast.success('Report submitted. Thank you for helping improve our listings!')
+          onClose()
+        },
+        onError: () => {
+          toast.error('Failed to submit report. Please try again.')
+        },
+      }
+    )
+  }
+
+  const reasons: LakeReportReason[] = [
+    'not_a_fishing_lake',
+    'incorrect_info',
+    'duplicate',
+    'closed_permanently',
+    'safety_issue',
+    'access_problem',
+    'inappropriate_content',
+    'other',
+  ]
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Report a Problem</h2>
+            <p className="text-sm text-gray-500">{lakeName}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              What's the problem?
+            </label>
+            <div className="space-y-2">
+              {reasons.map((r) => (
+                <label
+                  key={r}
+                  className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                    reason === r
+                      ? 'border-navy-800 bg-navy-50'
+                      : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="reason"
+                    value={r}
+                    checked={reason === r}
+                    onChange={() => setReason(r)}
+                    className="h-4 w-4 text-navy-800 focus:ring-navy-800"
+                  />
+                  <span className="text-sm text-gray-900">{REPORT_REASON_LABELS[r]}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Additional details (optional)
+            </label>
+            <textarea
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder="Please provide any additional information..."
+              rows={3}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!reason || submitReport.isPending}
+              className="flex-1 rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
+            >
+              {submitReport.isPending ? 'Submitting...' : 'Submit Report'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 

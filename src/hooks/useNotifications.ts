@@ -5,7 +5,14 @@ import { useAuth } from './useAuth'
 export interface Notification {
   id: string
   user_id: string
-  type: 'competition_invite' | 'competition_starting_soon' | 'competition_winner' | 'catch_approved' | 'catch_rejected' | 'post_like' | 'post_comment' | 'follow' | 'session_catch' | 'message' | 'share'
+  type: 
+    | 'competition_invite' | 'competition_starting_soon' | 'competition_winner' 
+    | 'catch_approved' | 'catch_rejected' 
+    | 'post_like' | 'post_comment' 
+    | 'follow' | 'session_catch' | 'message' | 'share'
+    | 'lake_team_invite' | 'lake_team_removed' | 'lake_team_role_changed'
+    | 'lake_claim_submitted' | 'lake_claim_approved' | 'lake_claim_rejected'
+    | 'lake_problem_reported'
   title: string
   message: string
   action_url: string | null
@@ -14,6 +21,7 @@ export interface Notification {
   related_session_id: string | null
   related_catch_id: string | null
   related_post_id: string | null
+  related_lake_id: string | null
   is_read: boolean
   created_at: string
   // Enriched fields

@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { Search, Check, X, Crown, MapPin, Globe, AlertCircle, UserCheck, User, ExternalLink, Phone, Mail, FileText } from 'lucide-react'
+import { Search, Check, X, Crown, MapPin, Globe, AlertCircle, UserCheck, User, ExternalLink, Phone, Mail, FileText, Users, Trash2, Flag } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import type { Lake } from '../../types'
+import { useLakeTeam, useAddLakeTeamMember, useRemoveLakeTeamMember, useUpdateLakeTeamRole } from '../../hooks/useLakeTeam'
+import { useAllLakeReports, useUpdateLakeReportStatus, REPORT_REASON_LABELS, type LakeReport } from '../../hooks/useLakeReports'
 
-type LakeFilter = 'all' | 'unverified' | 'verified' | 'premium' | 'claimed'
+type LakeFilter = 'all' | 'unverified' | 'verified' | 'premium' | 'claimed' | 'reports'
 
 type AdminLakeOwner = {
   id: string
@@ -48,6 +50,7 @@ export default function LakesPage() {
   const [ownerLakeId, setOwnerLakeId] = useState<string | null>(null)
   const [claimUpdatingId, setClaimUpdatingId] = useState<string | null>(null)
   const [showAddLake, setShowAddLake] = useState(false)
+  const [teamModalLakeId, setTeamModalLakeId] = useState<string | null>(null)
   const [newLake, setNewLake] = useState({
     name: '',
     latitude: '',
@@ -58,9 +61,18 @@ export default function LakesPage() {
     website: '',
   })
 
+  // Fetch lake reports for the reports tab
+  const { data: reports = [], isLoading: reportsLoading } = useAllLakeReports(
+    filter === 'reports' ? 'pending' : undefined
+  )
+  const updateReportStatus = useUpdateLakeReportStatus()
+
   const { data: lakes, isLoading } = useQuery({
     queryKey: ['admin-lakes', filter, searchTerm],
     queryFn: async () => {
+      // Skip fetching lakes if we're on the reports tab
+      if (filter === 'reports') return []
+
       let query = supabase
         .from('lakes')
         .select('*')
@@ -436,6 +448,7 @@ export default function LakesPage() {
     { value: 'verified', label: 'Verified' },
     { value: 'premium', label: 'Premium' },
     { value: 'claimed', label: 'Claimed' },
+    { value: 'reports', label: `Reports${reports.length > 0 ? ` (${reports.length})` : ''}` },
     { value: 'all', label: 'All' },
   ]
 
@@ -520,9 +533,50 @@ export default function LakesPage() {
                 onRejectClaim={(claim, reason) =>
                   rejectClaim.mutate({ claimId: claim.id, reason: reason || null })
                 }
+                onManageTeam={() => setTeamModalLakeId(lake.id)}
               />
             ))}
           </div>
+        ) : filter === 'reports' ? (
+          /* Reports View */
+          reportsLoading ? (
+            <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-6 text-gray-600">
+              <span>Loading reports...</span>
+            </div>
+          ) : reports.length > 0 ? (
+            <div className="space-y-3">
+              {reports.map((report) => (
+                <ReportCard
+                  key={report.id}
+                  report={report}
+                  onResolve={() => {
+                    updateReportStatus.mutate(
+                      { reportId: report.id, status: 'resolved' },
+                      {
+                        onSuccess: () => toast.success('Report marked as resolved'),
+                        onError: () => toast.error('Failed to update report'),
+                      }
+                    )
+                  }}
+                  onDismiss={() => {
+                    updateReportStatus.mutate(
+                      { reportId: report.id, status: 'dismissed' },
+                      {
+                        onSuccess: () => toast.success('Report dismissed'),
+                        onError: () => toast.error('Failed to update report'),
+                      }
+                    )
+                  }}
+                  isUpdating={updateReportStatus.isPending}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-6 text-gray-600">
+              <Check size={20} className="text-green-500" />
+              <span>No pending reports</span>
+            </div>
+          )
         ) : (
           <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-6 text-gray-600">
             <AlertCircle size={20} />
@@ -643,7 +697,215 @@ export default function LakesPage() {
           </div>
         </div>
       )}
+
+      {/* Team Management Modal */}
+      {teamModalLakeId && (
+        <TeamManagementModal
+          lakeId={teamModalLakeId}
+          lakeName={lakes?.find((l) => l.id === teamModalLakeId)?.name || 'Lake'}
+          onClose={() => setTeamModalLakeId(null)}
+        />
+      )}
     </AdminLayout>
+  )
+}
+
+// Team Management Modal Component
+function TeamManagementModal({
+  lakeId,
+  lakeName,
+  onClose,
+}: {
+  lakeId: string
+  lakeName: string
+  onClose: () => void
+}) {
+  const [username, setUsername] = useState('')
+  const [role, setRole] = useState<'manager' | 'bailiff'>('bailiff')
+  const [isSearching, setIsSearching] = useState(false)
+
+  const { data: teamData, isLoading } = useLakeTeam(lakeId)
+  const { mutate: addMember, isPending: isAdding } = useAddLakeTeamMember()
+  const { mutate: removeMember } = useRemoveLakeTeamMember()
+  const { mutate: updateRole } = useUpdateLakeTeamRole()
+
+  const handleAddMember = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!username.trim()) return
+
+    setIsSearching(true)
+
+    // Look up user by username or email
+    const searchTerm = username.trim().toLowerCase()
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('id, username, email')
+      .or(`username.eq.${searchTerm},email.eq.${searchTerm}`)
+      .maybeSingle()
+
+    setIsSearching(false)
+
+    if (error || !profile) {
+      toast.error('User not found. Check the username or email.')
+      return
+    }
+
+    addMember(
+      { lakeId, userId: profile.id, role },
+      {
+        onSuccess: () => {
+          toast.success('Team member added!')
+          setUsername('')
+        },
+        onError: (err) => {
+          if (err.message.includes('duplicate')) {
+            toast.error('This user is already a team member')
+          } else {
+            toast.error('Failed to add team member')
+          }
+        },
+      }
+    )
+  }
+
+  const handleRemove = (memberId: string) => {
+    if (!confirm('Remove this team member?')) return
+    removeMember(
+      { lakeId, memberId },
+      {
+        onSuccess: () => toast.success('Team member removed'),
+        onError: () => toast.error('Failed to remove'),
+      }
+    )
+  }
+
+  const handleRoleChange = (memberId: string, newRole: 'manager' | 'bailiff') => {
+    updateRole(
+      { memberId, lakeId, role: newRole },
+      {
+        onSuccess: () => toast.success('Role updated'),
+        onError: () => toast.error('Failed to update role'),
+      }
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Manage Team</h2>
+            <p className="text-sm text-gray-500">{lakeName}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {isLoading ? (
+          <p className="text-sm text-gray-500 py-4">Loading team...</p>
+        ) : (
+          <div className="space-y-4">
+            {/* Owner */}
+            {teamData?.owner && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50">
+                <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 font-bold text-sm">
+                  {(teamData.owner as any).display_name?.[0] || (teamData.owner as any).username?.[0] || '?'}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {(teamData.owner as any).display_name || (teamData.owner as any).username || 'Unknown'}
+                  </p>
+                  <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                    <Crown size={12} /> Owner
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {!teamData?.owner && (
+              <div className="p-3 rounded-lg bg-gray-50 text-center">
+                <p className="text-sm text-gray-500">No owner assigned</p>
+                <p className="text-xs text-gray-400 mt-1">Use "Assign Owner" on the lake card</p>
+              </div>
+            )}
+
+            {/* Team members */}
+            {teamData?.team && teamData.team.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-gray-700">Team Members</p>
+                {teamData.team.map((member) => (
+                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
+                      {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {member.profile?.display_name || member.profile?.username || 'Unknown'}
+                      </p>
+                      <select
+                        value={member.role}
+                        onChange={(e) => handleRoleChange(member.id, e.target.value as 'manager' | 'bailiff')}
+                        className="mt-1 text-xs rounded border-gray-200 py-0.5 px-1"
+                      >
+                        <option value="manager">Manager</option>
+                        <option value="bailiff">Bailiff</option>
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(member.id)}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add team member form */}
+            <form onSubmit={handleAddMember} className="border-t border-gray-100 pt-4">
+              <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                <Users size={14} /> Add Team Member
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Username or email"
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                />
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as 'manager' | 'bailiff')}
+                  className="rounded-lg border border-gray-300 px-2 py-2 text-sm"
+                >
+                  <option value="bailiff">Bailiff</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                disabled={isAdding || isSearching || !username.trim()}
+                className="mt-2 w-full rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
+              >
+                {isAdding || isSearching ? 'Adding...' : 'Add Member'}
+              </button>
+              <p className="mt-2 text-[11px] text-gray-500">
+                <strong>Manager:</strong> Can edit lake details and see all stats.{' '}
+                <strong>Bailiff:</strong> View-only dashboard access.
+              </p>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -660,6 +922,7 @@ function LakeCard({
   claimUpdatingId,
   onApproveClaim,
   onRejectClaim,
+  onManageTeam,
 }: {
   lake: AdminLake
   onVerify: (verified: boolean) => void
@@ -673,6 +936,7 @@ function LakeCard({
   claimUpdatingId: string | null
   onApproveClaim: (claim: AdminLakeClaim) => void
   onRejectClaim: (claim: AdminLakeClaim, reason: string | null) => void
+  onManageTeam: () => void
 }) {
   const hasPendingClaims = (lake.claims?.length || 0) > 0
 
@@ -803,6 +1067,16 @@ function LakeCard({
           <MapPin size={16} />
           <span>Map</span>
         </a>
+
+        {/* Manage Team */}
+        <button
+          type="button"
+          onClick={onManageTeam}
+          className="flex items-center justify-center gap-1 rounded-lg bg-indigo-100 px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-200"
+        >
+          <Users size={16} />
+          <span>Team</span>
+        </button>
       </div>
 
       {/* Claim review (collapsed by default) */}
@@ -948,6 +1222,78 @@ function LakeCard({
           </div>
         </details>
       )}
+    </div>
+  )
+}
+
+// Report Card component for admin reports view
+function ReportCard({
+  report,
+  onResolve,
+  onDismiss,
+  isUpdating,
+}: {
+  report: LakeReport
+  onResolve: () => void
+  onDismiss: () => void
+  isUpdating: boolean
+}) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <Flag size={16} className="text-amber-500" />
+            <span className="text-sm font-semibold text-gray-900">
+              {REPORT_REASON_LABELS[report.reason]}
+            </span>
+          </div>
+          
+          {report.lake && (
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">{report.lake.name}</span>
+              {report.lake.region && (
+                <span className="text-gray-500"> · {report.lake.region}</span>
+              )}
+            </p>
+          )}
+
+          {report.details && (
+            <p className="mt-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
+              "{report.details}"
+            </p>
+          )}
+
+          <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+            {report.reporter && (
+              <span>Reported by: {report.reporter.display_name || report.reporter.username}</span>
+            )}
+            <span>·</span>
+            <span>{new Date(report.created_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={onResolve}
+            disabled={isUpdating}
+            className="flex items-center gap-1 rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-200 disabled:opacity-50"
+          >
+            <Check size={14} />
+            Resolve
+          </button>
+          <button
+            type="button"
+            onClick={onDismiss}
+            disabled={isUpdating}
+            className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+          >
+            <X size={14} />
+            Dismiss
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

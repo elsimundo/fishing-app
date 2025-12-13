@@ -1,7 +1,7 @@
+import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../hooks/useAuth'
 import type { Lake, Catch } from '../types'
 import { Layout } from '../components/layout/Layout'
 import { 
@@ -13,14 +13,21 @@ import {
   Users, 
   Eye,
   Crown,
-  Lock
+  Lock,
+  UserPlus,
+  Shield,
+  Trash2,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import { UpgradeToPremiumCard } from '../components/lakes/UpgradeToPremiumCard'
+import { useLakeRole, useLakeTeam, useAddLakeTeamMember, useRemoveLakeTeamMember, useUpdateLakeTeamRole } from '../hooks/useLakeTeam'
+import { toast } from 'react-hot-toast'
 
 export default function LakeOwnerDashboard() {
   const { lakeId } = useParams<{ lakeId: string }>()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const [showTeamSection, setShowTeamSection] = useState(false)
 
   // Fetch lake details
   const { data: lake, isLoading: lakeLoading } = useQuery({
@@ -38,8 +45,16 @@ export default function LakeOwnerDashboard() {
     enabled: !!lakeId,
   })
 
-  // Check if user is the owner
-  const isOwner = lake?.claimed_by === user?.id
+  // Get user's role for this lake (owner, manager, bailiff, or null)
+  const { data: userRole, isLoading: roleLoading } = useLakeRole(lakeId)
+  
+  // Get team members
+  const { data: teamData } = useLakeTeam(lakeId)
+
+  // Check permissions based on role
+  const hasAccess = userRole === 'owner' || userRole === 'manager' || userRole === 'bailiff'
+  const canEdit = userRole === 'owner' || userRole === 'manager'
+  const isOwner = userRole === 'owner'
   const isPremium = lake?.is_premium
 
   // Fetch analytics data
@@ -109,13 +124,13 @@ export default function LakeOwnerDashboard() {
         avgCatchesPerSession: sessions?.length ? (catches.length / sessions.length).toFixed(1) : '0',
       }
     },
-    enabled: !!lakeId && isOwner,
+    enabled: !!lakeId && hasAccess,
   })
 
-  const isLoading = lakeLoading || analyticsLoading
+  const isLoading = lakeLoading || analyticsLoading || roleLoading
 
-  // Not owner - show access denied
-  if (!isLoading && lake && !isOwner) {
+  // No access - show access denied
+  if (!isLoading && lake && !hasAccess) {
     return (
       <Layout>
         <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8">
@@ -123,7 +138,7 @@ export default function LakeOwnerDashboard() {
             <Lock size={48} className="mx-auto text-gray-300" />
             <h1 className="mt-4 text-xl font-bold text-gray-900">Access Denied</h1>
             <p className="mt-2 text-sm text-gray-500">
-              Only the verified owner of this venue can access the dashboard.
+              Only the owner and team members can access this dashboard.
             </p>
             <Link
               to={`/lakes/${lakeId}`}
@@ -292,6 +307,72 @@ export default function LakeOwnerDashboard() {
               </div>
             ) : null}
 
+            {/* Team Management - Owner & Manager only */}
+            {canEdit && (
+              <div className="rounded-2xl bg-white shadow-sm overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowTeamSection(!showTeamSection)}
+                  className="w-full flex items-center justify-between p-5 text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                      <Shield size={20} />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-semibold text-gray-900">Team Management</h2>
+                      <p className="text-xs text-gray-500">
+                        {teamData?.team.length || 0} team member{(teamData?.team.length || 0) !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                  {showTeamSection ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                </button>
+
+                {showTeamSection && (
+                  <div className="border-t border-gray-100 p-5 space-y-4">
+                    {/* Owner */}
+                    {teamData?.owner && (
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50">
+                        <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 font-bold text-sm">
+                          {teamData.owner.display_name?.[0] || teamData.owner.username?.[0] || '?'}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {teamData.owner.display_name || teamData.owner.username || 'Unknown'}
+                          </p>
+                          <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                            <Crown size={12} /> Owner
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Team members */}
+                    {teamData?.team.map((member) => (
+                      <TeamMemberRow
+                        key={member.id}
+                        member={member}
+                        lakeId={lakeId!}
+                        isOwner={isOwner}
+                      />
+                    ))}
+
+                    {/* Add team member */}
+                    {isOwner && (
+                      <AddTeamMemberForm lakeId={lakeId!} />
+                    )}
+
+                    {!isOwner && (
+                      <p className="text-xs text-gray-500 text-center py-2">
+                        Only the owner can add or remove team members.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Upgrade to Premium Card */}
             <UpgradeToPremiumCard
               lakeId={lake.id}
@@ -330,5 +411,172 @@ function StatCard({
       <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
       <p className="text-xs text-gray-500">{label}</p>
     </div>
+  )
+}
+
+// Team member row component
+function TeamMemberRow({
+  member,
+  lakeId,
+  isOwner,
+}: {
+  member: {
+    id: string
+    role: 'manager' | 'bailiff'
+    profile?: {
+      display_name: string | null
+      username: string | null
+    }
+  }
+  lakeId: string
+  isOwner: boolean
+}) {
+  const { mutate: removeMember, isPending: isRemoving } = useRemoveLakeTeamMember()
+  const { mutate: updateRole, isPending: isUpdating } = useUpdateLakeTeamRole()
+
+  const roleColors = {
+    manager: 'bg-indigo-50 text-indigo-700',
+    bailiff: 'bg-gray-100 text-gray-700',
+  }
+
+  const handleRemove = () => {
+    if (!confirm('Remove this team member?')) return
+    removeMember(
+      { lakeId, memberId: member.id },
+      {
+        onSuccess: () => toast.success('Team member removed'),
+        onError: () => toast.error('Failed to remove team member'),
+      }
+    )
+  }
+
+  const handleRoleChange = (newRole: 'manager' | 'bailiff') => {
+    updateRole(
+      { memberId: member.id, lakeId, role: newRole },
+      {
+        onSuccess: () => toast.success('Role updated'),
+        onError: () => toast.error('Failed to update role'),
+      }
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
+        {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 truncate">
+          {member.profile?.display_name || member.profile?.username || 'Unknown'}
+        </p>
+        {isOwner ? (
+          <select
+            value={member.role}
+            onChange={(e) => handleRoleChange(e.target.value as 'manager' | 'bailiff')}
+            disabled={isUpdating}
+            className="mt-1 text-xs rounded border-gray-200 py-0.5 px-1"
+          >
+            <option value="manager">Manager</option>
+            <option value="bailiff">Bailiff</option>
+          </select>
+        ) : (
+          <span className={`text-xs font-medium px-2 py-0.5 rounded ${roleColors[member.role]}`}>
+            {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
+          </span>
+        )}
+      </div>
+      {isOwner && (
+        <button
+          type="button"
+          onClick={handleRemove}
+          disabled={isRemoving}
+          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+        >
+          <Trash2 size={16} />
+        </button>
+      )}
+    </div>
+  )
+}
+
+// Add team member form
+function AddTeamMemberForm({ lakeId }: { lakeId: string }) {
+  const [username, setUsername] = useState('')
+  const [role, setRole] = useState<'manager' | 'bailiff'>('bailiff')
+  const [isSearching, setIsSearching] = useState(false)
+  const { mutate: addMember, isPending: isAdding } = useAddLakeTeamMember()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!username.trim()) return
+
+    setIsSearching(true)
+
+    // Look up user by username
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', username.trim().toLowerCase())
+      .single()
+
+    setIsSearching(false)
+
+    if (error || !profile) {
+      toast.error('User not found. Check the username.')
+      return
+    }
+
+    addMember(
+      { lakeId, userId: profile.id, role },
+      {
+        onSuccess: () => {
+          toast.success('Team member added!')
+          setUsername('')
+        },
+        onError: (err) => {
+          if (err.message.includes('duplicate')) {
+            toast.error('This user is already a team member')
+          } else {
+            toast.error('Failed to add team member')
+          }
+        },
+      }
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="border-t border-gray-100 pt-4 mt-4">
+      <p className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1">
+        <UserPlus size={14} /> Add Team Member
+      </p>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter username"
+          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+        />
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value as 'manager' | 'bailiff')}
+          className="rounded-lg border border-gray-300 px-2 py-2 text-sm"
+        >
+          <option value="bailiff">Bailiff</option>
+          <option value="manager">Manager</option>
+        </select>
+        <button
+          type="submit"
+          disabled={isAdding || isSearching || !username.trim()}
+          className="rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
+        >
+          {isAdding || isSearching ? '...' : 'Add'}
+        </button>
+      </div>
+      <p className="mt-2 text-[11px] text-gray-500">
+        <strong>Manager:</strong> Can edit lake details and see all stats.{' '}
+        <strong>Bailiff:</strong> View-only dashboard access.
+      </p>
+    </form>
   )
 }

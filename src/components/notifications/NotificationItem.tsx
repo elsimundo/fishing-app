@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Trophy, Check, X, Heart, MessageCircle, UserPlus, Fish, Share2 } from 'lucide-react'
+import { Trophy, Check, X, Heart, MessageCircle, UserPlus, Fish, Share2, Users, AlertTriangle, Building2 } from 'lucide-react'
 import type { Notification } from '../../hooks/useNotifications'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -28,6 +28,16 @@ function getNotificationIcon(type: Notification['type']) {
       return <Fish size={20} className="text-teal-500" />
     case 'share':
       return <Share2 size={20} className="text-cyan-500" />
+    case 'lake_team_invite':
+    case 'lake_team_removed':
+    case 'lake_team_role_changed':
+      return <Users size={20} className="text-indigo-500" />
+    case 'lake_claim_submitted':
+    case 'lake_claim_approved':
+    case 'lake_claim_rejected':
+      return <Building2 size={20} className="text-emerald-500" />
+    case 'lake_problem_reported':
+      return <AlertTriangle size={20} className="text-amber-500" />
     default:
       return <Fish size={20} className="text-gray-500" />
   }

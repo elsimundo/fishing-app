@@ -76,7 +76,7 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
   }, [zoneId])
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 max-h-[70vh] overflow-hidden rounded-t-2xl border-t border-gray-200 bg-white shadow-2xl md:absolute md:inset-auto md:bottom-4 md:right-4 md:w-80 md:rounded-2xl md:border">
+    <div className="fixed inset-x-0 bottom-20 z-50 mx-3 max-h-[55vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl md:absolute md:inset-auto md:bottom-4 md:right-4 md:mx-0 md:w-80 md:max-h-[70vh]">
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
         <div className="flex items-center gap-3">
@@ -170,7 +170,7 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
       </div>
 
       {/* Catches list */}
-      <div className="max-h-[50vh] overflow-y-auto p-4">
+      <div className="max-h-[35vh] overflow-y-auto p-4 md:max-h-[50vh]">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 size={24} className="animate-spin text-gray-400" />
