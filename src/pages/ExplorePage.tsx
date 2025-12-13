@@ -7,6 +7,7 @@ import { useCatches } from '../hooks/useCatches'
 import { useTackleShops, useClubs, useCharters } from '../hooks/useTackleShops'
 import { useProfile } from '../hooks/useProfile'
 import { useAuth } from '../hooks/useAuth'
+import { useAdminAuth } from '../hooks/useAdminAuth'
 import { supabase } from '../lib/supabase'
 import { ExploreMap, type ExploreMarker, type ExploreMarkerType } from '../components/map/ExploreMap'
 import { calculateDistance, formatDistance } from '../utils/distance'
@@ -23,7 +24,7 @@ import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { useFishingZones } from '../hooks/useFishingZones'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
-import { MapPin, Navigation, Store, X } from 'lucide-react'
+import { MapPin, Navigation, Store, X, UserPlus, Loader2, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
 
@@ -46,6 +47,11 @@ export default function ExplorePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { data: profile, refetch: refetchProfile } = useProfile()
+  const { isAdmin } = useAdminAuth()
+  
+  // Quick assign owner modal state (admin only)
+  const [assignOwnerLakeId, setAssignOwnerLakeId] = useState<string | null>(null)
+  const [assignOwnerLakeName, setAssignOwnerLakeName] = useState<string>('')
   
   // Determine what content to show based on fishing preference
   const fishingPreference = profile?.fishing_preference
@@ -675,6 +681,21 @@ export default function ExplorePage() {
                       </button>
                     )
                   })()}
+                  {/* Admin: Quick assign owner */}
+                  {isAdmin && !selectedMarker.id.startsWith('lake-osm-') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const lakeId = selectedMarker.id.replace('lake-', '')
+                        setAssignOwnerLakeId(lakeId)
+                        setAssignOwnerLakeName(selectedMarker.title)
+                      }}
+                      className="w-full rounded-lg border border-purple-300 bg-purple-50 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100"
+                    >
+                      <UserPlus size={12} className="inline mr-1" />
+                      Assign Owner
+                    </button>
+                  )}
                 </div>
               )}
               {(selectedMarker.type === 'mark' || selectedMarker.type === 'shared-mark') && (
@@ -941,6 +962,204 @@ export default function ExplorePage() {
           </div>
         </div>
       )}
+
+      {/* Assign Owner Modal (Admin only) */}
+      {assignOwnerLakeId && (
+        <AssignOwnerModal
+          lakeId={assignOwnerLakeId}
+          lakeName={assignOwnerLakeName}
+          onClose={() => {
+            setAssignOwnerLakeId(null)
+            setAssignOwnerLakeName('')
+          }}
+          onSuccess={() => {
+            setAssignOwnerLakeId(null)
+            setAssignOwnerLakeName('')
+            setSelectedMarker(null)
+            toast.success('Owner assigned successfully!')
+          }}
+        />
+      )}
     </Layout>
+  )
+}
+
+// Admin modal to quickly assign a lake owner by username
+function AssignOwnerModal({
+  lakeId,
+  lakeName,
+  onClose,
+  onSuccess,
+}: {
+  lakeId: string
+  lakeName: string
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<Array<{ id: string; username: string; display_name: string | null; avatar_url: string | null }>>([])
+  const [isAssigning, setIsAssigning] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<{ id: string; username: string } | null>(null)
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return
+    setIsSearching(true)
+    setSearchResults([])
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_url')
+      .or(`username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
+      .limit(10)
+
+    setIsSearching(false)
+    if (error) {
+      toast.error('Search failed')
+      return
+    }
+    setSearchResults(data || [])
+  }
+
+  const handleAssign = async () => {
+    if (!selectedUser) return
+    setIsAssigning(true)
+
+    const { error } = await supabase
+      .from('lakes')
+      .update({
+        claimed_by: selectedUser.id,
+        claimed_at: new Date().toISOString(),
+        is_verified: true,
+      })
+      .eq('id', lakeId)
+
+    if (error) {
+      setIsAssigning(false)
+      toast.error('Failed to assign owner')
+      return
+    }
+
+    // Send notification to the new owner
+    await supabase.from('notifications').insert({
+      user_id: selectedUser.id,
+      type: 'lake_claim_approved',
+      title: 'You\'ve been assigned as lake owner!',
+      message: `You are now the owner of ${lakeName}. You can manage it from your dashboard.`,
+      related_lake_id: lakeId,
+      action_url: `/lakes/${lakeId}/dashboard`,
+    })
+
+    setIsAssigning(false)
+    onSuccess()
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Assign Owner</h2>
+            <p className="text-sm text-gray-500">{lakeName}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="mb-4">
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Search by username
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="Enter username..."
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+            />
+            <button
+              type="button"
+              onClick={handleSearch}
+              disabled={isSearching || !searchTerm.trim()}
+              className="rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
+            >
+              {isSearching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Results */}
+        {searchResults.length > 0 && (
+          <div className="mb-4 max-h-48 overflow-y-auto rounded-lg border border-gray-200">
+            {searchResults.map((user) => (
+              <button
+                key={user.id}
+                type="button"
+                onClick={() => setSelectedUser({ id: user.id, username: user.username })}
+                className={`flex w-full items-center gap-3 p-3 text-left transition-colors ${
+                  selectedUser?.id === user.id
+                    ? 'bg-navy-50 border-l-4 border-navy-800'
+                    : 'hover:bg-gray-50 border-l-4 border-transparent'
+                }`}
+              >
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600">
+                    {user.username?.charAt(0).toUpperCase() || '?'}
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-medium text-gray-900">@{user.username}</p>
+                  {user.display_name && (
+                    <p className="text-xs text-gray-500">{user.display_name}</p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {searchResults.length === 0 && searchTerm && !isSearching && (
+          <p className="mb-4 text-center text-sm text-gray-500">No users found</p>
+        )}
+
+        {/* Selected user confirmation */}
+        {selectedUser && (
+          <div className="mb-4 rounded-lg bg-green-50 p-3">
+            <p className="text-sm text-green-800">
+              <span className="font-medium">@{selectedUser.username}</span> will be assigned as owner of this lake.
+            </p>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleAssign}
+            disabled={!selectedUser || isAssigning}
+            className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:bg-primary/60"
+          >
+            {isAssigning ? 'Assigning...' : 'Assign Owner'}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
