@@ -91,33 +91,33 @@ export function FishIdentifierPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#1A2D3D] pb-20 md:pb-0">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+      <div className="sticky top-0 z-10 border-b border-[#334155] bg-[#243B4A]">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-full p-2 transition-colors hover:bg-gray-100"
+            className="rounded-full p-2 transition-colors hover:bg-[#334155]"
           >
-            <ArrowLeft size={20} className="text-gray-700" />
+            <ArrowLeft size={20} className="text-gray-300" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">Fish Identifier</h1>
+          <h1 className="text-lg font-bold text-white">Fish Identifier</h1>
         </div>
       </div>
 
       {/* Content */}
       <div className="mx-auto max-w-2xl p-4">
-        <div className="rounded-xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-[#243B4A] border border-[#334155] p-6 shadow-sm">
           {/* Mode Selection */}
           {mode === 'choose' && (
             <div className="space-y-4">
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100">
-                  <Search size={32} className="text-amber-600" />
+                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-900/30">
+                  <Search size={32} className="text-amber-400" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Fish Identifier</h2>
-                <p className="mt-2 text-sm text-gray-600">
+                <h2 className="text-xl font-bold text-white">Fish Identifier</h2>
+                <p className="mt-2 text-sm text-gray-400">
                   Identify a fish and learn about legal sizes, best baits, rigs, and records
                 </p>
               </div>
@@ -126,14 +126,14 @@ export function FishIdentifierPage() {
               <button
                 type="button"
                 onClick={() => setMode('photo')}
-                className="flex w-full items-center gap-4 rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-colors hover:border-amber-400 hover:bg-amber-50"
+                className="flex w-full items-center gap-4 rounded-xl border-2 border-[#334155] bg-[#1A2D3D] p-4 text-left transition-colors hover:border-amber-500/50 hover:bg-amber-900/20"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
-                  <Camera size={24} className="text-amber-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-900/30">
+                  <Camera size={24} className="text-amber-400" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">Upload a Photo</p>
-                  <p className="text-sm text-gray-600">AI will identify the species for you</p>
+                  <p className="font-semibold text-white">Upload a Photo</p>
+                  <p className="text-sm text-gray-400">AI will identify the species for you</p>
                 </div>
               </button>
 
@@ -141,14 +141,14 @@ export function FishIdentifierPage() {
               <button
                 type="button"
                 onClick={() => setMode('search')}
-                className="flex w-full items-center gap-4 rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-colors hover:border-cyan-400 hover:bg-cyan-50"
+                className="flex w-full items-center gap-4 rounded-xl border-2 border-[#334155] bg-[#1A2D3D] p-4 text-left transition-colors hover:border-[#1BA9A0]/50 hover:bg-[#1BA9A0]/20"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100">
-                  <Search size={24} className="text-cyan-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1BA9A0]/30">
+                  <Search size={24} className="text-[#1BA9A0]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">Search by Name</p>
-                  <p className="text-sm text-gray-600">Browse our species database</p>
+                  <p className="font-semibold text-white">Search by Name</p>
+                  <p className="text-sm text-gray-400">Browse our species database</p>
                 </div>
               </button>
             </div>
@@ -158,7 +158,7 @@ export function FishIdentifierPage() {
           {mode === 'search' && !selectedSpecies && (
             <div className="space-y-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -168,24 +168,24 @@ export function FishIdentifierPage() {
                   }}
                   onFocus={() => setShowDropdown(true)}
                   placeholder="Search for a species..."
-                  className="w-full rounded-xl border border-gray-300 py-3 pl-10 pr-4 text-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] py-3 pl-10 pr-4 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]/20"
                   autoFocus
                 />
               </div>
 
               {/* Species Dropdown */}
               {showDropdown && (
-                <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+                <div className="max-h-64 overflow-y-auto rounded-xl border border-[#334155] bg-[#1A2D3D] shadow-lg">
                   {filteredSpecies.length > 0 ? (
                     filteredSpecies.map((species) => (
                       <button
                         key={species}
                         type="button"
                         onClick={() => handleSelectSpecies(species)}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-gray-50"
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-[#334155]"
                       >
                         <span className="text-lg">🐟</span>
-                        <span className="text-gray-900">{species}</span>
+                        <span className="text-white">{species}</span>
                       </button>
                     ))
                   ) : (
@@ -199,7 +199,7 @@ export function FishIdentifierPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#334155]"
               >
                 ← Back
               </button>
@@ -224,7 +224,7 @@ export function FishIdentifierPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#334155]"
               >
                 Search Another Species
               </button>
@@ -244,17 +244,17 @@ export function FishIdentifierPage() {
                 />
                 <label
                   htmlFor="fish-photo"
-                  className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-12 transition-colors hover:border-amber-400 hover:bg-amber-50"
+                  className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-[#334155] bg-[#1A2D3D] px-6 py-12 transition-colors hover:border-amber-500/50 hover:bg-amber-900/20"
                 >
-                  <Camera size={40} className="text-gray-400" />
-                  <span className="text-sm font-medium text-gray-700">Tap to choose a photo</span>
+                  <Camera size={40} className="text-gray-500" />
+                  <span className="text-sm font-medium text-gray-300">Tap to choose a photo</span>
                   <span className="text-xs text-gray-500">JPG, PNG or WebP</span>
                 </label>
               </label>
 
-              <div className="rounded-lg bg-blue-50 p-4">
-                <p className="text-xs font-medium text-blue-900">💡 Tips for best results:</p>
-                <ul className="mt-2 space-y-1 text-xs text-blue-800">
+              <div className="rounded-lg bg-blue-900/30 border border-blue-500/40 p-4">
+                <p className="text-xs font-medium text-blue-300">💡 Tips for best results:</p>
+                <ul className="mt-2 space-y-1 text-xs text-blue-400">
                   <li>• Clear, well-lit photo of the fish</li>
                   <li>• Show the whole fish if possible</li>
                   <li>• Avoid blurry or dark images</li>
@@ -264,7 +264,7 @@ export function FishIdentifierPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#334155]"
               >
                 ← Back
               </button>
@@ -285,15 +285,15 @@ export function FishIdentifierPage() {
 
               {/* Loading State */}
               {loading ? (
-                <div className="flex items-center justify-center gap-3 rounded-lg bg-blue-50 py-6">
-                  <Loader2 size={20} className="animate-spin text-blue-600" />
-                  <p className="text-sm font-medium text-blue-900">Identifying fish...</p>
+                <div className="flex items-center justify-center gap-3 rounded-lg bg-[#1BA9A0]/20 border border-[#1BA9A0]/40 py-6">
+                  <Loader2 size={20} className="animate-spin text-[#1BA9A0]" />
+                  <p className="text-sm font-medium text-[#1BA9A0]">Identifying fish...</p>
                 </div>
               ) : null}
 
               {/* Error State */}
               {error ? (
-                <div className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+                <div className="flex items-start gap-2 rounded-lg bg-red-900/30 border border-red-500/40 px-3 py-2 text-xs text-red-400">
                   <AlertCircle size={14} className="mt-0.5" />
                   <div>
                     <p className="font-medium">Could not identify fish</p>
@@ -319,9 +319,9 @@ export function FishIdentifierPage() {
 
                   {/* EXIF Metadata Info */}
                   {metadata && (metadata.hasGPS || metadata.hasTimestamp) ? (
-                    <div className="rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                    <div className="rounded-lg bg-blue-900/30 border border-blue-500/40 px-3 py-2 text-xs text-blue-300">
                       <p className="font-medium mb-1">📸 Photo metadata detected:</p>
-                      <div className="space-y-0.5 text-blue-700">
+                      <div className="space-y-0.5 text-blue-400">
                         {metadata.hasGPS ? <p>• GPS location found</p> : null}
                         {metadata.hasTimestamp ? <p>• Photo timestamp found</p> : null}
                       </div>
@@ -333,14 +333,14 @@ export function FishIdentifierPage() {
                     <button
                       type="button"
                       onClick={handleLogCatch}
-                      className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                      className="w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#14B8A6]"
                     >
                       Log as Catch
                     </button>
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                      className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm font-semibold text-gray-300 transition-colors hover:bg-[#334155]"
                     >
                       Identify Another Fish
                     </button>
@@ -353,7 +353,7 @@ export function FishIdentifierPage() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#334155]"
                 >
                   Try Another Photo
                 </button>

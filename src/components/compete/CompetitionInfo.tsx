@@ -6,34 +6,34 @@ interface CompetitionInfoProps {
 
 export function CompetitionInfo({ competition }: CompetitionInfoProps) {
   return (
-    <div className="bg-white px-5 py-6 space-y-6">
+    <div className="bg-[#243B4A] px-5 py-6 space-y-6">
       {competition.description && (
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-gray-900">About</h2>
-          <p className="text-sm text-gray-700 leading-relaxed">{competition.description}</p>
+          <h2 className="mb-2 text-sm font-semibold text-white">About</h2>
+          <p className="text-sm text-gray-400 leading-relaxed">{competition.description}</p>
         </div>
       )}
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Rules</h2>
-        <div className="space-y-3 text-sm text-gray-700">
+        <h2 className="mb-3 text-sm font-semibold text-white">Rules</h2>
+        <div className="space-y-3 text-sm text-gray-400">
           {competition.allowed_species && competition.allowed_species.length > 0 && (
             <div>
-              <p className="font-medium text-gray-900">Allowed species</p>
+              <p className="font-medium text-white">Allowed species</p>
               <p>{competition.allowed_species.join(', ')}</p>
             </div>
           )}
 
           {competition.water_type && competition.water_type !== 'any' && (
             <div>
-              <p className="font-medium text-gray-900">Water type</p>
+              <p className="font-medium text-white">Water type</p>
               <p className="capitalize">{competition.water_type}</p>
             </div>
           )}
 
           {competition.location_restriction && (
             <div>
-              <p className="font-medium text-gray-900">Location</p>
+              <p className="font-medium text-white">Location</p>
               <p>Within {competition.location_restriction.radius_km}km of the target area</p>
             </div>
           )}
@@ -41,22 +41,22 @@ export function CompetitionInfo({ competition }: CompetitionInfoProps) {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Schedule</h2>
-        <div className="space-y-2 text-sm text-gray-700">
+        <h2 className="mb-3 text-sm font-semibold text-white">Schedule</h2>
+        <div className="space-y-2 text-sm text-gray-400">
           <div>
-            <p className="font-medium text-gray-900">Starts</p>
+            <p className="font-medium text-white">Starts</p>
             <p>{new Date(competition.starts_at).toLocaleString()}</p>
           </div>
           <div>
-            <p className="font-medium text-gray-900">Ends</p>
+            <p className="font-medium text-white">Ends</p>
             <p>{new Date(competition.ends_at).toLocaleString()}</p>
           </div>
         </div>
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Participants</h2>
-        <p className="text-sm text-gray-700">
+        <h2 className="mb-3 text-sm font-semibold text-white">Participants</h2>
+        <p className="text-sm text-gray-400">
           {competition.participant_count ?? 0} anglers joined
           {competition.max_participants && (
             <span>
@@ -68,16 +68,16 @@ export function CompetitionInfo({ competition }: CompetitionInfoProps) {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Hosted by</h2>
+        <h2 className="mb-3 text-sm font-semibold text-white">Hosted by</h2>
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-sm font-semibold text-white">
             {competition.creator?.username?.[0]?.toUpperCase() ?? 'U'}
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-white">
               {competition.creator?.full_name || competition.creator?.username || 'Unknown'}
             </p>
-            <p className="text-xs text-gray-600">@{competition.creator?.username ?? 'angler'}</p>
+            <p className="text-xs text-gray-500">@{competition.creator?.username ?? 'angler'}</p>
           </div>
         </div>
       </div>

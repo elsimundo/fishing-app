@@ -30,7 +30,7 @@ export function PopularAnglers() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
       </div>
     )
   }
@@ -38,8 +38,8 @@ export function PopularAnglers() {
   if (!users || users.length === 0) return null
 
   return (
-    <div className="bg-white px-5 py-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900">Popular Anglers</h2>
+    <div className="bg-[#243B4A] px-5 py-6">
+      <h2 className="mb-4 text-lg font-bold text-white">Popular Anglers</h2>
       <div className="space-y-3">
         {users.map((u: any) => (
           <UserCard key={u.id} user={u} />

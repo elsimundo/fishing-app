@@ -80,20 +80,20 @@ export default function LakeDetailPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-gray-900"
+          className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-white"
         >
           <ArrowLeft size={14} /> Back
         </button>
 
         {loading && (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="text-sm text-gray-600">Loading lake...</p>
+          <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-6 shadow-sm">
+            <p className="text-sm text-gray-400">Loading lake...</p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-6 shadow-sm">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
@@ -111,11 +111,11 @@ export default function LakeDetailPage() {
             )}
 
             {/* Header */}
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold text-gray-900">{lake.name}</h1>
+                    <h1 className="text-xl font-bold text-white">{lake.name}</h1>
                     {lake.is_premium && (
                       <span title="Premium Venue">
                         <Crown size={18} className="text-amber-500" />
@@ -146,8 +146,8 @@ export default function LakeDetailPage() {
                       disabled={isSavePending}
                       className={`flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
                         isLakeSaved(lake.id)
-                          ? 'bg-pink-100 text-pink-600 hover:bg-pink-200'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-pink-900/30 text-pink-400 hover:bg-pink-900/50'
+                          : 'bg-[#1A2D3D] text-gray-300 hover:bg-[#334155]'
                       }`}
                     >
                       <Heart size={14} fill={isLakeSaved(lake.id) ? 'currentColor' : 'none'} />
@@ -158,7 +158,7 @@ export default function LakeDetailPage() {
                   {canAccessDashboard && (
                     <Link
                       to={`/lakes/${lake.id}/dashboard`}
-                      className="flex items-center gap-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                      className="flex items-center gap-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
                     >
                       <BarChart3 size={14} />
                       Dashboard
@@ -169,7 +169,7 @@ export default function LakeDetailPage() {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${lake.latitude},${lake.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                    className="flex items-center gap-1 rounded-lg bg-[#1A2D3D] px-3 py-2 text-xs font-medium text-gray-300 hover:bg-[#334155]"
                   >
                     <Navigation size={14} />
                     Directions
@@ -179,19 +179,19 @@ export default function LakeDetailPage() {
 
               {/* Description (claimed lakes only) */}
               {lake.claimed_by && lake.description && (
-                <p className="mt-3 text-sm text-gray-600">{lake.description}</p>
+                <p className="mt-3 text-sm text-gray-400">{lake.description}</p>
               )}
 
               {/* Pricing (claimed lakes only) */}
               {lake.claimed_by && (lake.day_ticket_price || lake.night_ticket_price) && (
                 <div className="mt-3 flex flex-wrap gap-4">
                   {lake.day_ticket_price && (
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-white">
                       Day ticket: £{lake.day_ticket_price.toFixed(2)}
                     </p>
                   )}
                   {lake.night_ticket_price && (
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-white">
                       Night ticket: £{lake.night_ticket_price.toFixed(2)}
                     </p>
                   )}
@@ -199,34 +199,34 @@ export default function LakeDetailPage() {
               )}
 
               {/* Facilities */}
-              <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-gray-600">
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-gray-400">
                 {lake.has_parking && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5">
                     <Car size={12} /> Parking
                   </span>
                 )}
                 {lake.has_toilets && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5">
                     🚻 Toilets
                   </span>
                 )}
                 {lake.has_cafe && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5">
                     <Coffee size={12} /> Café
                   </span>
                 )}
                 {lake.has_tackle_shop && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5">
                     🎣 Tackle shop
                   </span>
                 )}
                 {lake.is_night_fishing_allowed && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5">
                     🌙 Night fishing
                   </span>
                 )}
                 {lake.is_disabled_accessible && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5">
                     ♿ Accessible
                   </span>
                 )}
@@ -240,7 +240,7 @@ export default function LakeDetailPage() {
                       href={lake.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white hover:bg-primary/90"
+                      className="inline-flex items-center gap-1 rounded-full bg-[#1BA9A0] px-3 py-1 text-xs font-semibold text-white hover:bg-[#14B8A6]"
                     >
                       <Globe size={12} /> Website
                     </a>
@@ -248,7 +248,7 @@ export default function LakeDetailPage() {
                   {lake.phone && (
                     <a
                       href={`tel:${lake.phone}`}
-                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-200"
+                      className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-3 py-1 text-xs font-semibold text-gray-300 hover:bg-[#334155]"
                     >
                       <Phone size={12} /> {lake.phone}
                     </a>
@@ -260,7 +260,7 @@ export default function LakeDetailPage() {
               {user && (
                 <Link
                   to={`/sessions/new?lakeId=${lake.id}&lakeName=${encodeURIComponent(lake.name)}&lat=${lake.latitude}&lng=${lake.longitude}`}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-navy-800 px-4 py-3 text-sm font-semibold text-white hover:bg-navy-900"
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white hover:bg-[#14B8A6]"
                 >
                   <Play size={16} />
                   Start Session Here
@@ -269,15 +269,15 @@ export default function LakeDetailPage() {
 
               {/* Claim CTA (unclaimed lakes) */}
               {!lake.claimed_by && user && (
-                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                  <p className="text-sm font-medium text-amber-800">Own or manage this venue?</p>
-                  <p className="mt-1 text-xs text-amber-700">
+                <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-900/30 p-3">
+                  <p className="text-sm font-medium text-amber-400">Own or manage this venue?</p>
+                  <p className="mt-1 text-xs text-amber-300">
                     Claim it to add your contact details, pricing, and more.
                   </p>
                   <button
                     type="button"
                     onClick={() => setShowClaimModal(true)}
-                    className="mt-2 rounded-lg bg-navy-800 px-4 py-2 text-xs font-semibold text-white hover:bg-navy-900"
+                    className="mt-2 rounded-lg bg-[#1BA9A0] px-4 py-2 text-xs font-semibold text-white hover:bg-[#14B8A6]"
                   >
                     Claim this venue
                   </button>
@@ -287,37 +287,37 @@ export default function LakeDetailPage() {
 
             {/* Owner & Team Section (for claimed lakes) */}
             {lake.claimed_by && teamData && (
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <h2 className="mb-3 text-sm font-semibold text-gray-900 flex items-center gap-2">
+              <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-white flex items-center gap-2">
                   <Users size={16} className="text-gray-400" />
                   Venue Team
                 </h2>
                 <div className="space-y-2">
                   {/* Owner */}
                   {teamData.owner && (
-                    <div className="flex items-center gap-3 p-2 rounded-lg bg-amber-50">
-                      <div className="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 font-bold text-xs">
+                    <div className="flex items-center gap-3 p-2 rounded-lg bg-amber-900/30">
+                      <div className="h-8 w-8 rounded-full bg-amber-700 flex items-center justify-center text-amber-200 font-bold text-xs">
                         {(teamData.owner as any).display_name?.[0] || (teamData.owner as any).username?.[0] || '?'}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-white">
                           {(teamData.owner as any).display_name || (teamData.owner as any).username || 'Owner'}
                         </p>
-                        <p className="text-xs text-amber-700 flex items-center gap-1">
+                        <p className="text-xs text-amber-400 flex items-center gap-1">
                           <Crown size={10} /> Owner
                         </p>
                       </div>
-                      <BadgeCheck size={16} className="text-blue-500" />
+                      <BadgeCheck size={16} className="text-blue-400" />
                     </div>
                   )}
                   {/* Team members */}
                   {teamData.team && teamData.team.length > 0 && teamData.team.map((member) => (
-                    <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs">
+                    <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg bg-[#1A2D3D]">
+                      <div className="h-8 w-8 rounded-full bg-[#334155] flex items-center justify-center text-gray-300 font-bold text-xs">
                         {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-white">
                           {member.profile?.display_name || member.profile?.username || 'Team Member'}
                         </p>
                         <p className="text-xs text-gray-500 flex items-center gap-1">
@@ -332,15 +332,15 @@ export default function LakeDetailPage() {
             )}
 
             {/* Community Stats */}
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-gray-900">Community Activity</h2>
+            <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-white">Community Activity</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-lg bg-gray-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">{lake.total_sessions || 0}</p>
+                <div className="rounded-lg bg-[#1A2D3D] p-3 text-center">
+                  <p className="text-2xl font-bold text-white">{lake.total_sessions || 0}</p>
                   <p className="text-xs text-gray-500">Sessions logged</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">{lake.total_catches || 0}</p>
+                <div className="rounded-lg bg-[#1A2D3D] p-3 text-center">
+                  <p className="text-2xl font-bold text-white">{lake.total_catches || 0}</p>
                   <p className="text-xs text-gray-500">Catches recorded</p>
                 </div>
               </div>
@@ -348,13 +348,13 @@ export default function LakeDetailPage() {
 
             {/* Species */}
             {lake.species && lake.species.length > 0 && (
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <h2 className="mb-2 text-sm font-semibold text-gray-900">Species</h2>
+              <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+                <h2 className="mb-2 text-sm font-semibold text-white">Species</h2>
                 <div className="flex flex-wrap gap-2">
                   {lake.species.map((s) => (
                     <span
                       key={s}
-                      className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-medium text-emerald-700"
+                      className="inline-flex items-center gap-1 rounded-full bg-emerald-900/30 px-2.5 py-1 text-[11px] font-medium text-emerald-400"
                     >
                       <Fish size={12} />
                       {s}
@@ -366,23 +366,23 @@ export default function LakeDetailPage() {
 
             {/* Rules (claimed lakes only) */}
             {lake.claimed_by && lake.rules && (
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <h2 className="mb-2 text-sm font-semibold text-gray-900">Venue Rules</h2>
-                <p className="whitespace-pre-wrap text-sm text-gray-600">{lake.rules}</p>
+              <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+                <h2 className="mb-2 text-sm font-semibold text-white">Venue Rules</h2>
+                <p className="whitespace-pre-wrap text-sm text-gray-400">{lake.rules}</p>
                 {(lake.barbless_only || lake.catch_and_release_only || lake.max_rods) && (
                   <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
                     {lake.barbless_only && (
-                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-red-700">
+                      <span className="rounded-full bg-red-900/30 px-2 py-0.5 text-red-400">
                         Barbless only
                       </span>
                     )}
                     {lake.catch_and_release_only && (
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">
+                      <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-blue-400">
                         Catch & release
                       </span>
                     )}
                     {lake.max_rods && (
-                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
+                      <span className="rounded-full bg-[#1A2D3D] px-2 py-0.5 text-gray-400">
                         Max {lake.max_rods} rods
                       </span>
                     )}
@@ -401,7 +401,7 @@ export default function LakeDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowReportModal(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600 hover:bg-gray-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#334155] bg-[#243B4A] p-4 text-sm text-gray-400 hover:bg-[#1A2D3D]"
               >
                 <Flag size={16} />
                 Report a problem with this listing
@@ -600,8 +600,8 @@ function RecentCatches({ lakeId, isPremium }: { lakeId: string; isPremium?: bool
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Recent Catches</h2>
+      <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold text-white">Recent Catches</h2>
         <div className="flex items-center justify-center py-4">
           <Loader2 size={20} className="animate-spin text-gray-400" />
         </div>
@@ -611,19 +611,19 @@ function RecentCatches({ lakeId, isPremium }: { lakeId: string; isPremium?: bool
 
   if (!catches || catches.length === 0) {
     return (
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Recent Catches</h2>
-        <p className="text-sm text-gray-500">No catches recorded yet at this venue.</p>
+      <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold text-white">Recent Catches</h2>
+        <p className="text-sm text-gray-400">No catches recorded yet at this venue.</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm">
-      <h2 className="mb-3 text-sm font-semibold text-gray-900">Recent Catches</h2>
+    <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+      <h2 className="mb-3 text-sm font-semibold text-white">Recent Catches</h2>
       <div className="space-y-3">
         {catches.map((c) => (
-          <div key={c.id} className="flex items-center gap-3 rounded-lg bg-gray-50 p-3">
+          <div key={c.id} className="flex items-center gap-3 rounded-lg bg-[#1A2D3D] border border-[#334155] p-3">
             {c.photo_url ? (
               <img
                 src={c.photo_url}
@@ -631,13 +631,13 @@ function RecentCatches({ lakeId, isPremium }: { lakeId: string; isPremium?: bool
                 className="h-12 w-12 rounded-lg object-cover"
               />
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-200 text-xl">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#243B4A] text-xl">
                 🐟
               </div>
             )}
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{c.species}</p>
-              <div className="flex gap-2 text-xs text-gray-500">
+              <p className="text-sm font-medium text-white">{c.species}</p>
+              <div className="flex gap-2 text-xs text-gray-400">
                 {c.weight_kg && <span>{c.weight_kg}kg</span>}
                 {c.length_cm && <span>{c.length_cm}cm</span>}
                 <span>·</span>
@@ -648,7 +648,7 @@ function RecentCatches({ lakeId, isPremium }: { lakeId: string; isPremium?: bool
         ))}
       </div>
       {!isPremium && catches.length >= 3 && (
-        <p className="mt-3 text-center text-xs text-gray-400">
+        <p className="mt-3 text-center text-xs text-gray-500">
           Premium venues show more catches
         </p>
       )}

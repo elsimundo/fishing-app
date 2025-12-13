@@ -128,13 +128,13 @@ export default function ChallengeBoardPage() {
   
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="min-h-screen bg-[#1A2D3D] pb-24">
         {/* Header */}
-        <div className="bg-gradient-to-br from-navy-800 to-navy-900 text-white px-4 pt-6 pb-4">
+        <div className="bg-gradient-to-br from-[#0D4B4E] to-[#1A2D3D] text-white px-4 pt-6 pb-4">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-2xl font-bold">Challenges</h1>
             <div className="text-right">
-              <p className="text-xs text-navy-200">Completed</p>
+              <p className="text-xs text-gray-400">Completed</p>
               <p className="text-lg font-bold">{completedCount}/{totalCount}</p>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function ChallengeBoardPage() {
         </div>
         
         {/* Main Tabs */}
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="bg-[#243B4A] border-b border-[#334155] sticky top-0 z-10">
           <div className="flex">
             {mainTabs.map(tab => {
               const Icon = tab.icon
@@ -171,8 +171,8 @@ export default function ChallengeBoardPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
                     isActive
-                      ? 'border-navy-800 text-navy-800'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      ? 'border-[#1BA9A0] text-[#1BA9A0]'
+                      : 'border-transparent text-gray-400 hover:text-white'
                   }`}
                 >
                   <Icon size={18} />
@@ -190,13 +190,13 @@ export default function ChallengeBoardPage() {
             <div className="space-y-4">
               {/* Water Type Toggle - only show if user fishes both or has no preference */}
               {(!profile?.fishing_preference || profile.fishing_preference === 'both') && (
-                <div className="flex bg-gray-100 rounded-xl p-1">
+                <div className="flex bg-[#243B4A] rounded-xl p-1 border border-[#334155]">
                   <button
                     onClick={() => setWaterType('freshwater')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
                       waterType === 'freshwater'
-                        ? 'bg-white text-navy-800 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
+                        ? 'bg-[#1A2D3D] text-[#1BA9A0] shadow-sm'
+                        : 'text-gray-400 hover:text-white'
                     }`}
                   >
                     <Trees size={16} />
@@ -206,8 +206,8 @@ export default function ChallengeBoardPage() {
                     onClick={() => setWaterType('saltwater')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
                       waterType === 'saltwater'
-                        ? 'bg-white text-navy-800 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
+                        ? 'bg-[#1A2D3D] text-[#1BA9A0] shadow-sm'
+                        : 'text-gray-400 hover:text-white'
                     }`}
                   >
                     <Waves size={16} />
@@ -222,8 +222,8 @@ export default function ChallengeBoardPage() {
                   onClick={() => { setScopeTab('all'); setSelectedCountry(null) }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     scopeTab === 'all'
-                      ? 'bg-navy-800 text-white'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                      ? 'bg-[#1BA9A0] text-white'
+                      : 'bg-[#243B4A] text-gray-400 border border-[#334155] hover:border-[#1BA9A0]'
                   }`}
                 >
                   <Trophy size={14} />
@@ -233,8 +233,8 @@ export default function ChallengeBoardPage() {
                   onClick={() => { setScopeTab('global'); setSelectedCountry(null) }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     scopeTab === 'global'
-                      ? 'bg-navy-800 text-white'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                      ? 'bg-[#1BA9A0] text-white'
+                      : 'bg-[#243B4A] text-gray-400 border border-[#334155] hover:border-[#1BA9A0]'
                   }`}
                 >
                   <Globe size={14} />
@@ -250,8 +250,8 @@ export default function ChallengeBoardPage() {
                         onClick={() => { setScopeTab('countries'); setSelectedCountry(code) }}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                           scopeTab === 'countries' && selectedCountry === code
-                            ? 'bg-navy-800 text-white'
-                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                            ? 'bg-[#1BA9A0] text-white'
+                            : 'bg-[#243B4A] text-gray-400 border border-[#334155] hover:border-[#1BA9A0]'
                         }`}
                       >
                         <span>{getCountryFlag(code)}</span>
@@ -268,8 +268,8 @@ export default function ChallengeBoardPage() {
                     onClick={() => { setScopeTab('countries'); setSelectedCountry(null) }}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                       scopeTab === 'countries' && !selectedCountry
-                        ? 'bg-navy-800 text-white'
-                        : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                        ? 'bg-[#1BA9A0] text-white'
+                        : 'bg-[#243B4A] text-gray-400 border border-[#334155] hover:border-[#1BA9A0]'
                     }`}
                   >
                     <Flag size={14} />
@@ -281,8 +281,8 @@ export default function ChallengeBoardPage() {
                   onClick={() => { setScopeTab('events'); setSelectedCountry(null) }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     scopeTab === 'events'
-                      ? 'bg-navy-800 text-white'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                      ? 'bg-[#1BA9A0] text-white'
+                      : 'bg-[#243B4A] text-gray-400 border border-[#334155] hover:border-[#1BA9A0]'
                   }`}
                 >
                   🌍
@@ -292,10 +292,10 @@ export default function ChallengeBoardPage() {
               
               {/* Featured Challenge */}
               {featuredChallenge && (
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border-2 border-amber-300">
+                <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/20 rounded-xl p-4 border-2 border-amber-500/40">
                   <div className="flex items-center gap-2 mb-2">
-                    <Star size={16} className="text-amber-500" fill="currentColor" />
-                    <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">
+                    <Star size={16} className="text-amber-400" fill="currentColor" />
+                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wide">
                       Featured Challenge
                     </span>
                   </div>
@@ -318,8 +318,8 @@ export default function ChallengeBoardPage() {
                       onClick={() => setSelectedCategory(cat.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                         isActive 
-                          ? 'bg-navy-800 text-white' 
-                          : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                          ? 'bg-[#1BA9A0] text-white' 
+                          : 'bg-[#243B4A] text-gray-400 border border-[#334155] hover:border-[#1BA9A0]'
                       }`}
                     >
                       <Icon size={14} />
@@ -331,15 +331,15 @@ export default function ChallengeBoardPage() {
               
               {/* Show completed toggle */}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-400">
                   {filteredChallenges.length} challenges
                 </span>
-                <label className="flex items-center gap-2 text-sm text-gray-600">
+                <label className="flex items-center gap-2 text-sm text-gray-400">
                   <input
                     type="checkbox"
                     checked={showCompleted}
                     onChange={(e) => setShowCompleted(e.target.checked)}
-                    className="rounded border-gray-300 text-navy-600 focus:ring-navy-500"
+                    className="rounded border-[#334155] bg-[#1A2D3D] text-[#1BA9A0] focus:ring-[#1BA9A0]"
                   />
                   Show completed
                 </label>
@@ -349,17 +349,17 @@ export default function ChallengeBoardPage() {
               {challengesLoading || userChallengesLoading ? (
                 <div className="grid gap-3">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-32 bg-white rounded-xl animate-pulse" />
+                    <div key={i} className="h-32 bg-[#243B4A] rounded-xl animate-pulse" />
                   ))}
                 </div>
               ) : filteredChallenges.length === 0 ? (
                 <div className="text-center py-12">
-                  <Trophy size={48} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-500">No challenges found</p>
+                  <Trophy size={48} className="mx-auto text-gray-500 mb-3" />
+                  <p className="text-gray-400">No challenges found</p>
                   {!showCompleted && (
                     <button
                       onClick={() => setShowCompleted(true)}
-                      className="mt-2 text-sm text-navy-600 font-medium"
+                      className="mt-2 text-sm text-[#1BA9A0] font-medium"
                     >
                       Show completed challenges
                     </button>
@@ -429,34 +429,34 @@ export default function ChallengeBoardPage() {
           {activeTab === 'leaderboards' && (
             <div className="space-y-4">
               {/* Info banner */}
-              <div className="rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-800">
+              <div className="rounded-lg bg-blue-900/30 px-3 py-2 text-xs text-blue-400">
                 <p className="font-medium">📊 Global leaderboard</p>
-                <p className="mt-0.5 text-blue-700">Showing top anglers by XP earned this week. Resets every Monday.</p>
+                <p className="mt-0.5 text-blue-500">Showing top anglers by XP earned this week. Resets every Monday.</p>
               </div>
 
               {/* XP Leaderboard */}
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100">
-                    <Trophy size={14} className="text-emerald-600" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/30">
+                    <Trophy size={14} className="text-emerald-400" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900">Top anglers this week</h3>
+                  <h3 className="text-sm font-bold text-white">Top anglers this week</h3>
                 </div>
 
                 {leaderboardLoading ? (
-                  <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
-                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-navy-800" />
+                  <div className="rounded-2xl border border-[#334155] bg-[#243B4A] p-8 text-center">
+                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#334155] border-t-[#1BA9A0]" />
                     <p className="mt-2 text-xs text-gray-500">Loading leaderboard...</p>
                   </div>
                 ) : !weeklyLeaderboard || weeklyLeaderboard.length === 0 ? (
-                  <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
-                    <Trophy size={32} className="mx-auto text-gray-300" />
-                    <p className="mt-2 text-sm font-medium text-gray-900">No data yet</p>
+                  <div className="rounded-2xl border border-[#334155] bg-[#243B4A] p-8 text-center">
+                    <Trophy size={32} className="mx-auto text-gray-500" />
+                    <p className="mt-2 text-sm font-medium text-white">No data yet</p>
                     <p className="text-xs text-gray-500">Start fishing to appear on the leaderboard!</p>
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-gray-200 bg-white">
-                    <ul className="divide-y divide-gray-100">
+                  <div className="rounded-2xl border border-[#334155] bg-[#243B4A]">
+                    <ul className="divide-y divide-[#334155]">
                       {weeklyLeaderboard.map((entry) => {
                         const isYou = user?.id === entry.user_id
                         return (
@@ -464,9 +464,9 @@ export default function ChallengeBoardPage() {
                             key={entry.user_id}
                             className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm ${
                               entry.rank === 1
-                                ? 'bg-amber-50'
+                                ? 'bg-amber-900/20'
                                 : isYou
-                                  ? 'bg-blue-50/40'
+                                  ? 'bg-[#1BA9A0]/10'
                                   : ''
                             }`}
                           >
@@ -476,10 +476,10 @@ export default function ChallengeBoardPage() {
                                   entry.rank === 1
                                     ? 'bg-amber-500 text-white'
                                     : entry.rank === 2
-                                      ? 'bg-gray-200 text-gray-800'
+                                      ? 'bg-gray-500 text-white'
                                       : entry.rank === 3
-                                        ? 'bg-orange-200 text-orange-900'
-                                        : 'bg-gray-100 text-gray-700'
+                                        ? 'bg-orange-600 text-white'
+                                        : 'bg-[#334155] text-gray-300'
                                 }`}
                               >
                                 #{entry.rank}
@@ -490,15 +490,15 @@ export default function ChallengeBoardPage() {
                               <img
                                 src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
                                 alt={entry.display_name || entry.username}
-                                className="h-8 w-8 rounded-full bg-gray-100 object-cover"
+                                className="h-8 w-8 rounded-full bg-[#1A2D3D] object-cover"
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1">
-                                  <p className="truncate text-xs font-semibold text-gray-900 sm:text-sm">
+                                  <p className="truncate text-xs font-semibold text-white sm:text-sm">
                                     {entry.display_name || entry.username}
                                   </p>
                                   {isYou && (
-                                    <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                                    <span className="rounded-full bg-[#1BA9A0]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#1BA9A0]">
                                       You
                                     </span>
                                   )}
@@ -509,7 +509,7 @@ export default function ChallengeBoardPage() {
                               </div>
 
                               <div className="text-right text-[11px] sm:text-xs">
-                                <p className="font-semibold text-emerald-700">
+                                <p className="font-semibold text-emerald-400">
                                   {entry.xp.toLocaleString()} XP
                                 </p>
                                 <p className="text-[11px] text-gray-500">{entry.species_points} species pts</p>
@@ -526,24 +526,24 @@ export default function ChallengeBoardPage() {
               {/* Top species hunters */}
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100">
-                    <Star size={14} className="text-amber-600" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-900/30">
+                    <Star size={14} className="text-amber-400" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900">Top species hunters</h3>
+                  <h3 className="text-sm font-bold text-white">Top species hunters</h3>
                 </div>
 
                 {leaderboardLoading ? (
-                  <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center">
-                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-4 border-gray-200 border-t-amber-600" />
+                  <div className="rounded-2xl border border-[#334155] bg-[#243B4A] p-6 text-center">
+                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-4 border-[#334155] border-t-amber-500" />
                   </div>
                 ) : !weeklyLeaderboard || weeklyLeaderboard.length === 0 ? (
-                  <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center">
-                    <Star size={24} className="mx-auto text-gray-300" />
+                  <div className="rounded-2xl border border-[#334155] bg-[#243B4A] p-6 text-center">
+                    <Star size={24} className="mx-auto text-gray-500" />
                     <p className="mt-1 text-xs text-gray-500">No data yet</p>
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-gray-200 bg-white">
-                    <ul className="divide-y divide-gray-100">
+                  <div className="rounded-2xl border border-[#334155] bg-[#243B4A]">
+                    <ul className="divide-y divide-[#334155]">
                       {[...weeklyLeaderboard]
                         .sort((a, b) => b.species_points - a.species_points)
                         .slice(0, 5)
@@ -552,7 +552,7 @@ export default function ChallengeBoardPage() {
                           return (
                             <li key={entry.user_id} className="flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm">
                               <div className="flex w-8 justify-center">
-                                <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-100 text-[11px] font-semibold text-amber-800">
+                                <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-900/30 text-[11px] font-semibold text-amber-400">
                                   #{index + 1}
                                 </span>
                               </div>
@@ -560,15 +560,15 @@ export default function ChallengeBoardPage() {
                                 <img
                                   src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
                                   alt={entry.display_name || entry.username}
-                                  className="h-8 w-8 rounded-full bg-gray-100 object-cover"
+                                  className="h-8 w-8 rounded-full bg-[#1A2D3D] object-cover"
                                 />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1">
-                                    <p className="truncate text-xs font-semibold text-gray-900 sm:text-sm">
+                                    <p className="truncate text-xs font-semibold text-white sm:text-sm">
                                       {entry.display_name || entry.username}
                                     </p>
                                     {isYou && (
-                                      <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                                      <span className="rounded-full bg-[#1BA9A0]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#1BA9A0]">
                                         You
                                       </span>
                                     )}
@@ -576,7 +576,7 @@ export default function ChallengeBoardPage() {
                                   <p className="truncate text-[11px] text-gray-500">Level {entry.level}</p>
                                 </div>
                                 <div className="text-right text-[11px] sm:text-xs">
-                                  <p className="font-semibold text-amber-700">{entry.species_points} pts</p>
+                                  <p className="font-semibold text-amber-400">{entry.species_points} pts</p>
                                   <p className="text-[11px] text-gray-500">{entry.xp.toLocaleString()} XP</p>
                                 </div>
                               </div>
@@ -596,7 +596,7 @@ export default function ChallengeBoardPage() {
               {/* Create Competition Button */}
               <button
                 onClick={() => navigate('/compete/create')}
-                className="w-full flex items-center justify-center gap-2 p-3 bg-navy-800 text-white rounded-xl hover:bg-navy-900 transition-colors"
+                className="w-full flex items-center justify-center gap-2 p-3 bg-[#1BA9A0] text-white rounded-xl hover:bg-[#14B8A6] transition-colors"
               >
                 <Plus size={20} />
                 <span className="font-medium">Create Competition</span>
@@ -605,12 +605,12 @@ export default function ChallengeBoardPage() {
               {/* Your Competitions */}
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100">
-                    <Trophy size={14} className="text-emerald-600" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/30">
+                    <Trophy size={14} className="text-emerald-400" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900">Your Competitions</h3>
+                  <h3 className="text-sm font-bold text-white">Your Competitions</h3>
                   {yourCompetitions.length > 0 && (
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                    <span className="rounded-full bg-emerald-900/30 px-2 py-0.5 text-xs font-semibold text-emerald-400">
                       {yourCompetitions.length}
                     </span>
                   )}
@@ -627,8 +627,8 @@ export default function ChallengeBoardPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-                    <p className="text-sm font-semibold text-gray-900">No active competitions</p>
+                  <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-6 text-center">
+                    <p className="text-sm font-semibold text-white">No active competitions</p>
                     <p className="text-xs text-gray-500">Join one below to get started</p>
                   </div>
                 )}
@@ -637,12 +637,12 @@ export default function ChallengeBoardPage() {
               {/* Available Competitions */}
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
-                    <Target size={14} className="text-blue-600" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-900/30">
+                    <Target size={14} className="text-blue-400" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900">Available to Join</h3>
+                  <h3 className="text-sm font-bold text-white">Available to Join</h3>
                   {availableCompetitions.length > 0 && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                    <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-xs font-semibold text-blue-400">
                       {availableCompetitions.length}
                     </span>
                   )}
@@ -659,8 +659,8 @@ export default function ChallengeBoardPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-                    <p className="text-sm font-semibold text-gray-900">No competitions available</p>
+                  <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-6 text-center">
+                    <p className="text-sm font-semibold text-white">No competitions available</p>
                     <p className="text-xs text-gray-500">Check back soon or create your own</p>
                   </div>
                 )}
@@ -699,19 +699,19 @@ function ChallengeSection({
   const allCompleted = completedCount === totalCount && totalCount > 0
   
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-[#334155] bg-[#243B4A] overflow-hidden">
       {/* Section Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1A2D3D] transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">{icon}</span>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-gray-900">{title}</h3>
+              <h3 className="font-semibold text-white">{title}</h3>
               {allCompleted && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                <span className="text-xs bg-emerald-900/30 text-emerald-400 px-2 py-0.5 rounded-full font-medium">
                   ✓ Complete
                 </span>
               )}
@@ -722,7 +722,7 @@ function ChallengeSection({
         
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-sm font-semibold text-gray-900">{completedCount}/{totalCount}</p>
+            <p className="text-sm font-semibold text-white">{completedCount}/{totalCount}</p>
             <p className="text-[10px] text-gray-500">completed</p>
           </div>
           {expanded ? (
@@ -735,7 +735,7 @@ function ChallengeSection({
       
       {/* Challenges List */}
       {expanded && (
-        <div className="border-t border-gray-100 p-3 space-y-2">
+        <div className="border-t border-[#334155] p-3 space-y-2">
           {challenges.map(challenge => (
             <ChallengeCard
               key={challenge.id}

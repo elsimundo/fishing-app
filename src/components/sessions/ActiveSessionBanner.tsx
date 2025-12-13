@@ -46,22 +46,22 @@ function SessionBannerItem({ session }: { session: Session }) {
   const waterBadge = getWaterTypeBadge(session)
 
   return (
-    <section className="mb-3 overflow-hidden rounded-2xl border border-emerald-100 bg-white p-4 text-xs text-slate-900 shadow-sm">
+    <section className="mb-3 overflow-hidden rounded-2xl border border-emerald-500/40 bg-emerald-900/30 p-4 text-xs shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <div className="space-y-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
             Active session
           </p>
-          <p className="text-base font-semibold text-slate-900">{title}</p>
+          <p className="text-base font-semibold text-white">{title}</p>
           <div className="flex flex-wrap gap-2 text-[11px]">
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-800">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/50 px-2 py-0.5 text-emerald-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
               Live · {durationLabel}
             </span>
             {waterBadge ? (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">{waterBadge}</span>
+              <span className="rounded-full bg-[#1A2D3D] px-2 py-0.5 text-gray-300">{waterBadge}</span>
             ) : null}
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">
+            <span className="rounded-full bg-[#1A2D3D] px-2 py-0.5 text-gray-300">
               {catches.length} {catches.length === 1 ? 'catch' : 'catches'}
             </span>
           </div>
@@ -69,7 +69,7 @@ function SessionBannerItem({ session }: { session: Session }) {
         <div className="flex flex-col items-end gap-1">
           <Link
             to={`/sessions/${session.id}`}
-            className="rounded-full bg-primary px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-primary/90"
+            className="rounded-full bg-[#1BA9A0] px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
           >
             View
           </Link>

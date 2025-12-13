@@ -36,27 +36,27 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
-      <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white md:max-w-lg md:rounded-2xl">
+      <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-[#243B4A] border border-[#334155] md:max-w-lg md:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-          <h2 className="text-lg font-bold text-gray-900">Invite to session</h2>
+        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
+          <h2 className="text-lg font-bold text-white">Invite to session</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 transition-colors hover:bg-gray-100"
+            className="rounded-full p-2 transition-colors hover:bg-[#334155]"
           >
-            <X size={20} className="text-gray-600" />
+            <X size={20} className="text-gray-400" />
           </button>
         </div>
 
         {/* Role selection */}
-        <div className="border-b border-gray-200 px-5 py-3 text-sm text-gray-700">
+        <div className="border-b border-[#334155] px-5 py-3 text-sm text-gray-300">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Role</p>
           <div className="flex gap-2 text-xs">
             <button
               type="button"
               onClick={() => setRole('contributor')}
-              className={`flex-1 rounded-xl border px-3 py-2 font-medium ${role === 'contributor' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-700'}`}
+              className={`flex-1 rounded-xl border px-3 py-2 font-medium ${role === 'contributor' ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]' : 'border-[#334155] bg-[#1A2D3D] text-gray-300'}`}
             >
               Contributor
               <span className="mt-0.5 block text-[10px] font-normal text-gray-500">
@@ -66,7 +66,7 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
             <button
               type="button"
               onClick={() => setRole('viewer')}
-              className={`flex-1 rounded-xl border px-3 py-2 font-medium ${role === 'viewer' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-700'}`}
+              className={`flex-1 rounded-xl border px-3 py-2 font-medium ${role === 'viewer' ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]' : 'border-[#334155] bg-[#1A2D3D] text-gray-300'}`}
             >
               Viewer
               <span className="mt-0.5 block text-[10px] font-normal text-gray-500">
@@ -78,13 +78,13 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
 
         {/* Search input */}
         <div className="px-5 py-4">
-          <label className="mb-2 block text-sm font-medium text-gray-900">Search anglers</label>
+          <label className="mb-2 block text-sm font-medium text-white">Search anglers</label>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by username or name"
-            className="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+            className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-2 text-sm text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]/20"
           />
           <p className="mt-1 text-xs text-gray-500">
             We&apos;ll show anglers who match your search. Tap one to send an invite.
@@ -93,10 +93,10 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
 
         {/* Results */}
         <div className="flex-1 space-y-2 overflow-y-auto px-5 pb-4">
-          {error ? <p className="text-xs text-red-600">{error}</p> : null}
+          {error ? <p className="text-xs text-red-400">{error}</p> : null}
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-6 text-sm text-gray-500">
+            <div className="flex items-center justify-center py-6 text-sm text-gray-400">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching…
             </div>
           ) : results.length === 0 ? (
@@ -106,7 +106,7 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
               {results.map((user) => (
                 <li
                   key={user.id}
-                  className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-800"
+                  className="flex items-center justify-between rounded-xl border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-gray-300"
                 >
                   <div className="flex items-center gap-3">
                     {user.avatar_url ? (
@@ -121,7 +121,7 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
                       </div>
                     )}
                     <div>
-                      <p className="font-medium text-gray-900">{user.full_name || user.username || 'Angler'}</p>
+                      <p className="font-medium text-white">{user.full_name || user.username || 'Angler'}</p>
                       {user.username ? (
                         <p className="text-xs text-gray-500">@{user.username}</p>
                       ) : null}
@@ -131,7 +131,7 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
                     type="button"
                     disabled={isPending}
                     onClick={() => handleInvite(user.id)}
-                    className="flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-500"
+                    className="flex items-center gap-1 rounded-xl bg-[#1BA9A0] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#14B8A6] disabled:cursor-not-allowed disabled:bg-[#334155]"
                   >
                     {isPending ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -147,11 +147,11 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 border-t border-gray-200 px-5 py-4">
+        <div className="flex gap-3 border-t border-[#334155] px-5 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            className="flex-1 rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm font-semibold text-gray-300 transition-colors hover:bg-[#334155]"
           >
             Close
           </button>

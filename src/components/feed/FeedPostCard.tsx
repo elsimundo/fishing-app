@@ -60,14 +60,14 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
   }
 
   return (
-    <article className="relative bg-white px-5 py-4">
+    <article className="relative bg-[#243B4A] px-5 py-4 border-b border-[#334155]">
       {/* Post Menu for own posts */}
       {isOwnPost && (
         <div className="absolute right-4 top-4">
           <button
             type="button"
             onClick={() => setShowMenu(!showMenu)}
-            className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-full p-1.5 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
           >
             <MoreHorizontal size={18} />
           </button>
@@ -78,12 +78,12 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
                 className="fixed inset-0 z-10"
                 onClick={() => setShowMenu(false)}
               />
-              <div className="absolute right-0 top-8 z-20 w-36 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 top-8 z-20 w-36 rounded-xl border border-[#334155] bg-[#1A2D3D] py-1 shadow-lg">
                 <button
                   type="button"
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 disabled:opacity-50"
                 >
                   <Trash2 size={14} />
                   <span>{isDeleting ? 'Deleting...' : 'Delete Post'}</span>
@@ -113,7 +113,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
               type="button"
               onClick={() => onToggleVisibility(post.id, !post.is_public)}
               className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                post.is_public ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                post.is_public ? 'bg-emerald-900/30 text-emerald-400' : 'bg-[#334155] text-gray-400'
               }`}
             >
               {post.is_public ? 'Public' : 'Private'}
@@ -121,7 +121,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
           ) : (
             <span
               className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                post.is_public ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                post.is_public ? 'bg-emerald-900/30 text-emerald-400' : 'bg-[#334155] text-gray-400'
               }`}
             >
               {post.is_public ? 'Public' : 'Private'}
@@ -141,45 +141,45 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
       )}
 
       {post.caption && (
-        <p className="text-[15px] leading-relaxed text-gray-900">{post.caption}</p>
+        <p className="text-[15px] leading-relaxed text-white">{post.caption}</p>
       )}
 
       {post.type === 'catch' && post.catch && (
         <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4 sm:text-xs">
-          <div className="rounded-xl bg-slate-50 px-2 py-2">
-            <p className="text-[10px] text-slate-500">Weight</p>
-            <p className="text-sm font-semibold text-slate-900">
+          <div className="rounded-xl bg-[#1A2D3D] px-2 py-2">
+            <p className="text-[10px] text-gray-400">Weight</p>
+            <p className="text-sm font-semibold text-white">
               {post.catch.weight_kg != null ? `${post.catch.weight_kg.toFixed(1)} kg` : '—'}
             </p>
           </div>
-          <div className="rounded-xl bg-slate-50 px-2 py-2">
-            <p className="text-[10px] text-slate-500">Length</p>
-            <p className="text-sm font-semibold text-slate-900">
+          <div className="rounded-xl bg-[#1A2D3D] px-2 py-2">
+            <p className="text-[10px] text-gray-400">Length</p>
+            <p className="text-sm font-semibold text-white">
               {post.catch.length_cm != null ? `${post.catch.length_cm.toFixed(1)} cm` : '—'}
             </p>
           </div>
-          <div className="rounded-xl bg-slate-50 px-2 py-2">
-            <p className="text-[10px] text-slate-500">Bait</p>
-            <p className="text-sm font-semibold text-slate-900 truncate">{post.catch.bait || '—'}</p>
+          <div className="rounded-xl bg-[#1A2D3D] px-2 py-2">
+            <p className="text-[10px] text-gray-400">Bait</p>
+            <p className="text-sm font-semibold text-white truncate">{post.catch.bait || '—'}</p>
           </div>
-          <div className="rounded-xl bg-slate-50 px-2 py-2">
-            <p className="text-[10px] text-slate-500">Rig</p>
-            <p className="text-sm font-semibold text-slate-900 truncate">{post.catch.rig || '—'}</p>
+          <div className="rounded-xl bg-[#1A2D3D] px-2 py-2">
+            <p className="text-[10px] text-gray-400">Rig</p>
+            <p className="text-sm font-semibold text-white truncate">{post.catch.rig || '—'}</p>
           </div>
         </div>
       )}
 
       {post.type === 'session' && post.session && (
         <div
-          className="mt-3 cursor-pointer rounded-xl bg-gray-50 p-3 transition-colors hover:bg-gray-100"
+          className="mt-3 cursor-pointer rounded-xl bg-[#1A2D3D] p-3 transition-colors hover:bg-[#0D4B4E]"
           onClick={handleCardClick}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-white">
                 {post.session.title || 'Fishing Session'}
               </p>
-              <p className="mt-0.5 text-xs text-gray-600">
+              <p className="mt-0.5 text-xs text-gray-400">
                 {post.session.catches?.length || 0} catches ·{' '}
                 {post.session.location_name || 'Unknown location'}
               </p>
@@ -191,13 +191,13 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
 
       {post.type === 'catch' && post.catch && (
         <div
-          className="mt-3 cursor-pointer rounded-xl bg-gray-50 p-3 transition-colors hover:bg-gray-100"
+          className="mt-3 cursor-pointer rounded-xl bg-[#1A2D3D] p-3 transition-colors hover:bg-[#0D4B4E]"
           onClick={handleCardClick}
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-gray-900">{post.catch.species}</p>
-              <p className="mt-0.5 text-xs text-gray-600">
+              <p className="text-sm font-semibold text-white">{post.catch.species}</p>
+              <p className="mt-0.5 text-xs text-gray-400">
                 {post.catch.weight_kg != null
                   ? `${post.catch.weight_kg.toFixed(1)} kg`
                   : 'Catch logged'}{' '}

@@ -118,8 +118,8 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-gray-900">Award Categories</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-bold text-white">Award Categories</h2>
+        <p className="mt-1 text-sm text-gray-400">
           Add one or more award categories for your competition
         </p>
       </div>
@@ -132,44 +132,44 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
             return (
               <div
                 key={award.id}
-                className="rounded-xl border border-gray-200 bg-white p-4"
+                className="rounded-xl border border-[#334155] bg-[#243B4A] p-4"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-900/30 text-amber-400">
                     {info?.icon}
                   </div>
                   <div className="flex-1 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <GripVertical size={16} className="text-gray-400" />
-                        <span className="text-xs font-semibold text-amber-600">
+                        <GripVertical size={16} className="text-gray-500" />
+                        <span className="text-xs font-semibold text-amber-400">
                           #{index + 1}
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeAward(award.id)}
-                        className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-red-500"
+                        className="rounded-full p-1 text-gray-400 hover:bg-[#334155] hover:text-red-400"
                       >
                         <X size={16} />
                       </button>
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-700">
+                      <label className="mb-1 block text-xs font-medium text-gray-400">
                         Award Title
                       </label>
                       <input
                         type="text"
                         value={award.title}
                         onChange={(e) => updateAward(award.id, { title: e.target.value })}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
+                        className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                         placeholder={info?.defaultTitle}
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-700">
+                      <label className="mb-1 block text-xs font-medium text-gray-400">
                         Target Species (optional)
                       </label>
                       <input
@@ -187,23 +187,23 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
                             })
                           }
                         }}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
+                        className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                         placeholder="e.g. Smoothhound, Cod, Skate"
                       />
-                      <p className="mt-1 text-[10px] text-gray-400">
+                      <p className="mt-1 text-[10px] text-gray-500">
                         Leave empty for any species, or enter a specific species name
                       </p>
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-700">
+                      <label className="mb-1 block text-xs font-medium text-gray-400">
                         Prize (optional)
                       </label>
                       <input
                         type="text"
                         value={award.prize}
                         onChange={(e) => updateAward(award.id, { prize: e.target.value })}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
+                        className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                         placeholder="e.g. £50 tackle voucher, Trophy"
                       />
                     </div>
@@ -211,7 +211,7 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
                     <p className="text-xs text-gray-500">
                       {info?.description}
                       {award.target_species && (
-                        <span className="ml-1 font-medium text-amber-600">
+                        <span className="ml-1 font-medium text-amber-400">
                           • Only {award.target_species} catches count
                         </span>
                       )}
@@ -223,11 +223,11 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
           })}
         </div>
       ) : (
-        <div className="rounded-xl border-2 border-dashed border-gray-300 p-8 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-            <Trophy size={24} className="text-gray-400" />
+        <div className="rounded-xl border-2 border-dashed border-[#334155] bg-[#1A2D3D] p-8 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#334155]">
+            <Trophy size={24} className="text-gray-500" />
           </div>
-          <p className="mt-3 text-sm font-medium text-gray-900">No awards added yet</p>
+          <p className="mt-3 text-sm font-medium text-white">No awards added yet</p>
           <p className="mt-1 text-xs text-gray-500">
             Add at least one award category to your competition
           </p>
@@ -238,13 +238,13 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
       {availableCategories.length > 0 && (
         <>
           {showPicker ? (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div className="rounded-xl border border-[#334155] bg-[#1A2D3D] p-4">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-semibold text-gray-900">Select Award Category</p>
+                <p className="text-sm font-semibold text-white">Select Award Category</p>
                 <button
                   type="button"
                   onClick={() => setShowPicker(false)}
-                  className="rounded-full p-1 text-gray-400 hover:bg-gray-200"
+                  className="rounded-full p-1 text-gray-400 hover:bg-[#334155]"
                 >
                   <X size={16} />
                 </button>
@@ -255,13 +255,13 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
                     key={cat.category}
                     type="button"
                     onClick={() => addAward(cat.category)}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left transition-colors hover:border-amber-300 hover:bg-amber-50"
+                    className="flex items-center gap-3 rounded-lg border border-[#334155] bg-[#243B4A] p-3 text-left transition-colors hover:border-amber-500/40 hover:bg-amber-900/20"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-900/30 text-amber-400">
                       {cat.icon}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{cat.label}</p>
+                      <p className="text-sm font-medium text-white">{cat.label}</p>
                       <p className="text-xs text-gray-500">{cat.description}</p>
                     </div>
                   </button>
@@ -272,7 +272,7 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
             <button
               type="button"
               onClick={() => setShowPicker(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-4 text-sm font-medium text-gray-600 transition-colors hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#334155] py-4 text-sm font-medium text-gray-400 transition-colors hover:border-amber-500/40 hover:bg-amber-900/20 hover:text-amber-400"
             >
               <Plus size={18} />
               <span>Add Award Category</span>
@@ -283,7 +283,7 @@ export function AwardsStep({ data, onChange }: AwardsStepProps) {
 
       {/* Validation hint */}
       {data.awards.length === 0 && (
-        <p className="text-center text-xs text-amber-600">
+        <p className="text-center text-xs text-amber-400">
           ⚠️ Add at least one award category to continue
         </p>
       )}

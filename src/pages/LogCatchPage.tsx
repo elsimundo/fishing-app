@@ -18,18 +18,18 @@ export default function LogCatchPage() {
 
   return (
     <Layout>
-      <main className="min-h-screen bg-gray-50 pb-24">
+      <main className="min-h-screen bg-[#1A2D3D] pb-24">
         {/* Header */}
-        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+        <header className="sticky top-0 z-10 border-b border-[#334155] bg-[#243B4A]">
           <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+              className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
             >
               <ArrowLeft size={20} />
             </button>
-            <h1 className="text-base font-bold text-gray-900">Log a Catch</h1>
+            <h1 className="text-base font-bold text-white">Log a Catch</h1>
           </div>
         </header>
 
@@ -48,7 +48,7 @@ export default function LogCatchPage() {
           </div>
 
           {/* Form Card */}
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <div className="rounded-2xl bg-[#243B4A] p-5 shadow-sm border border-[#334155]">
             <CatchForm
               onSuccess={() => {
                 navigate('/logbook')

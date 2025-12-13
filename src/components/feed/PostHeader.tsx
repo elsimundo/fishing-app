@@ -34,11 +34,11 @@ export function PostHeader({ user, createdAt, onUserClick }: PostHeaderProps) {
         <button
           type="button"
           onClick={onUserClick}
-          className="text-[15px] font-semibold text-gray-900 hover:underline"
+          className="text-[15px] font-semibold text-white hover:underline"
         >
           {user.username}
         </button>
-        <p className="text-[13px] text-gray-600">{timeAgo}</p>
+        <p className="text-[13px] text-gray-400">{timeAgo}</p>
       </div>
     </div>
   )

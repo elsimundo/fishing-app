@@ -63,7 +63,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
 
   if (totalNearby === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3 text-gray-400">
           <Fish size={20} />
           <span className="text-sm font-medium">Sessions & Catches</span>
@@ -74,18 +74,18 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A]">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[#1A2D3D]"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-            <Fish size={20} className="text-emerald-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-900/30">
+            <Fish size={20} className="text-emerald-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Sessions & Catches</p>
-            <p className="text-xs text-gray-600">
+            <p className="text-sm font-semibold text-white">Sessions & Catches</p>
+            <p className="text-xs text-gray-400">
               {nearbySessions.length} sessions · {nearbyCatches.length} catches nearby
             </p>
           </div>
@@ -101,11 +101,11 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-100 px-4 pb-4">
+        <div className="border-t border-[#334155] px-4 pb-4">
           {/* Sessions */}
           {nearbySessions.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Recent Sessions
               </p>
               <div className="mt-2 space-y-2">
@@ -113,7 +113,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                   <button
                     key={session.id}
                     onClick={() => navigate(`/sessions/${session.id}`)}
-                    className="flex w-full items-center justify-between rounded-lg bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
+                    className="flex w-full items-center justify-between rounded-lg bg-[#1A2D3D] p-3 text-left transition-colors hover:bg-[#0D4B4E]"
                   >
                     <div className="flex items-center gap-3">
                       {session.photo_url ? (
@@ -123,12 +123,12 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/30">
                           <span className="text-sm">🎣</span>
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-white">
                           {session.title || session.location_name || 'Fishing Session'}
                         </p>
                         {session.started_at && (
@@ -139,7 +139,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                       </div>
                     </div>
                     {session.distance !== undefined && (
-                      <span className="text-xs font-medium text-gray-600">
+                      <span className="text-xs font-medium text-gray-400">
                         {formatDistance(session.distance)}
                       </span>
                     )}
@@ -152,7 +152,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
           {/* Catches */}
           {nearbyCatches.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Recent Catches
               </p>
               <div className="mt-2 space-y-2">
@@ -160,7 +160,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                   <button
                     key={c.id}
                     onClick={() => navigate(`/catches/${c.id}`)}
-                    className="flex w-full items-center justify-between rounded-lg bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
+                    className="flex w-full items-center justify-between rounded-lg bg-[#1A2D3D] p-3 text-left transition-colors hover:bg-[#0D4B4E]"
                   >
                     <div className="flex items-center gap-3">
                       {c.photo_url ? (
@@ -170,12 +170,12 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-900/30">
                           <span className="text-sm">🐟</span>
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{c.species}</p>
+                        <p className="text-sm font-semibold text-white">{c.species}</p>
                         {c.caught_at && (
                           <p className="text-xs text-gray-500">
                             {format(new Date(c.caught_at), 'MMM d, yyyy')}
@@ -184,7 +184,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                       </div>
                     </div>
                     {c.distance !== undefined && (
-                      <span className="text-xs font-medium text-gray-600">
+                      <span className="text-xs font-medium text-gray-400">
                         {formatDistance(c.distance)}
                       </span>
                     )}

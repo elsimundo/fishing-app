@@ -553,16 +553,16 @@ export default function ExplorePage() {
     <Layout>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col pb-24">
         {/* Header */}
-        <header className="sticky top-0 z-10 bg-white px-4 py-3 border-b border-gray-100">
+        <header className="sticky top-0 z-10 bg-[#1A2D3D] px-4 py-3 border-b border-[#334155]">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-lg font-bold text-gray-900">Explore</h1>
-              <p className="text-xs text-gray-500">Find fishing spots & conditions</p>
+              <h1 className="text-lg font-bold text-white">Explore</h1>
+              <p className="text-xs text-gray-400">Find fishing spots & conditions</p>
             </div>
             <button
               type="button"
               onClick={handleUseMyLocation}
-              className="flex items-center gap-1.5 rounded-full bg-navy-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-navy-900"
+              className="flex items-center gap-1.5 rounded-full bg-[#1BA9A0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#14B8A6]"
             >
               <Navigation size={14} />
               {isLocating ? 'Locating…' : 'My Location'}
@@ -581,12 +581,12 @@ export default function ExplorePage() {
         </header>
 
         {/* Compact Map */}
-        <section id="explore-map" className="relative h-[35vh] min-h-[200px] bg-gray-100">
+        <section id="explore-map" className="relative h-[35vh] min-h-[200px] bg-[#243B4A]">
           {pillVisible && (
             <button
               type="button"
               onClick={applyBounds}
-              className="absolute left-1/2 top-3 z-[5] -translate-x-1/2 rounded-full bg-navy-800 px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-navy-900"
+              className="absolute left-1/2 top-3 z-[5] -translate-x-1/2 rounded-full bg-[#1BA9A0] px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-[#14B8A6]"
             >
               Search this area
               {visibleMarkersCount > 0 && (
@@ -606,19 +606,19 @@ export default function ExplorePage() {
                 setLiveBounds(null)
                 setSelectedMarker(null)
               }}
-              className="absolute bottom-3 right-3 z-20 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 shadow-md hover:bg-gray-50"
+              className="absolute bottom-3 right-3 z-20 rounded-full bg-[#243B4A] px-3 py-1.5 text-[11px] font-medium text-white shadow-md hover:bg-[#1A2D3D] border border-[#334155]"
             >
               ↻ Reset
             </button>
           )}
 
           {selectedMarker && (
-            <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-white/95 p-3 text-xs shadow-lg backdrop-blur">
+            <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-[#243B4A]/95 p-3 text-xs shadow-lg backdrop-blur border border-[#334155]">
               <div className="mb-2 flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">{selectedMarker.title}</p>
+                  <p className="text-sm font-semibold text-white">{selectedMarker.title}</p>
                   {selectedMarker.distance !== undefined && (
-                    <p className="text-[10px] text-gray-600">
+                    <p className="text-[10px] text-gray-400">
                       📍 {formatDistance(selectedMarker.distance)} away
                     </p>
                   )}
@@ -631,7 +631,7 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedMarker(null)}
-                  className="text-xs font-medium text-gray-400 hover:text-gray-600"
+                  className="text-xs font-medium text-gray-400 hover:text-white"
                 >
                   ✕
                 </button>
@@ -640,7 +640,7 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={handleViewDetails}
-                  className="w-full rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                  className="w-full rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
                 >
                   {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
                 </button>
@@ -652,7 +652,7 @@ export default function ExplorePage() {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      className="flex-1 rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-center text-xs font-medium text-white hover:bg-[#0D4B4E]"
                     >
                       📍 Directions
                     </a>
@@ -662,7 +662,7 @@ export default function ExplorePage() {
                         const lakeId = selectedMarker.id.replace('lake-', '')
                         navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
                       }}
-                      className="flex-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
                     >
                       🎣 Log Session
                     </button>
@@ -706,7 +706,7 @@ export default function ExplorePage() {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      className="flex-1 rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-center text-xs font-medium text-white hover:bg-[#0D4B4E]"
                     >
                       <Navigation size={12} className="inline mr-1" />
                       Directions
@@ -717,13 +717,13 @@ export default function ExplorePage() {
                         const markId = selectedMarker.id.replace('mark-', '').replace('shared-mark-', '')
                         navigate('/sessions/new', { state: { markId, markName: selectedMarker.title } })
                       }}
-                      className="flex-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
+                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
                     >
                       🎣 Log Session
                     </button>
                   </div>
                   {selectedMarker.type === 'shared-mark' && (
-                    <p className="text-center text-[10px] text-gray-500">
+                    <p className="text-center text-[10px] text-gray-400">
                       Shared with you by a friend
                     </p>
                   )}
@@ -733,12 +733,12 @@ export default function ExplorePage() {
           )}
 
           {showMarkHint && (
-            <div className="absolute left-3 bottom-24 z-20 max-w-[260px] rounded-2xl bg-white/95 px-3 py-2 text-[11px] text-gray-700 shadow-md backdrop-blur">
+            <div className="absolute left-3 bottom-24 z-20 max-w-[260px] rounded-2xl bg-[#243B4A]/95 px-3 py-2 text-[11px] text-gray-300 shadow-md backdrop-blur border border-[#334155]">
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 text-lg">💡</span>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-gray-900">Drop a private mark</p>
-                  <p className="mt-0.5 text-[11px] text-gray-600">
+                  <p className="text-xs font-semibold text-white">Drop a private mark</p>
+                  <p className="mt-0.5 text-[11px] text-gray-400">
                     Double tap the map to quickly save your own fishing spot.
                   </p>
                 </div>
@@ -750,7 +750,7 @@ export default function ExplorePage() {
                       localStorage.setItem('explore-mark-hint-dismissed', 'true')
                     } catch {}
                   }}
-                  className="ml-1 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                  className="ml-1 rounded-full p-1 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
                 >
                   <X size={14} />
                 </button>
@@ -786,12 +786,12 @@ export default function ExplorePage() {
         </section>
 
         {/* Data Cards */}
-        <section className="flex flex-col gap-3 px-4 py-4">
+        <section className="flex flex-col gap-3 px-4 py-4 bg-[#1A2D3D]">
           {/* Location indicator with default area controls */}
           <div className="flex items-center justify-between">
             {mapCenter && (
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <MapPin size={14} className="text-gray-400" />
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <MapPin size={14} className="text-gray-500" />
                 <span>
                   Showing data for {mapCenter.lat.toFixed(3)}, {mapCenter.lng.toFixed(3)}
                 </span>
@@ -805,7 +805,7 @@ export default function ExplorePage() {
                   type="button"
                   onClick={() => hasDefaultArea ? setShowDefaultConfirm(true) : saveAsDefaultArea()}
                   disabled={isSavingDefault}
-                  className="rounded-full bg-navy-800 px-3 py-1 text-[11px] font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
+                  className="rounded-full bg-[#1BA9A0] px-3 py-1 text-[11px] font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#0D4B4E]"
                 >
                   {isSavingDefault ? '...' : '⭐ Set as default'}
                 </button>
@@ -864,7 +864,7 @@ export default function ExplorePage() {
           {/* List Your Business Banner */}
           <Link
             to="/businesses/submit"
-            className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-navy-800 to-navy-900 p-4 shadow-sm transition-transform hover:scale-[1.02]"
+            className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[#1BA9A0] to-[#0D4B4E] p-4 shadow-sm transition-transform hover:scale-[1.02]"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
               <Store size={20} className="text-white" />

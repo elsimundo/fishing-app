@@ -39,7 +39,7 @@ export function SuggestedUsers() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
       </div>
     )
   }
@@ -47,8 +47,8 @@ export function SuggestedUsers() {
   if (!users || users.length === 0) return null
 
   return (
-    <div className="border-b border-gray-200 bg-white px-5 py-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900">Suggested for you</h2>
+    <div className="border-b border-[#334155] bg-[#243B4A] px-5 py-6">
+      <h2 className="mb-4 text-lg font-bold text-white">Suggested for you</h2>
       <div className="space-y-3">
         {users.map((u: any) => (
           <UserCard key={u.id} user={u} />

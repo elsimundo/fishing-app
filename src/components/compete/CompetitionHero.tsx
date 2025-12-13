@@ -13,10 +13,10 @@ const typeLabels: Record<Competition['type'], { label: string; emoji: string }> 
 }
 
 const statusClasses: Record<Competition['status'], string> = {
-  upcoming: 'bg-blue-100 text-blue-700',
-  active: 'bg-emerald-100 text-emerald-700',
-  ended: 'bg-gray-100 text-gray-700',
-  cancelled: 'bg-red-100 text-red-700',
+  upcoming: 'bg-blue-900/50 text-blue-300',
+  active: 'bg-emerald-900/50 text-emerald-300',
+  ended: 'bg-gray-700/50 text-gray-300',
+  cancelled: 'bg-red-900/50 text-red-300',
 }
 
 export function CompetitionHero({ competition, userEntry }: CompetitionHeroProps) {
@@ -43,7 +43,7 @@ export function CompetitionHero({ competition, userEntry }: CompetitionHeroProps
           >
             {competition.status.charAt(0).toUpperCase() + competition.status.slice(1)}
           </span>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 text-gray-900">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#243B4A]/90 text-white">
             {typeInfo.emoji} {typeInfo.label}
           </span>
           {userEntry?.rank && (

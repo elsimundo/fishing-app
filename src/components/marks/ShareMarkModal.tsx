@@ -51,32 +51,32 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-[#243B4A] border border-[#334155] shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 p-4">
+        <div className="flex items-center justify-between border-b border-[#334155] p-4">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Share Mark</h2>
+            <h2 className="text-lg font-bold text-white">Share Mark</h2>
             <p className="text-xs text-gray-500">Share "{mark.name}" with friends</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-gray-400 hover:bg-[#334155] hover:text-white"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Search */}
-        <div className="border-b border-gray-100 p-4">
+        <div className="border-b border-[#334155] p-4">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search friends..."
-              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] py-2 pl-9 pr-3 text-sm text-white focus:border-[#1BA9A0] focus:outline-none"
             />
           </div>
         </div>
@@ -89,8 +89,8 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
             </div>
           ) : following.length === 0 ? (
             <div className="py-8 text-center">
-              <UserPlus size={32} className="mx-auto text-gray-300" />
-              <p className="mt-2 text-sm font-medium text-gray-600">No friends yet</p>
+              <UserPlus size={32} className="mx-auto text-gray-500" />
+              <p className="mt-2 text-sm font-medium text-gray-300">No friends yet</p>
               <p className="mt-1 text-xs text-gray-500">
                 Follow other anglers to share marks with them
               </p>
@@ -104,7 +104,7 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
               {filteredFollowing.map((profile) => (
                 <div
                   key={profile.id}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                  className="flex items-center justify-between rounded-lg bg-[#1A2D3D] p-3"
                 >
                   <div className="flex items-center gap-3">
                     {profile.avatar_url ? (
@@ -114,12 +114,12 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
                         className="h-10 w-10 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-600">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#334155] text-sm font-medium text-gray-300">
                         {(profile.username || profile.full_name || '?')[0].toUpperCase()}
                       </div>
                     )}
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-white">
                         {profile.full_name || profile.username}
                       </p>
                       {profile.username && profile.full_name && (
@@ -129,7 +129,7 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
                   </div>
 
                   {sharedWith.has(profile.id) ? (
-                    <span className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                    <span className="flex items-center gap-1 rounded-full bg-emerald-900/30 border border-emerald-500/40 px-3 py-1 text-xs font-medium text-emerald-400">
                       <Check size={12} />
                       Shared
                     </span>
@@ -138,7 +138,7 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
                       type="button"
                       onClick={() => handleShare(profile.id)}
                       disabled={shareMark.isPending}
-                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary/90 disabled:bg-primary/60"
+                      className="rounded-lg bg-[#1BA9A0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
                     >
                       {shareMark.isPending ? 'Sharing...' : 'Share'}
                     </button>
@@ -150,11 +150,11 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 p-4">
+        <div className="border-t border-[#334155] p-4">
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg bg-gray-100 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+            className="w-full rounded-lg bg-[#1A2D3D] py-2 text-sm font-medium text-gray-300 hover:bg-[#334155]"
           >
             Done
           </button>

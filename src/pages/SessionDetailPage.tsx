@@ -83,10 +83,10 @@ export function SessionDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-50">
+      <main className="flex min-h-screen items-center justify-center bg-[#1A2D3D]">
         <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-navy-800" />
-          <p className="mt-3 text-sm text-gray-600">Loading session…</p>
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[#334155] border-t-[#1BA9A0]" />
+          <p className="mt-3 text-sm text-gray-400">Loading session…</p>
         </div>
       </main>
     )
@@ -95,11 +95,11 @@ export function SessionDetailPage() {
   if (isError || !session) {
     const message = error instanceof Error ? error.message : 'Please try again in a moment.'
     return (
-      <main className="min-h-screen bg-gray-50 px-4 py-6">
+      <main className="min-h-screen bg-[#1A2D3D] px-4 py-6">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+          className="mb-4 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
         >
           <ArrowLeft size={16} />
           Back
@@ -147,7 +147,7 @@ export function SessionDetailPage() {
   )
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-24">
+    <main className="min-h-screen bg-[#1A2D3D] pb-24">
       {/* Pending invite banner for invited users */}
       {!isOwner && myParticipant && myParticipant.status === 'pending' && (
         <div className="border-b border-amber-200 bg-amber-50/80">
@@ -195,12 +195,12 @@ export function SessionDetailPage() {
         </div>
       )}
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+      <header className="sticky top-0 z-10 border-b border-[#334155] bg-[#243B4A]">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            className="flex items-center gap-2 text-gray-400 hover:text-white"
           >
             <ArrowLeft size={20} />
           </button>
@@ -210,7 +210,7 @@ export function SessionDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowShareModal(true)}
-                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
               >
                 <Share2 size={20} />
               </button>
@@ -219,7 +219,7 @@ export function SessionDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowActions(!showActions)}
-                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
               >
                 <MoreHorizontal size={20} />
               </button>
@@ -229,11 +229,11 @@ export function SessionDetailPage() {
 
         {/* Actions dropdown - Owner */}
         {showActions && isOwner && (
-          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-black/5">
+          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-[#243B4A] border border-[#334155] py-2 shadow-lg">
             <button
               type="button"
               onClick={() => { setShowEditModal(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
             >
               <Pencil size={16} />
               Edit Session
@@ -241,7 +241,7 @@ export function SessionDetailPage() {
             <button
               type="button"
               onClick={() => { setShowShareModal(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
             >
               <Share2 size={16} />
               Share to Feed
@@ -266,7 +266,7 @@ export function SessionDetailPage() {
                 }
                 setShowActions(false)
               }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
             >
               <Share2 size={16} />
               Share Link
@@ -274,7 +274,7 @@ export function SessionDetailPage() {
             <button
               type="button"
               onClick={() => { setShowInviteModal(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
             >
               <Plus size={16} />
               Invite Angler
@@ -296,7 +296,7 @@ export function SessionDetailPage() {
                   })
                   setShowActions(false)
                 }}
-                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
               >
                 <Bookmark size={16} />
                 Save as Mark
@@ -304,21 +304,21 @@ export function SessionDetailPage() {
             )}
             {isActive && (
               <>
-                <div className="my-2 border-t border-gray-100" />
+                <div className="my-2 border-t border-[#334155]" />
                 <button
                   type="button"
                   onClick={() => { setShowEndConfirm(true); setShowActions(false) }}
-                  className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-900/30"
                 >
                   End Session
                 </button>
               </>
             )}
-            <div className="my-2 border-t border-gray-100" />
+            <div className="my-2 border-t border-[#334155]" />
             <button
               type="button"
               onClick={() => { setShowDeleteConfirm(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-900/30"
             >
               <Trash2 size={16} />
               Delete Session
@@ -328,11 +328,11 @@ export function SessionDetailPage() {
 
         {/* Actions dropdown - Participant (not owner) */}
         {showActions && !isOwner && myParticipant && (
-          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-black/5">
+          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-[#243B4A] border border-[#334155] py-2 shadow-lg">
             <button
               type="button"
               onClick={() => { setShowLeaveConfirm(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-900/30"
             >
               <LogOut size={16} />
               Leave Session
@@ -410,10 +410,10 @@ export function SessionDetailPage() {
         </div>
 
         {/* Info section */}
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
-              <h1 className="text-lg font-bold text-gray-900">{title}</h1>
+              <h1 className="text-lg font-bold text-white">{title}</h1>
               {sessionDate && (
                 <p className="mt-1 text-xs text-gray-500">
                   {sessionDate} · {sessionTime}
@@ -425,7 +425,7 @@ export function SessionDetailPage() {
                   <span>{session.location_name || 'Unknown location'}</span>
                 </span>
                 {session.location_privacy !== 'exact' && (
-                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+                  <span className="rounded-full bg-[#334155] px-2 py-0.5 text-[10px] font-medium text-gray-400">
                     {session.location_privacy === 'private'
                       ? '🔒 Location hidden'
                       : '📍 General area only'}
@@ -460,7 +460,7 @@ export function SessionDetailPage() {
           </div>
 
           {session.session_notes && (
-            <p className="mt-3 text-sm text-slate-700">
+            <p className="mt-3 text-sm text-gray-400">
               {session.session_notes}
             </p>
           )}
@@ -521,23 +521,23 @@ export function SessionDetailPage() {
 
             {/* Quick stats */}
             <div className="mt-4 grid grid-cols-3 gap-2">
-              <div className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-center text-xs">
+              <div className="rounded-xl border border-[#334155] bg-[#243B4A] px-3 py-3 text-center text-xs">
                 <div className="mb-1 text-lg">🐟</div>
-                <p className="text-base font-bold text-gray-900">{session.stats.total_catches}</p>
+                <p className="text-base font-bold text-white">{session.stats.total_catches}</p>
                 <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Catches</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-center text-xs">
+              <div className="rounded-xl border border-[#334155] bg-[#243B4A] px-3 py-3 text-center text-xs">
                 <div className="mb-1 text-lg">⚖️</div>
-                <p className="text-base font-bold text-gray-900">
+                <p className="text-base font-bold text-white">
                   {session.stats.biggest_catch?.weight_kg != null
                     ? `${session.stats.biggest_catch.weight_kg.toFixed(1)}kg`
                     : '—'}
                 </p>
                 <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Biggest</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-center text-xs">
+              <div className="rounded-xl border border-[#334155] bg-[#243B4A] px-3 py-3 text-center text-xs">
                 <div className="mb-1 text-lg">📸</div>
-                <p className="text-base font-bold text-gray-900">
+                <p className="text-base font-bold text-white">
                   {sortedCatches.filter((c) => c.photo_url).length}
                 </p>
                 <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Photos</p>
@@ -549,7 +549,7 @@ export function SessionDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsQuickLogOpen(true)}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
               >
                 <Plus size={18} />
                 Log new catch
@@ -557,14 +557,14 @@ export function SessionDetailPage() {
             )}
 
             {/* Timeline */}
-            <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+            <div className="mt-4 rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-900">Session timeline</h2>
+                <h2 className="text-sm font-semibold text-white">Session timeline</h2>
                 {canLogCatches && (session.allow_posts || session.allow_comments) && (
                   <button
                     type="button"
                     onClick={() => setShowAddPostModal(true)}
-                    className="flex items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                    className="flex items-center gap-1 rounded-lg bg-[#1A2D3D] px-2 py-1 text-xs font-medium text-gray-300 hover:bg-[#334155]"
                   >
                     <MessageSquare size={14} />
                     Add post
@@ -577,7 +577,7 @@ export function SessionDetailPage() {
                 </div>
               ) : (
                 <div className="relative">
-                  <div className="absolute left-3 top-2 bottom-2 w-px bg-gray-200" />
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-[#334155]" />
                   <div className="space-y-4">
                     {/* Merge catches and posts, sort by time */}
                     {[
@@ -699,9 +699,9 @@ export function SessionDetailPage() {
 
         {/* Participants */}
         {participants.length > 0 && (
-          <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+          <div className="mt-4 rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-900">Participants</h2>
+              <h2 className="text-sm font-semibold text-white">Participants</h2>
               {isOwner && (
                 <button
                   type="button"
@@ -742,18 +742,18 @@ export function SessionDetailPage() {
 
         {/* Catches */}
         <div className="mt-4">
-          <h2 className="mb-3 text-sm font-semibold text-gray-900">
+          <h2 className="mb-3 text-sm font-semibold text-white">
             Catches ({session.catches.length})
           </h2>
           {session.catches.length === 0 ? (
-            <div className="rounded-2xl bg-white p-6 text-center shadow-sm">
-              <Fish size={32} className="mx-auto text-gray-300" />
-              <p className="mt-2 text-sm text-gray-500">No catches logged yet</p>
+            <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-6 text-center shadow-sm">
+              <Fish size={32} className="mx-auto text-gray-500" />
+              <p className="mt-2 text-sm text-gray-400">No catches logged yet</p>
               {canLogCatches && (
                 <button
                   type="button"
                   onClick={() => setIsQuickLogOpen(true)}
-                  className="mt-3 text-sm font-medium text-navy-800 hover:underline"
+                  className="mt-3 text-sm font-medium text-[#1BA9A0] hover:underline"
                 >
                   Log your first catch
                 </button>

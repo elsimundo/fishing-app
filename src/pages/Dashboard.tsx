@@ -57,18 +57,18 @@ export function Dashboard() {
 
   return (
     <Layout>
-      <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-24 pt-3">
+      <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 pb-24 pt-3 bg-[#1A2D3D]">
         <ActiveCompetitionBanner />
         <ActiveSessionBanner />
 
         <header className="flex items-baseline justify-between">
           <div>
-            <h1 className="text-base font-semibold text-slate-900">Logbook</h1>
-            <p className="text-[11px] text-slate-500">Your fishing history, stats and recent trips.</p>
+            <h1 className="text-base font-semibold text-white">Logbook</h1>
+            <p className="text-[11px] text-gray-400">Your fishing history, stats and recent trips.</p>
           </div>
         </header>
 
-        <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 text-xs text-slate-100 shadow">
+        <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#0D4B4E] via-[#1A2D3D] to-[#243B4A] p-4 text-xs text-slate-100 shadow border border-[#334155]">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Lifetime stats</p>
@@ -107,14 +107,14 @@ export function Dashboard() {
         {recentCatches.length > 0 && (
           <section className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                 Recent Catches
               </p>
               {hasMoreCatches && (
                 <button
                   type="button"
                   onClick={() => navigate('/catches')}
-                  className="text-[11px] font-medium text-primary hover:underline"
+                  className="text-[11px] font-medium text-[#1BA9A0] hover:underline"
                 >
                   View all
                 </button>
@@ -131,14 +131,14 @@ export function Dashboard() {
         {/* Sessions */}
         <section className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
               Sessions
             </p>
             {hasMoreSessions && (
               <button
                 type="button"
                 onClick={() => navigate('/sessions')}
-                className="text-[11px] font-medium text-primary hover:underline"
+                className="text-[11px] font-medium text-[#1BA9A0] hover:underline"
               >
                 View all
               </button>
@@ -151,7 +151,7 @@ export function Dashboard() {
               <SessionCardSkeleton />
             </div>
           ) : recentSessions.length === 0 ? (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-gray-400">
               No sessions yet — start your first fishing session to see it here.
             </p>
           ) : (
@@ -160,7 +160,7 @@ export function Dashboard() {
                 <SessionCard key={session.id} session={session} />
               ))}
               {hasMoreSessions ? (
-                <p className="pt-1 text-[11px] text-slate-500">
+                <p className="pt-1 text-[11px] text-gray-400">
                   Showing {recentSessions.length} of {completedSessions.length} sessions
                 </p>
               ) : null}

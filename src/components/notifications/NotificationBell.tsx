@@ -44,7 +44,7 @@ export function NotificationBell({ align = 'right' }: NotificationBellProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-2 text-gray-700 hover:bg-gray-100 transition-colors"
+        className="relative rounded-full p-2 text-gray-300 hover:bg-[#334155] transition-colors"
         aria-label="Notifications"
       >
         <Bell size={20} />
@@ -57,19 +57,19 @@ export function NotificationBell({ align = 'right' }: NotificationBellProps) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className={`absolute ${align === 'left' ? 'left-0' : 'right-0'} top-full mt-2 w-80 md:w-96 rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50 overflow-hidden`}>
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+        <div className={`absolute ${align === 'left' ? 'left-0' : 'right-0'} top-full mt-2 w-80 md:w-96 rounded-xl bg-[#243B4A] border border-[#334155] shadow-lg z-50 overflow-hidden`}>
+          <div className="p-4 border-b border-[#334155]">
+            <h3 className="text-sm font-semibold text-white">Notifications</h3>
           </div>
 
           <div className="max-h-96 overflow-y-auto">
             {recentNotifications.length === 0 ? (
               <div className="p-8 text-center">
-                <Bell size={32} className="mx-auto mb-2 text-gray-300" />
-                <p className="text-sm text-gray-500">No notifications yet</p>
+                <Bell size={32} className="mx-auto mb-2 text-gray-500" />
+                <p className="text-sm text-gray-400">No notifications yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-[#334155]">
                 {recentNotifications.map((notification) => (
                   <NotificationItem
                     key={notification.id}
@@ -82,10 +82,10 @@ export function NotificationBell({ align = 'right' }: NotificationBellProps) {
           </div>
 
           {notifications.length > 5 && (
-            <div className="p-3 border-t border-gray-200">
+            <div className="p-3 border-t border-[#334155]">
               <Link
                 to="/notifications"
-                className="block text-center text-sm font-semibold text-navy-800 hover:text-navy-900"
+                className="block text-center text-sm font-semibold text-[#1BA9A0] hover:text-[#14B8A6]"
                 onClick={() => setIsOpen(false)}
               >
                 View all notifications

@@ -34,7 +34,7 @@ export function UserCard({ user }: UserCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-colors hover:border-navy-800"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#334155] bg-[#1A2D3D] p-4 transition-colors hover:border-[#1BA9A0]"
     >
       {user.avatar_url ? (
         <img
@@ -43,20 +43,20 @@ export function UserCard({ user }: UserCardProps) {
           className="h-12 w-12 flex-shrink-0 rounded-full object-cover"
         />
       ) : (
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-lg font-bold text-white">
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1BA9A0] to-[#14B8A6] text-lg font-bold text-white">
           {user.username?.[0]?.toUpperCase() || 'U'}
         </div>
       )}
 
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-gray-900">
+        <div className="truncate text-sm font-semibold text-white">
           {user.full_name || user.username || 'Unnamed User'}
         </div>
-        <div className="mb-1 text-xs text-gray-600">@{user.username || 'user'}</div>
+        <div className="mb-1 text-xs text-gray-400">@{user.username || 'user'}</div>
         {user.bio && (
-          <p className="mb-2 line-clamp-2 text-sm text-gray-700">{user.bio}</p>
+          <p className="mb-2 line-clamp-2 text-sm text-gray-400">{user.bio}</p>
         )}
-        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
           {user.location && (
             <span className="flex items-center gap-1">📍 {user.location}</span>
           )}

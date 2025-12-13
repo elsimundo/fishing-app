@@ -15,11 +15,11 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
   const progressPercent = Math.min(100, Math.round((progress / target) * 100))
   
   const difficultyConfig: Record<string, { color: string; bg: string; label: string }> = {
-    easy: { color: 'text-green-600', bg: 'bg-green-100', label: 'Easy' },
-    medium: { color: 'text-yellow-600', bg: 'bg-yellow-100', label: 'Medium' },
-    hard: { color: 'text-orange-600', bg: 'bg-orange-100', label: 'Hard' },
-    expert: { color: 'text-red-600', bg: 'bg-red-100', label: 'Expert' },
-    legendary: { color: 'text-purple-600', bg: 'bg-purple-100', label: 'Legendary' },
+    easy: { color: 'text-green-400', bg: 'bg-green-900/30', label: 'Easy' },
+    medium: { color: 'text-yellow-400', bg: 'bg-yellow-900/30', label: 'Medium' },
+    hard: { color: 'text-orange-400', bg: 'bg-orange-900/30', label: 'Hard' },
+    expert: { color: 'text-red-400', bg: 'bg-red-900/30', label: 'Expert' },
+    legendary: { color: 'text-purple-400', bg: 'bg-purple-900/30', label: 'Legendary' },
   }
   
   const difficulty = difficultyConfig[challenge.difficulty] || difficultyConfig.medium
@@ -31,18 +31,18 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
         className={`
           flex items-center gap-2 p-2 rounded-lg border transition-all
           ${isCompleted 
-            ? 'bg-green-50 border-green-200' 
-            : 'bg-white border-gray-200 hover:border-gray-300'
+            ? 'bg-emerald-900/30 border-emerald-500/40' 
+            : 'bg-[#243B4A] border-[#334155] hover:border-[#1BA9A0]'
           }
         `}
       >
         <span className="text-xl">{challenge.icon}</span>
         <div className="flex-1 text-left">
-          <p className={`text-xs font-medium ${isCompleted ? 'text-green-700' : 'text-gray-900'}`}>
+          <p className={`text-xs font-medium ${isCompleted ? 'text-emerald-400' : 'text-white'}`}>
             {challenge.title}
           </p>
         </div>
-        {isCompleted && <Check size={14} className="text-green-600" />}
+        {isCompleted && <Check size={14} className="text-emerald-400" />}
       </button>
     )
   }
@@ -53,14 +53,14 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
       className={`
         relative w-full p-4 rounded-xl border-2 transition-all text-left
         ${isCompleted 
-          ? 'bg-green-50 border-green-300 shadow-sm' 
-          : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-md'
+          ? 'bg-emerald-900/20 border-emerald-500/40 shadow-sm' 
+          : 'bg-[#243B4A] border-[#334155] hover:border-[#1BA9A0] hover:shadow-md'
         }
       `}
     >
       {/* Featured badge */}
       {challenge.is_featured && (
-        <div className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 rounded-full p-1">
+        <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 rounded-full p-1">
           <Star size={12} fill="currentColor" />
         </div>
       )}
@@ -69,24 +69,24 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
       <div className="flex items-start gap-3">
         <div className={`
           w-12 h-12 rounded-xl flex items-center justify-center text-2xl
-          ${isCompleted ? 'bg-green-100' : 'bg-gray-100'}
+          ${isCompleted ? 'bg-emerald-900/30' : 'bg-[#1A2D3D]'}
         `}>
           {challenge.icon}
         </div>
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className={`font-semibold truncate ${isCompleted ? 'text-green-700' : 'text-gray-900'}`}>
+            <h3 className={`font-semibold truncate ${isCompleted ? 'text-emerald-400' : 'text-white'}`}>
               {challenge.title}
             </h3>
             {isCompleted && (
-              <div className="flex-shrink-0 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="flex-shrink-0 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
                 <Check size={12} className="text-white" />
               </div>
             )}
           </div>
           
-          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+          <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
             {challenge.description}
           </p>
         </div>
@@ -99,9 +99,9 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
             <span>{progress} / {target}</span>
             <span>{progressPercent}%</span>
           </div>
-          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-[#334155] rounded-full overflow-hidden">
             <div 
-              className="h-full bg-navy-600 rounded-full transition-all duration-300"
+              className="h-full bg-[#1BA9A0] rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -109,12 +109,12 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
       )}
       
       {/* Footer */}
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#334155]">
         <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${difficulty.bg} ${difficulty.color}`}>
           {difficulty.label}
         </span>
         
-        <span className={`text-xs font-semibold ${isCompleted ? 'text-green-600' : 'text-amber-600'}`}>
+        <span className={`text-xs font-semibold ${isCompleted ? 'text-emerald-400' : 'text-[#1BA9A0]'}`}>
           {isCompleted ? '✓ Completed' : `+${challenge.xp_reward} XP`}
         </span>
       </div>
@@ -125,14 +125,14 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
 // Locked challenge placeholder
 export function LockedChallengeCard() {
   return (
-    <div className="w-full p-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50">
+    <div className="w-full p-4 rounded-xl border-2 border-dashed border-[#334155] bg-[#1A2D3D]">
       <div className="flex items-center gap-3 opacity-50">
-        <div className="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center">
-          <Lock size={20} className="text-gray-400" />
+        <div className="w-12 h-12 rounded-xl bg-[#334155] flex items-center justify-center">
+          <Lock size={20} className="text-gray-500" />
         </div>
         <div>
-          <h3 className="font-semibold text-gray-400">Coming Soon</h3>
-          <p className="text-xs text-gray-400">New challenges added monthly</p>
+          <h3 className="font-semibold text-gray-500">Coming Soon</h3>
+          <p className="text-xs text-gray-500">New challenges added monthly</p>
         </div>
       </div>
     </div>

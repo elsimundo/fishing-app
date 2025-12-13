@@ -517,13 +517,13 @@ export function CatchForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {formError ? (
-        <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+        <div className="rounded-md bg-red-900/30 border border-red-500/40 px-3 py-2 text-xs text-red-400">
           {formError}
         </div>
       ) : null}
 
       {mode === 'create' && activeSession ? (
-        <div className="rounded-md bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
+        <div className="rounded-md bg-emerald-900/30 border border-emerald-500/40 px-3 py-2 text-[11px] text-emerald-400">
           This catch will be added to your active session:{' '}
           <span className="font-semibold">{activeSession.title || activeSession.location_name}</span>.
           {participantSpot?.spot_name && (
@@ -582,12 +582,12 @@ export function CatchForm({
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="species">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="species">
             Species
           </label>
           <select
             id="species"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('species')}
           >
             <option value="">Select species</option>
@@ -624,13 +624,13 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="caught_at">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="caught_at">
             Date & time
           </label>
           <input
             id="caught_at"
             type="datetime-local"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('caught_at')}
           />
           {errors.caught_at ? (
@@ -641,11 +641,11 @@ export function CatchForm({
         {/* Quick mark picker */}
         {savedMarks.length > 0 && (
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-slate-700">
+            <label className="mb-1 block text-xs font-medium text-gray-400">
               Use a saved mark (optional)
             </label>
             <select
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               onChange={(e) => {
                 const markId = e.target.value
                 if (!markId) return
@@ -668,13 +668,13 @@ export function CatchForm({
         )}
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="location_name">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="location_name">
             Location name
           </label>
           <input
             id="location_name"
             type="text"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="e.g. Chesil Beach, Dorset"
             {...register('location_name')}
           />
@@ -685,10 +685,10 @@ export function CatchForm({
 
         <div className="sm:col-span-2 space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-medium text-slate-700">Pick location on map</p>
+            <p className="text-[11px] font-medium text-gray-400">Pick location on map</p>
             <button
               type="button"
-              className="rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
+              className="rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-2 py-1 text-[11px] text-gray-400 hover:bg-[#334155]"
               onClick={() => {
                 if (!navigator.geolocation) {
                   setFormError('Geolocation is not available in this browser.')
@@ -719,7 +719,7 @@ export function CatchForm({
               setValue('longitude', lng.toString(), { shouldValidate: true })
             }}
           />
-          <p className="mt-1 text-[11px] text-slate-500">
+          <p className="mt-1 text-[11px] text-gray-500">
             Tap or drag the pin to your fishing spot. Coordinates are saved automatically.
           </p>
           {errors.latitude ? (
@@ -731,7 +731,7 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="weight_kg">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="weight_kg">
             Weight (kg)
           </label>
           <input
@@ -739,7 +739,7 @@ export function CatchForm({
             type="number"
             inputMode="decimal"
             step="0.01"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('weight_kg')}
           />
           {errors.weight_kg ? (
@@ -748,7 +748,7 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="length_cm">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="length_cm">
             Length (cm)
           </label>
           <input
@@ -756,7 +756,7 @@ export function CatchForm({
             type="number"
             inputMode="decimal"
             step="0.1"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('length_cm')}
           />
           {errors.length_cm ? (
@@ -774,9 +774,9 @@ export function CatchForm({
                   type="checkbox"
                   checked={returned}
                   onChange={(e) => setReturned(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-navy-800 focus:ring-navy-800"
+                  className="h-4 w-4 rounded border-[#334155] bg-[#1A2D3D] text-white text-navy-800 focus:ring-navy-800"
                 />
-                <span className="text-xs text-slate-700">I returned this fish to the water</span>
+                <span className="text-xs text-gray-400">I returned this fish to the water</span>
               </label>
             </div>
           ) : legalStatus.status === 'legal' ? (
@@ -787,14 +787,14 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="bait">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="bait">
             Bait
           </label>
           <input
             id="bait"
             type="text"
             placeholder="e.g. lugworm, ragworm, squid"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('bait')}
           />
           {errors.bait ? (
@@ -803,14 +803,14 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="rig">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="rig">
             Rig
           </label>
           <input
             id="rig"
             type="text"
             placeholder="e.g. running ledger, paternoster"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('rig')}
           />
           {errors.rig ? (
@@ -819,12 +819,12 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="fishing_style">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="fishing_style">
             Fishing style
           </label>
           <select
             id="fishing_style"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('fishing_style')}
           >
             <option value="">Select style</option>
@@ -840,13 +840,13 @@ export function CatchForm({
         </div>
 
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="notes">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="notes">
             Notes
           </label>
           <textarea
             id="notes"
             rows={3}
-            className="block w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full resize-none rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="Conditions, tactics, who you were fishing with, etc."
             {...register('notes')}
           />
@@ -857,7 +857,7 @@ export function CatchForm({
 
         {/* Privacy Settings */}
         <div className="sm:col-span-2 space-y-3">
-          <p className="text-xs font-medium text-slate-700">Sharing</p>
+          <p className="text-xs font-medium text-gray-400">Sharing</p>
           
           {/* Public/Private Toggle */}
           <div className="flex gap-2">
@@ -866,8 +866,8 @@ export function CatchForm({
               onClick={() => setIsPublic(true)}
               className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
                 isPublic
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]'
+                  : 'border-[#334155] bg-[#1A2D3D] text-gray-400 hover:bg-[#334155]'
               }`}
             >
               <Globe size={14} />
@@ -878,8 +878,8 @@ export function CatchForm({
               onClick={() => setIsPublic(false)}
               className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
                 !isPublic
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]'
+                  : 'border-[#334155] bg-[#1A2D3D] text-gray-400 hover:bg-[#334155]'
               }`}
             >
               <Lock size={14} />
@@ -894,25 +894,25 @@ export function CatchForm({
                 type="checkbox"
                 checked={hideExactLocation}
                 onChange={(e) => setHideExactLocation(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-[#334155] bg-[#1A2D3D] text-white text-primary focus:ring-primary"
               />
-              <span className="text-xs text-slate-600">Hide exact location (show region only)</span>
+              <span className="text-xs text-gray-400">Hide exact location (show region only)</span>
             </label>
           )}
 
           {/* Privacy Info Box */}
-          <div className="rounded-lg bg-slate-50 p-3 text-[11px] text-slate-600">
+          <div className="rounded-lg bg-[#1A2D3D] border border-[#334155] p-3 text-[11px] text-gray-400">
             <div className="flex items-start gap-2">
               <Info size={14} className="mt-0.5 shrink-0 text-slate-400" />
               <div className="space-y-1.5">
-                <p className="font-medium text-slate-700">What's shared publicly?</p>
-                <ul className="space-y-0.5 text-slate-500">
+                <p className="font-medium text-gray-400">What's shared publicly?</p>
+                <ul className="space-y-0.5 text-gray-500">
                   <li>• Species, weight, and photo</li>
                   <li>• General area (e.g. "Cornwall")</li>
                   <li>• Date caught</li>
                 </ul>
-                <p className="font-medium text-slate-700 pt-1">🔒 Never shared:</p>
-                <ul className="space-y-0.5 text-slate-500">
+                <p className="font-medium text-gray-400 pt-1">🔒 Never shared:</p>
+                <ul className="space-y-0.5 text-gray-500">
                   <li>• Exact GPS coordinates</li>
                   <li>• Your precise fishing spot</li>
                 </ul>

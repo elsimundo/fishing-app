@@ -103,11 +103,11 @@ export default function CreatePostPage() {
     <Layout>
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#334155] bg-[#243B4A] px-4 py-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
           >
             <X size={22} />
           </button>
@@ -116,7 +116,7 @@ export default function CreatePostPage() {
             type="button"
             onClick={handleSubmit}
             disabled={!canPost || isSubmitting}
-            className="rounded-full bg-navy-800 px-5 py-2 text-sm font-bold text-white hover:bg-navy-900 disabled:bg-gray-300 disabled:text-gray-500"
+            className="rounded-full bg-[#1BA9A0] px-5 py-2 text-sm font-bold text-white hover:bg-[#14B8A6] disabled:bg-[#334155] disabled:text-gray-500"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
@@ -130,8 +130,8 @@ export default function CreatePostPage() {
         </header>
 
         {/* Composer Card */}
-        <div className="flex-1 bg-gray-50 p-4">
-          <div className="rounded-2xl bg-white shadow-sm">
+        <div className="flex-1 bg-[#1A2D3D] p-4">
+          <div className="rounded-2xl bg-[#243B4A] shadow-sm border border-[#334155]">
             {/* User info + textarea */}
             <div className="p-4">
               <div className="flex gap-3">
@@ -145,7 +145,7 @@ export default function CreatePostPage() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="What's happening on the water?"
-                    className="min-h-[120px] w-full resize-none border-none bg-transparent text-[15px] leading-relaxed text-gray-900 placeholder-gray-400 focus:outline-none"
+                    className="min-h-[120px] w-full resize-none border-none bg-transparent text-[15px] leading-relaxed text-white placeholder-gray-500 focus:outline-none"
                     maxLength={500}
                     autoFocus
                   />
@@ -174,15 +174,15 @@ export default function CreatePostPage() {
             )}
 
             {/* Actions bar */}
-            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+            <div className="flex items-center justify-between border-t border-[#334155] px-4 py-3">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     imagePreview
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'text-gray-600 hover:bg-gray-100'
+                      ? 'bg-emerald-900/30 text-emerald-400'
+                      : 'text-gray-400 hover:bg-[#1A2D3D]'
                   }`}
                 >
                   <Image size={20} />
@@ -198,7 +198,7 @@ export default function CreatePostPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-gray-200">
+                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[#334155]">
                   <div
                     className={`h-full rounded-full transition-all ${
                       content.length > 450
@@ -210,7 +210,7 @@ export default function CreatePostPage() {
                     style={{ width: `${Math.min((content.length / 500) * 100, 100)}%` }}
                   />
                 </div>
-                <span className={`text-xs font-medium ${content.length > 450 ? 'text-red-500' : 'text-gray-400'}`}>
+                <span className={`text-xs font-medium ${content.length > 450 ? 'text-red-400' : 'text-gray-500'}`}>
                   {500 - content.length}
                 </span>
               </div>
@@ -218,9 +218,9 @@ export default function CreatePostPage() {
           </div>
 
           {/* Tips */}
-          <div className="mt-4 rounded-xl bg-blue-50 p-4">
-            <p className="text-xs font-semibold text-blue-800">💡 Tips for a great post</p>
-            <ul className="mt-2 space-y-1 text-xs text-blue-700">
+          <div className="mt-4 rounded-xl bg-blue-900/30 p-4 border border-blue-500/30">
+            <p className="text-xs font-semibold text-blue-400">💡 Tips for a great post</p>
+            <ul className="mt-2 space-y-1 text-xs text-blue-400">
               <li>• Share your catch story or fishing conditions</li>
               <li>• Add a photo to get more engagement</li>
               <li>• Tag your location for local anglers</li>

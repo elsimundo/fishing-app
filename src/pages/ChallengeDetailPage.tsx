@@ -82,39 +82,39 @@ export function ChallengeDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-20">
+    <main className="min-h-screen bg-[#1A2D3D] pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+      <header className="sticky top-0 z-10 border-b border-[#334155] bg-[#243B4A]">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            className="flex items-center gap-2 text-gray-400 hover:text-white"
           >
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-sm font-semibold text-gray-900">Challenge Details</h1>
+          <h1 className="text-sm font-semibold text-white">Challenge Details</h1>
           <div className="w-8" /> {/* Spacer */}
         </div>
       </header>
 
       <div className="mx-auto max-w-2xl px-4 py-6">
         {/* Challenge Card */}
-        <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-2xl bg-[#243B4A] border border-[#334155] p-6 shadow-sm">
           <div className="flex items-start gap-4">
             {/* Icon */}
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 text-3xl">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1A2D3D] text-3xl">
               {challenge.icon}
             </div>
 
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-gray-900">{challenge.title}</h2>
+                <h2 className="text-lg font-bold text-white">{challenge.title}</h2>
                 {isCompleted && (
                   <CheckCircle size={20} className="text-emerald-500" />
                 )}
               </div>
-              <p className="mt-1 text-sm text-gray-600">{challenge.description}</p>
+              <p className="mt-1 text-sm text-gray-400">{challenge.description}</p>
 
               {/* Difficulty & XP */}
               <div className="mt-3 flex items-center gap-3">
@@ -129,17 +129,17 @@ export function ChallengeDetailPage() {
           {/* Progress bar */}
           <div className="mt-6">
             <div className="mb-2 flex justify-between text-sm">
-              <span className="text-gray-600">Progress</span>
-              <span className="font-medium text-gray-900">{progress} / {target}</span>
+              <span className="text-gray-400">Progress</span>
+              <span className="font-medium text-white">{progress} / {target}</span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-gray-200">
+            <div className="h-3 overflow-hidden rounded-full bg-[#1A2D3D]">
               <div
                 className={`h-full rounded-full transition-all ${isCompleted ? 'bg-emerald-500' : 'bg-amber-500'}`}
                 style={{ width: `${progressPct}%` }}
               />
             </div>
             {isCompleted && (
-              <p className="mt-2 text-center text-sm font-medium text-emerald-600">
+              <p className="mt-2 text-center text-sm font-medium text-emerald-400">
                 ✓ Completed
               </p>
             )}
@@ -147,19 +147,19 @@ export function ChallengeDetailPage() {
         </div>
 
         {/* Contributing Catches */}
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold text-gray-900">
+        <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold text-white">
             Contributing Catches ({challengeCatches.length})
           </h3>
 
           {catchesLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
             </div>
           ) : challengeCatches.length === 0 ? (
             <div className="py-8 text-center text-sm text-gray-500">
               <p>No catches recorded for this challenge yet.</p>
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-gray-600">
                 Catches logged before this feature was added won't appear here.
               </p>
             </div>
@@ -177,7 +177,7 @@ export function ChallengeDetailPage() {
                     <button
                       type="button"
                       onClick={() => setCatchToRemove({ id: catchData.id, species: catchData.species })}
-                      className="absolute right-2 top-2 rounded-full bg-white p-1.5 text-gray-400 shadow-sm hover:bg-red-50 hover:text-red-500"
+                      className="absolute right-2 top-2 rounded-full bg-[#1A2D3D] p-1.5 text-gray-400 shadow-sm hover:bg-[#334155] hover:text-red-400"
                       title="Remove from challenge"
                     >
                       <Trash2 size={14} />

@@ -13,16 +13,16 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-        <AlertCircle className="h-8 w-8 text-red-600" />
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-900/30">
+        <AlertCircle className="h-8 w-8 text-red-400" />
       </div>
-      <h3 className="mb-2 text-lg font-bold text-gray-900">{title}</h3>
-      <p className="mb-4 max-w-sm text-sm text-gray-600">{message}</p>
+      <h3 className="mb-2 text-lg font-bold text-white">{title}</h3>
+      <p className="mb-4 max-w-sm text-sm text-gray-400">{message}</p>
       {onRetry ? (
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex items-center gap-2 rounded-xl bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1BA9A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#14B8A6]"
         >
           <RefreshCw className="h-4 w-4" />
           Try again

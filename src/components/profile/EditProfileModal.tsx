@@ -159,15 +159,15 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
-      <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white md:max-w-lg md:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-          <h2 className="text-lg font-bold text-gray-900">Edit Profile</h2>
+      <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-[#243B4A] md:max-w-lg md:rounded-2xl">
+        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
+          <h2 className="text-lg font-bold text-white">Edit Profile</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 transition-colors hover:bg-gray-100"
+            className="rounded-full p-2 transition-colors hover:bg-[#1A2D3D]"
           >
-            <X size={20} className="text-gray-600" />
+            <X size={20} className="text-gray-400" />
           </button>
         </div>
 
@@ -182,14 +182,14 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
                   className="h-24 w-24 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-3xl font-bold text-white">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#1BA9A0] to-[#14B8A6] text-3xl font-bold text-white">
                   {profile.username?.[0]?.toUpperCase() ?? 'U'}
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-navy-800 text-white shadow-lg hover:bg-navy-900"
+                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#1BA9A0] text-white shadow-lg hover:bg-[#14B8A6]"
               >
                 <Camera size={16} />
               </button>
@@ -205,16 +205,16 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-900">Username</label>
+            <label className="mb-2 block text-sm font-medium text-white">Username</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">@</span>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => handleUsernameChange(e.target.value)}
                 maxLength={20}
-                className={`w-full rounded-xl border px-4 py-3 pl-8 text-sm focus:border-transparent focus:outline-none focus:ring-2 ${
-                  usernameError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-navy-800'
+                className={`w-full rounded-xl border bg-[#1A2D3D] px-4 py-3 pl-8 text-sm text-white focus:border-transparent focus:outline-none focus:ring-2 ${
+                  usernameError ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:ring-[#1BA9A0]'
                 }`}
                 placeholder="username"
               />
@@ -223,50 +223,50 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
               )}
             </div>
             {usernameError && (
-              <p className="mt-1 text-xs text-red-500">{usernameError}</p>
+              <p className="mt-1 text-xs text-red-400">{usernameError}</p>
             )}
             <p className="mt-1 text-xs text-gray-500">3-20 characters, letters, numbers, underscores only</p>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-900">Full name</label>
+            <label className="mb-2 block text-sm font-medium text-white">Full name</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               maxLength={100}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+              className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-900">Bio</label>
+            <label className="mb-2 block text-sm font-medium text-white">Bio</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={4}
               maxLength={200}
-              className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+              className="w-full resize-none rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]"
               placeholder="Tell others about yourself…"
             />
             <p className="mt-1 text-right text-xs text-gray-500">{bio.length}/200</p>
           </div>
 
           {/* Privacy Toggle */}
-          <div className="rounded-xl border border-gray-200 p-4">
+          <div className="rounded-xl border border-[#334155] bg-[#1A2D3D] p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {isPrivate ? (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-                    <Lock size={20} className="text-amber-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-900/30">
+                    <Lock size={20} className="text-amber-400" />
                   </div>
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                    <Globe size={20} className="text-emerald-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-900/30">
+                    <Globe size={20} className="text-emerald-400" />
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm font-semibold text-white">
                     {isPrivate ? 'Private Account' : 'Public Account'}
                   </p>
                   <p className="text-xs text-gray-500">
@@ -280,7 +280,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
                 type="button"
                 onClick={() => setIsPrivate(!isPrivate)}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  isPrivate ? 'bg-amber-500' : 'bg-gray-300'
+                  isPrivate ? 'bg-amber-500' : 'bg-[#334155]'
                 }`}
               >
                 <span
@@ -294,11 +294,11 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
 
         </div>
 
-        <div className="flex gap-3 border-t border-gray-200 px-5 py-4">
+        <div className="flex gap-3 border-t border-[#334155] px-5 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl border border-gray-300 px-4 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            className="flex-1 rounded-xl border border-[#334155] px-4 py-3 font-semibold text-gray-300 transition-colors hover:bg-[#1A2D3D]"
           >
             Cancel
           </button>
@@ -306,7 +306,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
             type="button"
             onClick={handleSave}
             disabled={isSaving || isUploading}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-3 font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] px-4 py-3 font-semibold text-white transition-colors hover:bg-[#14B8A6] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSaving ? (
               <>

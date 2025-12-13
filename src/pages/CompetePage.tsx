@@ -9,23 +9,23 @@ import { Trophy, Plus, Target } from 'lucide-react'
 function EmptyState({ type }: { type: 'yours' | 'available' }) {
   if (type === 'yours') {
     return (
-      <div className="rounded-2xl bg-white p-6 text-center shadow-sm">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
-          <Trophy size={28} className="text-amber-600" />
+      <div className="rounded-2xl bg-[#243B4A] p-6 text-center shadow-sm border border-[#334155]">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-900/30">
+          <Trophy size={28} className="text-amber-400" />
         </div>
-        <p className="mt-3 text-sm font-semibold text-gray-900">No active competitions</p>
-        <p className="mt-1 text-xs text-gray-500">Join a competition below to start competing</p>
+        <p className="mt-3 text-sm font-semibold text-white">No active competitions</p>
+        <p className="mt-1 text-xs text-gray-400">Join a competition below to start competing</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+    <div className="rounded-2xl bg-[#243B4A] p-8 text-center shadow-sm border border-[#334155]">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#1A2D3D]">
         <Target size={32} className="text-gray-400" />
       </div>
-      <p className="mt-4 text-base font-semibold text-gray-900">No competitions available</p>
-      <p className="mt-1 text-sm text-gray-500">Check back soon or create your own!</p>
+      <p className="mt-4 text-base font-semibold text-white">No competitions available</p>
+      <p className="mt-1 text-sm text-gray-400">Check back soon or create your own!</p>
     </div>
   )
 }
@@ -57,17 +57,17 @@ export default function CompetePage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="min-h-screen bg-[#1A2D3D] pb-24">
         <PullToRefresh onRefresh={handleRefresh}>
           <div className="mx-auto max-w-2xl">
             {/* Header */}
-            <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+            <header className="sticky top-0 z-10 border-b border-[#334155] bg-[#243B4A]">
               <div className="flex items-center justify-between px-4 py-3">
-                <h1 className="text-base font-bold text-gray-900">Compete</h1>
+                <h1 className="text-base font-bold text-white">Compete</h1>
                 <button
                   type="button"
                   onClick={() => navigate('/compete/create')}
-                  className="flex items-center gap-1.5 rounded-full bg-navy-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
+                  className="flex items-center gap-1.5 rounded-full bg-[#1BA9A0] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
                 >
                   <Plus size={16} />
                   <span>Create</span>
@@ -80,12 +80,12 @@ export default function CompetePage() {
               {/* Your Competitions */}
               <section>
                 <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100">
-                    <Trophy size={14} className="text-emerald-600" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-900/30">
+                    <Trophy size={14} className="text-emerald-400" />
                   </div>
-                  <h2 className="text-sm font-bold text-gray-900">Your Competitions</h2>
+                  <h2 className="text-sm font-bold text-white">Your Competitions</h2>
                   {yourCompetitions.length > 0 && (
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                    <span className="rounded-full bg-emerald-900/30 px-2 py-0.5 text-xs font-semibold text-emerald-400">
                       {yourCompetitions.length}
                     </span>
                   )}
@@ -109,12 +109,12 @@ export default function CompetePage() {
               {/* Available Competitions */}
               <section>
                 <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
-                    <Target size={14} className="text-blue-600" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-900/30">
+                    <Target size={14} className="text-blue-400" />
                   </div>
-                  <h2 className="text-sm font-bold text-gray-900">Available to Join</h2>
+                  <h2 className="text-sm font-bold text-white">Available to Join</h2>
                   {availableCompetitions.length > 0 && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                    <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-xs font-semibold text-blue-400">
                       {availableCompetitions.length}
                     </span>
                   )}
