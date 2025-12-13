@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Waves, ChevronDown, ChevronUp, Clock, Loader2 } from 'lucide-react'
-import { useTideData } from '../../hooks/useTideData'
-import { format, formatDistanceToNow } from 'date-fns'
+import { Waves, ChevronDown, ChevronUp, Loader2, Calendar } from 'lucide-react'
+import { useTideData, useTideDataForDate } from '../../hooks/useTideData'
+import { format, formatDistanceToNow, addDays, startOfDay, isSameDay } from 'date-fns'
 
 interface TideCardProps {
   lat: number | null
@@ -10,7 +10,19 @@ interface TideCardProps {
 
 export function TideCard({ lat, lng }: TideCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null) // null = today (live)
   const { data: tideData, isLoading, error } = useTideData(lat, lng, lat !== null && lng !== null)
+  const { data: futureTideData, isLoading: futureLoading } = useTideDataForDate(
+    lat,
+    lng,
+    selectedDate,
+    3,
+    selectedDate !== null
+  )
+  
+  // Use future data if a date is selected, otherwise use live data
+  const displayData = selectedDate ? futureTideData : tideData
+  const isLoadingData = selectedDate ? futureLoading : isLoading
 
   if (!lat || !lng) {
     return (
@@ -52,7 +64,7 @@ export function TideCard({ lat, lng }: TideCardProps) {
     )
   }
 
-  const { current, extremes, predictions, station, gaugeData } = tideData
+  const { current, extremes, station, gaugeData } = tideData
   const isLive = gaugeData?.latestReading !== undefined
 
   const formatHeight = (height: number) => `${height.toFixed(1)}m`
@@ -109,99 +121,184 @@ export function TideCard({ lat, lng }: TideCardProps) {
       {/* Expanded content */}
       {expanded && (
         <div className="border-t border-gray-100 px-4 pb-4">
-          {/* Live Reading */}
-          {isLive && gaugeData?.latestReading && (
+          {/* Date Picker - Quick date navigation */}
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedDate(null)}
+              className={`flex-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                !selectedDate
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Today
+            </button>
+            {[1, 2, 7, 14].map((daysAhead) => {
+              const date = addDays(startOfDay(new Date()), daysAhead)
+              const isSelected = selectedDate && isSameDay(selectedDate, date)
+              const label = daysAhead === 1 ? 'Tomorrow' : daysAhead === 7 ? 'Next Week' : daysAhead === 14 ? '2 Weeks' : format(date, 'EEE')
+              
+              return (
+                <button
+                  key={daysAhead}
+                  type="button"
+                  onClick={() => setSelectedDate(date)}
+                  className={`flex-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors ${
+                    isSelected
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Custom date picker */}
+          <div className="mt-2 flex items-center gap-2">
+            <Calendar size={14} className="text-gray-400" />
+            <input
+              type="date"
+              value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
+              min={format(new Date(), 'yyyy-MM-dd')}
+              max={format(addDays(new Date(), 30), 'yyyy-MM-dd')}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setSelectedDate(new Date(e.target.value))
+                } else {
+                  setSelectedDate(null)
+                }
+              }}
+              className="flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
+            />
+            {selectedDate && (
+              <button
+                type="button"
+                onClick={() => setSelectedDate(null)}
+                className="rounded-lg bg-gray-100 px-2 py-1.5 text-xs text-gray-600 hover:bg-gray-200"
+              >
+                Back to Live
+              </button>
+            )}
+          </div>
+
+          {/* Loading state for future data */}
+          {isLoadingData && selectedDate && (
+            <div className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-gray-50 p-4">
+              <Loader2 size={16} className="animate-spin text-gray-400" />
+              <span className="text-xs text-gray-500">Loading tides for {format(selectedDate, 'EEE, MMM d')}...</span>
+            </div>
+          )}
+
+          {/* Live Reading - only show when viewing today */}
+          {!selectedDate && isLive && gaugeData?.latestReading && (
             <div className="mt-3 rounded-lg bg-green-50 p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-green-700">
                 Live Reading
               </p>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-green-900">
+                <span className="text-sm text-green-700">
                   {formatHeight(gaugeData.latestReading.level)}
                 </span>
-                <span className="text-xs text-green-700">
+                <span className="text-xs text-green-600">
                   {formatDistanceToNow(new Date(gaugeData.latestReading.time), { addSuffix: true })}
                 </span>
               </div>
             </div>
           )}
 
-          {/* Next High/Low */}
-          {extremes && (extremes.nextHigh || extremes.nextLow) && (
+          {/* Next High/Low - TIME is now prominent, depth secondary */}
+          {(displayData?.extremes?.nextHigh || displayData?.extremes?.nextLow) && (
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {extremes.nextHigh && (
+              {displayData?.extremes?.nextHigh && (
                 <div className="rounded-lg bg-emerald-50 p-3">
-                  <p className="text-xs font-semibold text-emerald-700">Next High</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-900">
-                    {formatHeight(extremes.nextHigh.height)}
+                  <p className="text-xs font-semibold text-emerald-700">
+                    {selectedDate ? 'First High' : 'Next High'}
+                  </p>
+                  <p className="mt-1 text-xl font-bold text-emerald-900">
+                    {format(new Date(displayData.extremes.nextHigh.time), 'h:mm a')}
                   </p>
                   <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
-                    <Clock size={12} />
-                    <span>{format(new Date(extremes.nextHigh.time), 'h:mm a')}</span>
+                    <span className="text-emerald-600 font-medium">
+                      {formatHeight(displayData.extremes.nextHigh.height)}
+                    </span>
                   </div>
-                  <p className="text-[10px] text-gray-500">
-                    {formatDistanceToNow(new Date(extremes.nextHigh.time), { addSuffix: true })}
-                  </p>
+                  {!selectedDate && (
+                    <p className="text-[10px] text-gray-500">
+                      {formatDistanceToNow(new Date(displayData.extremes.nextHigh.time), { addSuffix: true })}
+                    </p>
+                  )}
                 </div>
               )}
-              {extremes.nextLow && (
+              {displayData?.extremes?.nextLow && (
                 <div className="rounded-lg bg-amber-50 p-3">
-                  <p className="text-xs font-semibold text-amber-700">Next Low</p>
-                  <p className="mt-1 text-lg font-bold text-amber-900">
-                    {formatHeight(extremes.nextLow.height)}
+                  <p className="text-xs font-semibold text-amber-700">
+                    {selectedDate ? 'First Low' : 'Next Low'}
+                  </p>
+                  <p className="mt-1 text-xl font-bold text-amber-900">
+                    {format(new Date(displayData.extremes.nextLow.time), 'h:mm a')}
                   </p>
                   <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
-                    <Clock size={12} />
-                    <span>{format(new Date(extremes.nextLow.time), 'h:mm a')}</span>
+                    <span className="text-amber-600 font-medium">
+                      {formatHeight(displayData.extremes.nextLow.height)}
+                    </span>
                   </div>
-                  <p className="text-[10px] text-gray-500">
-                    {formatDistanceToNow(new Date(extremes.nextLow.time), { addSuffix: true })}
-                  </p>
+                  {!selectedDate && (
+                    <p className="text-[10px] text-gray-500">
+                      {formatDistanceToNow(new Date(displayData.extremes.nextLow.time), { addSuffix: true })}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Upcoming Tides - grouped by day */}
-          {predictions.length > 0 ? (
+          {/* Upcoming Tides - TIME prominent, depth secondary */}
+          {(displayData?.predictions?.length ?? 0) > 0 ? (
             <div className="mt-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Tide Times
+                {selectedDate ? `Tides for ${format(selectedDate, 'EEE, MMM d')}` : 'Tide Times'}
               </p>
               <div className="mt-2 space-y-1.5">
-                {predictions.slice(0, 8).map((pred, idx) => {
+                {(displayData?.predictions ?? []).slice(0, 10).map((pred, idx) => {
                   const predDate = new Date(pred.time)
-                  const isToday = format(predDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
-                  const isTomorrow = format(predDate, 'yyyy-MM-dd') === format(new Date(Date.now() + 86400000), 'yyyy-MM-dd')
+                  const today = new Date()
+                  const isToday = format(predDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+                  const isTomorrow = format(predDate, 'yyyy-MM-dd') === format(addDays(today, 1), 'yyyy-MM-dd')
                   
                   return (
                     <div
                       key={idx}
-                      className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                      className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${
                         isToday ? 'bg-blue-50' : 'bg-gray-50'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-base">{pred.type === 'high' ? '⬆️' : '⬇️'}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">{pred.type === 'high' ? '⬆️' : '⬇️'}</span>
                         <div>
-                          <p className="text-xs font-semibold text-gray-900">
-                            {pred.type === 'high' ? 'High' : 'Low'} · {format(predDate, 'h:mm a')}
+                          <p className="text-sm font-bold text-gray-900">
+                            {format(predDate, 'h:mm a')}
                           </p>
                           <p className="text-[10px] text-gray-500">
-                            {isToday ? 'Today' : isTomorrow ? 'Tomorrow' : format(predDate, 'EEE, MMM d')}
+                            {pred.type === 'high' ? 'High' : 'Low'} · {isToday ? 'Today' : isTomorrow ? 'Tomorrow' : format(predDate, 'EEE, MMM d')}
                           </p>
                         </div>
                       </div>
-                      <p className="text-sm font-bold text-gray-900">{formatHeight(pred.height)}</p>
+                      <p className="text-xs font-medium text-gray-600">{formatHeight(pred.height)}</p>
                     </div>
                   )
                 })}
               </div>
             </div>
-          ) : (
+          ) : !isLoadingData && (
             <div className="mt-3 rounded-lg bg-amber-50 p-3">
               <p className="text-xs text-amber-700">
-                Future tide times unavailable. Only live readings shown.
+                {selectedDate 
+                  ? `No tide data available for ${format(selectedDate, 'EEE, MMM d')}`
+                  : 'Future tide times unavailable. Only live readings shown.'
+                }
               </p>
             </div>
           )}

@@ -129,6 +129,61 @@ export async function getWorldTidesPredictions(
 }
 
 /**
+ * Get tide predictions for a specific date range (for future planning)
+ */
+export async function getWorldTidesPredictionsForDate(
+  lat: number,
+  lng: number,
+  startDate: Date,
+  days: number = 3
+): Promise<TidePrediction[]> {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    console.error('[WorldTides] Cannot fetch predictions - API key not configured')
+    throw new Error('WorldTides API key not configured')
+  }
+
+  const dateStr = startDate.toISOString().split('T')[0]
+  console.log(`[WorldTides] Fetching predictions for ${dateStr} (${days} days)...`)
+
+  const params = new URLSearchParams({
+    lat: lat.toString(),
+    lon: lng.toString(),
+    date: dateStr,
+    days: days.toString(),
+    key: apiKey,
+  })
+
+  const url = `${WORLDTIDES_BASE_URL}?extremes&${params}`
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    console.error(`[WorldTides] API error: ${response.status}`)
+    throw new Error(`WorldTides API error: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  if (data.error) {
+    console.error(`[WorldTides] API returned error: ${data.error}`)
+    throw new Error(data.error || 'WorldTides API error')
+  }
+
+  if (!data.extremes || data.extremes.length === 0) {
+    console.log('[WorldTides] No extremes data returned for date range')
+    return []
+  }
+
+  console.log(`[WorldTides] Got ${data.extremes.length} tide predictions for ${dateStr}`)
+
+  return data.extremes.map((extreme: WorldTidesExtreme) => ({
+    time: new Date(extreme.dt * 1000).toISOString(),
+    height: extreme.height,
+    type: extreme.type === 'High' ? 'high' : 'low',
+  }))
+}
+
+/**
  * Get complete tide data from WorldTides
  */
 export async function getWorldTidesData(

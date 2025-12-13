@@ -1,6 +1,6 @@
-import type { TideData } from '../types/tides'
+import type { TideData, TidePrediction } from '../types/tides'
 import { getNOAATideData } from './noaa-tides'
-import { getWorldTidesData, getWorldTidesPredictions, isWorldTidesConfigured } from './worldtides'
+import { getWorldTidesData, getWorldTidesPredictions, getWorldTidesPredictionsForDate, isWorldTidesConfigured, findNearestWorldTidesStation } from './worldtides'
 import { getUKTideGaugeData, convertGaugeToTideData } from './uk-ea-tides'
 
 /**
@@ -117,6 +117,55 @@ export async function getTideData(
 
   console.log('[Tides] No tide data available for this location')
   return null
+}
+
+/**
+ * Get tide data for a specific date range (for future planning)
+ */
+export async function getTideDataForDate(
+  lat: number,
+  lng: number,
+  startDate: Date,
+  days: number = 3
+): Promise<TideData | null> {
+  // For future dates, we only use WorldTides predictions (no live data)
+  if (!isWorldTidesConfigured()) {
+    console.log('[Tides] WorldTides not configured - cannot fetch future tide data')
+    return null
+  }
+
+  console.log(`[Tides] Fetching tides for ${startDate.toISOString().split('T')[0]} (${days} days)...`)
+  
+  try {
+    const predictions = await getWorldTidesPredictionsForDate(lat, lng, startDate, days)
+    if (predictions.length === 0) {
+      console.log('[Tides] No predictions returned for date range')
+      return null
+    }
+
+    // Find station info
+    const station = await findNearestWorldTidesStation(lat, lng)
+    if (!station) {
+      console.log('[Tides] No station found')
+      return null
+    }
+
+    // Find next high and low from the start date
+    const nextHigh = predictions.find((p: TidePrediction) => p.type === 'high') || null
+    const nextLow = predictions.find((p: TidePrediction) => p.type === 'low') || null
+
+    return {
+      station,
+      predictions,
+      extremes: { nextHigh, nextLow },
+      current: undefined,
+      gaugeData: undefined,
+      fetchedAt: new Date().toISOString(),
+    }
+  } catch (error) {
+    console.error('[Tides] Failed to fetch future tide data:', error)
+    return null
+  }
 }
 
 /**
