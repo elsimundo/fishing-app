@@ -81,87 +81,87 @@ export function SignupForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-xl bg-surface p-6 shadow-lg">
-      <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>
-      <p className="mb-6 text-center text-sm text-slate-600">Create a new account</p>
+    <div className="mx-auto w-full max-w-md rounded-xl bg-[#243B4A] p-6 shadow-lg border border-[#334155]">
+      <h1 className="mb-1 text-center text-2xl font-semibold text-[#1BA9A0]">{APP_NAME}</h1>
+      <p className="mb-6 text-center text-sm text-gray-400">Create a new account</p>
 
       {formError ? (
-        <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="mb-4 rounded-md bg-red-900/30 px-3 py-2 text-sm text-red-400">
           {formError}
         </div>
       ) : null}
 
       {successMessage ? (
-        <div className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+        <div className="mb-4 rounded-md bg-emerald-900/30 px-3 py-2 text-sm text-emerald-400">
           {successMessage}
         </div>
       ) : null}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="username">
+          <label className="mb-1 block text-sm font-medium text-gray-300" htmlFor="username">
             Username
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+            <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">
               @
             </span>
             <input
               id="username"
               type="text"
               autoComplete="username"
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 pl-5 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 pl-5 text-sm text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
               maxLength={20}
               {...register('username')}
             />
           </div>
           {watchedUsername && !usernameValidation.valid ? (
-            <p className="mt-1 text-xs text-red-600">{usernameValidation.error}</p>
+            <p className="mt-1 text-xs text-red-400">{usernameValidation.error}</p>
           ) : null}
           {watchedUsername && usernameValidation.valid && availability && !availability.available ? (
-            <p className="mt-1 text-xs text-red-600">@{normalizeUsername(watchedUsername)} is already taken</p>
+            <p className="mt-1 text-xs text-red-400">@{normalizeUsername(watchedUsername)} is already taken</p>
           ) : null}
           {watchedUsername && usernameValidation.valid && availability?.available ? (
-            <p className="mt-1 text-xs text-emerald-600">@{normalizeUsername(watchedUsername)} is available</p>
+            <p className="mt-1 text-xs text-emerald-400">@{normalizeUsername(watchedUsername)} is available</p>
           ) : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="email">
+          <label className="mb-1 block text-sm font-medium text-gray-300" htmlFor="email">
             Email
           </label>
           <input
             id="email"
             type="email"
             autoComplete="email"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             {...register('email')}
           />
           {errors.email ? (
-            <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
           ) : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="password">
+          <label className="mb-1 block text-sm font-medium text-gray-300" htmlFor="password">
             Password
           </label>
           <input
             id="password"
             type="password"
             autoComplete="new-password"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             {...register('password')}
           />
           {errors.password ? (
-            <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>
           ) : null}
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-70"
+          className="flex w-full items-center justify-center rounded-md bg-[#1BA9A0] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#14B8A6] disabled:bg-[#0D4B4E]"
         >
           {isSubmitting ? 'Creating account…' : 'Create account'}
         </button>

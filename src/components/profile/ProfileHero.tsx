@@ -36,7 +36,7 @@ export function ProfileHero({ profile, level, xp }: ProfileHeroProps) {
             className="h-16 w-16 rounded-full object-cover shadow-sm"
           />
         ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-xl font-bold text-white shadow-sm">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#1BA9A0] to-[#14B8A6] text-xl font-bold text-white shadow-sm">
             {(profile.full_name || profile.username || 'U').slice(0, 1).toUpperCase()}
           </div>
         )}
@@ -47,17 +47,17 @@ export function ProfileHero({ profile, level, xp }: ProfileHeroProps) {
 
       <div className="flex-1 space-y-2">
         <div>
-          <p className="text-sm font-semibold text-gray-900">
+          <p className="text-sm font-semibold text-white">
             {profile.full_name || 'Angler'}
           </p>
-          <p className="text-xs text-gray-500">@{profile.username || 'angler'}</p>
+          <p className="text-xs text-gray-400">@{profile.username || 'angler'}</p>
           {profile.bio && (
-            <p className="mt-1 text-xs text-gray-600 line-clamp-2">{profile.bio}</p>
+            <p className="mt-1 text-xs text-gray-400 line-clamp-2">{profile.bio}</p>
           )}
         </div>
 
         {/* Rank pill */}
-        <div className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-800">
+        <div className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 px-2.5 py-1 text-[11px] font-medium text-amber-400">
           <span>⚡</span>
           <span>{rankLabel}</span>
         </div>
@@ -70,9 +70,9 @@ export function ProfileHero({ profile, level, xp }: ProfileHeroProps) {
               {xpProg.current}/{xpProg.needed} XP to level {level + 1}
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#334155]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500"
+              className="h-full rounded-full bg-gradient-to-r from-[#1BA9A0] to-[#14B8A6]"
               style={{ width: `${xpProg.percentage}%` }}
             />
           </div>

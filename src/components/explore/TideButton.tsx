@@ -49,25 +49,25 @@ export function TideButton({ lat, lng, className = '' }: TideButtonProps) {
             onClick={e => e.stopPropagation()}
           >
             {isLoading ? (
-              <div className="bg-white rounded-t-2xl md:rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <div className="bg-[#243B4A] border border-[#334155] rounded-t-2xl md:rounded-2xl p-8 text-center">
+                <div className="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
                 </div>
-                <p className="font-semibold text-gray-900 mb-1">Loading Tide Data</p>
-                <p className="text-sm text-gray-600">Finding nearest tide station...</p>
+                <p className="font-semibold text-white mb-1">Loading Tide Data</p>
+                <p className="text-sm text-gray-400">Finding nearest tide station...</p>
               </div>
             ) : error || !tideData ? (
-              <div className="bg-white rounded-t-2xl md:rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Waves className="w-8 h-8 text-gray-400" />
+              <div className="bg-[#243B4A] border border-[#334155] rounded-t-2xl md:rounded-2xl p-8 text-center">
+                <div className="w-16 h-16 bg-[#1A2D3D] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Waves className="w-8 h-8 text-gray-500" />
                 </div>
-                <p className="font-semibold text-gray-900 mb-2">No Tide Data Available</p>
-                <p className="text-sm text-gray-600 mb-6">
+                <p className="font-semibold text-white mb-2">No Tide Data Available</p>
+                <p className="text-sm text-gray-400 mb-6">
                   Tide information is not available for this location. Try searching near a coastal area.
                 </p>
                 <button
                   onClick={handleClose}
-                  className="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                  className="px-6 py-2.5 bg-[#1A2D3D] text-gray-300 rounded-xl font-semibold hover:bg-[#334155] transition-colors"
                 >
                   Close
                 </button>

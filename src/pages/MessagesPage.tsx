@@ -70,14 +70,14 @@ export default function MessagesPage() {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100dvh-3.5rem)] flex-col pb-14 md:h-screen md:pb-0">
+      <div className="flex h-[calc(100dvh-3.5rem)] flex-col pb-14 md:h-screen md:pb-0 bg-[#1A2D3D]">
         {/* Header - only show on mobile or when in conversation */}
-        <header className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
+        <header className="flex items-center gap-3 border-b border-[#334155] bg-[#243B4A] px-4 py-3 md:hidden">
           {showConversation ? (
             <>
               <button
                 onClick={() => navigate('/messages')}
-                className="rounded-full p-1.5 text-gray-600 hover:bg-gray-100"
+                className="rounded-full p-1.5 text-gray-400 hover:bg-[#1A2D3D]"
               >
                 <ArrowLeft size={20} />
               </button>
@@ -99,46 +99,46 @@ export default function MessagesPage() {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy-800 font-bold text-white">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1BA9A0] font-bold text-white">
                       {otherUser.username?.[0]?.toUpperCase() || '?'}
                     </div>
                   )}
                   <div className="text-left">
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-white">
                       {otherUser.full_name || otherUser.username}
                     </p>
-                    <p className="text-xs text-gray-500">@{otherUser.username}</p>
+                    <p className="text-xs text-gray-400">@{otherUser.username}</p>
                   </div>
                 </button>
               )}
             </>
           ) : (
-            <h1 className="text-lg font-bold text-gray-900">Messages</h1>
+            <h1 className="text-lg font-bold text-white">Messages</h1>
           )}
         </header>
 
         <div className="flex flex-1 overflow-hidden">
           {/* Conversation List - hidden on mobile when viewing a conversation */}
-          <div className={`w-full flex-shrink-0 border-r border-gray-200 bg-white md:w-80 ${showConversation ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
+          <div className={`w-full flex-shrink-0 border-r border-[#334155] bg-[#243B4A] md:w-80 ${showConversation ? 'hidden md:flex md:flex-col' : 'flex flex-col'}`}>
             {/* Desktop list header */}
-            <div className="hidden border-b border-gray-200 px-4 py-3 md:block">
-              <h1 className="text-lg font-bold text-gray-900">Messages</h1>
+            <div className="hidden border-b border-[#334155] px-4 py-3 md:block">
+              <h1 className="text-lg font-bold text-white">Messages</h1>
             </div>
             <div className="flex-1 overflow-y-auto">
             {loadingConversations ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+                <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
               </div>
             ) : !conversations?.length ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <MessageCircle size={48} className="mb-3 text-gray-300" />
-                <p className="text-sm text-gray-500">No messages yet</p>
-                <p className="mt-1 text-xs text-gray-400">
+                <MessageCircle size={48} className="mb-3 text-gray-500" />
+                <p className="text-sm text-gray-400">No messages yet</p>
+                <p className="mt-1 text-xs text-gray-500">
                   Start a conversation from someone's profile
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-[#334155]">
                 {conversations.map(conv => {
                   const other = getOtherParticipant(conv)
                   if (!other) return null
@@ -147,8 +147,8 @@ export default function MessagesPage() {
                     <button
                       key={conv.id}
                       onClick={() => navigate(`/messages/${conv.id}`)}
-                      className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${
-                        conv.id === conversationId ? 'bg-navy-50' : ''
+                      className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#1A2D3D] ${
+                        conv.id === conversationId ? 'bg-[#0D4B4E]' : ''
                       }`}
                     >
                       {other.avatar_url ? (
@@ -158,27 +158,27 @@ export default function MessagesPage() {
                           className="h-12 w-12 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-800 font-bold text-white">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1BA9A0] font-bold text-white">
                           {other.username?.[0]?.toUpperCase() || '?'}
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
-                          <p className={`truncate font-semibold ${conv.unread_count > 0 ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <p className={`truncate font-semibold ${conv.unread_count > 0 ? 'text-white' : 'text-gray-300'}`}>
                             {other.full_name || other.username}
                           </p>
                           {conv.last_message && (
-                            <span className="text-[10px] text-gray-400">
+                            <span className="text-[10px] text-gray-500">
                               {formatDistanceToNow(new Date(conv.last_message.created_at), { addSuffix: false })}
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <p className={`truncate text-sm ${conv.unread_count > 0 ? 'font-medium text-gray-900' : 'text-gray-500'}`}>
+                          <p className={`truncate text-sm ${conv.unread_count > 0 ? 'font-medium text-white' : 'text-gray-400'}`}>
                             {conv.last_message?.content || 'No messages yet'}
                           </p>
                           {conv.unread_count > 0 && (
-                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-navy-800 px-1.5 text-[10px] font-bold text-white">
+                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#1BA9A0] px-1.5 text-[10px] font-bold text-white">
                               {conv.unread_count}
                             </span>
                           )}
@@ -193,19 +193,19 @@ export default function MessagesPage() {
           </div>
 
           {/* Message Thread */}
-          <div className={`flex flex-1 flex-col bg-gray-50 ${!showConversation ? 'hidden md:flex' : ''}`}>
+          <div className={`flex flex-1 flex-col bg-[#1A2D3D] ${!showConversation ? 'hidden md:flex' : ''}`}>
             {!conversationId ? (
               <div className="flex flex-1 items-center justify-center">
                 <div className="text-center">
-                  <MessageCircle size={48} className="mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm text-gray-500">Select a conversation</p>
+                  <MessageCircle size={48} className="mx-auto mb-3 text-gray-500" />
+                  <p className="text-sm text-gray-400">Select a conversation</p>
                 </div>
               </div>
             ) : (
               <>
                 {/* Desktop conversation header */}
                 {otherUser && (
-                  <div className="hidden border-b border-gray-200 bg-white px-4 py-3 md:block">
+                  <div className="hidden border-b border-[#334155] bg-[#243B4A] px-4 py-3 md:block">
                     <button
                       onClick={() => navigate(`/profile/${otherUser.id}`)}
                       className="flex items-center gap-3"
@@ -217,15 +217,15 @@ export default function MessagesPage() {
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy-800 font-bold text-white">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1BA9A0] font-bold text-white">
                           {otherUser.username?.[0]?.toUpperCase() || '?'}
                         </div>
                       )}
                       <div className="text-left">
-                        <p className="font-semibold text-gray-900">
+                        <p className="font-semibold text-white">
                           {otherUser.full_name || otherUser.username}
                         </p>
-                        <p className="text-xs text-gray-500">@{otherUser.username}</p>
+                        <p className="text-xs text-gray-400">@{otherUser.username}</p>
                       </div>
                     </button>
                   </div>
@@ -234,12 +234,12 @@ export default function MessagesPage() {
                 <div className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4">
                   {loadingMessages ? (
                     <div className="flex justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+                      <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
                     </div>
                   ) : !messages?.length ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <p className="text-sm text-gray-500">No messages yet</p>
-                      <p className="mt-1 text-xs text-gray-400">Send a message to start the conversation</p>
+                      <p className="text-sm text-gray-400">No messages yet</p>
+                      <p className="mt-1 text-xs text-gray-500">Send a message to start the conversation</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -253,8 +253,8 @@ export default function MessagesPage() {
                             <div
                               className={`max-w-[75%] rounded-2xl px-4 py-2 ${
                                 isMe
-                                  ? 'bg-navy-800 text-white'
-                                  : 'bg-white text-gray-900 shadow-sm'
+                                  ? 'bg-[#1BA9A0] text-white'
+                                  : 'bg-[#243B4A] text-white shadow-sm'
                               }`}
                             >
                               <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
@@ -277,7 +277,7 @@ export default function MessagesPage() {
 
         {/* Message Input - Fixed above bottom nav */}
         {conversationId && (
-          <div className="fixed bottom-14 left-0 right-0 border-t border-gray-200 bg-white p-3 md:static md:bottom-auto">
+          <div className="fixed bottom-14 left-0 right-0 border-t border-[#334155] bg-[#243B4A] p-3 md:static md:bottom-auto">
             <div className="flex items-end gap-2">
               <textarea
                 value={messageText}
@@ -285,12 +285,12 @@ export default function MessagesPage() {
                 onKeyDown={handleKeyPress}
                 placeholder="Type a message..."
                 rows={1}
-                className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+                className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]"
               />
               <button
                 onClick={handleSend}
                 disabled={!messageText.trim() || isSending}
-                className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy-800 text-white transition-colors hover:bg-navy-900 disabled:bg-gray-300"
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1BA9A0] text-white transition-colors hover:bg-[#14B8A6] disabled:bg-[#334155]"
               >
                 {isSending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />

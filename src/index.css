@@ -1,21 +1,34 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --color-primary: #1e3a8a;
-  --color-secondary: #0891b2;
-  --color-accent: #10b981;
-  --color-background: #f8fafc;
-  --color-surface: #ffffff;
-  --color-text: #1e293b;
-  --color-error: #ef4444;
-  --color-success: #10b981;
-  
-  /* Navy color scale for primary buttons */
+  /* Catchi Brand Colors */
+  --color-primary: #1BA9A0;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #0D4B4E;
+  --color-accent: #14B8A6;
+  --color-background: #1A2D3D;
+  --color-surface: #243B4A;
+  --color-text: #FFFFFF;
+  --color-error: #EF4444;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+
+  /* Catchi teal scale for primary buttons */
+  --color-teal-400: #2DD4BF;
+  --color-teal-500: #14B8A6;
+  --color-teal-600: #1BA9A0;
+  --color-teal-700: #0D9488;
+  --color-teal-800: #0D4B4E;
+
+  /* Keep navy for backwards compatibility */
   --color-navy-400: #6b7fb8;
-  --color-navy-800: #1e3a8a;
-  --color-navy-900: #172554;
+  --color-navy-800: #1BA9A0;
+  --color-navy-900: #0D4B4E;
 }
 
 html,
@@ -40,14 +53,18 @@ button {
   font-family: inherit;
 }
 
-/* Ensure white text on primary/navy buttons */
+/* Ensure white text on primary/teal buttons */
 .bg-primary,
+.bg-teal-600,
+.bg-teal-700,
 .bg-navy-800,
 .bg-navy-900 {
   color: white !important;
 }
 
 .bg-primary svg,
+.bg-teal-600 svg,
+.bg-teal-700 svg,
 .bg-navy-800 svg,
 .bg-navy-900 svg {
   color: white !important;
@@ -69,7 +86,7 @@ button {
   position: relative;
   width: 16px;
   height: 16px;
-  background: #3b82f6;
+  background: #1BA9A0;
   border: 3px solid #ffffff;
   border-radius: 9999px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -83,7 +100,7 @@ button {
   width: 100%;
   height: 100%;
   border-radius: 9999px;
-  background: rgba(59, 130, 246, 0.4);
+  background: rgba(27, 169, 160, 0.4);
   transform: translate(-50%, -50%) scale(1);
   animation: user-location-pulse 2s infinite;
 }
@@ -118,8 +135,8 @@ button {
   bottom: 5rem; /* 80px - height of mobile bottom nav */
   left: 0;
   right: 0;
-  border-top: 1px solid #e5e7eb;
-  background-color: white;
+  border-top: 1px solid #334155;
+  background-color: #243B4A;
   padding: 1.25rem;
   z-index: 40;
 }
@@ -127,5 +144,137 @@ button {
 @media (min-width: 768px) {
   .fixed-bottom-actions {
     bottom: 0;
+  }
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Catchi Dark Theme - Always Dark */
+:root {
+  --radius: 0.75rem;
+  
+  /* Primary - Teal/Turquoise */
+  --primary: #1BA9A0;
+  --primary-foreground: #FFFFFF;
+  
+  /* Background - Deep Ocean */
+  --background: #1A2D3D;
+  --foreground: #FFFFFF;
+  
+  /* Cards - Lighter Navy */
+  --card: #243B4A;
+  --card-foreground: #FFFFFF;
+  
+  /* Popover - Same as card */
+  --popover: #243B4A;
+  --popover-foreground: #FFFFFF;
+  
+  /* Secondary - Dark Teal */
+  --secondary: #0D4B4E;
+  --secondary-foreground: #FFFFFF;
+  
+  /* Muted - Charcoal */
+  --muted: #2C3E50;
+  --muted-foreground: #94A3B8;
+  
+  /* Accent - Bright Teal */
+  --accent: #14B8A6;
+  --accent-foreground: #FFFFFF;
+  
+  /* Destructive - Red */
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  
+  /* Borders */
+  --border: #334155;
+  --input: #334155;
+  --ring: #1BA9A0;
+  
+  /* Charts - Ocean inspired */
+  --chart-1: #1BA9A0;
+  --chart-2: #14B8A6;
+  --chart-3: #0D4B4E;
+  --chart-4: #10B981;
+  --chart-5: #F59E0B;
+  
+  /* Sidebar */
+  --sidebar: #1A2D3D;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #1BA9A0;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #243B4A;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #334155;
+  --sidebar-ring: #1BA9A0;
+}
+
+/* Dark class for compatibility - same as root since always dark */
+.dark {
+  --primary: #1BA9A0;
+  --primary-foreground: #FFFFFF;
+  --background: #1A2D3D;
+  --foreground: #FFFFFF;
+  --card: #243B4A;
+  --card-foreground: #FFFFFF;
+  --popover: #243B4A;
+  --popover-foreground: #FFFFFF;
+  --secondary: #0D4B4E;
+  --secondary-foreground: #FFFFFF;
+  --muted: #2C3E50;
+  --muted-foreground: #94A3B8;
+  --accent: #14B8A6;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #334155;
+  --input: #334155;
+  --ring: #1BA9A0;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

@@ -45,14 +45,14 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
       onClick={handleClick}
       className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm shadow-sm transition-colors ${
         isActive
-          ? 'border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-100 hover:from-amber-100 hover:to-yellow-150'
-          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+          ? 'border-amber-500/40 bg-gradient-to-r from-amber-900/30 to-yellow-900/20 hover:from-amber-900/40 hover:to-yellow-900/30'
+          : 'border-[#334155] bg-[#243B4A] hover:border-[#1BA9A0]/40 hover:bg-[#1A2D3D]'
       }`}
     >
       {/* Icon */}
       <div
         className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-xl ${
-          isActive ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-600'
+          isActive ? 'bg-amber-500 text-white' : 'bg-[#1A2D3D] text-gray-400'
         }`}
       >
         <Swords size={24} />
@@ -61,7 +61,7 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
       {/* Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold text-gray-900">
+          <p className="truncate text-sm font-semibold text-white">
             {competition.title}
           </p>
           {isActive && (
@@ -71,12 +71,12 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
             </span>
           )}
           {isUpcoming && (
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+            <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-[10px] font-bold text-blue-400">
               SOON
             </span>
           )}
         </div>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-gray-400">
           {typeInfo.icon} {typeInfo.label}
         </p>
         <div className="mt-1 flex items-center gap-3 text-[11px] text-gray-500">
@@ -91,7 +91,7 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
             </span>
           )}
           {competition.prize && (
-            <span className="flex items-center gap-1 text-amber-600">
+            <span className="flex items-center gap-1 text-amber-400">
               <Trophy size={12} />
               {competition.prize}
             </span>

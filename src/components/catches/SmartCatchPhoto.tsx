@@ -74,27 +74,27 @@ export function SmartCatchPhoto({
   }
 
   return (
-    <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div className="mb-4 rounded-xl border border-[#334155] bg-[#1A2D3D] p-3">
       <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-navy-800/10 text-navy-800">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1BA9A0]/20 text-[#1BA9A0]">
           <Camera size={16} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-slate-900">Smart species detection</p>
-          <p className="text-[11px] text-slate-500">Take a clear photo of the fish to auto-detect the species.</p>
+          <p className="text-xs font-semibold text-white">Smart species detection</p>
+          <p className="text-[11px] text-gray-400">Take a clear photo of the fish to auto-detect the species.</p>
         </div>
       </div>
 
       <div className="mt-3 space-y-2">
         <label
           htmlFor="smart-photo"
-          className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-slate-300 bg-white px-3 py-2 text-[11px] text-slate-600 hover:bg-slate-50"
+          className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-[#334155] bg-[#243B4A] px-3 py-2 text-[11px] text-gray-400 hover:bg-[#334155]"
         >
           <div className="flex items-center gap-2">
-            <Camera size={14} className="text-slate-500" />
+            <Camera size={14} className="text-gray-500" />
             <span>Tap to take a photo or choose from gallery</span>
           </div>
-          <span className="text-[10px] text-slate-400">JPG/PNG/WebP up to 5MB</span>
+          <span className="text-[10px] text-gray-500">JPG/PNG/WebP up to 5MB</span>
         </label>
         <input
           id="smart-photo"
@@ -109,20 +109,20 @@ export function SmartCatchPhoto({
         />
 
         {previewUrl ? (
-          <div className="overflow-hidden rounded-lg border border-slate-200 bg-black/5">
+          <div className="overflow-hidden rounded-lg border border-[#334155] bg-black/20">
             <img src={previewUrl} alt="Catch preview" className="h-40 w-full object-cover" />
           </div>
         ) : null}
 
         {loading ? (
-          <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-[11px] text-slate-700">
+          <div className="flex items-center gap-2 rounded-lg bg-[#243B4A] px-3 py-2 text-[11px] text-gray-300">
             <Loader2 size={14} className="animate-spin" />
-            <span>Identifying fish5</span>
+            <span>Identifying fish...</span>
           </div>
         ) : null}
 
         {error ? (
-          <div className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-[11px] text-red-700">
+          <div className="flex items-start gap-2 rounded-lg bg-red-900/30 border border-red-500/40 px-3 py-2 text-[11px] text-red-400">
             <AlertCircle size={14} className="mt-0.5" />
             <div>
               <p className="font-medium">Could not identify fish</p>
@@ -135,9 +135,9 @@ export function SmartCatchPhoto({
 
         {metadata ? (
           metadata.hasGPS || metadata.hasTimestamp ? (
-            <div className="rounded-lg bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
+            <div className="rounded-lg bg-emerald-900/30 border border-emerald-500/40 px-3 py-2 text-[11px] text-emerald-400">
               <p className="font-medium mb-1">📸 Photo metadata detected:</p>
-              <div className="space-y-0.5 text-emerald-700">
+              <div className="space-y-0.5 text-emerald-400">
                 {metadata.hasGPS ? (
                   <div className="flex items-center gap-1">
                     <MapPin size={12} />
@@ -153,9 +153,9 @@ export function SmartCatchPhoto({
               </div>
             </div>
           ) : (
-            <div className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+            <div className="rounded-lg bg-amber-900/30 border border-amber-500/40 px-3 py-2 text-[11px] text-amber-400">
               <p className="font-medium mb-1">📍 No location data in photo</p>
-              <p className="text-amber-700">
+              <p className="text-amber-400">
                 Mobile browsers remove location data for privacy. Use the "Use my current location" button or map picker below to set your location.
               </p>
             </div>

@@ -293,17 +293,17 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {formError ? (
-        <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">{formError}</div>
+        <div className="rounded-md bg-red-900/30 border border-red-500/40 px-3 py-2 text-xs text-red-400">{formError}</div>
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="species">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="species">
             Species
           </label>
           <select
             id="species"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-xs text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             {...register('species')}
           >
             <option value="">Select species</option>
@@ -341,7 +341,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
 
         {/* Location picker */}
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-medium text-gray-400">
             Location
           </label>
           {showLocationPicker ? (
@@ -356,13 +356,13 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
                   }}
                   className={`flex w-full items-center gap-2 rounded-lg border p-2 text-left text-xs transition-colors ${
                     locationSource === 'session'
-                      ? 'border-navy-800 bg-navy-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-[#1BA9A0] bg-[#1BA9A0]/20'
+                      : 'border-[#334155] hover:border-[#1BA9A0]/50'
                   }`}
                 >
                   <MapPin size={14} className="text-gray-500" />
                   <div>
-                    <p className="font-medium text-gray-900">Session location</p>
+                    <p className="font-medium text-white">Session location</p>
                     <p className="text-[10px] text-gray-500">{session.location_name || 'From session'}</p>
                   </div>
                 </button>
@@ -383,12 +383,12 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
                       }}
                       className={`flex w-full items-center gap-2 rounded-lg border p-2 text-left text-xs transition-colors ${
                         locationSource === 'mark' && selectedMarkId === mark.id
-                          ? 'border-navy-800 bg-navy-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-[#1BA9A0] bg-[#1BA9A0]/20'
+                          : 'border-[#334155] hover:border-[#1BA9A0]/50'
                       }`}
                     >
-                      <MapPin size={14} className="text-blue-500" />
-                      <span className="font-medium text-gray-900">{mark.name}</span>
+                      <MapPin size={14} className="text-blue-400" />
+                      <span className="font-medium text-white">{mark.name}</span>
                     </button>
                   ))}
                 </div>
@@ -403,13 +403,13 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
                 }}
                 className={`flex w-full items-center gap-2 rounded-lg border p-2 text-left text-xs transition-colors ${
                   locationSource === 'current'
-                    ? 'border-navy-800 bg-navy-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-[#1BA9A0] bg-[#1BA9A0]/20'
+                    : 'border-[#334155] hover:border-[#1BA9A0]/50'
                 }`}
               >
-                <MapPin size={14} className="text-green-500" />
+                <MapPin size={14} className="text-green-400" />
                 <div>
-                  <p className="font-medium text-gray-900">Current location</p>
+                  <p className="font-medium text-white">Current location</p>
                   <p className="text-[10px] text-gray-500">Use GPS</p>
                 </div>
               </button>
@@ -418,11 +418,11 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
             <button
               type="button"
               onClick={() => setShowLocationPicker(true)}
-              className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs hover:border-gray-300"
+              className="flex w-full items-center justify-between rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-left text-xs hover:border-[#1BA9A0]/50"
             >
               <div className="flex items-center gap-2">
                 <MapPin size={14} className="text-gray-500" />
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-white">
                   {activeLocation?.name || 'Select location'}
                 </span>
               </div>
@@ -432,13 +432,13 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="caught_at">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="caught_at">
             Time
           </label>
           <input
             id="caught_at"
             type="datetime-local"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-xs text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             {...register('caught_at')}
           />
           {errors.caught_at ? (
@@ -447,7 +447,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="weight_kg">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="weight_kg">
             Weight (kg)
           </label>
           <input
@@ -455,16 +455,16 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
             type="number"
             inputMode="decimal"
             step="0.01"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-xs text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             {...register('weight_kg')}
           />
           {errors.weight_kg ? (
-            <p className="mt-1 text-[11px] text-red-600">{errors.weight_kg.message as string}</p>
+            <p className="mt-1 text-[11px] text-red-400">{errors.weight_kg.message as string}</p>
           ) : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="length_cm">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="length_cm">
             Length (cm)
           </label>
           <input
@@ -472,33 +472,33 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
             type="number"
             inputMode="decimal"
             step="0.1"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-xs text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             {...register('length_cm')}
           />
           {errors.length_cm ? (
-            <p className="mt-1 text-[11px] text-red-600">{errors.length_cm.message as string}</p>
+            <p className="mt-1 text-[11px] text-red-400">{errors.length_cm.message as string}</p>
           ) : null}
         </div>
 
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="notes">
+          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="notes">
             Quick note (optional)
           </label>
           <textarea
             id="notes"
             rows={2}
-            className="block w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full resize-none rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-xs text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             placeholder="Rig, depth, what happened"
             {...register('notes')}
           />
           {errors.notes ? (
-            <p className="mt-1 text-[11px] text-red-600">{errors.notes.message}</p>
+            <p className="mt-1 text-[11px] text-red-400">{errors.notes.message}</p>
           ) : null}
         </div>
 
         {/* Photo upload */}
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-medium text-gray-400">
             Photo (optional)
           </label>
           {photoPreview ? (
@@ -520,7 +520,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-4 text-xs text-slate-500 hover:border-slate-400 hover:text-slate-600"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#334155] py-4 text-xs text-gray-500 hover:border-[#1BA9A0]/50 hover:text-gray-400"
             >
               <Camera size={18} />
               <span>Add a photo of your catch</span>
@@ -537,7 +537,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
 
         {/* Privacy Settings */}
         <div className="sm:col-span-2 space-y-2">
-          <p className="text-xs font-medium text-slate-700">Sharing</p>
+          <p className="text-xs font-medium text-gray-400">Sharing</p>
           
           {/* Public/Private Toggle */}
           <div className="flex gap-2">
@@ -546,8 +546,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
               onClick={() => setIsPublic(true)}
               className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-[11px] font-medium transition-colors ${
                 isPublic
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]'
+                  : 'border-[#334155] bg-[#1A2D3D] text-gray-400 hover:bg-[#334155]'
               }`}
             >
               <Globe size={12} />
@@ -558,8 +558,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
               onClick={() => setIsPublic(false)}
               className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-[11px] font-medium transition-colors ${
                 !isPublic
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]'
+                  : 'border-[#334155] bg-[#1A2D3D] text-gray-400 hover:bg-[#334155]'
               }`}
             >
               <Lock size={12} />
@@ -574,16 +574,16 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
                 type="checkbox"
                 checked={hideExactLocation}
                 onChange={(e) => setHideExactLocation(e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary"
+                className="h-3.5 w-3.5 rounded border-[#334155] text-[#1BA9A0] focus:ring-[#1BA9A0]"
               />
-              <span className="text-[11px] text-slate-600">Hide exact location</span>
+              <span className="text-[11px] text-gray-400">Hide exact location</span>
             </label>
           )}
 
           {/* Privacy Info Box */}
-          <div className="rounded-lg bg-slate-50 p-2.5 text-[10px] text-slate-600">
+          <div className="rounded-lg bg-[#1A2D3D] p-2.5 text-[10px] text-gray-400">
             <div className="flex items-start gap-1.5">
-              <Info size={12} className="mt-0.5 shrink-0 text-slate-400" />
+              <Info size={12} className="mt-0.5 shrink-0 text-gray-500" />
               <div className="space-y-1">
                 <p><span className="font-medium">Shared:</span> Species, weight, photo, general area</p>
                 <p><span className="font-medium">🔒 Never shared:</span> Exact GPS / fishing spot</p>

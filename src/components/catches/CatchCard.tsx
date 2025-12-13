@@ -18,10 +18,10 @@ export function CatchCard({ item }: CatchCardProps) {
 
   return (
     <Link to={`/catches/${item.id}`} className="block">
-      <article className="w-full rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm hover:border-navy-800/40">
+      <article className="w-full rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-left shadow-sm hover:border-[#1BA9A0]/40">
         {/* Top row: badge + date */}
-        <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
-          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700">
+        <div className="mb-1 flex items-center justify-between text-[11px] text-gray-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5 font-medium text-gray-300">
             🐟 Catch
           </span>
           <span>
@@ -45,12 +45,12 @@ export function CatchCard({ item }: CatchCardProps) {
           )}
           <div className="min-w-0 flex-1">
             {/* Title: species + stats */}
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-white">
               {item.species}{statsSuffix}
             </p>
 
             {/* Location */}
-            <p className="mt-0.5 text-xs text-gray-500">
+            <p className="mt-0.5 text-xs text-gray-400">
               📍 {item.location_name || 'Unknown location'}
             </p>
           </div>

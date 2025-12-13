@@ -12,8 +12,8 @@ export function PostsGrid({ posts }: PostsGridProps) {
     return (
       <div className="py-12 text-center">
         <div className="mb-3 text-5xl">📸</div>
-        <p className="mb-1 text-base font-semibold text-gray-900">No posts yet</p>
-        <p className="text-sm text-gray-600">Share your first fishing session!</p>
+        <p className="mb-1 text-base font-semibold text-white">No posts yet</p>
+        <p className="text-sm text-gray-500">Share your first fishing session!</p>
       </div>
     )
   }
@@ -44,7 +44,7 @@ export function PostsGrid({ posts }: PostsGridProps) {
                 navigate(`/sessions/${post.session_id}`)
               }
             }}
-            className="group relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-gray-100 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            className="group relative aspect-square overflow-hidden rounded-2xl border border-[#334155] bg-[#1A2D3D] shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
           >
             {imageUrl ? (
               <img
@@ -53,7 +53,7 @@ export function PostsGrid({ posts }: PostsGridProps) {
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#243B4A] to-[#334155]">
                 <span className="text-4xl">🎣</span>
               </div>
             )}

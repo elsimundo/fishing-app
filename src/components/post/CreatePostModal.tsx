@@ -21,7 +21,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       icon: '🎣',
       title: 'Start Session',
       subtitle: 'Begin a fishing trip and log catches',
-      color: 'bg-blue-100',
+      color: 'bg-blue-900/30',
       onClick: () => {
         onClose()
         navigate('/sessions/new')
@@ -32,7 +32,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       icon: '🔍',
       title: 'Fish Identifier',
       subtitle: 'Identify a fish with AI and optionally log it',
-      color: 'bg-amber-100',
+      color: 'bg-amber-900/30',
       onClick: () => {
         onClose()
         navigate('/identify')
@@ -43,7 +43,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       icon: '🐟',
       title: 'Log a Catch',
       subtitle: 'Quick share a single fish',
-      color: 'bg-emerald-100',
+      color: 'bg-emerald-900/30',
       onClick: () => {
         onClose()
         navigate('/catches/new')
@@ -54,7 +54,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       icon: '✏️',
       title: 'Share Update',
       subtitle: 'Post a thought, photo or video',
-      color: 'bg-purple-100',
+      color: 'bg-purple-900/30',
       onClick: () => {
         onClose()
         navigate('/posts/new')
@@ -68,23 +68,23 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full overflow-hidden rounded-t-3xl bg-white md:max-w-md md:rounded-2xl"
+        className="w-full overflow-hidden rounded-t-3xl bg-[#243B4A] md:max-w-md md:rounded-2xl border border-[#334155]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle bar (mobile) */}
         <div className="flex justify-center pt-3 pb-2 md:hidden">
-          <div className="h-1 w-12 rounded-full bg-gray-300" />
+          <div className="h-1 w-12 rounded-full bg-[#334155]" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-          <h2 className="text-xl font-bold text-gray-900">Create Post</h2>
+        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
+          <h2 className="text-xl font-bold text-white">Create Post</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 transition-colors hover:bg-gray-100"
+            className="rounded-full p-2 transition-colors hover:bg-[#1A2D3D]"
           >
-            <X size={20} className="text-gray-600" />
+            <X size={20} className="text-gray-400" />
           </button>
         </div>
 
@@ -95,7 +95,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
               key={option.id}
               type="button"
               onClick={option.onClick}
-              className="group flex w-full items-center gap-4 rounded-xl p-4 transition-colors hover:bg-gray-50"
+              className="group flex w-full items-center gap-4 rounded-xl p-4 transition-colors hover:bg-[#1A2D3D]"
             >
               <div
                 className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-2xl ${option.color}`}
@@ -104,13 +104,13 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
               </div>
 
               <div className="flex-1 text-left">
-                <p className="text-base font-semibold text-gray-900">{option.title}</p>
-                <p className="mt-0.5 text-sm text-gray-600">{option.subtitle}</p>
+                <p className="text-base font-semibold text-white">{option.title}</p>
+                <p className="mt-0.5 text-sm text-gray-400">{option.subtitle}</p>
               </div>
 
               <ChevronRight
                 size={20}
-                className="flex-shrink-0 text-gray-400 transition-colors group-hover:text-gray-600"
+                className="flex-shrink-0 text-gray-500 transition-colors group-hover:text-[#1BA9A0]"
               />
             </button>
           ))}

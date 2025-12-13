@@ -18,23 +18,23 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
         onClick={onClose}
       />
       <section
-        className="relative z-[210] w-full max-w-lg rounded-t-2xl bg-surface px-4 pb-[calc(3rem+env(safe-area-inset-bottom,0px))] pt-3 shadow-xl sm:mb-6 sm:rounded-2xl"
+        className="relative z-[210] w-full max-w-lg rounded-t-2xl bg-[#243B4A] px-4 pb-[calc(3rem+env(safe-area-inset-bottom,0px))] pt-3 shadow-xl sm:mb-6 sm:rounded-2xl border border-[#334155]"
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
         <div className="mb-3 flex items-center justify-between">
-          <div className="h-1 w-10 rounded-full bg-slate-200 sm:hidden" />
-          <h2 className="text-sm font-medium text-slate-800">{title}</h2>
+          <div className="h-1 w-10 rounded-full bg-[#334155] sm:hidden" />
+          <h2 className="text-sm font-medium text-white">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-xs font-medium text-slate-500 hover:text-slate-700"
+            className="text-xs font-medium text-gray-400 hover:text-white"
           >
             Close
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto pt-1 pb-4 text-sm text-slate-700">
+        <div className="max-h-[70vh] overflow-y-auto pt-1 pb-4 text-sm text-gray-300">
           {children}
         </div>
       </section>

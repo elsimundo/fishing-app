@@ -78,15 +78,15 @@ export function CompetitionInviteModal({ competitionId, competitionTitle, onClos
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-white shadow-xl">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-lg rounded-xl bg-[#243B4A] border border-[#334155] shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-4">
-          <h2 className="text-lg font-semibold text-gray-900">Invite to Competition</h2>
+        <div className="flex items-center justify-between border-b border-[#334155] p-4">
+          <h2 className="text-lg font-semibold text-white">Invite to Competition</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-full p-1 text-gray-400 hover:bg-[#334155] hover:text-white"
           >
             <X size={20} />
           </button>
@@ -94,37 +94,37 @@ export function CompetitionInviteModal({ competitionId, competitionTitle, onClos
 
         {/* Content */}
         <div className="p-4">
-          <p className="text-sm text-gray-600 mb-4">
-            Invite anglers to join <span className="font-semibold">{competitionTitle}</span>
+          <p className="text-sm text-gray-400 mb-4">
+            Invite anglers to join <span className="font-semibold text-white">{competitionTitle}</span>
           </p>
 
           {/* Search Input */}
           <div className="relative mb-4">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               placeholder="Search by username or name..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] py-2 pl-10 pr-4 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             />
           </div>
 
           {/* Selected Users */}
           {selectedUsers.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-semibold text-gray-700 mb-2">Selected ({selectedUsers.length})</p>
+              <p className="text-xs font-semibold text-gray-400 mb-2">Selected ({selectedUsers.length})</p>
               <div className="flex flex-wrap gap-2">
                 {selectedUsers.map(selectedUser => (
                   <div
                     key={selectedUser.id}
-                    className="flex items-center gap-2 rounded-full bg-navy-100 px-3 py-1 text-sm"
+                    className="flex items-center gap-2 rounded-full bg-[#1BA9A0]/20 border border-[#1BA9A0]/40 px-3 py-1 text-sm"
                   >
-                    <span className="font-medium text-navy-800">{selectedUser.username}</span>
+                    <span className="font-medium text-[#1BA9A0]">{selectedUser.username}</span>
                     <button
                       type="button"
                       onClick={() => toggleUserSelection(selectedUser)}
-                      className="text-navy-600 hover:text-navy-800"
+                      className="text-[#1BA9A0] hover:text-white"
                     >
                       <X size={14} />
                     </button>
@@ -148,10 +148,10 @@ export function CompetitionInviteModal({ competitionId, competitionTitle, onClos
                       type="button"
                       onClick={() => toggleUserSelection(result)}
                       className={`w-full flex items-center gap-3 rounded-lg p-3 text-left transition-colors ${
-                        isSelected ? 'bg-navy-50 border border-navy-200' : 'hover:bg-gray-50'
+                        isSelected ? 'bg-[#1BA9A0]/20 border border-[#1BA9A0]/40' : 'hover:bg-[#1A2D3D]'
                       }`}
                     >
-                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
+                      <div className="h-10 w-10 rounded-full bg-[#334155] flex items-center justify-center text-sm font-semibold text-gray-300">
                         {result.avatar_url ? (
                           <img src={result.avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
                         ) : (
@@ -159,13 +159,13 @@ export function CompetitionInviteModal({ competitionId, competitionTitle, onClos
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900">{result.username}</p>
+                        <p className="text-sm font-semibold text-white">{result.username}</p>
                         {result.full_name && (
                           <p className="text-xs text-gray-500 truncate">{result.full_name}</p>
                         )}
                       </div>
                       {isSelected && (
-                        <div className="h-5 w-5 rounded-full bg-navy-800 flex items-center justify-center">
+                        <div className="h-5 w-5 rounded-full bg-[#1BA9A0] flex items-center justify-center">
                           <UserPlus size={12} className="text-white" />
                         </div>
                       )}
@@ -182,11 +182,11 @@ export function CompetitionInviteModal({ competitionId, competitionTitle, onClos
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 border-t border-gray-200 p-4">
+        <div className="flex gap-3 border-t border-[#334155] p-4">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            className="flex-1 rounded-lg border border-[#334155] bg-[#1A2D3D] px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-[#334155]"
           >
             Cancel
           </button>
@@ -194,7 +194,7 @@ export function CompetitionInviteModal({ competitionId, competitionTitle, onClos
             type="button"
             onClick={handleSendInvites}
             disabled={selectedUsers.length === 0 || inviteUsers.isPending}
-            className="flex-1 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+            className="flex-1 rounded-lg bg-[#1BA9A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
           >
             {inviteUsers.isPending ? 'Sending...' : `Send ${selectedUsers.length > 0 ? `(${selectedUsers.length})` : ''}`}
           </button>

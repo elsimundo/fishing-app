@@ -64,8 +64,8 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
   if (catches.length === 0) {
     return (
       <div className="py-10 text-center text-sm text-gray-500">
-        <Fish className="mx-auto mb-2 h-10 w-10 text-gray-300" />
-        <p className="mb-1 font-medium text-gray-900">No species caught yet</p>
+        <Fish className="mx-auto mb-2 h-10 w-10 text-gray-500" />
+        <p className="mb-1 font-medium text-white">No species caught yet</p>
         <p className="text-xs text-gray-500">Log your first catch to start building your collection.</p>
       </div>
     )
@@ -82,7 +82,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
         <button
           type="button"
           onClick={() => setSelectedSpecies(null)}
-          className="mb-4 flex items-center gap-1 text-sm font-medium text-navy-600 hover:text-navy-800"
+          className="mb-4 flex items-center gap-1 text-sm font-medium text-[#1BA9A0] hover:text-[#14B8A6]"
         >
           ← Back to collection
         </button>
@@ -103,10 +103,10 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
         </div>
 
         {/* Personal best highlight */}
-        <div className="mb-4 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-3">
+        <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-900/30 p-3">
           <div className="mb-2 flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-amber-600" />
-            <span className="text-xs font-semibold text-amber-800">Personal Best</span>
+            <Trophy className="h-4 w-4 text-amber-400" />
+            <span className="text-xs font-semibold text-amber-300">Personal Best</span>
           </div>
           <button
             type="button"
@@ -116,16 +116,16 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
             <div className="flex items-center justify-between">
               <div>
                 {stats.bestCatch.weight_kg && (
-                  <p className="text-lg font-bold text-amber-900">
+                  <p className="text-lg font-bold text-white">
                     {stats.bestCatch.weight_kg.toFixed(2)} kg
                   </p>
                 )}
                 {stats.bestCatch.length_cm && (
-                  <p className="text-sm text-amber-700">
+                  <p className="text-sm text-amber-300">
                     {stats.bestCatch.length_cm} cm
                   </p>
                 )}
-                <p className="mt-1 text-xs text-amber-600">
+                <p className="mt-1 text-xs text-amber-400">
                   {new Date(stats.bestCatch.caught_at).toLocaleDateString(undefined, {
                     day: 'numeric',
                     month: 'short',
@@ -145,14 +145,14 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
         </div>
 
         {/* All catches for this species */}
-        <h4 className="mb-2 text-sm font-semibold text-gray-900">All Catches</h4>
+        <h4 className="mb-2 text-sm font-semibold text-white">All Catches</h4>
         <div className="space-y-2">
           {selectedSpeciesCatches.map((c, index) => (
             <button
               key={c.id}
               type="button"
               onClick={() => navigate(`/catches/${c.id}`)}
-              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:border-gray-300"
+              className="flex w-full items-center gap-3 rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-left transition-colors hover:border-[#1BA9A0]/50"
             >
               {c.photo_url ? (
                 <img
@@ -161,18 +161,18 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                   className="h-12 w-12 rounded-lg object-cover"
                 />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 text-xl">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#1A2D3D] text-xl">
                   🐟
                 </div>
               )}
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   {index === 0 && (
-                    <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                    <span className="rounded-full bg-amber-900/30 border border-amber-500/40 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400">
                       PB
                     </span>
                   )}
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-white">
                     {c.weight_kg ? `${c.weight_kg.toFixed(2)} kg` : 'No weight'}
                     {c.length_cm ? ` · ${c.length_cm} cm` : ''}
                   </span>
@@ -185,7 +185,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                   })}
                 </p>
               </div>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <ChevronRight className="h-4 w-4 text-gray-500" />
             </button>
           ))}
         </div>
@@ -197,7 +197,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-gray-600">
+        <p className="text-sm font-medium text-gray-400">
           {speciesStats.length} {speciesStats.length === 1 ? 'species' : 'species'} caught
         </p>
       </div>
@@ -208,7 +208,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
             key={stats.species}
             type="button"
             onClick={() => setSelectedSpecies(stats.species)}
-            className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-3 text-left transition-all hover:border-cyan-300 hover:shadow-md"
+            className="group relative overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-left transition-all hover:border-[#1BA9A0]/50 hover:shadow-md"
           >
             {/* Photo or placeholder */}
             {stats.bestCatch.photo_url ? (
@@ -219,24 +219,24 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                <div className="absolute bottom-1 right-1 rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-gray-700">
+                <div className="absolute bottom-1 right-1 rounded-full bg-[#243B4A]/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   {stats.count}×
                 </div>
               </div>
             ) : (
-              <div className="relative mb-2 flex h-24 w-full items-center justify-center rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50">
+              <div className="relative mb-2 flex h-24 w-full items-center justify-center rounded-lg bg-gradient-to-br from-cyan-900/30 to-blue-900/30">
                 <span className="text-4xl">🐟</span>
-                <div className="absolute bottom-1 right-1 rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-gray-700">
+                <div className="absolute bottom-1 right-1 rounded-full bg-[#243B4A]/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   {stats.count}×
                 </div>
               </div>
             )}
 
             {/* Species name */}
-            <p className="truncate text-sm font-semibold text-gray-900">{stats.species}</p>
+            <p className="truncate text-sm font-semibold text-white">{stats.species}</p>
 
             {/* Best catch stats */}
-            <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500">
+            <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-400">
               {stats.bestCatch.weight_kg && (
                 <span className="flex items-center gap-0.5">
                   <Scale size={10} />

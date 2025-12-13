@@ -10,9 +10,9 @@ interface CompetitionLeaderboardProps {
 }
 
 const podiumBg: Record<number, string> = {
-  1: 'bg-yellow-50 border-yellow-400',
-  2: 'bg-gray-50 border-gray-400',
-  3: 'bg-orange-50 border-orange-400',
+  1: 'bg-yellow-900/30 border-yellow-500/50',
+  2: 'bg-gray-700/30 border-gray-500/50',
+  3: 'bg-orange-900/30 border-orange-500/50',
 }
 
 const podiumIcon: Record<number, string> = {
@@ -48,10 +48,10 @@ export function CompetitionLeaderboard({
 
   if (isLoading) {
     return (
-      <div className="mt-4 bg-white px-5 py-6">
-        <h2 className="mb-4 text-lg font-bold text-gray-900">Leaderboard</h2>
+      <div className="mt-4 px-5 py-6">
+        <h2 className="mb-4 text-lg font-bold text-white">Leaderboard</h2>
         <div className="flex justify-center py-8">
-          <div className="h-6 w-6 rounded-full border-2 border-gray-300 border-t-transparent animate-spin" />
+          <div className="h-6 w-6 rounded-full border-2 border-[#334155] border-t-[#1BA9A0] animate-spin" />
         </div>
       </div>
     )
@@ -59,22 +59,22 @@ export function CompetitionLeaderboard({
 
   if (!entries || entries.length === 0) {
     return (
-      <div className="mt-4 bg-white px-5 py-6">
-        <h2 className="mb-4 text-lg font-bold text-gray-900">Leaderboard</h2>
+      <div className="mt-4 px-5 py-6">
+        <h2 className="mb-4 text-lg font-bold text-white">Leaderboard</h2>
         <div className="py-10 text-center">
           <div className="mb-3 text-5xl">🏆</div>
-          <p className="mb-1 text-base font-semibold text-gray-900">No entries yet</p>
-          <p className="text-sm text-gray-600">Be the first to compete.</p>
+          <p className="mb-1 text-base font-semibold text-white">No entries yet</p>
+          <p className="text-sm text-gray-500">Be the first to compete.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="mt-4 bg-white px-5 py-6">
+    <div className="mt-4 px-5 py-6">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-900">Leaderboard</h2>
-        <span className="text-sm text-gray-600">{entries.length} entries</span>
+        <h2 className="text-lg font-bold text-white">Leaderboard</h2>
+        <span className="text-sm text-gray-500">{entries.length} entries</span>
       </div>
 
       <div className="space-y-2">
@@ -90,13 +90,13 @@ export function CompetitionLeaderboard({
               onClick={() => entry.best_catch_id && navigate(`/catches/${entry.best_catch_id}`)}
               className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
                 isYou
-                  ? 'border-2 border-navy-800 bg-navy-50'
+                  ? 'border-2 border-[#1BA9A0] bg-[#1BA9A0]/20'
                   : isPodium
                   ? `border-2 ${podiumBg[rank]}`
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-[#334155] hover:border-[#1BA9A0]/50 bg-[#1A2D3D]'
               }`}
             >
-              <div className="w-8 text-center text-sm font-bold text-gray-600">
+              <div className="w-8 text-center text-sm font-bold text-gray-400">
                 {isPodium ? podiumIcon[rank] : `#${rank}`}
               </div>
 
@@ -105,20 +105,20 @@ export function CompetitionLeaderboard({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-gray-900">
+                <p className="truncate text-sm font-semibold text-white">
                   {entry.username ?? 'Unknown'}
-                  {isYou && <span className="ml-1 text-xs text-navy-800">(you)</span>}
+                  {isYou && <span className="ml-1 text-xs text-[#1BA9A0]">(you)</span>}
                 </p>
                 {entry.best_catch_species && (
-                  <p className="truncate text-xs text-gray-600">{entry.best_catch_species}</p>
+                  <p className="truncate text-xs text-gray-500">{entry.best_catch_species}</p>
                 )}
               </div>
 
               <div className="text-right text-sm">
-                <p className="text-base font-bold text-gray-900">
+                <p className="text-base font-bold text-white">
                   {entry.score != null ? entry.score.toFixed(2) : '0.00'}
                 </p>
-                <p className="text-xs text-gray-600">{unit}</p>
+                <p className="text-xs text-gray-500">{unit}</p>
               </div>
             </button>
           )

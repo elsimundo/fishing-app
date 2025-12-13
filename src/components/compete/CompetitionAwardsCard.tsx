@@ -10,32 +10,32 @@ const CATEGORY_INFO: Record<AwardCategory, { label: string; icon: React.ReactNod
   heaviest_total: {
     label: 'Heaviest Total',
     icon: <Scale size={16} />,
-    color: 'bg-amber-100 text-amber-700',
+    color: 'bg-amber-900/30 text-amber-400',
   },
   biggest_single: {
     label: 'Biggest Fish',
     icon: <Trophy size={16} />,
-    color: 'bg-yellow-100 text-yellow-700',
+    color: 'bg-yellow-900/30 text-yellow-400',
   },
   longest_fish: {
     label: 'Longest Fish',
     icon: <Ruler size={16} />,
-    color: 'bg-blue-100 text-blue-700',
+    color: 'bg-blue-900/30 text-blue-400',
   },
   most_catches: {
     label: 'Most Catches',
     icon: <Hash size={16} />,
-    color: 'bg-emerald-100 text-emerald-700',
+    color: 'bg-emerald-900/30 text-emerald-400',
   },
   species_diversity: {
     label: 'Species Diversity',
     icon: <Palette size={16} />,
-    color: 'bg-purple-100 text-purple-700',
+    color: 'bg-purple-900/30 text-purple-400',
   },
   photo_contest: {
     label: 'Best Photo',
     icon: <Camera size={16} />,
-    color: 'bg-pink-100 text-pink-700',
+    color: 'bg-pink-900/30 text-pink-400',
   },
 }
 
@@ -44,12 +44,12 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
         <div className="animate-pulse">
-          <div className="mb-3 h-4 w-24 rounded bg-gray-200" />
+          <div className="mb-3 h-4 w-24 rounded bg-[#334155]" />
           <div className="space-y-2">
-            <div className="h-12 rounded-lg bg-gray-100" />
-            <div className="h-12 rounded-lg bg-gray-100" />
+            <div className="h-12 rounded-lg bg-[#1A2D3D]" />
+            <div className="h-12 rounded-lg bg-[#1A2D3D]" />
           </div>
         </div>
       </div>
@@ -61,13 +61,13 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
   }
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm">
+    <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100">
-          <Trophy size={14} className="text-amber-600" />
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-900/30">
+          <Trophy size={14} className="text-amber-400" />
         </div>
-        <h3 className="text-sm font-bold text-gray-900">Award Categories</h3>
-        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+        <h3 className="text-sm font-bold text-white">Award Categories</h3>
+        <span className="rounded-full bg-amber-900/30 px-2 py-0.5 text-xs font-semibold text-amber-400">
           {awards.length}
         </span>
       </div>
@@ -78,7 +78,7 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
           return (
             <div
               key={award.id}
-              className="flex items-center gap-3 rounded-xl bg-gray-50 p-3"
+              className="flex items-center gap-3 rounded-xl bg-[#1A2D3D] p-3"
             >
               <div className={`flex h-8 w-8 items-center justify-center rounded-full ${info.color}`}>
                 {info.icon}
@@ -86,9 +86,9 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-gray-500">#{index + 1}</span>
-                  <p className="text-sm font-semibold text-gray-900">{award.title}</p>
+                  <p className="text-sm font-semibold text-white">{award.title}</p>
                   {award.target_species && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+                    <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-[10px] font-medium text-blue-400">
                       🐟 {award.target_species}
                     </span>
                   )}

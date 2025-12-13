@@ -48,8 +48,8 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
   const content = (
     <div
-      className={`flex gap-3 p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-        !notification.is_read ? 'bg-blue-50' : ''
+      className={`flex gap-3 p-4 hover:bg-[#1A2D3D] transition-colors cursor-pointer ${
+        !notification.is_read ? 'bg-[#1A2D3D]' : ''
       }`}
       onClick={onClick}
     >
@@ -60,15 +60,15 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-        <p className="text-sm text-gray-600 mt-0.5">{notification.message}</p>
+        <p className="text-sm font-medium text-white">{notification.title}</p>
+        <p className="text-sm text-gray-400 mt-0.5">{notification.message}</p>
         <p className="text-xs text-gray-500 mt-1">{timeAgo}</p>
       </div>
 
       {/* Unread indicator */}
       {!notification.is_read && (
         <div className="flex-shrink-0">
-          <div className="h-2 w-2 rounded-full bg-blue-600" />
+          <div className="h-2 w-2 rounded-full bg-[#1BA9A0]" />
         </div>
       )}
     </div>

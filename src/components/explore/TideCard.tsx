@@ -26,7 +26,7 @@ export function TideCard({ lat, lng }: TideCardProps) {
 
   if (!lat || !lng) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3 text-gray-400">
           <Waves size={20} />
           <span className="text-sm font-medium">Tides</span>
@@ -38,14 +38,14 @@ export function TideCard({ lat, lng }: TideCardProps) {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-            <Loader2 size={20} className="animate-spin text-blue-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-900/30">
+            <Loader2 size={20} className="animate-spin text-blue-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Loading Tides</p>
-            <p className="text-xs text-gray-500">Fetching tide data...</p>
+            <p className="text-sm font-semibold text-white">Loading Tides</p>
+            <p className="text-xs text-gray-400">Fetching tide data...</p>
           </div>
         </div>
       </div>
@@ -54,7 +54,7 @@ export function TideCard({ lat, lng }: TideCardProps) {
 
   if (error || !tideData) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3 text-gray-400">
           <Waves size={20} />
           <span className="text-sm font-medium">Tides</span>
@@ -70,28 +70,28 @@ export function TideCard({ lat, lng }: TideCardProps) {
   const formatHeight = (height: number) => `${height.toFixed(1)}m`
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A]">
       {/* Header - Always visible */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[#1A2D3D]"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-            <Waves size={20} className="text-blue-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-900/30">
+            <Waves size={20} className="text-blue-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-gray-900">Tides</p>
+              <p className="text-sm font-semibold text-white">Tides</p>
               {isLive && (
-                <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
+                <span className="flex items-center gap-1 rounded-full bg-green-900/30 px-2 py-0.5 text-[10px] font-semibold text-green-400">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
                   LIVE
                 </span>
               )}
             </div>
             {current ? (
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-400">
                 {current.type === 'rising' ? '↗ Rising' : '↘ Falling'} · {formatHeight(current.height)}
               </p>
             ) : (
@@ -105,7 +105,7 @@ export function TideCard({ lat, lng }: TideCardProps) {
           {extremes?.nextHigh && !expanded && (
             <div className="text-right">
               <p className="text-xs text-gray-500">Next High</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-white">
                 {format(new Date(extremes.nextHigh.time), 'h:mm a')}
               </p>
             </div>
@@ -120,7 +120,7 @@ export function TideCard({ lat, lng }: TideCardProps) {
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t border-gray-100 px-4 pb-4">
+        <div className="border-t border-[#334155] px-4 pb-4">
           {/* Horizontal scrollable date picker - shows next 10 days */}
           <div className="mt-3 -mx-4 px-4">
             <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
@@ -131,7 +131,7 @@ export function TideCard({ lat, lng }: TideCardProps) {
                 className={`flex-shrink-0 flex flex-col items-center rounded-xl px-3 py-2 min-w-[56px] transition-all ${
                   !selectedDate
                     ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-[#1A2D3D] text-gray-300 hover:bg-[#334155]'
                 }`}
               >
                 <span className="text-[10px] font-medium uppercase">
@@ -155,8 +155,8 @@ export function TideCard({ lat, lng }: TideCardProps) {
                       isSelected
                         ? 'bg-blue-600 text-white shadow-md'
                         : isWeekend
-                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50'
+                        : 'bg-[#1A2D3D] text-gray-300 hover:bg-[#334155]'
                     }`}
                   >
                     <span className="text-[10px] font-medium uppercase">{format(date, 'EEE')}</span>
@@ -180,14 +180,14 @@ export function TideCard({ lat, lng }: TideCardProps) {
             <>
               {/* Live Reading - compact, only for today */}
               {!selectedDate && isLive && gaugeData?.latestReading && (
-                <div className="mt-3 flex items-center justify-between rounded-lg bg-green-50 px-3 py-2">
+                <div className="mt-3 flex items-center justify-between rounded-lg bg-emerald-900/30 border border-emerald-500/40 px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                    <span className="text-xs font-medium text-green-700">Live</span>
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                    <span className="text-xs font-medium text-emerald-400">Live</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm font-bold text-green-800">{formatHeight(gaugeData.latestReading.level)}</span>
-                    <span className="ml-1 text-xs text-green-600">
+                    <span className="text-sm font-bold text-emerald-300">{formatHeight(gaugeData.latestReading.level)}</span>
+                    <span className="ml-1 text-xs text-emerald-400">
                       {formatDistanceToNow(new Date(gaugeData.latestReading.time), { addSuffix: true })}
                     </span>
                   </div>
@@ -224,17 +224,17 @@ export function TideCard({ lat, lng }: TideCardProps) {
                         <div
                           key={idx}
                           className={`flex items-center justify-between rounded-xl px-4 py-3 ${
-                            isHigh ? 'bg-emerald-50' : 'bg-amber-50'
+                            isHigh ? 'bg-emerald-900/30 border border-emerald-500/40' : 'bg-amber-900/30 border border-amber-500/40'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${
-                              isHigh ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                              isHigh ? 'bg-emerald-900/50 text-emerald-400' : 'bg-amber-900/50 text-amber-400'
                             }`}>
                               {isHigh ? 'H' : 'L'}
                             </div>
                             <div>
-                              <p className="text-lg font-bold text-gray-900">
+                              <p className="text-lg font-bold text-white">
                                 {format(predDate, 'HH:mm')}
                               </p>
                               {!selectedDate && (
@@ -245,10 +245,10 @@ export function TideCard({ lat, lng }: TideCardProps) {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className={`text-lg font-bold ${isHigh ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            <p className={`text-lg font-bold ${isHigh ? 'text-emerald-400' : 'text-amber-400'}`}>
                               {formatHeight(pred.height)}
                             </p>
-                            <p className="text-[10px] text-gray-400">
+                            <p className="text-[10px] text-gray-500">
                               {isHigh ? 'High' : 'Low'}
                             </p>
                           </div>
@@ -258,7 +258,7 @@ export function TideCard({ lat, lng }: TideCardProps) {
                   </div>
                 </div>
               ) : (
-                <div className="mt-3 rounded-xl bg-gray-50 p-4 text-center">
+                <div className="mt-3 rounded-xl bg-[#1A2D3D] p-4 text-center">
                   <p className="text-sm text-gray-500">
                     {selectedDate 
                       ? `No tide data for ${format(selectedDate, 'EEE, MMM d')}`

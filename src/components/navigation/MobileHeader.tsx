@@ -18,9 +18,11 @@ export function MobileHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-navy-800 px-5 py-3 text-white">
+      <header className="sticky top-0 z-40 bg-[#1A2D3D] px-5 py-3 text-white border-b border-[#334155]">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Fishing App</h1>
+          <div className="flex items-center gap-3">
+            <img src="/catchi-logo.svg" alt="Catchi" className="h-7 w-auto" />
+          </div>
           <div className="flex items-center gap-1">
             {/* Messages button */}
             <button
@@ -55,7 +57,7 @@ export function MobileHeader() {
       {showMenu && (
         <div className="fixed inset-0 z-30 bg-black/40" onClick={() => setShowMenu(false)}>
           <div 
-            className="absolute right-4 top-16 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+            className="absolute right-4 top-16 w-48 rounded-xl bg-[#243B4A] shadow-lg ring-1 ring-[#334155]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-2">
@@ -65,14 +67,14 @@ export function MobileHeader() {
                   navigate('/logbook')
                   setShowMenu(false)
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg"
+                className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#1A2D3D] rounded-lg"
               >
                 Logbook
               </button>
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 rounded-lg"
               >
                 Sign out
               </button>

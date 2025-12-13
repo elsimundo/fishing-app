@@ -31,14 +31,14 @@ export function ParticipantsList({
   if (!participants || participants.length === 0) {
     if (myRole === 'owner') {
       return (
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-gray-500">
           You&apos;re the only angler in this session so far. Use the Invite button to add contributors or
           viewers.
         </p>
       )
     }
 
-    return <p className="text-[11px] text-slate-500">No other participants have joined this session yet.</p>
+    return <p className="text-[11px] text-gray-500">No other participants have joined this session yet.</p>
   }
 
   return (
@@ -52,7 +52,7 @@ export function ParticipantsList({
         return (
           <li
             key={p.id}
-            className="flex items-center justify-between rounded-md bg-slate-50 px-2 py-1 text-[10px] text-slate-600"
+            className="flex items-center justify-between rounded-md bg-[#1A2D3D] px-2 py-1 text-[10px] text-gray-400"
           >
             <div className="flex items-center gap-2 overflow-hidden">
               {p.user?.avatar_url ? (
@@ -67,11 +67,11 @@ export function ParticipantsList({
                 </div>
               )}
               <div className="min-w-0">
-                <p className="truncate text-[11px] font-medium text-slate-800">
+                <p className="truncate text-[11px] font-medium text-white">
                   {displayName}
                   {isCurrentUser ? ' (you)' : ''}
                 </p>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-gray-500">
                   {roleLabel(p.role)}
                   {p.status === 'pending' && p.role !== 'contributor' ? ' · Invited' : null}
                 </p>
@@ -81,10 +81,10 @@ export function ParticipantsList({
             <div className="ml-2 flex items-center gap-1">
               <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
                 p.status === 'pending'
-                  ? 'bg-amber-100 text-amber-700'
+                  ? 'bg-amber-900/30 text-amber-400'
                   : p.status === 'active'
-                    ? 'bg-slate-100 text-slate-600'
-                    : 'bg-red-100 text-red-600'
+                    ? 'bg-[#334155] text-gray-300'
+                    : 'bg-red-900/30 text-red-400'
               }`}>
                 {p.status === 'active'
                   ? 'Active'
@@ -99,7 +99,7 @@ export function ParticipantsList({
                 <select
                   value={p.role}
                   onChange={(e) => onChangeRole(p, e.target.value as ParticipantRole)}
-                  className="rounded-md border border-slate-300 bg-white px-1 py-0.5 text-[9px] text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="rounded-md border border-[#334155] bg-[#243B4A] px-1 py-0.5 text-[9px] text-gray-300 focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                 >
                   <option value="contributor">Contributor</option>
                   <option value="viewer">Viewer</option>
@@ -110,7 +110,7 @@ export function ParticipantsList({
                 <button
                   type="button"
                   onClick={() => onRemove(p)}
-                  className="rounded-md border border-slate-300 px-2 py-0.5 text-[9px] text-slate-600 hover:bg-slate-100"
+                  className="rounded-md border border-[#334155] px-2 py-0.5 text-[9px] text-gray-400 hover:bg-[#334155]"
                 >
                   Remove
                 </button>

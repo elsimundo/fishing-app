@@ -15,20 +15,20 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
   const hasLakes = savedLakes.length > 0
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-[#334155] bg-[#243B4A] overflow-hidden">
       {/* Header */}
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4"
+        className="flex w-full items-center justify-between p-4 hover:bg-[#1A2D3D] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-xl">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-900/30 text-xl">
             ❤️
           </div>
           <div className="text-left">
-            <h3 className="text-sm font-semibold text-gray-900">My Lakes</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="text-sm font-semibold text-white">My Lakes</h3>
+            <p className="text-xs text-gray-400">
               {hasLakes ? `${savedLakes.length} saved` : 'Save lakes to track'}
             </p>
           </div>
@@ -42,15 +42,15 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t border-gray-100 px-4 pb-4">
+        <div className="border-t border-[#334155] px-4 pb-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-6">
               <Loader2 size={20} className="animate-spin text-gray-400" />
             </div>
           ) : !hasLakes ? (
-            <div className="rounded-lg bg-gray-50 p-4 text-center mt-3">
+            <div className="rounded-lg bg-[#1A2D3D] p-4 text-center mt-3">
               <span className="text-3xl">🏞️</span>
-              <p className="mt-2 text-sm font-medium text-gray-600">No saved lakes yet</p>
+              <p className="mt-2 text-sm font-medium text-gray-300">No saved lakes yet</p>
               <p className="mt-1 text-xs text-gray-500">
                 Tap the ❤️ on any lake to add it to your watchlist
               </p>
@@ -64,7 +64,7 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                 return (
                   <div
                     key={saved.id}
-                    className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                    className="flex items-center justify-between rounded-lg bg-[#1A2D3D] p-3"
                   >
                     <button
                       type="button"
@@ -74,10 +74,10 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                       <div className="flex items-center gap-2">
                         <span className="text-lg">🏞️</span>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{lake.name}</p>
-                          <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                          <p className="text-sm font-medium text-white">{lake.name}</p>
+                          <div className="flex items-center gap-2 text-[10px] text-gray-400">
                             {lake.is_verified && (
-                              <span className="rounded bg-green-100 px-1 py-0.5 text-green-700">
+                              <span className="rounded bg-green-900/30 px-1 py-0.5 text-green-400">
                                 Verified
                               </span>
                             )}
@@ -92,7 +92,7 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                     <div className="flex items-center gap-1">
                       <Link
                         to={`/lakes/${lake.id}`}
-                        className="rounded-lg p-2 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                        className="rounded-lg p-2 text-gray-400 hover:bg-[#334155] hover:text-white"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <MapPin size={14} />
@@ -102,7 +102,7 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="rounded-lg p-2 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                        className="rounded-lg p-2 text-gray-400 hover:bg-[#334155] hover:text-white"
                       >
                         <Navigation size={14} />
                       </a>
@@ -113,7 +113,7 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                           unsaveLake.mutate(lake.id)
                         }}
                         disabled={isPending}
-                        className="rounded-lg p-2 text-pink-400 hover:bg-pink-100 hover:text-pink-600 disabled:opacity-50"
+                        className="rounded-lg p-2 text-pink-400 hover:bg-pink-900/30 hover:text-pink-300 disabled:opacity-50"
                       >
                         <Heart size={14} fill="currentColor" />
                       </button>

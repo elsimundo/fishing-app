@@ -125,18 +125,18 @@ export default function ProfilePage() {
     : 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#1A2D3D]">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white px-5 pt-4 pb-3 flex items-center justify-between">
+      <div className="border-b border-[#334155] bg-[#243B4A] px-5 pt-4 pb-3 flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Profile</p>
-          <p className="text-lg font-bold text-gray-900">@{profile.username || profile.full_name || 'angler'}</p>
+          <p className="text-lg font-bold text-white">@{profile.username || profile.full_name || 'angler'}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => navigate('/messages')}
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+            className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-[#1A2D3D] text-white hover:bg-[#0D4B4E]"
           >
             <MessageCircle size={18} />
             {unreadCount > 0 && (
@@ -147,14 +147,14 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1A2D3D] text-white hover:bg-[#0D4B4E]"
           >
             <Share2 size={18} />
           </button>
           <button
             type="button"
             onClick={() => setShowEditModal(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1A2D3D] text-white hover:bg-[#0D4B4E]"
           >
             <Settings size={18} />
           </button>
@@ -162,7 +162,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile hero & gamification */}
-      <div className="border-b border-gray-200 bg-white px-5 py-4">
+      <div className="border-b border-[#334155] bg-[#243B4A] px-5 py-4">
         <ProfileHero profile={profile} level={level} xp={xp} />
 
         {/* Stats grid */}
@@ -199,22 +199,22 @@ export default function ProfilePage() {
 
         {/* This week's challenge */}
         {currentChallenge && (
-          <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-3">
+          <div className="mt-4 rounded-xl border border-[#334155] bg-[#1A2D3D] p-3">
             <div className="mb-1 flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-blue-900">🔥 This week's challenge</p>
-              <span className="text-[11px] text-blue-700">{currentChallenge.difficulty}</span>
+              <p className="text-[13px] font-semibold text-[#1BA9A0]">🔥 This week's challenge</p>
+              <span className="text-[11px] text-gray-400">{currentChallenge.difficulty}</span>
             </div>
-            <p className="text-xs text-blue-900 font-medium">{currentChallenge.title}</p>
-            <p className="mt-0.5 text-[11px] text-blue-800/80">
+            <p className="text-xs text-white font-medium">{currentChallenge.title}</p>
+            <p className="mt-0.5 text-[11px] text-gray-400">
               {currentChallenge.description}
             </p>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#334155]">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500"
+                className="h-full rounded-full bg-gradient-to-r from-[#1BA9A0] to-[#14B8A6]"
                 style={{ width: `${currentChallengePct}%` }}
               />
             </div>
-            <p className="mt-1 text-[11px] text-blue-900/80">
+            <p className="mt-1 text-[11px] text-gray-400">
               {currentChallengeProgress
                 ? `${currentChallengeProgress.progress}/${currentChallengeProgress.target} · +${currentChallenge.xp_reward} XP`
                 : `0/${(currentChallenge as any).criteria?.target ?? currentChallenge.xp_reward} · +${currentChallenge.xp_reward} XP`}
@@ -227,14 +227,14 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setShowEditModal(true)}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
+            className="flex-1 inline-flex items-center justify-center rounded-xl bg-[#1BA9A0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
           >
             ✏️ Edit profile
           </button>
           <button
             type="button"
             onClick={() => navigate('/catches/new')}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-200"
+            className="flex-1 inline-flex items-center justify-center rounded-xl bg-[#1A2D3D] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0D4B4E]"
           >
             🎣 Log catch
           </button>
@@ -242,13 +242,13 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="sticky top-0 z-10 mt-2 border-b border-gray-200 bg-white">
-        <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-gray-500 md:justify-center">
+      <div className="sticky top-0 z-10 mt-2 border-b border-[#334155] bg-[#243B4A]">
+        <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-gray-400 md:justify-center">
           <button
             type="button"
             onClick={() => setActiveTab('posts')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'posts' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
+              activeTab === 'posts' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -260,7 +260,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('sessions')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'sessions' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
+              activeTab === 'sessions' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -272,7 +272,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('catches')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'catches' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
+              activeTab === 'catches' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -284,7 +284,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('species')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'species' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
+              activeTab === 'species' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -296,7 +296,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('achievements')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'achievements' ? 'text-navy-800 border-b-2 border-navy-800' : 'text-gray-500'
+              activeTab === 'achievements' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -314,11 +314,11 @@ export default function ProfilePage() {
           <div>
             {postsLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+                <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
               </div>
             ) : !posts || (posts as any[]).length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No posts yet</p>
+              <div className="py-10 text-center text-sm text-gray-400">
+                <p className="mb-1 font-medium text-white">No posts yet</p>
                 <p className="text-xs text-gray-500">Share a great session, catch, or photo from your logbook.</p>
               </div>
             ) : (
@@ -362,8 +362,8 @@ export default function ProfilePage() {
 
               if (items.length === 0) {
                 return (
-                  <div className="py-10 text-center text-sm text-gray-500">
-                    <p className="mb-1 font-medium text-gray-900">No sessions yet</p>
+                  <div className="py-10 text-center text-sm text-gray-400">
+                    <p className="mb-1 font-medium text-white">No sessions yet</p>
                     <p className="text-xs text-gray-500">Start a session from Explore or the Logbook to track your fishing.</p>
                   </div>
                 )
@@ -384,10 +384,10 @@ export default function ProfilePage() {
                           onClick={() => navigate(`/sessions/${session.id}`)}
                           className={`w-full rounded-xl border p-3 text-left shadow-sm transition-colors ${
                             isActive
-                              ? 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400'
+                              ? 'border-emerald-500/40 bg-emerald-900/20 hover:border-emerald-400'
                               : isCompetition
-                              ? 'border-amber-200 bg-amber-50/40 hover:border-amber-400'
-                              : 'border-gray-200 bg-white hover:border-navy-800/40'
+                              ? 'border-amber-500/40 bg-amber-900/20 hover:border-amber-400'
+                              : 'border-[#334155] bg-[#243B4A] hover:border-[#1BA9A0]/40'
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -400,10 +400,10 @@ export default function ProfilePage() {
                             )}
 
                             <div className="flex-1">
-                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
+                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-400">
                                 <div className="flex items-center gap-1.5">
                                   {isCompetition && (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 px-2 py-0.5 font-medium text-amber-400">
                                       <Swords size={10} />
                                       Competition
                                     </span>
@@ -411,8 +411,8 @@ export default function ProfilePage() {
                                   <span
                                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
                                       typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
-                                        ? 'bg-gray-100 text-gray-700'
-                                        : 'bg-gray-100 text-gray-700'
+                                        ? 'bg-[#1A2D3D] text-gray-300'
+                                        : 'bg-[#1A2D3D] text-gray-300'
                                     }`}
                                   >
                                     {typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
@@ -422,8 +422,8 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {isActive && (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/30 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
                                       Live
                                     </span>
                                   )}
@@ -436,10 +436,10 @@ export default function ProfilePage() {
                                   </span>
                                 </div>
                               </div>
-                              <p className="text-sm font-semibold text-gray-900">
+                              <p className="text-sm font-semibold text-white">
                                 {session.title || session.location_name || 'Fishing session'}
                               </p>
-                              <p className="mt-0.5 text-xs text-gray-500">
+                              <p className="mt-0.5 text-xs text-gray-400">
                                 📍 {session.location_name || 'Unknown location'}
                               </p>
                             </div>
@@ -459,10 +459,10 @@ export default function ProfilePage() {
                           onClick={() => navigate(`/compete/${competition.id}`)}
                           className={`w-full rounded-xl border p-3 text-left shadow-sm transition-colors ${
                             isLive
-                              ? 'border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 hover:border-amber-400'
+                              ? 'border-amber-500/40 bg-amber-900/20 hover:border-amber-400'
                               : isUpcoming
-                              ? 'border-blue-200 bg-blue-50/40 hover:border-blue-400'
-                              : 'border-gray-200 bg-white hover:border-navy-800/40'
+                              ? 'border-blue-500/40 bg-blue-900/20 hover:border-blue-400'
+                              : 'border-[#334155] bg-[#243B4A] hover:border-[#1BA9A0]/40'
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -474,17 +474,17 @@ export default function ProfilePage() {
                               />
                             ) : (
                               <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${
-                                isLive ? 'bg-amber-100' : isUpcoming ? 'bg-blue-100' : 'bg-gray-100'
+                                isLive ? 'bg-amber-900/30' : isUpcoming ? 'bg-blue-900/30' : 'bg-[#1A2D3D]'
                               }`}>
                                 <Swords size={20} className={
-                                  isLive ? 'text-amber-600' : isUpcoming ? 'text-blue-600' : 'text-gray-400'
+                                  isLive ? 'text-amber-400' : isUpcoming ? 'text-blue-400' : 'text-gray-400'
                                 } />
                               </div>
                             )}
 
                             <div className="flex-1">
-                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">
+                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-400">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 px-2 py-0.5 font-medium text-amber-400">
                                   <Trophy size={10} />
                                   Competition
                                 </span>
@@ -496,7 +496,7 @@ export default function ProfilePage() {
                                     </span>
                                   )}
                                   {isUpcoming && (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-900/30 px-2 py-0.5 text-[10px] font-semibold text-blue-400">
                                       Upcoming
                                     </span>
                                   )}
@@ -509,10 +509,10 @@ export default function ProfilePage() {
                                   </span>
                                 </div>
                               </div>
-                              <p className="text-sm font-semibold text-gray-900">
+                              <p className="text-sm font-semibold text-white">
                                 {competition.title}
                               </p>
-                              <p className="mt-0.5 text-xs text-gray-500">
+                              <p className="mt-0.5 text-xs text-gray-400">
                                 👥 {competition.participant_count ?? 0} anglers
                                 {competition.prize && ` · 🏆 ${competition.prize}`}
                               </p>
@@ -532,8 +532,8 @@ export default function ProfilePage() {
         {activeTab === 'catches' && (
           <div>
             {!catches || catches.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No catches logged</p>
+              <div className="py-10 text-center text-sm text-gray-400">
+                <p className="mb-1 font-medium text-white">No catches logged</p>
                 <p className="text-xs text-gray-500">Log your first catch from a session or directly from the logbook.</p>
               </div>
             ) : (

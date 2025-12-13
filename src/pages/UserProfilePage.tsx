@@ -94,17 +94,17 @@ export default function UserProfilePage() {
 
   if (profileLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-navy-800" />
+      <div className="flex h-screen items-center justify-center bg-[#1A2D3D]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#1BA9A0]" />
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center p-5 text-center">
-        <p className="mb-2 text-lg font-semibold text-gray-900">User not found</p>
-        <p className="text-sm text-gray-600">This profile does not exist or has been deleted.</p>
+      <div className="flex h-screen flex-col items-center justify-center p-5 text-center bg-[#1A2D3D]">
+        <p className="mb-2 text-lg font-semibold text-white">User not found</p>
+        <p className="text-sm text-gray-400">This profile does not exist or has been deleted.</p>
       </div>
     )
   }
@@ -119,17 +119,17 @@ export default function UserProfilePage() {
   const lifetimeStats = calculateLifetimeStats(userSessions ?? [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#1A2D3D]">
       {/* Header - matches ProfilePage exactly */}
-      <div className="border-b border-gray-200 bg-white px-5 pt-4 pb-3 flex items-center justify-between">
+      <div className="border-b border-[#334155] bg-[#243B4A] px-5 pt-4 pb-3 flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Profile</p>
-          <p className="text-lg font-bold text-gray-900">@{profile.username || profile.full_name || 'angler'}</p>
+          <p className="text-lg font-bold text-white">@{profile.username || profile.full_name || 'angler'}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1A2D3D] text-white hover:bg-[#0D4B4E]"
           >
             <Share2 size={18} />
           </button>
@@ -137,7 +137,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* Profile hero & gamification - matches ProfilePage exactly */}
-      <div className="border-b border-gray-200 bg-white px-5 py-4">
+      <div className="border-b border-[#334155] bg-[#243B4A] px-5 py-4">
         <ProfileHero profile={profile} level={level} xp={xp} />
 
         {/* Stats grid */}
@@ -190,7 +190,7 @@ export default function UserProfilePage() {
                 })
               }}
               disabled={isStartingConversation}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-200 disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#1A2D3D] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0D4B4E] disabled:opacity-50"
             >
               <MessageCircle size={18} />
               {isStartingConversation ? 'Starting...' : 'Message'}
@@ -200,13 +200,13 @@ export default function UserProfilePage() {
       </div>
 
       {/* Tabs - matches ProfilePage exactly */}
-      <div className="sticky top-0 z-10 mt-2 border-b border-gray-200 bg-white">
-        <div className="flex text-xs font-semibold text-gray-500">
+      <div className="sticky top-0 z-10 mt-2 border-b border-[#334155] bg-[#243B4A]">
+        <div className="flex text-xs font-semibold text-gray-400">
           <button
             type="button"
             onClick={() => setActiveTab('posts')}
             className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'posts' ? 'text-navy-800' : 'text-gray-500'
+              activeTab === 'posts' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -218,7 +218,7 @@ export default function UserProfilePage() {
             type="button"
             onClick={() => setActiveTab('sessions')}
             className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'sessions' ? 'text-navy-800' : 'text-gray-500'
+              activeTab === 'sessions' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -230,7 +230,7 @@ export default function UserProfilePage() {
             type="button"
             onClick={() => setActiveTab('catches')}
             className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'catches' ? 'text-navy-800' : 'text-gray-500'
+              activeTab === 'catches' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -242,7 +242,7 @@ export default function UserProfilePage() {
             type="button"
             onClick={() => setActiveTab('achievements')}
             className={`flex-1 px-4 py-3 text-center ${
-              activeTab === 'achievements' ? 'text-navy-800' : 'text-gray-500'
+              activeTab === 'achievements' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -259,11 +259,11 @@ export default function UserProfilePage() {
           <>
             {postsLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+                <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
               </div>
             ) : !posts || (posts as any[]).length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No posts yet</p>
+              <div className="py-10 text-center text-sm text-gray-400">
+                <p className="mb-1 font-medium text-white">No posts yet</p>
                 <p className="text-xs text-gray-500">This angler hasn't shared any posts.</p>
               </div>
             ) : (
@@ -281,11 +281,11 @@ export default function UserProfilePage() {
           <>
             {sessionsLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+                <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
               </div>
             ) : !userSessions || userSessions.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No public sessions</p>
+              <div className="py-10 text-center text-sm text-gray-400">
+                <p className="mb-1 font-medium text-white">No public sessions</p>
                 <p className="text-xs text-gray-500">This angler hasn't shared any sessions publicly.</p>
               </div>
             ) : (
@@ -295,7 +295,7 @@ export default function UserProfilePage() {
                     key={session.id}
                     type="button"
                     onClick={() => navigate(`/sessions/${session.id}`)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm transition-colors hover:border-navy-800/40"
+                    className="w-full rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-left shadow-sm transition-colors hover:border-[#1BA9A0]/40"
                   >
                     <div className="flex items-start gap-3">
                       {session.cover_photo_url && (
@@ -306,9 +306,9 @@ export default function UserProfilePage() {
                         />
                       )}
                       <div className="flex-1">
-                        <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
+                        <div className="mb-1 flex items-center justify-between text-[11px] text-gray-400">
                           <span
-                            className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700"
+                            className="inline-flex items-center gap-1 rounded-full bg-[#1A2D3D] px-2 py-0.5 font-medium text-gray-300"
                           >
                             {typeof session.water_type === 'string' &&
                             (session.water_type.toLowerCase().includes('salt') ||
@@ -325,10 +325,10 @@ export default function UserProfilePage() {
                             })}
                           </span>
                         </div>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-white">
                           {session.title || session.location_name || 'Fishing session'}
                         </p>
-                        <p className="mt-0.5 text-xs text-gray-500">
+                        <p className="mt-0.5 text-xs text-gray-400">
                           📍 {session.location_name || 'Unknown location'}
                           {session.catches && session.catches.length > 0 && (
                             <span className="ml-2">🎣 {session.catches.length} catches</span>
@@ -348,11 +348,11 @@ export default function UserProfilePage() {
           <>
             {catchesLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+                <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
               </div>
             ) : !catches || catches.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No public catches</p>
+              <div className="py-10 text-center text-sm text-gray-400">
+                <p className="mb-1 font-medium text-white">No public catches</p>
                 <p className="text-xs text-gray-500">This angler hasn't shared any catches publicly.</p>
               </div>
             ) : (
@@ -369,8 +369,8 @@ export default function UserProfilePage() {
         {activeTab === 'achievements' && (
           <div className="space-y-3">
             {completedChallenges.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No achievements yet</p>
+              <div className="py-10 text-center text-sm text-gray-400">
+                <p className="mb-1 font-medium text-white">No achievements yet</p>
                 <p className="text-xs text-gray-500">This angler hasn't completed any challenges yet.</p>
               </div>
             ) : (
@@ -379,20 +379,20 @@ export default function UserProfilePage() {
                   key={uc.id}
                   type="button"
                   onClick={() => navigate(`/challenges/${uc.challenge?.slug}`)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100 p-3 text-left text-sm shadow-sm transition-colors hover:from-emerald-100 hover:to-emerald-150"
+                  className="flex w-full items-center gap-3 rounded-xl border border-emerald-500/40 bg-emerald-900/20 p-3 text-left text-sm shadow-sm transition-colors hover:border-emerald-400"
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 text-2xl text-white">
                     {uc.challenge?.icon || '🎣'}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-white">
                       {uc.challenge?.title || 'Challenge'}
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-400">
                       {uc.challenge?.description || ''}
                     </p>
                     {uc.completed_at && (
-                      <p className="mt-0.5 text-[11px] font-semibold text-emerald-800">
+                      <p className="mt-0.5 text-[11px] font-semibold text-emerald-400">
                         ✓ Completed {new Date(uc.completed_at).toLocaleDateString(undefined, {
                           month: 'short',
                           day: 'numeric',

@@ -19,7 +19,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
 
   if (nearbyShops.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3 text-gray-400">
           <Store size={20} />
           <span className="text-sm font-medium">Tackle Shops</span>
@@ -32,18 +32,18 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
   const nearestShop = nearbyShops[0]
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A]">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[#1A2D3D]"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-            <Store size={20} className="text-amber-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-900/30">
+            <Store size={20} className="text-amber-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Tackle Shops</p>
-            <p className="text-xs text-gray-600">
+            <p className="text-sm font-semibold text-white">Tackle Shops</p>
+            <p className="text-xs text-gray-400">
               {nearbyShops.length} nearby · {nearestShop.name}
             </p>
           </div>
@@ -53,7 +53,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
           {!expanded && nearestShop.distance !== undefined && (
             <div className="text-right">
               <p className="text-xs text-gray-500">Nearest</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-white">
                 {formatDistance(nearestShop.distance)}
               </p>
             </div>
@@ -67,16 +67,16 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-100 px-4 pb-4">
+        <div className="border-t border-[#334155] px-4 pb-4">
           <div className="mt-3 space-y-3">
             {nearbyShops.slice(0, 10).map((shop) => (
-              <div key={shop.id} className="rounded-lg bg-gray-50 p-3">
+              <div key={shop.id} className="rounded-lg bg-[#1A2D3D] p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">🎣</span>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{shop.name}</p>
+                    <p className="text-sm font-semibold text-white">{shop.name}</p>
                     {shop.distance !== undefined && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         {formatDistance(shop.distance)} away
                       </p>
                     )}
@@ -84,7 +84,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                 </div>
 
                 {shop.address && (
-                  <p className="mb-2 text-xs text-gray-600">{shop.address}</p>
+                  <p className="mb-2 text-xs text-gray-400">{shop.address}</p>
                 )}
 
 
@@ -92,7 +92,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                   {shop.phone && (
                     <a
                       href={`tel:${shop.phone}`}
-                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D4B4E]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Phone size={14} />
@@ -104,7 +104,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                       href={shop.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D4B4E]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Globe size={14} />
@@ -115,7 +115,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium hover:bg-primary/90"
+                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Navigation size={14} />
@@ -125,7 +125,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
 
                 {/* Claim CTA or Claimed badge */}
                 {shop.is_claimed ? (
-                  <div className="mt-2 flex items-center gap-1 text-[11px] text-emerald-600">
+                  <div className="mt-2 flex items-center gap-1 text-[11px] text-emerald-400">
                     <CheckCircle size={12} />
                     <span>{shop.owner_user_id === user?.id ? 'Claimed by you' : 'Claimed'}</span>
                   </div>
@@ -136,7 +136,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                       e.stopPropagation()
                       setClaimBusiness(shop)
                     }}
-                    className="mt-2 text-[11px] font-medium text-navy-800 hover:underline"
+                    className="mt-2 text-[11px] font-medium text-[#1BA9A0] hover:underline"
                   >
                     Are you the owner? Claim this business
                   </button>

@@ -16,10 +16,10 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 z-50 flex h-screen w-[275px] flex-col border-r border-gray-200 bg-white p-3">
+      <aside className="fixed left-0 top-0 z-50 flex h-screen w-[275px] flex-col border-r border-[#334155] bg-[#1A2D3D] p-3">
         {/* App title and notifications */}
         <div className="mb-6 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Fishing App</h1>
+          <img src="/catchi-logo.svg" alt="Catchi" className="h-10 w-auto" />
           <NotificationBell align="left" />
         </div>
 
@@ -30,10 +30,10 @@ export function Sidebar() {
             type="button"
             onClick={() => navigate('/feed')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/feed') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+              isActive('/feed') ? 'bg-[#243B4A] text-[#1BA9A0] font-bold' : 'text-white font-medium hover:bg-[#243B4A]'
             }`}
           >
-            <Home size={28} className="text-gray-900" />
+            <Home size={28} className={isActive('/feed') ? 'text-[#1BA9A0]' : 'text-white'} />
             <span className="text-base">Feed</span>
           </button>
 
@@ -42,10 +42,10 @@ export function Sidebar() {
             type="button"
             onClick={() => navigate('/explore')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/explore') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+              isActive('/explore') ? 'bg-[#243B4A] text-[#1BA9A0] font-bold' : 'text-white font-medium hover:bg-[#243B4A]'
             }`}
           >
-            <Map size={28} className="text-gray-900" />
+            <Map size={28} className={isActive('/explore') ? 'text-[#1BA9A0]' : 'text-white'} />
             <span className="text-base">Explore</span>
           </button>
 
@@ -54,10 +54,10 @@ export function Sidebar() {
             type="button"
             onClick={() => navigate('/challenges')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/challenges') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+              isActive('/challenges') ? 'bg-[#243B4A] text-[#1BA9A0] font-bold' : 'text-white font-medium hover:bg-[#243B4A]'
             }`}
           >
-            <Trophy size={28} className="text-gray-900" />
+            <Trophy size={28} className={isActive('/challenges') ? 'text-[#1BA9A0]' : 'text-white'} />
             <span className="text-base">Challenges</span>
           </button>
 
@@ -65,10 +65,10 @@ export function Sidebar() {
           type="button"
           onClick={() => navigate('/logbook')}
           className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-            isActive('/logbook') ? 'bg-gray-100 font-bold' : 'font-medium hover:bg-gray-100'
+            isActive('/logbook') ? 'bg-[#243B4A] text-[#1BA9A0] font-bold' : 'text-white font-medium hover:bg-[#243B4A]'
           }`}
         >
-          <User size={28} className="text-gray-900" />
+          <User size={28} className={isActive('/logbook') ? 'text-[#1BA9A0]' : 'text-white'} />
           <div className="flex flex-col items-start">
             <span>Logbook</span>
           </div>
@@ -78,7 +78,7 @@ export function Sidebar() {
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-blue-700"
+          className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#14B8A6]"
         >
           <Plus size={20} strokeWidth={3} />
           <span>Cast</span>
@@ -91,18 +91,18 @@ export function Sidebar() {
           <button
             type="button"
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-gray-100"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-[#243B4A]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-500 text-sm font-semibold text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#1BA9A0] to-[#14B8A6] text-sm font-semibold text-white">
               {user.email?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="flex-1 text-left">
-              <div className="text-sm font-semibold text-gray-900">
+              <div className="text-sm font-semibold text-white">
                 {user.email?.split('@')[0] || 'User'}
               </div>
-              <div className="text-xs text-gray-600 truncate">{user.email}</div>
+              <div className="text-xs text-gray-400 truncate">{user.email}</div>
             </div>
-            <MoreHorizontal size={20} className="text-gray-600" />
+            <MoreHorizontal size={20} className="text-gray-400" />
           </button>
 
           {/* Profile Menu Dropdown */}
@@ -112,7 +112,7 @@ export function Sidebar() {
                 className="fixed inset-0 z-40" 
                 onClick={() => setShowProfileMenu(false)}
               />
-              <div className="absolute bottom-full left-4 right-4 mb-2 z-50 rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div className="absolute bottom-full left-4 right-4 mb-2 z-50 rounded-xl bg-[#243B4A] shadow-lg ring-1 ring-[#334155]">
                 <div className="p-2">
                   <button
                     type="button"
@@ -120,7 +120,7 @@ export function Sidebar() {
                       navigate('/settings')
                       setShowProfileMenu(false)
                     }}
-                    className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm text-white hover:bg-[#1A2D3D]"
                   >
                     <Settings size={18} />
                     <span>Settings</span>
@@ -131,7 +131,7 @@ export function Sidebar() {
                       await signOut()
                       setShowProfileMenu(false)
                     }}
-                    className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-sm text-red-400 hover:bg-red-900/20"
                   >
                     <LogOut size={18} />
                     <span>Sign out</span>

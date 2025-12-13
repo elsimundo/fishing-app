@@ -36,32 +36,32 @@ export function UpgradeToPremiumCard({
 
   if (isPremium) {
     return (
-      <div className="rounded-xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-6">
+      <div className="rounded-xl border-2 border-amber-500/40 bg-amber-900/30 p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
-            <Crown size={24} className="text-amber-600" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-900/50">
+            <Crown size={24} className="text-amber-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Premium Active</h3>
-            <p className="text-sm text-gray-600">{lakeName}</p>
+            <h3 className="text-lg font-bold text-white">Premium Active</h3>
+            <p className="text-sm text-gray-400">{lakeName}</p>
           </div>
         </div>
 
         <div className="space-y-3 mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Check size={16} className="text-green-600" />
+          <div className="flex items-center gap-2 text-sm text-gray-300">
+            <Check size={16} className="text-emerald-400" />
             Featured placement in search
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Check size={16} className="text-green-600" />
+          <div className="flex items-center gap-2 text-sm text-gray-300">
+            <Check size={16} className="text-emerald-400" />
             Analytics dashboard
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Check size={16} className="text-green-600" />
+          <div className="flex items-center gap-2 text-sm text-gray-300">
+            <Check size={16} className="text-emerald-400" />
             Photo gallery
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Check size={16} className="text-green-600" />
+          <div className="flex items-center gap-2 text-sm text-gray-300">
+            <Check size={16} className="text-emerald-400" />
             Priority support
           </div>
         </div>
@@ -80,7 +80,7 @@ export function UpgradeToPremiumCard({
           type="button"
           onClick={handleManage}
           disabled={manageSubscription.isPending}
-          className="w-full rounded-lg border border-gray-300 bg-white py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] py-2 text-sm font-medium text-gray-300 hover:bg-[#334155] disabled:opacity-50"
         >
           {manageSubscription.isPending ? (
             <Loader2 size={16} className="inline animate-spin mr-2" />
@@ -92,26 +92,26 @@ export function UpgradeToPremiumCard({
   }
 
   return (
-    <div className="rounded-xl border-2 border-gray-200 bg-white p-6">
+    <div className="rounded-xl border-2 border-[#334155] bg-[#243B4A] p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500">
           <Crown size={24} className="text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900">Upgrade to Premium</h3>
-          <p className="text-sm text-gray-600">Unlock all features for {lakeName}</p>
+          <h3 className="text-lg font-bold text-white">Upgrade to Premium</h3>
+          <p className="text-sm text-gray-400">Unlock all features for {lakeName}</p>
         </div>
       </div>
 
       {/* Billing toggle */}
-      <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
+      <div className="flex rounded-lg bg-[#1A2D3D] p-1 mb-6">
         <button
           type="button"
           onClick={() => setBillingInterval('monthly')}
           className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
             billingInterval === 'monthly'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-[#334155] text-white shadow-sm'
+              : 'text-gray-400 hover:text-gray-300'
           }`}
         >
           Monthly
@@ -121,12 +121,12 @@ export function UpgradeToPremiumCard({
           onClick={() => setBillingInterval('yearly')}
           className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
             billingInterval === 'yearly'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-[#334155] text-white shadow-sm'
+              : 'text-gray-400 hover:text-gray-300'
           }`}
         >
           Yearly
-          <span className="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-700">
+          <span className="ml-1 rounded bg-emerald-900/30 border border-emerald-500/40 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
             Save {pricing.yearly.savings}
           </span>
         </button>
@@ -135,7 +135,7 @@ export function UpgradeToPremiumCard({
       {/* Price display */}
       <div className="text-center mb-6">
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-3xl font-bold text-gray-900">
+          <span className="text-3xl font-bold text-white">
             £{billingInterval === 'yearly' ? pricing.yearly.amount : pricing.monthly.amount}
           </span>
           <span className="text-gray-500">
@@ -151,28 +151,28 @@ export function UpgradeToPremiumCard({
 
       {/* Features */}
       <div className="space-y-3 mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <Check size={16} className="text-green-600" />
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <Check size={16} className="text-emerald-400" />
           Featured placement in search results
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <Check size={16} className="text-green-600" />
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <Check size={16} className="text-emerald-400" />
           Full analytics dashboard
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <Check size={16} className="text-green-600" />
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <Check size={16} className="text-emerald-400" />
           Photo gallery (up to 20 photos)
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <Check size={16} className="text-green-600" />
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <Check size={16} className="text-emerald-400" />
           Booking link integration
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <Check size={16} className="text-green-600" />
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <Check size={16} className="text-emerald-400" />
           Remove competitor ads
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <Check size={16} className="text-green-600" />
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <Check size={16} className="text-emerald-400" />
           Priority support
         </div>
       </div>
@@ -196,7 +196,7 @@ export function UpgradeToPremiumCard({
         )}
       </button>
 
-      <p className="text-center text-[10px] text-gray-400 mt-3">
+      <p className="text-center text-[10px] text-gray-500 mt-3">
         Cancel anytime. Secure payment via Stripe.
       </p>
     </div>

@@ -43,7 +43,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
 
   if (!lat || !lng) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3 text-gray-400">
           <span className="text-xl">🏞️</span>
           <span className="text-sm font-medium">Fishing Lakes</span>
@@ -55,14 +55,14 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-            <Loader2 size={20} className="animate-spin text-sky-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-900/30">
+            <Loader2 size={20} className="animate-spin text-sky-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Finding Lakes</p>
-            <p className="text-xs text-gray-500">Searching nearby venues...</p>
+            <p className="text-sm font-semibold text-white">Finding Lakes</p>
+            <p className="text-xs text-gray-400">Searching nearby venues...</p>
           </div>
         </div>
       </div>
@@ -71,7 +71,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
 
   if (error || !lakes) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
         <div className="flex items-center gap-3 text-gray-400">
           <span className="text-xl">🏞️</span>
           <span className="text-sm font-medium">Fishing Lakes</span>
@@ -84,20 +84,20 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
   const hasLakes = lakes.length > 0
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A]">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[#1A2D3D]"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-900/30">
             <span className="text-xl">🏞️</span>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Fishing Lakes</p>
+            <p className="text-sm font-semibold text-white">Fishing Lakes</p>
             {hasLakes ? (
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-400">
                 {lakes.length} venue{lakes.length !== 1 ? 's' : ''} nearby
               </p>
             ) : (
@@ -110,7 +110,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
           {hasLakes && lakes[0] && !expanded && (
             <div className="text-right">
               <p className="text-xs text-gray-500">Nearest</p>
-              <p className="max-w-[120px] truncate text-sm font-semibold text-gray-900">
+              <p className="max-w-[120px] truncate text-sm font-semibold text-white">
                 {lakes[0].name}
               </p>
             </div>
@@ -125,11 +125,11 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t border-gray-100 px-4 pb-4">
+        <div className="border-t border-[#334155] px-4 pb-4">
           {!hasLakes ? (
-            <div className="mt-3 rounded-lg bg-gray-50 p-4 text-center">
+            <div className="mt-3 rounded-lg bg-[#1A2D3D] p-4 text-center">
               <span className="text-3xl">🏞️</span>
-              <p className="mt-2 text-sm font-medium text-gray-600">No lakes found nearby</p>
+              <p className="mt-2 text-sm font-medium text-gray-300">No lakes found nearby</p>
               <p className="mt-1 text-xs text-gray-500">
                 Try searching a different area
               </p>
@@ -179,7 +179,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
                 <button
                   type="button"
                   onClick={() => setShowAll(!showAll)}
-                  className="w-full rounded-lg bg-gray-100 py-2 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                  className="w-full rounded-lg bg-[#1A2D3D] py-2 text-xs font-medium text-gray-300 hover:bg-[#0D4B4E]"
                 >
                   {showAll ? 'Show less' : `Show ${lakes.length - 5} more`}
                 </button>
@@ -248,13 +248,13 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
 
   return (
     <div
-      className="cursor-pointer rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-gray-100"
+      className="cursor-pointer rounded-lg border border-[#334155] bg-[#1A2D3D] p-3 hover:bg-[#0D4B4E]"
       onClick={handleClick}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-1.5">
-            <h4 className="text-sm font-semibold text-gray-900">{lake.name}</h4>
+            <h4 className="text-sm font-semibold text-white">{lake.name}</h4>
             {/* Ownership badges */}
             {lake.is_premium && (
               <span title="Premium Venue">
@@ -269,7 +269,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-2">
             {lake.lake_type && (
-              <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+              <span className="rounded bg-blue-900/30 px-1.5 py-0.5 text-[10px] font-medium text-blue-400">
                 {LAKE_TYPE_LABELS[lake.lake_type] || lake.lake_type}
               </span>
             )}
@@ -283,7 +283,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
         </div>
         <div className="flex items-center gap-2">
           {lake.distance !== undefined && (
-            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+            <span className="rounded-full bg-sky-900/30 px-2 py-0.5 text-xs font-medium text-sky-400">
               {lake.distance.toFixed(1)} km
             </span>
           )}
@@ -297,8 +297,8 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
               disabled={isSaving}
               className={`rounded-full p-1.5 transition-colors ${
                 isSaved 
-                  ? 'text-pink-500 hover:bg-pink-100' 
-                  : 'text-gray-300 hover:bg-gray-200 hover:text-pink-400'
+                  ? 'text-pink-500 hover:bg-pink-900/30' 
+                  : 'text-gray-500 hover:bg-[#334155] hover:text-pink-400'
               }`}
               title={isSaved ? 'Remove from watchlist' : 'Add to watchlist'}
             >
@@ -310,7 +310,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
 
       {/* Stats */}
       {(lake.total_sessions || lake.total_catches) && (
-        <div className="mt-2 flex gap-3 text-[10px] text-gray-600">
+        <div className="mt-2 flex gap-3 text-[10px] text-gray-400">
           {lake.total_sessions ? (
             <span>📊 {lake.total_sessions} sessions</span>
           ) : null}
@@ -326,7 +326,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
           {lake.species.slice(0, 4).map((species) => (
             <span
               key={species}
-              className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700"
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-900/30 px-2 py-0.5 text-[10px] font-medium text-emerald-400"
             >
               <Fish size={10} />
               {species}
@@ -359,7 +359,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
 
       {/* Pricing - only show for claimed lakes */}
       {lake.claimed_by && lake.day_ticket_price && (
-        <p className="mt-2 text-xs font-medium text-gray-700">
+        <p className="mt-2 text-xs font-medium text-gray-300">
           Day ticket: £{lake.day_ticket_price.toFixed(2)}
         </p>
       )}
@@ -372,7 +372,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
             href={lake.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block text-xs font-medium text-blue-600 hover:text-blue-700"
+            className="inline-block text-xs font-medium text-[#1BA9A0] hover:text-[#14B8A6]"
             onClick={(e) => e.stopPropagation()}
           >
             Visit website →
@@ -387,7 +387,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
               e.stopPropagation()
               onClaim()
             }}
-            className="inline-flex items-center rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-primary/90"
+            className="inline-flex items-center rounded-full bg-[#1BA9A0] px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-[#14B8A6]"
           >
             Claim this venue
           </button>
@@ -398,7 +398,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
           <Link
             to={`/lakes/${lake.slug || lake.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="inline-block text-xs font-medium text-gray-600 hover:text-gray-900"
+            className="inline-block text-xs font-medium text-gray-400 hover:text-white"
           >
             Details
           </Link>
@@ -413,7 +413,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
               onHide()
             }}
             disabled={isHiding}
-            className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-[10px] font-semibold text-red-700 hover:bg-red-200 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-red-900/30 px-2.5 py-1 text-[10px] font-semibold text-red-400 hover:bg-red-900/50 disabled:opacity-50"
             title="Admin: Hide this lake from Explore (soft-delete)"
           >
             <EyeOff size={10} />
@@ -429,7 +429,7 @@ function LakeItem({ lake, canClaim, onClaim, onSelect, isSaved, onToggleSave, is
               e.stopPropagation()
               onAssignOwner()
             }}
-            className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-[10px] font-semibold text-purple-700 hover:bg-purple-200"
+            className="inline-flex items-center gap-1 rounded-full bg-purple-900/30 px-2.5 py-1 text-[10px] font-semibold text-purple-400 hover:bg-purple-900/50"
             title="Admin: Assign an owner to this lake"
           >
             <UserPlus size={10} />
@@ -513,16 +513,16 @@ function AssignOwnerModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Assign Owner</h2>
-            <p className="text-sm text-gray-500">{lakeName}</p>
+            <h2 className="text-lg font-bold text-white">Assign Owner</h2>
+            <p className="text-sm text-gray-400">{lakeName}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
           >
             <X size={20} />
           </button>
@@ -530,7 +530,7 @@ function AssignOwnerModal({
 
         {/* Search */}
         <div className="mb-4">
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-gray-400">
             Search by username
           </label>
           <div className="flex gap-2">
@@ -540,13 +540,13 @@ function AssignOwnerModal({
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Enter username..."
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="flex-1 rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
             />
             <button
               type="button"
               onClick={handleSearch}
               disabled={isSearching || !searchTerm.trim()}
-              className="rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
+              className="rounded-lg bg-[#1BA9A0] px-4 py-2 text-sm font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#1BA9A0]/60"
             >
               {isSearching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             </button>
@@ -555,7 +555,7 @@ function AssignOwnerModal({
 
         {/* Results */}
         {searchResults.length > 0 && (
-          <div className="mb-4 max-h-48 overflow-y-auto rounded-lg border border-gray-200">
+          <div className="mb-4 max-h-48 overflow-y-auto rounded-lg border border-[#334155]">
             {searchResults.map((user) => (
               <button
                 key={user.id}
@@ -563,19 +563,19 @@ function AssignOwnerModal({
                 onClick={() => setSelectedUser({ id: user.id, username: user.username })}
                 className={`flex w-full items-center gap-3 p-3 text-left transition-colors ${
                   selectedUser?.id === user.id
-                    ? 'bg-navy-50 border-l-4 border-navy-800'
-                    : 'hover:bg-gray-50 border-l-4 border-transparent'
+                    ? 'bg-[#1BA9A0]/20 border-l-4 border-[#1BA9A0]'
+                    : 'hover:bg-[#1A2D3D] border-l-4 border-transparent'
                 }`}
               >
                 {user.avatar_url ? (
                   <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#334155] text-xs font-medium text-gray-300">
                     {user.username?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-medium text-gray-900">@{user.username}</p>
+                  <p className="text-sm font-medium text-white">@{user.username}</p>
                   {user.display_name && (
                     <p className="text-xs text-gray-500">{user.display_name}</p>
                   )}
@@ -591,8 +591,8 @@ function AssignOwnerModal({
 
         {/* Selected user confirmation */}
         {selectedUser && (
-          <div className="mb-4 rounded-lg bg-green-50 p-3">
-            <p className="text-sm text-green-800">
+          <div className="mb-4 rounded-lg bg-emerald-900/30 border border-emerald-500/40 p-3">
+            <p className="text-sm text-emerald-400">
               <span className="font-medium">@{selectedUser.username}</span> will be assigned as owner of this lake.
             </p>
           </div>
@@ -603,7 +603,7 @@ function AssignOwnerModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="flex-1 rounded-lg border border-[#334155] px-4 py-2 text-sm font-medium text-gray-300 hover:bg-[#1A2D3D]"
           >
             Cancel
           </button>
@@ -611,7 +611,7 @@ function AssignOwnerModal({
             type="button"
             onClick={handleAssign}
             disabled={!selectedUser || isAssigning}
-            className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:bg-primary/60"
+            className="flex-1 rounded-lg bg-[#1BA9A0] px-4 py-2 text-sm font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#1BA9A0]/60"
           >
             {isAssigning ? 'Assigning...' : 'Assign Owner'}
           </button>

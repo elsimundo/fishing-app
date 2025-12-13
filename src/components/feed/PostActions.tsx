@@ -69,16 +69,16 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
         type="button"
         onClick={handleLike}
         disabled={isPending}
-        className="flex items-center gap-1.5 text-gray-600 transition-colors hover:text-red-600 disabled:opacity-50"
+        className="flex items-center gap-1.5 text-gray-400 transition-colors hover:text-red-400 disabled:opacity-50"
       >
-        <Heart size={20} className={effectiveIsLiked ? 'fill-red-600 text-red-600' : ''} />
+        <Heart size={20} className={effectiveIsLiked ? 'fill-red-500 text-red-500' : ''} />
         <span className="text-sm font-medium">{effectiveLikeCount}</span>
       </button>
 
       <button
         type="button"
         onClick={handleOpenComments}
-        className="flex items-center gap-1.5 text-gray-600 transition-colors hover:text-navy-800"
+        className="flex items-center gap-1.5 text-gray-400 transition-colors hover:text-[#1BA9A0]"
       >
         <MessageCircle size={20} />
         <span className="text-sm font-medium">{effectiveCommentCount}</span>
@@ -87,7 +87,7 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
       <button
         type="button"
         onClick={handleOpenRepost}
-        className="flex items-center gap-1.5 text-gray-600 transition-colors hover:text-navy-800"
+        className="flex items-center gap-1.5 text-gray-400 transition-colors hover:text-[#1BA9A0]"
       >
         <Send size={20} />
       </button>

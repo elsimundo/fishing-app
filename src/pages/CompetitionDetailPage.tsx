@@ -143,23 +143,23 @@ export default function CompetitionDetailPage() {
     : 'from-slate-500 to-slate-600'
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-24">
+    <main className="min-h-screen bg-[#1A2D3D] pb-24">
       {/* Header - matches SessionDetailPage */}
-      <header className="sticky top-0 z-20 border-b border-gray-200 bg-white px-4 py-3">
+      <header className="sticky top-0 z-20 border-b border-[#334155] bg-[#243B4A] px-4 py-3">
         <div className="relative mx-auto flex max-w-2xl items-center justify-between">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+            className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
           >
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-sm font-bold text-gray-900">Competition</h1>
+          <h1 className="text-sm font-bold text-white">Competition</h1>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleShare}
-              className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+              className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
             >
               <Share2 size={20} />
             </button>
@@ -167,7 +167,7 @@ export default function CompetitionDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowActions(!showActions)}
-                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
               >
                 <MoreHorizontal size={20} />
               </button>
@@ -176,11 +176,11 @@ export default function CompetitionDetailPage() {
 
           {/* Actions dropdown - Organizer */}
           {showActions && isOrganizer && (
-            <div className="absolute right-0 top-12 z-30 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-black/5">
+            <div className="absolute right-0 top-12 z-30 w-48 rounded-xl bg-[#243B4A] border border-[#334155] py-2 shadow-lg">
           <button
             type="button"
             onClick={() => { setShowInviteModal(true); setShowActions(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
           >
             <UserPlus size={16} />
             Invite Angler
@@ -188,7 +188,7 @@ export default function CompetitionDetailPage() {
           <button
             type="button"
             onClick={() => { handleEdit(); setShowActions(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
           >
             <Edit2 size={16} />
             Edit Competition
@@ -196,7 +196,7 @@ export default function CompetitionDetailPage() {
           <button
             type="button"
             onClick={() => { setShowAdjustTime(true); setShowActions(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
           >
             <Clock size={16} />
             Adjust Time
@@ -205,17 +205,17 @@ export default function CompetitionDetailPage() {
             <button
               type="button"
               onClick={() => { setShowDeclareWinner(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-amber-600 hover:bg-amber-50"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-amber-400 hover:bg-amber-900/30"
             >
               <Trophy size={16} />
               Declare Winner
             </button>
           )}
-          <div className="my-2 border-t border-gray-100" />
+          <div className="my-2 border-t border-[#334155]" />
           <button
             type="button"
             onClick={() => { setShowDeleteConfirm(true); setShowActions(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-900/30"
           >
               <Trash2 size={16} />
               Delete Competition
@@ -279,10 +279,10 @@ export default function CompetitionDetailPage() {
         </div>
 
         {/* Info section - matches SessionDetailPage */}
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
-              <h1 className="text-lg font-bold text-gray-900">{competition.title}</h1>
+              <h1 className="text-lg font-bold text-white">{competition.title}</h1>
               <p className="mt-1 text-xs text-gray-500">{dateLabel}</p>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                 <span className="inline-flex items-center gap-1">
@@ -293,24 +293,24 @@ export default function CompetitionDetailPage() {
             </div>
             <div className="text-right">
               <span className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold ${
-                isOrganizer ? 'bg-navy-800 text-white' : isParticipant ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                isOrganizer ? 'bg-[#1BA9A0] text-white' : isParticipant ? 'bg-emerald-900/30 text-emerald-400' : 'bg-[#334155] text-gray-400'
               }`}>
                 {isOrganizer ? 'Organizer' : isParticipant ? 'Joined' : 'Not Joined'}
               </span>
             </div>
           </div>
           {competition.description && (
-            <p className="mt-3 text-sm text-slate-700">{competition.description}</p>
+            <p className="mt-3 text-sm text-gray-400">{competition.description}</p>
           )}
         </div>
 
         {/* Prize Banner */}
         {competition.prize && (
-          <div className="mt-4 flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 p-4">
-            <Gift size={24} className="text-amber-500 flex-shrink-0" />
+          <div className="mt-4 flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border-2 border-amber-500/40 p-4">
+            <Gift size={24} className="text-amber-400 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-[10px] font-medium text-amber-600 uppercase tracking-wide">Prize</p>
-              <p className="text-base font-bold text-amber-800">{competition.prize}</p>
+              <p className="text-[10px] font-medium text-amber-400 uppercase tracking-wide">Prize</p>
+              <p className="text-base font-bold text-amber-300">{competition.prize}</p>
             </div>
             <Trophy size={28} className="text-amber-400 flex-shrink-0" />
           </div>
@@ -338,8 +338,8 @@ export default function CompetitionDetailPage() {
           </button>
         )}
         {isUpcoming && (
-          <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-center">
-            <p className="text-sm font-medium text-blue-800">
+          <div className="mt-4 rounded-2xl bg-blue-900/30 border border-blue-500/40 p-4 text-center">
+            <p className="text-sm font-medium text-blue-400">
               Competition starts on {format(new Date(competition.starts_at), 'd MMM yyyy')}
             </p>
           </div>
@@ -347,14 +347,14 @@ export default function CompetitionDetailPage() {
 
         {/* Participants */}
         {participants && participants.length > 0 && (
-          <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+          <div className="mt-4 rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-900">Participants ({participants.length})</h2>
+              <h2 className="text-sm font-semibold text-white">Participants ({participants.length})</h2>
               {isOrganizer && (
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(true)}
-                  className="text-xs font-medium text-navy-800 hover:underline"
+                  className="text-xs font-medium text-[#1BA9A0] hover:underline"
                 >
                   + Invite
                 </button>
@@ -370,7 +370,7 @@ export default function CompetitionDetailPage() {
 
         {/* Map - if linked session has location */}
         {linkedSession?.latitude && linkedSession?.longitude && (
-          <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="mt-4 overflow-hidden rounded-2xl bg-[#243B4A] border border-[#334155] shadow-sm">
             <div className="h-48 w-full">
               <Map 
                 catches={linkedSession.catches || []} 
@@ -383,14 +383,14 @@ export default function CompetitionDetailPage() {
         )}
 
         {/* Tabs */}
-        <div className="mt-4 sticky top-[57px] z-10 rounded-t-2xl border-b border-gray-200 bg-white">
+        <div className="mt-4 sticky top-[57px] z-10 rounded-t-2xl border-b border-[#334155] bg-[#243B4A]">
           <div className="flex">
             <button
               onClick={() => setActiveTab('leaderboard')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'leaderboard'
-                  ? 'border-b-2 border-navy-800 text-navy-800'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               <Trophy size={14} className="inline mr-1" />
@@ -400,8 +400,8 @@ export default function CompetitionDetailPage() {
               onClick={() => setActiveTab('catches')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'catches'
-                  ? 'border-b-2 border-navy-800 text-navy-800'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               <Fish size={14} className="inline mr-1" />
@@ -411,8 +411,8 @@ export default function CompetitionDetailPage() {
               onClick={() => setActiveTab('my-catches')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'my-catches'
-                  ? 'border-b-2 border-navy-800 text-navy-800'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               My Catches
@@ -421,8 +421,8 @@ export default function CompetitionDetailPage() {
               onClick={() => setActiveTab('timeline')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'timeline'
-                  ? 'border-b-2 border-navy-800 text-navy-800'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               <MessageSquare size={14} className="inline mr-1" />
@@ -433,8 +433,8 @@ export default function CompetitionDetailPage() {
                 onClick={() => setActiveTab('pending')}
                 className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                   activeTab === 'pending'
-                    ? 'border-b-2 border-navy-800 text-navy-800'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
+                    : 'text-gray-500 hover:text-gray-300'
                 }`}
               >
                 Pending
@@ -444,7 +444,7 @@ export default function CompetitionDetailPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="rounded-b-2xl bg-white p-4 shadow-sm">
+        <div className="rounded-b-2xl bg-[#243B4A] border border-t-0 border-[#334155] p-4 shadow-sm">
           {activeTab === 'leaderboard' && (
             <>
               <WinnersDisplay competitionId={competition.id} isOrganizer={isOrganizer} />
@@ -466,7 +466,7 @@ export default function CompetitionDetailPage() {
                 ))
               ) : (
                 <div className="py-6 text-center">
-                  <Fish size={32} className="mx-auto text-gray-300" />
+                  <Fish size={32} className="mx-auto text-gray-500" />
                   <p className="mt-2 text-sm text-gray-500">No catches logged yet</p>
                 </div>
               )}
@@ -483,7 +483,7 @@ export default function CompetitionDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowAddPostModal(true)}
-                    className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                    className="flex items-center gap-1 rounded-lg bg-[#1A2D3D] px-3 py-2 text-xs font-medium text-gray-300 hover:bg-[#334155]"
                   >
                     <MessageSquare size={14} />
                     Add post
@@ -498,7 +498,7 @@ export default function CompetitionDetailPage() {
                 </div>
               ) : (
                 <div className="relative">
-                  <div className="absolute left-3 top-2 bottom-2 w-px bg-gray-200" />
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-[#334155]" />
                   <div className="space-y-4">
                     {/* Merge catches and posts, sort by time */}
                     {[

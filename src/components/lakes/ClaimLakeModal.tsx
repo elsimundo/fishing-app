@@ -211,22 +211,22 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-lg rounded-xl bg-white shadow-xl">
+      <div className="relative w-full max-w-lg rounded-xl bg-[#243B4A] border border-[#334155] shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Claim {lake.name}</h2>
+            <h2 className="text-lg font-semibold text-white">Claim {lake.name}</h2>
             <p className="text-xs text-gray-500">Step {step} of 4</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100">
-            <X size={20} className="text-gray-500" />
+          <button onClick={onClose} className="rounded-full p-1 hover:bg-[#334155]">
+            <X size={20} className="text-gray-400" />
           </button>
         </div>
 
         {/* Progress bar */}
-        <div className="h-1 bg-gray-100">
+        <div className="h-1 bg-[#1A2D3D]">
           <div
-            className="h-full bg-primary transition-all duration-300"
+            className="h-full bg-[#1BA9A0] transition-all duration-300"
             style={{ width: `${(step / 4) * 100}%` }}
           />
         </div>
@@ -235,16 +235,16 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
         <div className="max-h-[60vh] overflow-y-auto px-5 py-4">
           {step === 1 && (
             <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">Your Role & Contact</h3>
+              <h3 className="font-medium text-white">Your Role & Contact</h3>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-gray-400">
                   Your role at this venue *
                 </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as LakeClaimRole)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                 >
                   <option value="">Select role...</option>
                   {ROLE_OPTIONS.map((opt) => (
@@ -256,7 +256,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-gray-400">
                   Business name (if different)
                 </label>
                 <input
@@ -264,40 +264,40 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder={lake.name}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Website</label>
+                <label className="mb-1 block text-sm font-medium text-gray-400">Website</label>
                 <input
                   type="url"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   placeholder="https://..."
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Phone</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-400">Phone</label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="07..."
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Email *</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-400">Email *</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   />
                 </div>
               </div>
@@ -306,19 +306,19 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
 
           {step === 2 && (
             <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">Proof of Ownership</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="font-medium text-white">Proof of Ownership</h3>
+              <p className="text-sm text-gray-400">
                 Help us verify you're authorised to manage this venue. This speeds up approval.
               </p>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-gray-400">
                   Document type *
                 </label>
                 <select
                   value={proofType}
                   onChange={(e) => setProofType(e.target.value as LakeClaimProofType)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                 >
                   <option value="">Select type...</option>
                   {PROOF_TYPE_OPTIONS.map((opt) => (
@@ -330,7 +330,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-gray-400">
                   Upload document (optional but recommended)
                 </label>
                 <input
@@ -341,16 +341,16 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                   className="hidden"
                 />
                 {proofUrl ? (
-                  <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
-                    <CheckCircle size={16} className="text-green-600" />
-                    <span className="flex-1 truncate text-sm text-green-700">{proofFileName}</span>
+                  <div className="flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-900/30 px-3 py-2">
+                    <CheckCircle size={16} className="text-emerald-400" />
+                    <span className="flex-1 truncate text-sm text-emerald-300">{proofFileName}</span>
                     <button
                       type="button"
                       onClick={() => {
                         setProofUrl('')
                         setProofFileName('')
                       }}
-                      className="text-xs text-gray-500 hover:text-gray-700"
+                      className="text-xs text-gray-400 hover:text-white"
                     >
                       Remove
                     </button>
@@ -360,7 +360,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-600"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#334155] bg-[#1A2D3D] px-4 py-6 text-sm text-gray-400 hover:border-[#1BA9A0]/50 hover:text-gray-300"
                   >
                     {isUploading ? (
                       <>
@@ -375,25 +375,25 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                     )}
                   </button>
                 )}
-                <p className="mt-1 text-xs text-gray-400">Max 10MB. We keep this private.</p>
+                <p className="mt-1 text-xs text-gray-500">Max 10MB. We keep this private.</p>
               </div>
             </div>
           )}
 
           {step === 3 && (
             <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">Venue Details</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="font-medium text-white">Venue Details</h3>
+              <p className="text-sm text-gray-400">
                 Help anglers find your venue. You can update these later.
               </p>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Water type</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-400">Water type</label>
                   <select
                     value={waterType}
                     onChange={(e) => setWaterType(e.target.value as LakeWaterType)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   >
                     <option value="">Select...</option>
                     {WATER_TYPE_OPTIONS.map((opt) => (
@@ -404,11 +404,11 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Venue type</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-400">Venue type</label>
                   <select
                     value={lakeType}
                     onChange={(e) => setLakeType(e.target.value as LakeType)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   >
                     <option value="">Select...</option>
                     {LAKE_TYPE_OPTIONS.map((opt) => (
@@ -422,7 +422,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                  <label className="mb-1 block text-sm font-medium text-gray-400">
                     Day ticket (£)
                   </label>
                   <input
@@ -432,11 +432,11 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                     value={dayTicketPrice}
                     onChange={(e) => setDayTicketPrice(e.target.value)}
                     placeholder="10.00"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                  <label className="mb-1 block text-sm font-medium text-gray-400">
                     Night ticket (£)
                   </label>
                   <input
@@ -446,13 +446,13 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                     value={nightTicketPrice}
                     onChange={(e) => setNightTicketPrice(e.target.value)}
                     placeholder="20.00"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">Facilities</label>
+                <label className="mb-2 block text-sm font-medium text-gray-400">Facilities</label>
                 <div className="flex flex-wrap gap-2">
                   {FACILITY_OPTIONS.map((facility) => (
                     <button
@@ -461,8 +461,8 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                       onClick={() => toggleFacility(facility)}
                       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                         facilities.includes(facility)
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-[#1BA9A0] text-white'
+                          : 'bg-[#1A2D3D] text-gray-400 hover:bg-[#334155]'
                       }`}
                     >
                       {facility}
@@ -472,7 +472,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-gray-400">
                   Description
                 </label>
                 <textarea
@@ -480,7 +480,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="Tell anglers about your venue..."
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                 />
               </div>
             </div>
@@ -488,26 +488,26 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
 
           {step === 4 && (
             <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">Almost Done!</h3>
+              <h3 className="font-medium text-white">Almost Done!</h3>
 
-              <div className="rounded-lg bg-amber-50 p-4">
-                <h4 className="text-sm font-medium text-amber-800">🌟 Early Adopter Offer</h4>
-                <p className="mt-1 text-sm text-amber-700">
+              <div className="rounded-lg bg-amber-900/30 border border-amber-500/40 p-4">
+                <h4 className="text-sm font-medium text-amber-300">🌟 Early Adopter Offer</h4>
+                <p className="mt-1 text-sm text-amber-400">
                   Claim your venue for <strong>FREE</strong> during our launch period (normally £29).
                   You'll also get a "Founding Venue" badge displayed permanently.
                 </p>
               </div>
 
-              <div className="rounded-lg border border-gray-200 p-4">
+              <div className="rounded-lg border border-[#334155] bg-[#1A2D3D] p-4">
                 <label className="flex cursor-pointer items-start gap-3">
                   <input
                     type="checkbox"
                     checked={interestedInPremium}
                     onChange={(e) => setInterestedInPremium(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    className="mt-0.5 h-4 w-4 rounded border-[#334155] text-[#1BA9A0] focus:ring-[#1BA9A0]"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-white">
                       I'm interested in Premium features
                     </span>
                     <p className="text-xs text-gray-500">
@@ -518,16 +518,16 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                 </label>
               </div>
 
-              <div className="rounded-lg border border-gray-200 p-4">
+              <div className="rounded-lg border border-[#334155] bg-[#1A2D3D] p-4">
                 <label className="flex cursor-pointer items-start gap-3">
                   <input
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    className="mt-0.5 h-4 w-4 rounded border-[#334155] text-[#1BA9A0] focus:ring-[#1BA9A0]"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-white">
                       I confirm I'm authorised to manage this venue *
                     </span>
                     <p className="text-xs text-gray-500">
@@ -542,11 +542,11 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-gray-200 px-5 py-4">
+        <div className="flex items-center justify-between border-t border-[#334155] px-5 py-4">
           <button
             type="button"
             onClick={step === 1 ? onClose : prevStep}
-            className="flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+            className="flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium text-gray-400 hover:bg-[#334155]"
           >
             <ChevronLeft size={16} />
             {step === 1 ? 'Cancel' : 'Back'}
@@ -561,7 +561,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
                 (step === 2 && !canProceedStep2) ||
                 (step === 3 && !canProceedStep3)
               }
-              className="flex items-center gap-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+              className="flex items-center gap-1 rounded-lg bg-[#1BA9A0] px-4 py-2 text-sm font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
             >
               Next
               <ChevronRight size={16} />
@@ -571,7 +571,7 @@ export function ClaimLakeModal({ lake, userId, onClose, onSuccess }: ClaimLakeMo
               type="button"
               onClick={handleSubmit}
               disabled={!canSubmit || isSubmitting}
-              className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-[#1BA9A0] px-5 py-2 text-sm font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
             >
               {isSubmitting ? (
                 <>

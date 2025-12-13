@@ -30,7 +30,7 @@ export function UserSearchResults({ query }: UserSearchResultsProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-navy-800" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
       </div>
     )
   }
@@ -39,15 +39,15 @@ export function UserSearchResults({ query }: UserSearchResultsProps) {
     return (
       <div className="px-5 py-12 text-center">
         <div className="mb-3 text-5xl">🔍</div>
-        <p className="mb-1 text-base font-semibold text-gray-900">No anglers found</p>
-        <p className="text-sm text-gray-600">Try searching for a different username</p>
+        <p className="mb-1 text-base font-semibold text-white">No anglers found</p>
+        <p className="text-sm text-gray-400">Try searching for a different username</p>
       </div>
     )
   }
 
   return (
     <div className="px-5 py-6">
-      <p className="mb-4 text-sm text-gray-600">{users.length} anglers found</p>
+      <p className="mb-4 text-sm text-gray-400">{users.length} anglers found</p>
       <div className="space-y-3">
         {users.map((u: any) => (
           <UserCard key={u.id} user={u} />

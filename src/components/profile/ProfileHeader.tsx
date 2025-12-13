@@ -7,7 +7,7 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   return (
-    <div className="bg-white px-5 pb-4 pt-6">
+    <div className="bg-[#243B4A] px-5 pb-4 pt-6">
       <div className="mb-4 flex items-center gap-4">
         {profile.avatar_url ? (
           <img
@@ -22,15 +22,15 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
         )}
 
         <div>
-          <h1 className="text-xl font-bold text-gray-900">
+          <h1 className="text-xl font-bold text-white">
             {profile.full_name || profile.username || 'Unnamed User'}
           </h1>
-          <p className="text-sm text-gray-600">@{profile.username || 'user'}</p>
+          <p className="text-sm text-gray-400">@{profile.username || 'user'}</p>
         </div>
       </div>
 
       {profile.bio ? (
-        <p className="text-[15px] leading-relaxed text-gray-700">{profile.bio}</p>
+        <p className="text-[15px] leading-relaxed text-gray-300">{profile.bio}</p>
       ) : null}
     </div>
   )

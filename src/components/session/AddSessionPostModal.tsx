@@ -94,17 +94,17 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center">
-      <div className="w-full max-w-lg rounded-t-2xl bg-white sm:rounded-2xl">
+      <div className="w-full max-w-lg rounded-t-2xl bg-[#243B4A] border border-[#334155] sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-          <h2 className="text-lg font-semibold text-gray-900">Add to session</h2>
+        <div className="flex items-center justify-between border-b border-[#334155] px-4 py-3">
+          <h2 className="text-lg font-semibold text-white">Add to session</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1 hover:bg-gray-100"
+            className="rounded-full p-1 hover:bg-[#334155]"
             disabled={uploading || isPending}
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-gray-400" />
           </button>
         </div>
 
@@ -112,7 +112,7 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
         <form onSubmit={handleSubmit} className="p-4">
           {!allowPosts && !allowComments ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-gray-600">Posts and comments are disabled for this session.</p>
+              <p className="text-sm text-gray-400">Posts and comments are disabled for this session.</p>
               <p className="mt-1 text-xs text-gray-500">The session owner can enable them in session settings.</p>
             </div>
           ) : (
@@ -124,7 +124,7 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="What's happening? Add a comment or update..."
-                    className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                    className="w-full resize-none rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                     rows={4}
                     disabled={uploading || isPending}
                   />
@@ -154,7 +154,7 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
               {/* Actions */}
               <div className="flex items-center justify-between">
                 {allowPosts && (
-                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm font-medium text-gray-300 hover:bg-[#334155]">
                     <ImageIcon size={18} />
                     <span>Add photo</span>
                     <input
@@ -170,7 +170,7 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
                 <button
                   type="submit"
                   disabled={uploading || isPending || (!caption.trim() && !photoFile)}
-                  className="flex items-center gap-2 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+                  className="flex items-center gap-2 rounded-lg bg-[#1BA9A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
                 >
                   {uploading || isPending ? (
                     <>

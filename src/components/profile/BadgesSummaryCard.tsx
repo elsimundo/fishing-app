@@ -15,10 +15,10 @@ export function BadgesSummaryCard({
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded-xl bg-gradient-to-br from-navy-900 to-blue-600 p-3 text-xs text-white text-left transition-all hover:from-navy-800 hover:to-blue-500 hover:shadow-lg">
+      className="w-full rounded-xl bg-gradient-to-br from-[#0D4B4E] to-[#1BA9A0] p-3 text-xs text-white text-left transition-all hover:from-[#1A2D3D] hover:to-[#14B8A6] hover:shadow-lg border border-[#334155]">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-[13px] font-semibold">🏆 Badges</p>
-        <p className="text-[11px] text-blue-100">
+        <p className="text-[11px] text-white/80">
           {completedChallenges.length}/{totalBadges} earned
         </p>
       </div>
@@ -35,7 +35,7 @@ export function BadgesSummaryCard({
           </div>
         ))}
         {completedChallenges.length === 0 && (
-          <p className="text-[11px] text-blue-100">
+          <p className="text-[11px] text-white/80">
             Start logging catches and sessions to earn your first badge.
           </p>
         )}
