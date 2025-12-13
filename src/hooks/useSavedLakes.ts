@@ -39,7 +39,9 @@ export function useSavedLakes() {
             is_premium,
             claimed_by,
             day_ticket_price,
-            facilities
+            has_parking,
+            has_toilets,
+            has_cafe
           )
         `)
         .eq('user_id', user.id)

@@ -59,8 +59,15 @@ export async function findNearestWorldTidesStation(
     return null
   }
 
+  // Log all available stations for debugging
+  console.log('[WorldTides] Available stations:')
+  data.stations.slice(0, 5).forEach((s: WorldTidesStation, i: number) => {
+    console.log(`  ${i + 1}. ${s.name}`)
+  })
+
   // API returns stations sorted by distance
   const nearest = data.stations[0] as WorldTidesStation
+  console.log(`[WorldTides] Selected: ${nearest.name}`)
 
   return {
     id: nearest.id,
@@ -95,6 +102,7 @@ export async function getWorldTidesPredictions(
     lon: lng.toString(),
     date: today,
     days: days.toString(),
+    datum: 'LAT', // Lowest Astronomical Tide - gives heights fishermen expect (like tidetimes.org.uk)
     key: apiKey,
   })
 
@@ -151,6 +159,7 @@ export async function getWorldTidesPredictionsForDate(
     lon: lng.toString(),
     date: dateStr,
     days: days.toString(),
+    datum: 'LAT', // Lowest Astronomical Tide - gives heights fishermen expect
     key: apiKey,
   })
 

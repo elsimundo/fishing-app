@@ -75,9 +75,16 @@ export async function findNearestUKStation(
   // Sort by distance
   stationsWithDistance.sort((a, b) => a.distance - b.distance)
 
+  // Log top 5 nearest stations for debugging
+  console.log('[UK-EA] Nearest tide stations:')
+  stationsWithDistance.slice(0, 5).forEach((s, i) => {
+    console.log(`  ${i + 1}. ${s.name} - ${s.distance.toFixed(1)}km`)
+  })
+
   // Only return if within max distance
   const nearest = stationsWithDistance[0]
   if (nearest && nearest.distance <= maxDistanceKm) {
+    console.log(`[UK-EA] Selected: ${nearest.name} (${nearest.distance.toFixed(1)}km away)`)
     return nearest
   }
 

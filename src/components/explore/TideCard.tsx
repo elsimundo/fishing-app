@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Waves, ChevronDown, ChevronUp, Loader2, Calendar } from 'lucide-react'
+import { Waves, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import { useTideData, useTideDataForDate } from '../../hooks/useTideData'
 import { format, formatDistanceToNow, addDays, startOfDay, isSameDay } from 'date-fns'
 
@@ -121,198 +121,160 @@ export function TideCard({ lat, lng }: TideCardProps) {
       {/* Expanded content */}
       {expanded && (
         <div className="border-t border-gray-100 px-4 pb-4">
-          {/* Date Picker - Quick date navigation */}
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setSelectedDate(null)}
-              className={`flex-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                !selectedDate
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Today
-            </button>
-            {[1, 2, 7, 14].map((daysAhead) => {
-              const date = addDays(startOfDay(new Date()), daysAhead)
-              const isSelected = selectedDate && isSameDay(selectedDate, date)
-              const label = daysAhead === 1 ? 'Tomorrow' : daysAhead === 7 ? 'Next Week' : daysAhead === 14 ? '2 Weeks' : format(date, 'EEE')
-              
-              return (
-                <button
-                  key={daysAhead}
-                  type="button"
-                  onClick={() => setSelectedDate(date)}
-                  className={`flex-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors ${
-                    isSelected
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {label}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Custom date picker */}
-          <div className="mt-2 flex items-center gap-2">
-            <Calendar size={14} className="text-gray-400" />
-            <input
-              type="date"
-              value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-              min={format(new Date(), 'yyyy-MM-dd')}
-              max={format(addDays(new Date(), 30), 'yyyy-MM-dd')}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setSelectedDate(new Date(e.target.value))
-                } else {
-                  setSelectedDate(null)
-                }
-              }}
-              className="flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none"
-            />
-            {selectedDate && (
+          {/* Horizontal scrollable date picker - shows next 10 days */}
+          <div className="mt-3 -mx-4 px-4">
+            <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
+              {/* Today button with live indicator */}
               <button
                 type="button"
                 onClick={() => setSelectedDate(null)}
-                className="rounded-lg bg-gray-100 px-2 py-1.5 text-xs text-gray-600 hover:bg-gray-200"
+                className={`flex-shrink-0 flex flex-col items-center rounded-xl px-3 py-2 min-w-[56px] transition-all ${
+                  !selectedDate
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                Back to Live
+                <span className="text-[10px] font-medium uppercase">
+                  {!selectedDate && isLive ? '● Live' : 'Today'}
+                </span>
+                <span className="text-sm font-bold">{format(new Date(), 'd')}</span>
               </button>
-            )}
+              
+              {/* Next 9 days */}
+              {Array.from({ length: 9 }, (_, i) => {
+                const date = addDays(startOfDay(new Date()), i + 1)
+                const isSelected = selectedDate && isSameDay(selectedDate, date)
+                const isWeekend = [0, 6].includes(date.getDay())
+                
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setSelectedDate(date)}
+                    className={`flex-shrink-0 flex flex-col items-center rounded-xl px-3 py-2 min-w-[56px] transition-all ${
+                      isSelected
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : isWeekend
+                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span className="text-[10px] font-medium uppercase">{format(date, 'EEE')}</span>
+                    <span className="text-sm font-bold">{format(date, 'd')}</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
-          {/* Loading state for future data */}
+          {/* Loading state */}
           {isLoadingData && selectedDate && (
-            <div className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-gray-50 p-4">
-              <Loader2 size={16} className="animate-spin text-gray-400" />
-              <span className="text-xs text-gray-500">Loading tides for {format(selectedDate, 'EEE, MMM d')}...</span>
+            <div className="mt-3 flex items-center justify-center gap-2 py-8">
+              <Loader2 size={20} className="animate-spin text-blue-500" />
+              <span className="text-sm text-gray-500">Loading tides...</span>
             </div>
           )}
 
-          {/* Live Reading - only show when viewing today */}
-          {!selectedDate && isLive && gaugeData?.latestReading && (
-            <div className="mt-3 rounded-lg bg-green-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-green-700">
-                Live Reading
-              </p>
-              <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-sm text-green-700">
-                  {formatHeight(gaugeData.latestReading.level)}
-                </span>
-                <span className="text-xs text-green-600">
-                  {formatDistanceToNow(new Date(gaugeData.latestReading.time), { addSuffix: true })}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Next High/Low - TIME is now prominent, depth secondary */}
-          {(displayData?.extremes?.nextHigh || displayData?.extremes?.nextLow) && (
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {displayData?.extremes?.nextHigh && (
-                <div className="rounded-lg bg-emerald-50 p-3">
-                  <p className="text-xs font-semibold text-emerald-700">
-                    {selectedDate ? 'First High' : 'Next High'}
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-emerald-900">
-                    {format(new Date(displayData.extremes.nextHigh.time), 'h:mm a')}
-                  </p>
-                  <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
-                    <span className="text-emerald-600 font-medium">
-                      {formatHeight(displayData.extremes.nextHigh.height)}
+          {/* Content for selected date */}
+          {!isLoadingData && (
+            <>
+              {/* Live Reading - compact, only for today */}
+              {!selectedDate && isLive && gaugeData?.latestReading && (
+                <div className="mt-3 flex items-center justify-between rounded-lg bg-green-50 px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                    <span className="text-xs font-medium text-green-700">Live</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-green-800">{formatHeight(gaugeData.latestReading.level)}</span>
+                    <span className="ml-1 text-xs text-green-600">
+                      {formatDistanceToNow(new Date(gaugeData.latestReading.time), { addSuffix: true })}
                     </span>
                   </div>
-                  {!selectedDate && (
-                    <p className="text-[10px] text-gray-500">
-                      {formatDistanceToNow(new Date(displayData.extremes.nextHigh.time), { addSuffix: true })}
-                    </p>
-                  )}
                 </div>
               )}
-              {displayData?.extremes?.nextLow && (
-                <div className="rounded-lg bg-amber-50 p-3">
-                  <p className="text-xs font-semibold text-amber-700">
-                    {selectedDate ? 'First Low' : 'Next Low'}
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-amber-900">
-                    {format(new Date(displayData.extremes.nextLow.time), 'h:mm a')}
-                  </p>
-                  <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
-                    <span className="text-amber-600 font-medium">
-                      {formatHeight(displayData.extremes.nextLow.height)}
-                    </span>
-                  </div>
-                  {!selectedDate && (
-                    <p className="text-[10px] text-gray-500">
-                      {formatDistanceToNow(new Date(displayData.extremes.nextLow.time), { addSuffix: true })}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* Upcoming Tides - TIME prominent, depth secondary */}
-          {(displayData?.predictions?.length ?? 0) > 0 ? (
-            <div className="mt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                {selectedDate ? `Tides for ${format(selectedDate, 'EEE, MMM d')}` : 'Tide Times'}
-              </p>
-              <div className="mt-2 space-y-1.5">
-                {(displayData?.predictions ?? []).slice(0, 10).map((pred, idx) => {
-                  const predDate = new Date(pred.time)
-                  const today = new Date()
-                  const isToday = format(predDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
-                  const isTomorrow = format(predDate, 'yyyy-MM-dd') === format(addDays(today, 1), 'yyyy-MM-dd')
+              {/* Tide times - app style with 24hr format */}
+              {(displayData?.predictions?.length ?? 0) > 0 ? (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      {selectedDate ? format(selectedDate, 'EEEE, d MMM') : 'Tide Times'}
+                    </p>
+                    {selectedDate && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDate(null)}
+                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        ← Back to live
+                      </button>
+                    )}
+                  </div>
                   
-                  return (
-                    <div
-                      key={idx}
-                      className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${
-                        isToday ? 'bg-blue-50' : 'bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg">{pred.type === 'high' ? '⬆️' : '⬇️'}</span>
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">
-                            {format(predDate, 'h:mm a')}
-                          </p>
-                          <p className="text-[10px] text-gray-500">
-                            {pred.type === 'high' ? 'High' : 'Low'} · {isToday ? 'Today' : isTomorrow ? 'Tomorrow' : format(predDate, 'EEE, MMM d')}
-                          </p>
+                  <div className="space-y-2">
+                    {(displayData?.predictions ?? []).slice(0, selectedDate ? 6 : 8).map((pred, idx) => {
+                      const predDate = new Date(pred.time)
+                      const today = new Date()
+                      const isToday = format(predDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+                      const isTomorrow = format(predDate, 'yyyy-MM-dd') === format(addDays(today, 1), 'yyyy-MM-dd')
+                      const isHigh = pred.type === 'high'
+                      
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-center justify-between rounded-xl px-4 py-3 ${
+                            isHigh ? 'bg-emerald-50' : 'bg-amber-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${
+                              isHigh ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              {isHigh ? 'H' : 'L'}
+                            </div>
+                            <div>
+                              <p className="text-lg font-bold text-gray-900">
+                                {format(predDate, 'HH:mm')}
+                              </p>
+                              {!selectedDate && (
+                                <p className="text-xs text-gray-500">
+                                  {isToday ? 'Today' : isTomorrow ? 'Tomorrow' : format(predDate, 'EEE')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-lg font-bold ${isHigh ? 'text-emerald-700' : 'text-amber-700'}`}>
+                              {formatHeight(pred.height)}
+                            </p>
+                            <p className="text-[10px] text-gray-400">
+                              {isHigh ? 'High' : 'Low'}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <p className="text-xs font-medium text-gray-600">{formatHeight(pred.height)}</p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ) : !isLoadingData && (
-            <div className="mt-3 rounded-lg bg-amber-50 p-3">
-              <p className="text-xs text-amber-700">
-                {selectedDate 
-                  ? `No tide data available for ${format(selectedDate, 'EEE, MMM d')}`
-                  : 'Future tide times unavailable. Only live readings shown.'
-                }
-              </p>
-            </div>
-          )}
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 rounded-xl bg-gray-50 p-4 text-center">
+                  <p className="text-sm text-gray-500">
+                    {selectedDate 
+                      ? `No tide data for ${format(selectedDate, 'EEE, MMM d')}`
+                      : 'Tide predictions unavailable'
+                    }
+                  </p>
+                </div>
+              )}
 
-          {/* Station Info */}
-          <div className="mt-3 rounded-lg bg-gray-50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-              Reference Station
-            </p>
-            <p className="mt-1 text-xs font-medium text-gray-900">📍 {station.name}</p>
-            <p className="mt-0.5 text-[10px] text-gray-500">
-              {station.distance ? `${station.distance.toFixed(1)} km away` : 'Nearest station'} · {station.source === 'uk-ea' ? 'UK Environment Agency' : station.source === 'noaa' ? 'NOAA' : 'WorldTides'}
-            </p>
-          </div>
+              {/* Station Info - more compact */}
+              <div className="mt-4 flex items-center justify-between text-[10px] text-gray-400">
+                <span>📍 {station.name}</span>
+                <span>{station.distance ? `${station.distance.toFixed(1)}km` : ''} · {station.source === 'uk-ea' ? 'UK EA' : station.source === 'noaa' ? 'NOAA' : 'WorldTides'}</span>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
