@@ -18,12 +18,12 @@ export function WeeklySpeciesCard({ limit = 5, showCountdown = true, waterType, 
   
   if (isLoading) {
     return (
-      <div className={`bg-[#243B4A] border border-[#334155] rounded-2xl p-4 ${className}`}>
+      <div className={`bg-card border border-border rounded-2xl p-4 ${className}`}>
         <div className="animate-pulse space-y-3">
-          <div className="h-5 bg-[#334155] rounded w-1/2" />
+          <div className="h-5 bg-muted rounded w-1/2" />
           <div className="space-y-2">
             {[...Array(limit)].map((_, i) => (
-              <div key={i} className="h-8 bg-[#1A2D3D] rounded" />
+              <div key={i} className="h-8 bg-background rounded" />
             ))}
           </div>
         </div>
@@ -35,12 +35,12 @@ export function WeeklySpeciesCard({ limit = 5, showCountdown = true, waterType, 
   const bonusSpecies = displaySpecies.find(s => s.is_bonus)
   
   return (
-    <div className={`bg-[#243B4A] border border-[#334155] rounded-2xl p-4 ${className}`}>
+    <div className={`bg-card border border-border rounded-2xl p-4 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-white">This Week's Species</h3>
+        <h3 className="font-bold text-foreground">This Week's Species</h3>
         {showCountdown && (
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock size={12} />
             <span>{daysUntilMonday} days left</span>
           </div>
@@ -49,7 +49,7 @@ export function WeeklySpeciesCard({ limit = 5, showCountdown = true, waterType, 
       
       {/* Bonus species highlight */}
       {bonusSpecies && (
-        <div className="mb-3 p-2 bg-amber-900/30 rounded-lg border border-amber-500/40">
+        <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-500/40">
           <div className="flex items-center gap-2">
             <Flame size={16} className="text-orange-400" />
             <span className="text-xs font-semibold text-orange-300">
@@ -72,17 +72,16 @@ export function WeeklySpeciesCard({ limit = 5, showCountdown = true, waterType, 
         {displaySpecies.filter(s => !s.is_bonus).map((species) => (
           <div 
             key={species.id}
-            className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-[#1A2D3D]"
-          >
-            <span className="text-sm text-gray-300 capitalize">{species.species}</span>
-            <span className="text-sm font-semibold text-[#1BA9A0]">{species.points} pts</span>
+            className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted">
+            <span className="text-sm text-muted-foreground capitalize">{species.species}</span>
+            <span className="text-sm font-semibold text-primary">{species.points} pts</span>
           </div>
         ))}
       </div>
       
       {/* View all link */}
       {speciesPoints && speciesPoints.length > limit && (
-        <button className="w-full mt-3 text-xs text-[#1BA9A0] font-medium hover:text-[#14B8A6]">
+        <button className="w-full mt-3 text-xs text-primary font-medium hover:text-primary/80">
           View all {speciesPoints.length} species →
         </button>
       )}

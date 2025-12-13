@@ -13,7 +13,7 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
 
   if (isMobile) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#1A2D3D]">
+      <div className="flex min-h-screen flex-col bg-background">
         <MobileHeader />
         <main className="flex-1 overflow-auto pb-24">{children}</main>
         <BottomNav />
@@ -22,9 +22,9 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#1A2D3D]">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <main className="ml-[275px] flex-1 max-w-[600px] border-r border-[#334155] bg-[#1A2D3D]">{children}</main>
+      <main className="ml-[275px] flex-1 max-w-[600px] border-r border-border bg-background">{children}</main>
     </div>
   )
 }

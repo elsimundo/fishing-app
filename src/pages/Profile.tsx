@@ -22,7 +22,7 @@ export function Profile() {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
         <div className="flex h-full items-center justify-center">
-          <p className="text-sm text-slate-600">Loading profile</p>
+          <p className="text-sm text-muted-foreground">Loading profile</p>
         </div>
       </main>
     )
@@ -56,7 +56,7 @@ export function Profile() {
   return (
     <main className="min-h-screen bg-background px-4 py-4">
       <div className="mx-auto flex max-w-xl flex-col gap-4">
-        <div className="flex items-center justify-between text-xs text-slate-600">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -70,26 +70,26 @@ export function Profile() {
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
             {initials}
           </div>
-          <div className="space-y-1 text-xs text-slate-700">
-            <p className="text-sm font-semibold text-slate-900">{profile.username || 'Unnamed angler'}</p>
+          <div className="space-y-1 text-xs text-muted-foreground">
+            <p className="text-sm font-semibold text-foreground">{profile.username || 'Unnamed angler'}</p>
             {profile.full_name && <p>{profile.full_name}</p>}
-            {memberSince && <p className="text-[11px] text-slate-500">Member since {memberSince}</p>}
+            {memberSince && <p className="text-[11px] text-muted-foreground">Member since {memberSince}</p>}
           </div>
         </header>
 
-        <section className="rounded-xl bg-surface p-4 text-xs text-slate-700 shadow">
-          <h2 className="mb-3 text-xs font-semibold text-slate-800">Account</h2>
+        <section className="rounded-xl bg-card p-4 text-xs text-muted-foreground shadow border border-border">
+          <h2 className="mb-3 text-xs font-semibold text-foreground">Account</h2>
           <dl className="space-y-2">
             <div>
-              <dt className="text-[11px] font-medium text-slate-500">Username</dt>
+              <dt className="text-[11px] font-medium text-muted-foreground">Username</dt>
               <dd>{profile.username || 'Not set'}</dd>
             </div>
             <div>
-              <dt className="text-[11px] font-medium text-slate-500">Full name</dt>
+              <dt className="text-[11px] font-medium text-muted-foreground">Full name</dt>
               <dd>{profile.full_name || 'Not set'}</dd>
             </div>
             <div>
-              <dt className="text-[11px] font-medium text-slate-500">Email for sharing</dt>
+              <dt className="text-[11px] font-medium text-muted-foreground">Email for sharing</dt>
               <dd className="mt-1">
                 <form
                   className="flex gap-2"
@@ -118,7 +118,7 @@ export function Profile() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="flex-1 rounded-md border border-slate-300 px-2 py-1 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="flex-1 rounded-md border border-border bg-background text-foreground px-2 py-1 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                   <button
                     type="submit"
@@ -135,7 +135,7 @@ export function Profile() {
                   <p className="mt-1 text-[11px] text-emerald-600">Saved.</p>
                 ) : null}
                 {!profile.email && !saveError ? (
-                  <p className="mt-1 text-[11px] text-slate-500">
+                  <p className="mt-1 text-[11px] text-muted-foreground">
                     Optional: set an email so friends can find you when sharing sessions.
                   </p>
                 ) : null}
@@ -144,9 +144,9 @@ export function Profile() {
           </dl>
         </section>
 
-        <section className="rounded-xl bg-surface p-4 text-xs text-slate-700 shadow">
-          <h2 className="mb-3 text-xs font-semibold text-slate-800">Preferences</h2>
-          <p className="text-[11px] text-slate-500">Unit preferences and notifications coming in a future update.</p>
+        <section className="rounded-xl bg-card p-4 text-xs text-muted-foreground shadow border border-border">
+          <h2 className="mb-3 text-xs font-semibold text-foreground">Preferences</h2>
+          <p className="text-[11px] text-muted-foreground">Unit preferences and notifications coming in a future update.</p>
         </section>
       </div>
     </main>

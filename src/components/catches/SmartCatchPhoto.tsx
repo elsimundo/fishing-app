@@ -74,27 +74,27 @@ export function SmartCatchPhoto({
   }
 
   return (
-    <div className="mb-4 rounded-xl border border-[#334155] bg-[#1A2D3D] p-3">
+    <div className="mb-4 rounded-xl border border-border bg-background p-3">
       <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1BA9A0]/20 text-[#1BA9A0]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
           <Camera size={16} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-white">Smart species detection</p>
-          <p className="text-[11px] text-gray-400">Take a clear photo of the fish to auto-detect the species.</p>
+          <p className="text-xs font-semibold text-foreground">Smart species detection</p>
+          <p className="text-[11px] text-muted-foreground">Take a clear photo of the fish to auto-detect the species.</p>
         </div>
       </div>
 
       <div className="mt-3 space-y-2">
         <label
           htmlFor="smart-photo"
-          className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-[#334155] bg-[#243B4A] px-3 py-2 text-[11px] text-gray-400 hover:bg-[#334155]"
+          className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-border bg-card px-3 py-2 text-[11px] text-muted-foreground hover:bg-muted"
         >
           <div className="flex items-center gap-2">
-            <Camera size={14} className="text-gray-500" />
+            <Camera size={14} className="text-muted-foreground" />
             <span>Tap to take a photo or choose from gallery</span>
           </div>
-          <span className="text-[10px] text-gray-500">JPG/PNG/WebP up to 5MB</span>
+          <span className="text-[10px] text-muted-foreground">JPG/PNG/WebP up to 5MB</span>
         </label>
         <input
           id="smart-photo"
@@ -109,13 +109,13 @@ export function SmartCatchPhoto({
         />
 
         {previewUrl ? (
-          <div className="overflow-hidden rounded-lg border border-[#334155] bg-black/20">
+          <div className="overflow-hidden rounded-lg border border-border bg-card">
             <img src={previewUrl} alt="Catch preview" className="h-40 w-full object-cover" />
           </div>
         ) : null}
 
         {loading ? (
-          <div className="flex items-center gap-2 rounded-lg bg-[#243B4A] px-3 py-2 text-[11px] text-gray-300">
+          <div className="flex items-center gap-2 rounded-lg bg-card px-3 py-2 text-[11px] text-muted-foreground">
             <Loader2 size={14} className="animate-spin" />
             <span>Identifying fish...</span>
           </div>

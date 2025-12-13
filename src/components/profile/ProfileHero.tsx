@@ -47,30 +47,30 @@ export function ProfileHero({ profile, level, xp }: ProfileHeroProps) {
 
       <div className="flex-1 space-y-2">
         <div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-foreground">
             {profile.full_name || 'Angler'}
           </p>
-          <p className="text-xs text-gray-400">@{profile.username || 'angler'}</p>
+          <p className="text-xs text-muted-foreground">@{profile.username || 'angler'}</p>
           {profile.bio && (
-            <p className="mt-1 text-xs text-gray-400 line-clamp-2">{profile.bio}</p>
+            <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{profile.bio}</p>
           )}
         </div>
 
         {/* Rank pill */}
-        <div className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 px-2.5 py-1 text-[11px] font-medium text-amber-400">
+        <div className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
           <span>⚡</span>
           <span>{rankLabel}</span>
         </div>
 
         {/* XP bar inline */}
         <div className="mt-1">
-          <div className="mb-1 flex justify-between text-[11px] text-gray-500">
+          <div className="mb-1 flex justify-between text-[11px] text-muted-foreground">
             <span>Level {level}</span>
             <span>
               {xpProg.current}/{xpProg.needed} XP to level {level + 1}
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#334155]">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-gradient-to-r from-[#1BA9A0] to-[#14B8A6]"
               style={{ width: `${xpProg.percentage}%` }}

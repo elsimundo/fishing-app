@@ -11,7 +11,7 @@ export function SessionsList() {
 
   if (isLoading) {
     return (
-      <div className="space-y-2 text-sm text-gray-400">
+      <div className="space-y-2 text-sm text-muted-foreground">
         <p>Loading sessions…</p>
       </div>
     )
@@ -29,9 +29,9 @@ export function SessionsList() {
 
   if (!sessions.length) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-[#334155] bg-[#243B4A] p-6 text-center text-sm text-gray-400">
+      <div className="rounded-2xl border-2 border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
         <div className="mb-2 text-3xl">🎣</div>
-        <p className="font-medium text-white">No sessions yet</p>
+        <p className="font-medium text-foreground">No sessions yet</p>
         <p className="mt-1 text-xs">Start your first fishing session to see it here</p>
       </div>
     )
@@ -58,14 +58,14 @@ export function SessionsList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-xs text-gray-400">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Your sessions</p>
-        <div className="inline-flex rounded-full bg-[#1A2D3D] p-0.5 text-[11px] font-medium">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Your sessions</p>
+        <div className="inline-flex rounded-full bg-background p-0.5 text-[11px] font-medium">
           <button
             type="button"
             onClick={() => setFilter('all')}
             className={`rounded-full px-2 py-0.5 ${
-              filter === 'all' ? 'bg-[#1BA9A0] text-white shadow-sm' : 'text-gray-400'
+              filter === 'all' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground'
             }`}
           >
             All
@@ -74,7 +74,7 @@ export function SessionsList() {
             type="button"
             onClick={() => setFilter('active')}
             className={`rounded-full px-2 py-0.5 ${
-              filter === 'active' ? 'bg-[#1BA9A0] text-white shadow-sm' : 'text-gray-400'
+              filter === 'active' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground'
             }`}
           >
             Active
@@ -83,7 +83,7 @@ export function SessionsList() {
             type="button"
             onClick={() => setFilter('completed')}
             className={`rounded-full px-2 py-0.5 ${
-              filter === 'completed' ? 'bg-[#1BA9A0] text-white shadow-sm' : 'text-gray-400'
+              filter === 'completed' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground'
             }`}
           >
             Completed
@@ -93,17 +93,17 @@ export function SessionsList() {
 
       {today.length > 0 && (
         <section className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Today</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Today</p>
           {today.map((session) => (
             <div
               key={session.id}
-              className="group relative overflow-hidden rounded-2xl bg-[#243B4A] border border-[#334155] p-3 text-xs text-gray-400 shadow-sm transition-shadow hover:shadow-md"
+              className="group relative overflow-hidden rounded-2xl bg-card border border-border p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md"
             >
               <SessionCard session={session} />
-              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-hover:text-gray-400" size={20} />
+              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
               <Link
                 to={`/sessions/${session.id}?share=1`}
-                className="absolute bottom-3 right-3 rounded-full border border-[#334155] bg-[#1A2D3D] px-2 py-1 text-[10px] font-medium text-gray-400 shadow-sm hover:bg-[#334155]"
+                className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
               >
                 Share
               </Link>
@@ -114,17 +114,17 @@ export function SessionsList() {
 
       {yesterday.length > 0 && (
         <section className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Yesterday</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Yesterday</p>
           {yesterday.map((session) => (
             <div
               key={session.id}
-              className="group relative overflow-hidden rounded-2xl bg-[#243B4A] border border-[#334155] p-3 text-xs text-gray-400 shadow-sm transition-shadow hover:shadow-md"
+              className="group relative overflow-hidden rounded-2xl bg-card border border-border p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md"
             >
               <SessionCard session={session} />
-              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-hover:text-gray-400" size={20} />
+              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
               <Link
                 to={`/sessions/${session.id}?share=1`}
-                className="absolute bottom-3 right-3 rounded-full border border-[#334155] bg-[#1A2D3D] px-2 py-1 text-[10px] font-medium text-gray-400 shadow-sm hover:bg-[#334155]"
+                className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
               >
                 Share
               </Link>
@@ -135,17 +135,17 @@ export function SessionsList() {
 
       {earlier.length > 0 && (
         <section className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Earlier</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Earlier</p>
           {earlier.map((session) => (
             <div
               key={session.id}
-              className="group relative overflow-hidden rounded-2xl bg-[#243B4A] border border-[#334155] p-3 text-xs text-gray-400 shadow-sm transition-shadow hover:shadow-md"
+              className="group relative overflow-hidden rounded-2xl bg-card border border-border p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md"
             >
               <SessionCard session={session} />
-              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-hover:text-gray-400" size={20} />
+              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
               <Link
                 to={`/sessions/${session.id}?share=1`}
-                className="absolute bottom-3 right-3 rounded-full border border-[#334155] bg-[#1A2D3D] px-2 py-1 text-[10px] font-medium text-gray-400 shadow-sm hover:bg-[#334155]"
+                className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
               >
                 Share
               </Link>

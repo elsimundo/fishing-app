@@ -17,18 +17,18 @@ export function BadgesModal({ completedChallenges, onClose, isOwnProfile = false
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-t-2xl bg-[#243B4A] border border-[#334155] shadow-xl sm:rounded-2xl">
+      <div className="relative w-full max-w-md rounded-t-2xl bg-card border border-border shadow-xl sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-bold text-white">🏆 Badges</h2>
-            <p className="text-xs text-gray-500">
+            <h2 className="text-lg font-bold text-foreground">🏆 Badges</h2>
+            <p className="text-xs text-muted-foreground">
               {completedChallenges.length} earned
             </p>
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-[#334155] hover:text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X size={20} />
           </button>
@@ -38,11 +38,11 @@ export function BadgesModal({ completedChallenges, onClose, isOwnProfile = false
         <div className="max-h-[60vh] overflow-y-auto p-5">
           {completedChallenges.length === 0 ? (
             <div className="py-8 text-center">
-              <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[#1A2D3D] text-3xl">
+              <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-background text-3xl">
                 🎣
               </div>
-              <p className="font-medium text-white">No badges yet</p>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="font-medium text-foreground">No badges yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {isOwnProfile
                   ? 'Complete challenges by logging catches and sessions to earn badges.'
                   : 'This angler hasn\'t earned any badges yet.'}
@@ -53,13 +53,13 @@ export function BadgesModal({ completedChallenges, onClose, isOwnProfile = false
               {completedChallenges.map((uc) => (
                 <div
                   key={uc.id}
-                  className="rounded-xl border border-emerald-500/40 bg-emerald-900/30 p-3"
+                  className="rounded-xl border border-emerald-200 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-900/30 p-3"
                 >
                   <div className="mb-2 text-3xl">{uc.challenge?.icon || '🎣'}</div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-foreground">
                     {uc.challenge?.title || 'Challenge'}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-gray-400 line-clamp-2">
+                  <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">
                     {uc.challenge?.description || ''}
                   </p>
                   {uc.completed_at && (

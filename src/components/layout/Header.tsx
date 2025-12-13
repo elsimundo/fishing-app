@@ -5,17 +5,17 @@ export function Header() {
   const { user, signOut } = useAuth()
 
   return (
-    <header className="flex items-center justify-between border-b border-slate-200 bg-surface px-4 py-3">
+    <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3">
       <div className="flex items-center gap-2">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
           SF
         </span>
         <div className="leading-tight">
           <p className="text-sm font-semibold text-primary">Sea Fishing App</p>
-          <p className="text-[11px] text-slate-500">Sea fishing logbook & map</p>
+          <p className="text-[11px] text-muted-foreground">Sea fishing logbook & map</p>
         </div>
       </div>
-      <div className="flex items-center gap-3 text-xs text-slate-600">
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <Link to="/sessions" className="text-[11px] text-secondary hover:underline">
           Sessions
         </Link>

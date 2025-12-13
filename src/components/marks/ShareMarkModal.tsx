@@ -51,32 +51,32 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-[#243B4A] border border-[#334155] shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#334155] p-4">
+        <div className="flex items-center justify-between border-b border-border p-4">
           <div>
-            <h2 className="text-lg font-bold text-white">Share Mark</h2>
-            <p className="text-xs text-gray-500">Share "{mark.name}" with friends</p>
+            <h2 className="text-lg font-bold text-foreground">Share Mark</h2>
+            <p className="text-xs text-muted-foreground">Share "{mark.name}" with friends</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-[#334155] hover:text-white"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Search */}
-        <div className="border-b border-[#334155] p-4">
+        <div className="border-b border-border p-4">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search friends..."
-              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] py-2 pl-9 pr-3 text-sm text-white focus:border-[#1BA9A0] focus:outline-none"
+              className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground focus:border-primary focus:outline-none"
             />
           </div>
         </div>
@@ -85,26 +85,26 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
         <div className="max-h-80 overflow-y-auto p-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 size={24} className="animate-spin text-gray-400" />
+              <Loader2 size={24} className="animate-spin text-muted-foreground" />
             </div>
           ) : following.length === 0 ? (
             <div className="py-8 text-center">
-              <UserPlus size={32} className="mx-auto text-gray-500" />
-              <p className="mt-2 text-sm font-medium text-gray-300">No friends yet</p>
-              <p className="mt-1 text-xs text-gray-500">
+              <UserPlus size={32} className="mx-auto text-muted-foreground" />
+              <p className="mt-2 text-sm font-medium text-muted-foreground">No friends yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Follow other anglers to share marks with them
               </p>
             </div>
           ) : filteredFollowing.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-gray-500">No friends match "{searchQuery}"</p>
+              <p className="text-sm text-muted-foreground">No friends match "{searchQuery}"</p>
             </div>
           ) : (
             <div className="space-y-2">
               {filteredFollowing.map((profile) => (
                 <div
                   key={profile.id}
-                  className="flex items-center justify-between rounded-lg bg-[#1A2D3D] p-3"
+                  className="flex items-center justify-between rounded-lg bg-background p-3"
                 >
                   <div className="flex items-center gap-3">
                     {profile.avatar_url ? (
@@ -114,16 +114,16 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
                         className="h-10 w-10 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#334155] text-sm font-medium text-gray-300">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
                         {(profile.username || profile.full_name || '?')[0].toUpperCase()}
                       </div>
                     )}
                     <div>
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-sm font-medium text-foreground">
                         {profile.full_name || profile.username}
                       </p>
                       {profile.username && profile.full_name && (
-                        <p className="text-xs text-gray-500">@{profile.username}</p>
+                        <p className="text-xs text-muted-foreground">@{profile.username}</p>
                       )}
                     </div>
                   </div>
@@ -138,7 +138,7 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
                       type="button"
                       onClick={() => handleShare(profile.id)}
                       disabled={shareMark.isPending}
-                      className="rounded-lg bg-[#1BA9A0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
+                      className="rounded-lg bg-navy-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
                     >
                       {shareMark.isPending ? 'Sharing...' : 'Share'}
                     </button>
@@ -150,11 +150,11 @@ export function ShareMarkModal({ mark, onClose }: ShareMarkModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#334155] p-4">
+        <div className="border-t border-border p-4">
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg bg-[#1A2D3D] py-2 text-sm font-medium text-gray-300 hover:bg-[#334155]"
+            className="w-full rounded-lg bg-background py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
             Done
           </button>

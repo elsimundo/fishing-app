@@ -297,18 +297,18 @@ export default function CreateCompetitionPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 pb-32">
+      <div className="min-h-screen bg-background pb-32">
         {/* Header */}
-        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+        <header className="sticky top-0 z-10 border-b border-border bg-card">
           <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3">
             <button
               type="button"
               onClick={handleBack}
-              className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+              className="rounded-full p-2 text-muted-foreground hover:bg-muted"
             >
               <ArrowLeft size={20} />
             </button>
-            <h1 className="text-base font-bold text-gray-900">
+            <h1 className="text-base font-bold text-foreground">
               {isEditMode ? 'Edit Competition' : 'Create Competition'}
             </h1>
           </div>
@@ -333,14 +333,14 @@ export default function CreateCompetitionPage() {
           )}
 
           {/* Progress */}
-          <div className="mb-4 rounded-2xl bg-white p-4 shadow-sm">
+          <div className="mb-4 rounded-2xl bg-card p-4 shadow-sm">
             <div className="mb-2 flex justify-between text-xs">
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-muted-foreground">
                 Step {step} of {totalSteps}
               </span>
               <span className="font-semibold text-navy-800">{progress}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-navy-800 transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -349,19 +349,19 @@ export default function CreateCompetitionPage() {
           </div>
 
           {/* Step Content */}
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <div className="rounded-2xl bg-card p-5 shadow-sm">
             {renderStep()}
           </div>
         </div>
 
         {/* Fixed Bottom Actions */}
-        <div className="fixed bottom-20 left-0 right-0 border-t border-gray-200 bg-white p-4 md:bottom-0">
+        <div className="fixed bottom-20 left-0 right-0 border-t border-border bg-card p-4 md:bottom-0">
           <div className="mx-auto flex max-w-2xl gap-3">
             {step > 1 && (
               <button
                 type="button"
                 onClick={handleBack}
-                className="rounded-xl border-2 border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="rounded-xl border-2 border-border px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-muted"
               >
                 Back
               </button>

@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
   return (
     <AdminLayout>
       <div className="p-4 lg:p-8">
-        <h1 className="mb-8 text-2xl font-bold text-gray-900 lg:text-3xl">Dashboard</h1>
+        <h1 className="mb-8 text-2xl font-bold text-foreground lg:text-3xl">Dashboard</h1>
 
         {/* Stats Grid */}
         <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
@@ -106,7 +106,7 @@ function StatCard({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm lg:p-6">
       <div className="mb-3 flex items-center justify-between lg:mb-4">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-full lg:h-12 lg:w-12 ${colors[color]}`}
@@ -116,11 +116,11 @@ function StatCard({
         </div>
       </div>
       {loading ? (
-        <div className="h-8 w-16 animate-pulse rounded bg-gray-200" />
+        <div className="h-8 w-16 animate-pulse rounded bg-muted" />
       ) : (
-        <p className="text-2xl font-bold text-gray-900 lg:text-3xl">{value}</p>
+        <p className="text-2xl font-bold text-foreground lg:text-3xl">{value}</p>
       )}
-      <p className="mt-1 text-xs text-gray-600 lg:text-sm">{label}</p>
+      <p className="mt-1 text-xs text-muted-foreground lg:text-sm">{label}</p>
     </div>
   )
 }
@@ -151,12 +151,12 @@ function RecentActivitySection() {
   }
 
   return (
-    <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900 lg:text-xl">Recent Activity</h2>
+    <div className="mb-8 rounded-xl border border-border bg-card p-4 shadow-sm lg:p-6">
+      <h2 className="mb-4 text-lg font-bold text-foreground lg:text-xl">Recent Activity</h2>
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-12 animate-pulse rounded bg-gray-100" />
+            <div key={i} className="h-12 animate-pulse rounded bg-muted" />
           ))}
         </div>
       ) : activity && activity.length > 0 ? (
@@ -164,20 +164,20 @@ function RecentActivitySection() {
           {activity.map((log: any) => (
             <div
               key={log.id}
-              className="flex items-center justify-between border-b border-gray-100 py-2 last:border-0"
+              className="flex items-center justify-between border-b border-border py-2 last:border-0"
             >
               <div>
-                <p className="text-sm font-semibold text-gray-900">{formatAction(log.action)}</p>
-                <p className="text-xs text-gray-600">by @{log.admin?.username || 'unknown'}</p>
+                <p className="text-sm font-semibold text-foreground">{formatAction(log.action)}</p>
+                <p className="text-xs text-muted-foreground">by @{log.admin?.username || 'unknown'}</p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
+        <div className="flex items-center gap-2 rounded-lg bg-muted p-4 text-sm text-muted-foreground">
           <AlertCircle size={16} />
           <span>No activity yet. Actions will appear here.</span>
         </div>
@@ -223,10 +223,10 @@ function HiddenLakesSection() {
   })
 
   return (
-    <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
+    <div className="mb-8 rounded-xl border border-border bg-card p-4 shadow-sm lg:p-6">
       <div className="mb-4 flex items-center gap-2">
         <EyeOff size={20} className="text-red-500" />
-        <h2 className="text-lg font-bold text-gray-900 lg:text-xl">Hidden Lakes</h2>
+        <h2 className="text-lg font-bold text-foreground lg:text-xl">Hidden Lakes</h2>
         {hiddenLakes && hiddenLakes.length > 0 && (
           <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
             {hiddenLakes.length}
@@ -236,18 +236,18 @@ function HiddenLakesSection() {
       
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
-          <Loader2 size={24} className="animate-spin text-gray-400" />
+          <Loader2 size={24} className="animate-spin text-muted-foreground" />
         </div>
       ) : hiddenLakes && hiddenLakes.length > 0 ? (
         <div className="space-y-2">
           {hiddenLakes.map((lake: any) => (
             <div
               key={lake.id}
-              className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+              className="flex items-center justify-between rounded-lg bg-muted p-3"
             >
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">{lake.name}</p>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <p className="text-sm font-semibold text-foreground">{lake.name}</p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {lake.region && (
                     <span className="flex items-center gap-1">
                       <MapPin size={10} />
@@ -275,7 +275,7 @@ function HiddenLakesSection() {
           ))}
         </div>
       ) : (
-        <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
+        <div className="flex items-center gap-2 rounded-lg bg-muted p-4 text-sm text-muted-foreground">
           <Eye size={16} className="text-green-500" />
           <span>All lakes are visible. Hidden lakes will appear here.</span>
         </div>
@@ -286,8 +286,8 @@ function HiddenLakesSection() {
 
 function QuickActionsSection() {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900 lg:text-xl">Quick Actions</h2>
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm lg:p-6">
+      <h2 className="mb-4 text-lg font-bold text-foreground lg:text-xl">Quick Actions</h2>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <QuickActionButton
           href="/admin/businesses?filter=pending"

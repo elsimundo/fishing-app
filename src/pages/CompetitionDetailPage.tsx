@@ -143,23 +143,23 @@ export default function CompetitionDetailPage() {
     : 'from-slate-500 to-slate-600'
 
   return (
-    <main className="min-h-screen bg-[#1A2D3D] pb-24">
+    <main className="min-h-screen bg-background pb-24">
       {/* Header - matches SessionDetailPage */}
-      <header className="sticky top-0 z-20 border-b border-[#334155] bg-[#243B4A] px-4 py-3">
+      <header className="sticky top-0 z-20 border-b border-border bg-card px-4 py-3">
         <div className="relative mx-auto flex max-w-2xl items-center justify-between">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
+            className="rounded-full p-2 text-muted-foreground hover:bg-background hover:text-foreground"
           >
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-sm font-bold text-white">Competition</h1>
+          <h1 className="text-sm font-bold text-foreground">Competition</h1>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleShare}
-              className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
+              className="rounded-full p-2 text-muted-foreground hover:bg-background hover:text-foreground"
             >
               <Share2 size={20} />
             </button>
@@ -167,7 +167,7 @@ export default function CompetitionDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowActions(!showActions)}
-                className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
+                className="rounded-full p-2 text-muted-foreground hover:bg-background hover:text-foreground"
               >
                 <MoreHorizontal size={20} />
               </button>
@@ -176,11 +176,11 @@ export default function CompetitionDetailPage() {
 
           {/* Actions dropdown - Organizer */}
           {showActions && isOrganizer && (
-            <div className="absolute right-0 top-12 z-30 w-48 rounded-xl bg-[#243B4A] border border-[#334155] py-2 shadow-lg">
+            <div className="absolute right-0 top-12 z-30 w-48 rounded-xl bg-card border border-border py-2 shadow-lg">
           <button
             type="button"
             onClick={() => { setShowInviteModal(true); setShowActions(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-background"
           >
             <UserPlus size={16} />
             Invite Angler
@@ -188,7 +188,7 @@ export default function CompetitionDetailPage() {
           <button
             type="button"
             onClick={() => { handleEdit(); setShowActions(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-background"
           >
             <Edit2 size={16} />
             Edit Competition
@@ -196,7 +196,7 @@ export default function CompetitionDetailPage() {
           <button
             type="button"
             onClick={() => { setShowAdjustTime(true); setShowActions(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:bg-background"
           >
             <Clock size={16} />
             Adjust Time
@@ -211,7 +211,7 @@ export default function CompetitionDetailPage() {
               Declare Winner
             </button>
           )}
-          <div className="my-2 border-t border-[#334155]" />
+          <div className="my-2 border-t border-border" />
           <button
             type="button"
             onClick={() => { setShowDeleteConfirm(true); setShowActions(false) }}
@@ -227,7 +227,7 @@ export default function CompetitionDetailPage() {
 
       <div className="mx-auto max-w-2xl px-4 py-4">
         {/* Hero image / cover - matches SessionDetailPage */}
-        <div className="relative mb-4 overflow-hidden rounded-2xl bg-slate-900">
+        <div className="relative mb-4 overflow-hidden rounded-2xl bg-background">
           {competition.cover_image_url ? (
             <img
               src={competition.cover_image_url}
@@ -240,7 +240,7 @@ export default function CompetitionDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/70" />
 
           {/* Hero badge */}
-          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-navy-900 shadow-sm">
+          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-card/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm border border-border">
             <span>{typeInfo.icon}</span>
             <span>{typeInfo.label}</span>
             {isActive && (
@@ -255,7 +255,7 @@ export default function CompetitionDetailPage() {
               </span>
             )}
             {hasEnded && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700">
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                 Ended
               </span>
             )}
@@ -263,28 +263,28 @@ export default function CompetitionDetailPage() {
 
           {/* Hero stats - matches SessionDetailPage */}
           <div className="absolute bottom-4 left-4 right-4 flex gap-2">
-            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
-              <p className="text-base font-bold text-slate-900">{competition.participant_count ?? 0}</p>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Anglers</p>
+            <div className="flex-1 rounded-xl bg-card/95 border border-border px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-foreground">{competition.participant_count ?? 0}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Anglers</p>
             </div>
-            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
-              <p className="text-base font-bold text-slate-900">{timeRemaining || '—'}</p>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Remaining</p>
+            <div className="flex-1 rounded-xl bg-card/95 border border-border px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-foreground">{timeRemaining || '—'}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Remaining</p>
             </div>
-            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
-              <p className="text-base font-bold text-slate-900">{totalCatches}</p>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Catches</p>
+            <div className="flex-1 rounded-xl bg-card/95 border border-border px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-foreground">{totalCatches}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Catches</p>
             </div>
           </div>
         </div>
 
         {/* Info section - matches SessionDetailPage */}
-        <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+        <div className="rounded-2xl bg-card border border-border p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
-              <h1 className="text-lg font-bold text-white">{competition.title}</h1>
-              <p className="mt-1 text-xs text-gray-500">{dateLabel}</p>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+              <h1 className="text-lg font-bold text-foreground">{competition.title}</h1>
+              <p className="mt-1 text-xs text-muted-foreground">{dateLabel}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
                   <MapPin size={13} />
                   <span>{linkedSession?.location_name || 'Online Competition'}</span>
@@ -293,14 +293,14 @@ export default function CompetitionDetailPage() {
             </div>
             <div className="text-right">
               <span className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold ${
-                isOrganizer ? 'bg-[#1BA9A0] text-white' : isParticipant ? 'bg-emerald-900/30 text-emerald-400' : 'bg-[#334155] text-gray-400'
+                isOrganizer ? 'bg-primary text-white' : isParticipant ? 'bg-emerald-900/30 text-emerald-400' : 'bg-muted text-muted-foreground'
               }`}>
                 {isOrganizer ? 'Organizer' : isParticipant ? 'Joined' : 'Not Joined'}
               </span>
             </div>
           </div>
           {competition.description && (
-            <p className="mt-3 text-sm text-gray-400">{competition.description}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{competition.description}</p>
           )}
         </div>
 
@@ -347,14 +347,14 @@ export default function CompetitionDetailPage() {
 
         {/* Participants */}
         {participants && participants.length > 0 && (
-          <div className="mt-4 rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+          <div className="mt-4 rounded-2xl bg-card border border-border p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-white">Participants ({participants.length})</h2>
+              <h2 className="text-sm font-semibold text-foreground">Participants ({participants.length})</h2>
               {isOrganizer && (
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(true)}
-                  className="text-xs font-medium text-[#1BA9A0] hover:underline"
+                  className="text-xs font-medium text-primary hover:underline"
                 >
                   + Invite
                 </button>
@@ -370,7 +370,7 @@ export default function CompetitionDetailPage() {
 
         {/* Map - if linked session has location */}
         {linkedSession?.latitude && linkedSession?.longitude && (
-          <div className="mt-4 overflow-hidden rounded-2xl bg-[#243B4A] border border-[#334155] shadow-sm">
+          <div className="mt-4 overflow-hidden rounded-2xl bg-card border border-border shadow-sm">
             <div className="h-48 w-full">
               <Map 
                 catches={linkedSession.catches || []} 
@@ -383,14 +383,14 @@ export default function CompetitionDetailPage() {
         )}
 
         {/* Tabs */}
-        <div className="mt-4 sticky top-[57px] z-10 rounded-t-2xl border-b border-[#334155] bg-[#243B4A]">
+        <div className="mt-4 sticky top-[57px] z-10 rounded-t-2xl border-b border-border bg-card">
           <div className="flex">
             <button
               onClick={() => setActiveTab('leaderboard')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'leaderboard'
-                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Trophy size={14} className="inline mr-1" />
@@ -400,8 +400,8 @@ export default function CompetitionDetailPage() {
               onClick={() => setActiveTab('catches')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'catches'
-                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Fish size={14} className="inline mr-1" />
@@ -411,8 +411,8 @@ export default function CompetitionDetailPage() {
               onClick={() => setActiveTab('my-catches')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'my-catches'
-                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               My Catches
@@ -421,8 +421,8 @@ export default function CompetitionDetailPage() {
               onClick={() => setActiveTab('timeline')}
               className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'timeline'
-                  ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <MessageSquare size={14} className="inline mr-1" />
@@ -433,8 +433,8 @@ export default function CompetitionDetailPage() {
                 onClick={() => setActiveTab('pending')}
                 className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
                   activeTab === 'pending'
-                    ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
-                    : 'text-gray-500 hover:text-gray-300'
+                    ? 'border-b-2 border-primary text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Pending
@@ -444,7 +444,7 @@ export default function CompetitionDetailPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="rounded-b-2xl bg-[#243B4A] border border-t-0 border-[#334155] p-4 shadow-sm">
+        <div className="rounded-b-2xl bg-card border border-t-0 border-border p-4 shadow-sm">
           {activeTab === 'leaderboard' && (
             <>
               <WinnersDisplay competitionId={competition.id} isOrganizer={isOrganizer} />
@@ -466,8 +466,8 @@ export default function CompetitionDetailPage() {
                 ))
               ) : (
                 <div className="py-6 text-center">
-                  <Fish size={32} className="mx-auto text-gray-500" />
-                  <p className="mt-2 text-sm text-gray-500">No catches logged yet</p>
+                  <Fish size={32} className="mx-auto text-muted-foreground" />
+                  <p className="mt-2 text-sm text-muted-foreground">No catches logged yet</p>
                 </div>
               )}
             </div>
@@ -483,7 +483,7 @@ export default function CompetitionDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowAddPostModal(true)}
-                    className="flex items-center gap-1 rounded-lg bg-[#1A2D3D] px-3 py-2 text-xs font-medium text-gray-300 hover:bg-[#334155]"
+                    className="flex items-center gap-1 rounded-lg bg-background px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
                     <MessageSquare size={14} />
                     Add post
@@ -493,12 +493,12 @@ export default function CompetitionDetailPage() {
 
               {/* Timeline content */}
               {linkedSession?.catches?.length === 0 && sessionPosts.length === 0 ? (
-                <div className="py-6 text-center text-xs text-gray-500">
+                <div className="py-6 text-center text-xs text-muted-foreground">
                   No activity yet. Log a catch or add a post to start the timeline.
                 </div>
               ) : (
                 <div className="relative">
-                  <div className="absolute left-3 top-2 bottom-2 w-px bg-[#334155]" />
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-border" />
                   <div className="space-y-4">
                     {/* Merge catches and posts, sort by time */}
                     {[
@@ -524,21 +524,21 @@ export default function CompetitionDetailPage() {
                                   className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
                                 />
                               ) : (
-                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-lg">
+                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-muted text-lg">
                                   🐟
                                 </div>
                               )}
                               <div className="flex-1 text-xs">
                                 <div className="flex items-center justify-between">
-                                  <p className="text-sm font-semibold text-gray-900">
+                                  <p className="text-sm font-semibold text-foreground">
                                     {c.species}
                                     {c.weight_kg != null && ` • ${c.weight_kg.toFixed(1)}kg`}
                                   </p>
-                                  <span className="ml-2 text-[11px] text-gray-500">
+                                  <span className="ml-2 text-[11px] text-muted-foreground">
                                     {format(new Date(c.caught_at), 'HH:mm')}
                                   </span>
                                 </div>
-                                <p className="mt-0.5 text-[11px] text-gray-600">
+                                <p className="mt-0.5 text-[11px] text-muted-foreground">
                                   {c.bait && c.bait !== '0' ? c.bait : '—'}
                                   {c.released ? ' • Released' : ''}
                                 </p>
@@ -564,11 +564,11 @@ export default function CompetitionDetailPage() {
                               )}
                               <div className="flex-1 text-xs">
                                 <div className="flex items-center justify-between">
-                                  <p className="text-xs font-medium text-gray-700">
+                                  <p className="text-xs font-medium text-foreground">
                                     {p.user.full_name || p.user.username}
                                   </p>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[11px] text-gray-500">
+                                    <span className="text-[11px] text-muted-foreground">
                                       {format(new Date(p.created_at), 'HH:mm')}
                                     </span>
                                     {canDeletePost && (
@@ -584,7 +584,7 @@ export default function CompetitionDetailPage() {
                                             }
                                           }
                                         }}
-                                        className="opacity-0 group-hover:opacity-100 rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 transition-opacity"
+                                        className="opacity-0 group-hover:opacity-100 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-red-600 transition-opacity"
                                       >
                                         <XIcon size={14} />
                                       </button>
@@ -592,7 +592,7 @@ export default function CompetitionDetailPage() {
                                   </div>
                                 </div>
                                 {p.caption && (
-                                  <p className="mt-0.5 text-[11px] text-gray-900">{p.caption}</p>
+                                  <p className="mt-0.5 text-[11px] text-foreground">{p.caption}</p>
                                 )}
                               </div>
                             </div>

@@ -72,39 +72,39 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
       : similarSpecies
 
     return (
-      <div className="mt-3 rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-xs">
-        <p className="mb-2 text-[11px] font-medium text-gray-400">
+      <div className="mt-3 rounded-xl border border-border bg-card p-3 text-xs">
+        <p className="mb-2 text-[11px] font-medium text-muted-foreground">
           {searchQuery.trim() || showFullList ? 'Select the correct species:' : 'Similar species:'}
         </p>
         
         {/* Search input */}
         <div className="relative mb-2">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search all species..."
-            className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] py-2 pl-8 pr-3 text-xs text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+            className="w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
         {/* Species list */}
-        <div className="max-h-48 overflow-y-auto rounded-lg border border-[#334155] bg-[#1A2D3D]">
+        <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-background">
           {displaySpecies.length > 0 ? (
             displaySpecies.map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => handleSelectManual(s)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[#334155]"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-muted"
               >
                 <span className="text-base">🐟</span>
-                <span className="text-white">{s}</span>
+                <span className="text-foreground">{s}</span>
               </button>
             ))
           ) : (
-            <div className="px-3 py-4 text-center text-gray-500">
+            <div className="px-3 py-4 text-center text-muted-foreground">
               No species found matching "{searchQuery}"
             </div>
           )}
@@ -129,7 +129,7 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
             setShowFullList(false)
             setSearchQuery('')
           }}
-          className="mt-2 w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-[11px] font-medium text-gray-300 hover:bg-[#334155]"
+          className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground hover:bg-muted"
         >
           ← Back to AI suggestion
         </button>
@@ -138,13 +138,13 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
   }
 
   return (
-    <div className="mt-3 rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-xs">
+    <div className="mt-3 rounded-xl border border-border bg-card p-3 text-xs">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="text-[11px] font-medium text-gray-400">AI suggestion</p>
-          <p className="text-sm font-semibold text-white">{species}</p>
+          <p className="text-[11px] font-medium text-muted-foreground">AI suggestion</p>
+          <p className="text-sm font-semibold text-foreground">{species}</p>
           {scientificName && (
-            <p className="text-[11px] italic text-gray-500">{scientificName}</p>
+            <p className="text-[11px] italic text-muted-foreground">{scientificName}</p>
           )}
         </div>
         <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ${confidenceColor}`}>
@@ -155,14 +155,14 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
       {/* Always show alternatives if available */}
       {alternatives && alternatives.length > 0 && (
         <div className="mt-2">
-          <p className="mb-1 text-[11px] font-medium text-gray-400">Could also be:</p>
+          <p className="mb-1 text-[11px] font-medium text-muted-foreground">Could also be:</p>
           <div className="flex flex-wrap gap-1">
             {alternatives.map((alt) => (
               <button
                 key={alt}
                 type="button"
                 onClick={() => onConfirm(alt)}
-                className="rounded-full border border-[#334155] bg-[#1A2D3D] px-2 py-0.5 text-[10px] text-gray-300 hover:bg-[#334155]"
+                className="rounded-full border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground hover:bg-muted"
               >
                 {alt}
               </button>
@@ -175,7 +175,7 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
         <button
           type="button"
           onClick={() => onConfirm(species)}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#1BA9A0] px-3 py-2 text-[11px] font-semibold text-white shadow-sm hover:bg-[#14B8A6] disabled:opacity-70"
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-navy-800 px-3 py-2 text-[11px] font-semibold text-white shadow-sm hover:bg-navy-900 disabled:opacity-70"
         >
           <Check size={12} />
           Confirm
@@ -183,7 +183,7 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
         <button
           type="button"
           onClick={() => setShowManualPicker(true)}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-[11px] font-medium text-gray-300 hover:bg-[#334155]"
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground hover:bg-muted"
         >
           <Search size={12} />
           Pick different

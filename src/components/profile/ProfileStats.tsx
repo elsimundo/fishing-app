@@ -16,8 +16,8 @@ export function ProfileStats({
   return (
     <div className="flex justify-around text-center">
       <div className="flex flex-col">
-        <span className="text-lg font-bold text-gray-900">{postCount}</span>
-        <span className="text-xs uppercase tracking-wide text-gray-600">Posts</span>
+        <span className="text-lg font-bold text-foreground">{postCount}</span>
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">Posts</span>
       </div>
 
       <button
@@ -25,8 +25,8 @@ export function ProfileStats({
         onClick={onFollowersClick}
         className="flex flex-col hover:opacity-70 transition-opacity"
       >
-        <span className="text-lg font-bold text-gray-900">{followerCount}</span>
-        <span className="text-xs uppercase tracking-wide text-gray-600">Followers</span>
+        <span className="text-lg font-bold text-foreground">{followerCount}</span>
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">Followers</span>
       </button>
 
       <button
@@ -34,8 +34,8 @@ export function ProfileStats({
         onClick={onFollowingClick}
         className="flex flex-col hover:opacity-70 transition-opacity"
       >
-        <span className="text-lg font-bold text-gray-900">{followingCount}</span>
-        <span className="text-xs uppercase tracking-wide text-gray-600">Following</span>
+        <span className="text-lg font-bold text-foreground">{followingCount}</span>
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">Following</span>
       </button>
     </div>
   )

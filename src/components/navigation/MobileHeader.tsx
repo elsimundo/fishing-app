@@ -18,7 +18,7 @@ export function MobileHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-[#1A2D3D] px-5 py-3 text-white border-b border-[#334155]">
+      <header className="sticky top-0 z-40 bg-background px-5 py-3 text-foreground border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/catchi-logo.svg" alt="Catchi" className="h-7 w-auto" />
@@ -28,7 +28,7 @@ export function MobileHeader() {
             <button
               type="button"
               onClick={() => navigate('/messages')}
-              className="relative rounded-full p-2 text-white hover:bg-white/10 transition-colors"
+              className="relative rounded-full p-2 text-foreground hover:bg-muted transition-colors"
               aria-label="Messages"
             >
               <MessageCircle size={20} />
@@ -38,13 +38,13 @@ export function MobileHeader() {
                 </span>
               )}
             </button>
-            <div className="[&_button]:text-white [&_button:hover]:bg-white/10">
+            <div className="[&_button]:text-foreground [&_button:hover]:bg-muted">
               <NotificationBell />
             </div>
             <button
               type="button"
               onClick={() => setShowMenu(!showMenu)}
-              className="rounded-full p-2 text-white hover:bg-white/10 transition-colors"
+              className="rounded-full p-2 text-foreground hover:bg-muted transition-colors"
               aria-label="Settings"
             >
               {showMenu ? <X size={20} /> : <Settings size={20} />}

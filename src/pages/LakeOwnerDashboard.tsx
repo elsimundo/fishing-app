@@ -134,10 +134,10 @@ export default function LakeOwnerDashboard() {
     return (
       <Layout>
         <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8">
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <Lock size={48} className="mx-auto text-gray-300" />
-            <h1 className="mt-4 text-xl font-bold text-gray-900">Access Denied</h1>
-            <p className="mt-2 text-sm text-gray-500">
+          <div className="rounded-2xl bg-card p-8 text-center shadow-sm">
+            <Lock size={48} className="mx-auto text-muted-foreground" />
+            <h1 className="mt-4 text-xl font-bold text-foreground">Access Denied</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
               Only the owner and team members can access this dashboard.
             </p>
             <Link
@@ -158,28 +158,28 @@ export default function LakeOwnerDashboard() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-gray-900"
+          className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft size={14} /> Back
         </button>
 
         {isLoading && (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="text-sm text-gray-600">Loading dashboard...</p>
+          <div className="rounded-2xl bg-card p-6 shadow-sm">
+            <p className="text-sm text-muted-foreground">Loading dashboard...</p>
           </div>
         )}
 
         {!isLoading && lake && analytics && (
           <div className="space-y-4">
             {/* Header */}
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="rounded-2xl bg-card p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
                     <BarChart3 size={20} className="text-primary" />
-                    <h1 className="text-xl font-bold text-gray-900">Owner Dashboard</h1>
+                    <h1 className="text-xl font-bold text-foreground">Owner Dashboard</h1>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">{lake.name}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{lake.name}</p>
                 </div>
                 {isPremium ? (
                   <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
@@ -226,8 +226,8 @@ export default function LakeOwnerDashboard() {
 
             {/* Premium-only: Monthly trend */}
             {isPremium ? (
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <h2 className="mb-4 text-sm font-semibold text-gray-900">Activity Trend (6 months)</h2>
+              <div className="rounded-2xl bg-card p-5 shadow-sm">
+                <h2 className="mb-4 text-sm font-semibold text-foreground">Activity Trend (6 months)</h2>
                 <div className="flex items-end gap-2 h-32">
                   {analytics.monthlyData.map((m) => {
                     const maxVal = Math.max(...analytics.monthlyData.map((d) => d.sessions + d.catches), 1)
@@ -238,39 +238,39 @@ export default function LakeOwnerDashboard() {
                           className="w-full rounded-t bg-primary/80"
                           style={{ height: `${height}%`, minHeight: m.sessions + m.catches > 0 ? '4px' : '0' }}
                         />
-                        <p className="mt-2 text-[10px] text-gray-500">{m.month}</p>
-                        <p className="text-[10px] font-medium text-gray-700">{m.sessions + m.catches}</p>
+                        <p className="mt-2 text-[10px] text-muted-foreground">{m.month}</p>
+                        <p className="text-[10px] font-medium text-foreground">{m.sessions + m.catches}</p>
                       </div>
                     )
                   })}
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-5">
+              <div className="rounded-2xl border-2 border-dashed border-border bg-muted p-5">
                 <div className="flex items-center gap-3">
-                  <Lock size={24} className="text-gray-400" />
+                  <Lock size={24} className="text-muted-foreground" />
                   <div>
-                    <h2 className="text-sm font-semibold text-gray-700">Activity Trend</h2>
-                    <p className="text-xs text-gray-500">Upgrade to Premium to see monthly trends</p>
+                    <h2 className="text-sm font-semibold text-foreground">Activity Trend</h2>
+                    <p className="text-xs text-muted-foreground">Upgrade to Premium to see monthly trends</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Top Species */}
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-gray-900">Top Species Caught</h2>
+            <div className="rounded-2xl bg-card p-5 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">Top Species Caught</h2>
               {analytics.topSpecies.length > 0 ? (
                 <div className="space-y-2">
                   {analytics.topSpecies.map(([species, count], i) => (
                     <div key={species} className="flex items-center gap-3">
-                      <span className="w-5 text-center text-xs font-bold text-gray-400">#{i + 1}</span>
+                      <span className="w-5 text-center text-xs font-bold text-muted-foreground">#{i + 1}</span>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-900">{species}</span>
-                          <span className="text-xs text-gray-500">{count} catches</span>
+                          <span className="text-sm font-medium text-foreground">{species}</span>
+                          <span className="text-xs text-muted-foreground">{count} catches</span>
                         </div>
-                        <div className="mt-1 h-1.5 w-full rounded-full bg-gray-100">
+                        <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
                           <div
                             className="h-full rounded-full bg-emerald-500"
                             style={{ width: `${(count / analytics.topSpecies[0][1]) * 100}%` }}
@@ -281,27 +281,27 @@ export default function LakeOwnerDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No catches recorded yet.</p>
+                <p className="text-sm text-muted-foreground">No catches recorded yet.</p>
               )}
             </div>
 
             {/* Best Day */}
             {analytics.bestDay && analytics.bestDay.count > 0 && (
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <h2 className="mb-2 text-sm font-semibold text-gray-900">Busiest Day</h2>
+              <div className="rounded-2xl bg-card p-5 shadow-sm">
+                <h2 className="mb-2 text-sm font-semibold text-foreground">Busiest Day</h2>
                 <p className="text-2xl font-bold text-primary">{analytics.bestDay.name}</p>
-                <p className="text-xs text-gray-500">{analytics.bestDay.count} sessions</p>
+                <p className="text-xs text-muted-foreground">{analytics.bestDay.count} sessions</p>
               </div>
             )}
 
             {/* Premium-only: Profile views placeholder */}
             {isPremium ? (
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
+              <div className="rounded-2xl bg-card p-5 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <Eye size={20} className="text-gray-400" />
+                  <Eye size={20} className="text-muted-foreground" />
                   <div>
-                    <h2 className="text-sm font-semibold text-gray-900">Profile Views</h2>
-                    <p className="text-xs text-gray-500">Coming soon - track how many anglers view your venue</p>
+                    <h2 className="text-sm font-semibold text-foreground">Profile Views</h2>
+                    <p className="text-xs text-muted-foreground">Coming soon - track how many anglers view your venue</p>
                   </div>
                 </div>
               </div>
@@ -309,7 +309,7 @@ export default function LakeOwnerDashboard() {
 
             {/* Team Management - Owner & Manager only */}
             {canEdit && (
-              <div className="rounded-2xl bg-white shadow-sm overflow-hidden">
+              <div className="rounded-2xl bg-card shadow-sm overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setShowTeamSection(!showTeamSection)}
@@ -320,17 +320,17 @@ export default function LakeOwnerDashboard() {
                       <Shield size={20} />
                     </div>
                     <div>
-                      <h2 className="text-sm font-semibold text-gray-900">Team Management</h2>
-                      <p className="text-xs text-gray-500">
+                      <h2 className="text-sm font-semibold text-foreground">Team Management</h2>
+                      <p className="text-xs text-muted-foreground">
                         {teamData?.team.length || 0} team member{(teamData?.team.length || 0) !== 1 ? 's' : ''}
                       </p>
                     </div>
                   </div>
-                  {showTeamSection ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                  {showTeamSection ? <ChevronUp size={20} className="text-muted-foreground" /> : <ChevronDown size={20} className="text-muted-foreground" />}
                 </button>
 
                 {showTeamSection && (
-                  <div className="border-t border-gray-100 p-5 space-y-4">
+                  <div className="border-t border-border p-5 space-y-4">
                     {/* Owner */}
                     {teamData?.owner && (
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50">
@@ -338,7 +338,7 @@ export default function LakeOwnerDashboard() {
                           {teamData.owner.display_name?.[0] || teamData.owner.username?.[0] || '?'}
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-foreground">
                             {teamData.owner.display_name || teamData.owner.username || 'Unknown'}
                           </p>
                           <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
@@ -364,7 +364,7 @@ export default function LakeOwnerDashboard() {
                     )}
 
                     {!isOwner && (
-                      <p className="text-xs text-gray-500 text-center py-2">
+                      <p className="text-xs text-muted-foreground text-center py-2">
                         Only the owner can add or remove team members.
                       </p>
                     )}
@@ -406,10 +406,10 @@ function StatCard({
   }
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm">
+    <div className="rounded-2xl bg-card p-4 shadow-sm">
       <div className={`inline-flex rounded-lg p-2 ${colorClasses[color]}`}>{icon}</div>
-      <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-xs text-gray-500">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   )
 }
@@ -436,7 +436,7 @@ function TeamMemberRow({
 
   const roleColors = {
     manager: 'bg-indigo-50 text-indigo-700',
-    bailiff: 'bg-gray-100 text-gray-700',
+    bailiff: 'bg-muted text-muted-foreground',
   }
 
   const handleRemove = () => {
@@ -461,12 +461,12 @@ function TeamMemberRow({
   }
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
+      <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground font-bold text-sm">
         {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">
+        <p className="text-sm font-medium text-foreground truncate">
           {member.profile?.display_name || member.profile?.username || 'Unknown'}
         </p>
         {isOwner ? (
@@ -474,7 +474,7 @@ function TeamMemberRow({
             value={member.role}
             onChange={(e) => handleRoleChange(e.target.value as 'manager' | 'bailiff')}
             disabled={isUpdating}
-            className="mt-1 text-xs rounded border-gray-200 py-0.5 px-1"
+            className="mt-1 text-xs rounded border-border bg-background py-0.5 px-1"
           >
             <option value="manager">Manager</option>
             <option value="bailiff">Bailiff</option>
@@ -490,7 +490,7 @@ function TeamMemberRow({
           type="button"
           onClick={handleRemove}
           disabled={isRemoving}
-          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
         >
           <Trash2 size={16} />
         </button>
@@ -545,8 +545,8 @@ function AddTeamMemberForm({ lakeId }: { lakeId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-gray-100 pt-4 mt-4">
-      <p className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1">
+    <form onSubmit={handleSubmit} className="border-t border-border pt-4 mt-4">
+      <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1">
         <UserPlus size={14} /> Add Team Member
       </p>
       <div className="flex gap-2">
@@ -555,12 +555,12 @@ function AddTeamMemberForm({ lakeId }: { lakeId: string }) {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Enter username"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+          className="flex-1 rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
         />
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as 'manager' | 'bailiff')}
-          className="rounded-lg border border-gray-300 px-2 py-2 text-sm"
+          className="rounded-lg border border-border bg-background text-foreground px-2 py-2 text-sm"
         >
           <option value="bailiff">Bailiff</option>
           <option value="manager">Manager</option>
@@ -573,7 +573,7 @@ function AddTeamMemberForm({ lakeId }: { lakeId: string }) {
           {isAdding || isSearching ? '...' : 'Add'}
         </button>
       </div>
-      <p className="mt-2 text-[11px] text-gray-500">
+      <p className="mt-2 text-[11px] text-muted-foreground">
         <strong>Manager:</strong> Can edit lake details and see all stats.{' '}
         <strong>Bailiff:</strong> View-only dashboard access.
       </p>

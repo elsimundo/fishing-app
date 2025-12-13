@@ -63,29 +63,29 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
 
   if (totalNearby === 0) {
     return (
-      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
-        <div className="flex items-center gap-3 text-gray-400">
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center gap-3 text-muted-foreground">
           <Fish size={20} />
           <span className="text-sm font-medium">Sessions & Catches</span>
         </div>
-        <p className="mt-2 text-xs text-gray-500">No fishing activity recorded nearby</p>
+        <p className="mt-2 text-xs text-muted-foreground">No fishing activity recorded nearby</p>
       </div>
     )
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A]">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[#1A2D3D]"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-muted"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-900/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
             <Fish size={20} className="text-emerald-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">Sessions & Catches</p>
-            <p className="text-xs text-gray-400">
+            <p className="text-sm font-semibold text-foreground">Sessions & Catches</p>
+            <p className="text-xs text-muted-foreground">
               {nearbySessions.length} sessions · {nearbyCatches.length} catches nearby
             </p>
           </div>
@@ -93,19 +93,19 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
 
         <div className="flex items-center gap-3">
           {expanded ? (
-            <ChevronUp size={20} className="text-gray-400" />
+            <ChevronUp size={20} className="text-muted-foreground" />
           ) : (
-            <ChevronDown size={20} className="text-gray-400" />
+            <ChevronDown size={20} className="text-muted-foreground" />
           )}
         </div>
       </button>
 
       {expanded && (
-        <div className="border-t border-[#334155] px-4 pb-4">
+        <div className="border-t border-border px-4 pb-4">
           {/* Sessions */}
           {nearbySessions.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Recent Sessions
               </p>
               <div className="mt-2 space-y-2">
@@ -113,7 +113,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                   <button
                     key={session.id}
                     onClick={() => navigate(`/sessions/${session.id}`)}
-                    className="flex w-full items-center justify-between rounded-lg bg-[#1A2D3D] p-3 text-left transition-colors hover:bg-[#0D4B4E]"
+                    className="flex w-full items-center justify-between rounded-lg bg-background p-3 text-left transition-colors hover:bg-muted"
                   >
                     <div className="flex items-center gap-3">
                       {session.photo_url ? (
@@ -123,23 +123,23 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/30">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
                           <span className="text-sm">🎣</span>
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-foreground">
                           {session.title || session.location_name || 'Fishing Session'}
                         </p>
                         {session.started_at && (
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {format(new Date(session.started_at), 'MMM d, yyyy')}
                           </p>
                         )}
                       </div>
                     </div>
                     {session.distance !== undefined && (
-                      <span className="text-xs font-medium text-gray-400">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {formatDistance(session.distance)}
                       </span>
                     )}
@@ -152,7 +152,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
           {/* Catches */}
           {nearbyCatches.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Recent Catches
               </p>
               <div className="mt-2 space-y-2">
@@ -160,7 +160,7 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                   <button
                     key={c.id}
                     onClick={() => navigate(`/catches/${c.id}`)}
-                    className="flex w-full items-center justify-between rounded-lg bg-[#1A2D3D] p-3 text-left transition-colors hover:bg-[#0D4B4E]"
+                    className="flex w-full items-center justify-between rounded-lg bg-background p-3 text-left transition-colors hover:bg-muted"
                   >
                     <div className="flex items-center gap-3">
                       {c.photo_url ? (
@@ -170,21 +170,21 @@ export function SessionsCatchesCard({ lat, lng, sessions, catches }: SessionsCat
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-900/30">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/30">
                           <span className="text-sm">🐟</span>
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-semibold text-white">{c.species}</p>
+                        <p className="text-sm font-semibold text-foreground">{c.species}</p>
                         {c.caught_at && (
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {format(new Date(c.caught_at), 'MMM d, yyyy')}
                           </p>
                         )}
                       </div>
                     </div>
                     {c.distance !== undefined && (
-                      <span className="text-xs font-medium text-gray-400">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {formatDistance(c.distance)}
                       </span>
                     )}

@@ -35,8 +35,8 @@ export function PrivacyStep({ data, onChange }: PrivacyStepProps) {
 
   return (
     <div>
-      <h2 className="mb-2 text-xl font-bold text-gray-900">Who can join?</h2>
-      <p className="mb-6 text-sm text-gray-600">Choose how visible your competition should be.</p>
+      <h2 className="mb-2 text-xl font-bold text-foreground">Who can join?</h2>
+      <p className="mb-6 text-sm text-muted-foreground">Choose how visible your competition should be.</p>
 
       <div className="space-y-3">
         {OPTIONS.map((option) => (
@@ -47,19 +47,19 @@ export function PrivacyStep({ data, onChange }: PrivacyStepProps) {
             className={`flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
               selectedId === option.id
                 ? 'border-navy-800 bg-navy-50'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-border hover:border-muted-foreground'
             }`}
           >
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-2xl">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-muted text-2xl">
               {option.icon}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-gray-900">{option.title}</p>
-              <p className="text-xs text-gray-600">{option.description}</p>
+              <p className="text-sm font-semibold text-foreground">{option.title}</p>
+              <p className="text-xs text-muted-foreground">{option.description}</p>
             </div>
             <div
               className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                selectedId === option.id ? 'border-primary bg-primary' : 'border-gray-300'
+                selectedId === option.id ? 'border-primary bg-primary' : 'border-muted-foreground'
               }`}
             >
               {selectedId === option.id && (

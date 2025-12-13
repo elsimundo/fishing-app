@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="rounded-xl bg-surface p-6 shadow-lg">
           <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>
-          <p className="mb-6 text-center text-sm text-slate-600">Reset your password</p>
+          <p className="mb-6 text-center text-sm text-muted-foreground">Reset your password</p>
 
           {isSubmitted ? (
             <div className="space-y-4">
@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
                   We've sent a password reset link to your email address. Click the link to reset your password.
                 </p>
               </div>
-              <p className="text-center text-xs text-slate-500">
+              <p className="text-center text-xs text-muted-foreground">
                 Didn't receive the email? Check your spam folder or{' '}
                 <button
                   type="button"
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="email">
+                <label className="mb-1 block text-sm font-medium text-muted-foreground" htmlFor="email">
                   Email address
                 </label>
                 <input
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   {...register('email')}
                 />
                 {errors.email && (
@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <p className="mt-4 text-center text-xs text-slate-600">
+        <p className="mt-4 text-center text-xs text-muted-foreground">
           Remember your password?{' '}
           <Link to="/login" className="font-medium text-navy-800 hover:underline">
             Sign in

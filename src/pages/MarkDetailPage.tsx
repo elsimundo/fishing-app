@@ -79,7 +79,7 @@ export default function MarkDetailPage() {
     return (
       <Layout>
         <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-6">
-          <p className="text-sm text-gray-400">Loading mark...</p>
+          <p className="text-sm text-muted-foreground">Loading mark...</p>
         </main>
       </Layout>
     )
@@ -89,7 +89,7 @@ export default function MarkDetailPage() {
     return (
       <Layout>
         <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-6">
-          <p className="text-sm text-gray-400">Mark not found</p>
+          <p className="text-sm text-muted-foreground">Mark not found</p>
           <Link to="/explore" className="mt-4 text-sm text-[#1BA9A0] hover:underline">
             Back to Explore
           </Link>
@@ -148,17 +148,17 @@ export default function MarkDetailPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-white"
+          className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft size={14} /> Back
         </button>
 
         {/* Header */}
-        <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-sm">
+        <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-xl font-bold text-white">{mark.name}</h1>
-              <p className="mt-1 text-sm text-gray-400">
+              <h1 className="text-xl font-bold text-foreground">{mark.name}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {mark.water_type?.charAt(0).toUpperCase()}{mark.water_type?.slice(1)} fishing spot
               </p>
             </div>
@@ -171,11 +171,11 @@ export default function MarkDetailPage() {
       {/* Leave shared mark modal */}
       {showLeaveModal && mark && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl bg-card border border-border p-5 shadow-xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-base font-semibold text-white">Leave this shared mark?</h2>
-                <p className="mt-1 text-xs text-gray-400">
+                <h2 className="text-base font-semibold text-foreground">Leave this shared mark?</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
                   You&apos;ll lose access to <span className="font-semibold">{mark.name}</span>, but your
                   own sessions and catches at this spot will stay in your logbook.
                 </p>
@@ -183,10 +183,10 @@ export default function MarkDetailPage() {
               <button
                 type="button"
                 onClick={() => !isSavingCopy && setShowLeaveModal(false)}
-                className="rounded-full p-1 hover:bg-[#334155] disabled:opacity-50"
+                className="rounded-full p-1 hover:bg-muted disabled:opacity-50"
                 disabled={isSavingCopy || leaveMark.isPending}
               >
-                <X size={16} className="text-gray-500" />
+                <X size={16} className="text-muted-foreground" />
               </button>
             </div>
 
@@ -195,7 +195,7 @@ export default function MarkDetailPage() {
                 type="button"
                 onClick={() => handleConfirmLeave(true)}
                 disabled={isSavingCopy || leaveMark.isPending}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
               >
                 {isSavingCopy ? 'Saving your mark…' : 'Save as my mark & leave'}
               </button>
@@ -203,13 +203,13 @@ export default function MarkDetailPage() {
                 type="button"
                 onClick={() => handleConfirmLeave(false)}
                 disabled={leaveMark.isPending}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-[#334155] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
               >
                 {leaveMark.isPending ? 'Leaving…' : 'Just leave'}
               </button>
             </div>
 
-            <p className="mt-3 text-center text-[11px] text-gray-500">
+            <p className="mt-3 text-center text-[11px] text-muted-foreground">
               Your existing sessions and catches at this location will not be deleted.
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function MarkDetailPage() {
           </div>
 
           {/* Coordinates */}
-          <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin size={14} />
             <span>
               {mark.latitude.toFixed(5)}, {mark.longitude.toFixed(5)}
@@ -226,7 +226,7 @@ export default function MarkDetailPage() {
           </div>
 
           {/* Map preview of this mark */}
-          <div className="mt-4 h-64 overflow-hidden rounded-xl border border-[#334155]">
+          <div className="mt-4 h-64 overflow-hidden rounded-xl border border-border">
             <ExploreMap
               markers={[
                 {
@@ -247,7 +247,7 @@ export default function MarkDetailPage() {
               href={`https://www.google.com/maps/dir/?api=1&destination=${mark.latitude},${mark.longitude}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-[#334155] bg-[#1A2D3D] py-2.5 text-sm font-medium text-gray-300 hover:bg-[#334155]"
+              className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               <Navigation size={16} />
               Directions
@@ -255,7 +255,7 @@ export default function MarkDetailPage() {
             <button
               type="button"
               onClick={() => navigate('/sessions/new', { state: { markId: mark.id, markName: mark.name } })}
-              className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#1BA9A0] py-2.5 text-sm font-medium text-white hover:bg-[#14B8A6]"
+              className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-navy-800 py-2.5 text-sm font-medium text-white hover:bg-navy-900"
             >
               <MapPin size={16} />
               Log Session
@@ -269,7 +269,7 @@ export default function MarkDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowShareModal(true)}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-[#334155] bg-[#1A2D3D] py-2.5 text-sm font-medium text-gray-300 hover:bg-[#334155]"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                 >
                   <Share2 size={16} />
                   Share
@@ -278,7 +278,7 @@ export default function MarkDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowManageShares(true)}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-[#334155] bg-[#1A2D3D] py-2.5 text-sm font-medium text-gray-300 hover:bg-[#334155]"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                   >
                     <Users size={16} />
                     Manage ({shares.length})
@@ -303,7 +303,7 @@ export default function MarkDetailPage() {
               type="button"
               onClick={() => setShowLeaveModal(true)}
               disabled={leaveMark.isPending}
-              className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border border-[#334155] bg-[#1A2D3D] py-2.5 text-sm font-medium text-gray-300 hover:bg-[#334155] disabled:opacity-50"
+              className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
               <LogOut size={16} />
               {leaveMark.isPending ? 'Leaving...' : 'Leave Shared Mark'}
@@ -312,51 +312,51 @@ export default function MarkDetailPage() {
 
           {/* Notes */}
           {mark.notes && (
-            <div className="mt-4 rounded-lg bg-[#1A2D3D] p-3">
-              <p className="text-xs font-medium text-gray-500 mb-1">Notes</p>
-              <p className="text-sm text-gray-300">{mark.notes}</p>
+            <div className="mt-4 rounded-lg bg-background p-3">
+              <p className="text-xs font-medium text-muted-foreground mb-1">Notes</p>
+              <p className="text-sm text-muted-foreground">{mark.notes}</p>
             </div>
           )}
         </div>
 
         {/* Stats */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-400">
+          <div className="rounded-xl bg-card border border-border p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar size={16} />
               <span className="text-xs">Sessions</span>
             </div>
-            <p className="mt-1 text-2xl font-bold text-white">{totalSessions}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{totalSessions}</p>
           </div>
-          <div className="rounded-xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-400">
+          <div className="rounded-xl bg-card border border-border p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Fish size={16} />
               <span className="text-xs">Catches</span>
             </div>
-            <p className="mt-1 text-2xl font-bold text-white">{totalCatches}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{totalCatches}</p>
           </div>
         </div>
 
         {/* Recent Sessions */}
         {sessions && sessions.length > 0 && (
           <div className="mt-4">
-            <h2 className="text-sm font-semibold text-white mb-3">Recent Sessions</h2>
+            <h2 className="text-sm font-semibold text-foreground mb-3">Recent Sessions</h2>
             <div className="space-y-2">
               {sessions.slice(0, 5).map((session) => (
                 <Link
                   key={session.id}
                   to={`/sessions/${session.id}`}
-                  className="flex items-center justify-between rounded-xl bg-[#243B4A] border border-[#334155] p-3 shadow-sm hover:bg-[#1A2D3D]"
+                  className="flex items-center justify-between rounded-xl bg-card border border-border p-3 shadow-sm hover:bg-background"
                 >
                   <div>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-foreground">
                       {session.title || session.location_name || 'Fishing session'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {format(new Date(session.started_at), 'MMM d, yyyy')}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock size={12} />
                     {session.ended_at ? 'Completed' : 'Active'}
                   </div>
@@ -369,7 +369,7 @@ export default function MarkDetailPage() {
         {/* Recent Catches */}
         {catches && catches.length > 0 && (
           <div className="mt-4">
-            <h2 className="text-sm font-semibold text-white mb-3">Recent Catches</h2>
+            <h2 className="text-sm font-semibold text-foreground mb-3">Recent Catches</h2>
             <div className="space-y-3">
               {catches.slice(0, 5).map((catchItem) => (
                 <CatchCard key={catchItem.id} item={catchItem} />
@@ -380,10 +380,10 @@ export default function MarkDetailPage() {
 
         {/* Empty state */}
         {totalSessions === 0 && totalCatches === 0 && (
-          <div className="mt-6 rounded-xl bg-[#243B4A] border border-[#334155] p-6 text-center">
+          <div className="mt-6 rounded-xl bg-card border border-border p-6 text-center">
             <span className="text-3xl">🎣</span>
-            <p className="mt-2 text-sm font-medium text-gray-300">No activity yet</p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-2 text-sm font-medium text-muted-foreground">No activity yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               Start a session at this mark to track your catches
             </p>
           </div>
@@ -400,20 +400,20 @@ export default function MarkDetailPage() {
         {/* Manage Shares Modal */}
         {showManageShares && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-md rounded-xl bg-[#243B4A] border border-[#334155] overflow-hidden">
-              <div className="flex items-center justify-between border-b border-[#334155] px-4 py-3">
-                <h3 className="text-sm font-semibold text-white">Manage Access</h3>
+            <div className="w-full max-w-md rounded-xl bg-card border border-border overflow-hidden">
+              <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                <h3 className="text-sm font-semibold text-foreground">Manage Access</h3>
                 <button
                   type="button"
                   onClick={() => setShowManageShares(false)}
-                  className="text-gray-400 hover:text-white"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <X size={18} />
                 </button>
               </div>
               <div className="max-h-80 overflow-y-auto p-4">
                 {shares.length === 0 ? (
-                  <p className="text-center text-sm text-gray-500 py-4">
+                  <p className="text-center text-sm text-muted-foreground py-4">
                     Not shared with anyone yet
                   </p>
                 ) : (
@@ -421,7 +421,7 @@ export default function MarkDetailPage() {
                     {shares.map((share) => (
                       <div
                         key={share.id}
-                        className="flex items-center justify-between rounded-lg bg-[#1A2D3D] p-3"
+                        className="flex items-center justify-between rounded-lg bg-background p-3"
                       >
                         <div className="flex items-center gap-3">
                           {share.shared_with_user?.avatar_url ? (
@@ -431,15 +431,15 @@ export default function MarkDetailPage() {
                               className="h-8 w-8 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#334155] text-xs font-medium text-gray-300">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
                               {(share.shared_with_user?.username || share.shared_with_user?.full_name || '?')[0].toUpperCase()}
                             </div>
                           )}
                           <div>
-                            <p className="text-sm font-medium text-white">
+                            <p className="text-sm font-medium text-foreground">
                               {share.shared_with_user?.username || share.shared_with_user?.full_name || 'Unknown'}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-muted-foreground">
                               Shared {format(new Date(share.created_at), 'MMM d, yyyy')}
                             </p>
                           </div>

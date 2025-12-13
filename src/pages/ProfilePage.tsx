@@ -125,18 +125,18 @@ export default function ProfilePage() {
     : 0
 
   return (
-    <div className="min-h-screen bg-[#1A2D3D]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-[#334155] bg-[#243B4A] px-5 pt-4 pb-3 flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-border bg-card px-5 pt-4 pb-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Profile</p>
-          <p className="text-lg font-bold text-white">@{profile.username || profile.full_name || 'angler'}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Profile</p>
+          <p className="text-lg font-bold text-foreground">@{profile.username || profile.full_name || 'angler'}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => navigate('/messages')}
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-[#1A2D3D] text-white hover:bg-[#0D4B4E]"
+            className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground hover:bg-muted/80"
           >
             <MessageCircle size={18} />
             {unreadCount > 0 && (
@@ -147,14 +147,14 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1A2D3D] text-white hover:bg-[#0D4B4E]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground hover:bg-muted/80"
           >
             <Share2 size={18} />
           </button>
           <button
             type="button"
             onClick={() => setShowEditModal(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1A2D3D] text-white hover:bg-[#0D4B4E]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground hover:bg-muted/80"
           >
             <Settings size={18} />
           </button>
@@ -162,7 +162,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile hero & gamification */}
-      <div className="border-b border-[#334155] bg-[#243B4A] px-5 py-4">
+      <div className="border-b border-border bg-card px-5 py-4">
         <ProfileHero profile={profile} level={level} xp={xp} />
 
         {/* Stats grid */}
@@ -199,22 +199,22 @@ export default function ProfilePage() {
 
         {/* This week's challenge */}
         {currentChallenge && (
-          <div className="mt-4 rounded-xl border border-[#334155] bg-[#1A2D3D] p-3">
+          <div className="mt-4 rounded-xl border border-border bg-background p-3">
             <div className="mb-1 flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-[#1BA9A0]">🔥 This week's challenge</p>
-              <span className="text-[11px] text-gray-400">{currentChallenge.difficulty}</span>
+              <p className="text-[13px] font-semibold text-primary">🔥 This week's challenge</p>
+              <span className="text-[11px] text-muted-foreground">{currentChallenge.difficulty}</span>
             </div>
-            <p className="text-xs text-white font-medium">{currentChallenge.title}</p>
-            <p className="mt-0.5 text-[11px] text-gray-400">
+            <p className="text-xs font-medium text-foreground">{currentChallenge.title}</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
               {currentChallenge.description}
             </p>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#334155]">
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#1BA9A0] to-[#14B8A6]"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70"
                 style={{ width: `${currentChallengePct}%` }}
               />
             </div>
-            <p className="mt-1 text-[11px] text-gray-400">
+            <p className="mt-1 text-[11px] text-muted-foreground">
               {currentChallengeProgress
                 ? `${currentChallengeProgress.progress}/${currentChallengeProgress.target} · +${currentChallenge.xp_reward} XP`
                 : `0/${(currentChallenge as any).criteria?.target ?? currentChallenge.xp_reward} · +${currentChallenge.xp_reward} XP`}
@@ -227,14 +227,14 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setShowEditModal(true)}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-[#1BA9A0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+            className="flex-1 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-primary/60"
           >
             ✏️ Edit profile
           </button>
           <button
             type="button"
             onClick={() => navigate('/catches/new')}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-[#1A2D3D] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0D4B4E]"
+            className="flex-1 inline-flex items-center justify-center rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
           >
             🎣 Log catch
           </button>
@@ -242,13 +242,13 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="sticky top-0 z-10 mt-2 border-b border-[#334155] bg-[#243B4A]">
-        <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-gray-400 md:justify-center">
+      <div className="sticky top-0 z-10 mt-2 border-b border-border bg-card">
+        <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-muted-foreground md:justify-center">
           <button
             type="button"
             onClick={() => setActiveTab('posts')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'posts' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
+              activeTab === 'posts' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -260,7 +260,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('sessions')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'sessions' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
+              activeTab === 'sessions' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -272,7 +272,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('catches')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'catches' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
+              activeTab === 'catches' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -284,7 +284,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('species')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'species' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
+              activeTab === 'species' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -296,7 +296,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setActiveTab('achievements')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
-              activeTab === 'achievements' ? 'text-[#1BA9A0] border-b-2 border-[#1BA9A0]' : 'text-gray-500'
+              activeTab === 'achievements' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
@@ -314,12 +314,12 @@ export default function ProfilePage() {
           <div>
             {postsLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : !posts || (posts as any[]).length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-400">
-                <p className="mb-1 font-medium text-white">No posts yet</p>
-                <p className="text-xs text-gray-500">Share a great session, catch, or photo from your logbook.</p>
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                <p className="mb-1 font-medium text-foreground">No posts yet</p>
+                <p className="text-xs text-muted-foreground">Share a great session, catch, or photo from your logbook.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -362,9 +362,9 @@ export default function ProfilePage() {
 
               if (items.length === 0) {
                 return (
-                  <div className="py-10 text-center text-sm text-gray-400">
-                    <p className="mb-1 font-medium text-white">No sessions yet</p>
-                    <p className="text-xs text-gray-500">Start a session from Explore or the Logbook to track your fishing.</p>
+                  <div className="py-10 text-center text-sm text-muted-foreground">
+                    <p className="mb-1 font-medium text-foreground">No sessions yet</p>
+                    <p className="text-xs text-muted-foreground">Start a session from Explore or the Logbook to track your fishing.</p>
                   </div>
                 )
               }
@@ -387,7 +387,7 @@ export default function ProfilePage() {
                               ? 'border-emerald-500/40 bg-emerald-900/20 hover:border-emerald-400'
                               : isCompetition
                               ? 'border-amber-500/40 bg-amber-900/20 hover:border-amber-400'
-                              : 'border-[#334155] bg-[#243B4A] hover:border-[#1BA9A0]/40'
+                              : 'border-border bg-card hover:border-primary/40'
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -400,7 +400,7 @@ export default function ProfilePage() {
                             )}
 
                             <div className="flex-1">
-                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-400">
+                              <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
                                 <div className="flex items-center gap-1.5">
                                   {isCompetition && (
                                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 px-2 py-0.5 font-medium text-amber-400">
@@ -411,8 +411,8 @@ export default function ProfilePage() {
                                   <span
                                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
                                       typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
-                                        ? 'bg-[#1A2D3D] text-gray-300'
-                                        : 'bg-[#1A2D3D] text-gray-300'
+                                        ? 'bg-muted text-muted-foreground'
+                                        : 'bg-muted text-muted-foreground'
                                     }`}
                                   >
                                     {typeof session.water_type === 'string' && (session.water_type.toLowerCase().includes('salt') || session.water_type.toLowerCase().includes('sea') || session.water_type.toLowerCase().includes('coastal'))
@@ -436,10 +436,10 @@ export default function ProfilePage() {
                                   </span>
                                 </div>
                               </div>
-                              <p className="text-sm font-semibold text-white">
+                              <p className="text-sm font-semibold text-foreground">
                                 {session.title || session.location_name || 'Fishing session'}
                               </p>
-                              <p className="mt-0.5 text-xs text-gray-400">
+                              <p className="mt-0.5 text-xs text-muted-foreground">
                                 📍 {session.location_name || 'Unknown location'}
                               </p>
                             </div>
@@ -462,7 +462,7 @@ export default function ProfilePage() {
                               ? 'border-amber-500/40 bg-amber-900/20 hover:border-amber-400'
                               : isUpcoming
                               ? 'border-blue-500/40 bg-blue-900/20 hover:border-blue-400'
-                              : 'border-[#334155] bg-[#243B4A] hover:border-[#1BA9A0]/40'
+                              : 'border-border bg-card hover:border-primary/40'
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -474,16 +474,16 @@ export default function ProfilePage() {
                               />
                             ) : (
                               <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${
-                                isLive ? 'bg-amber-900/30' : isUpcoming ? 'bg-blue-900/30' : 'bg-[#1A2D3D]'
+                                isLive ? 'bg-amber-900/30' : isUpcoming ? 'bg-blue-900/30' : 'bg-muted'
                               }`}>
                                 <Swords size={20} className={
-                                  isLive ? 'text-amber-400' : isUpcoming ? 'text-blue-400' : 'text-gray-400'
+                                  isLive ? 'text-amber-400' : isUpcoming ? 'text-blue-400' : 'text-muted-foreground'
                                 } />
                               </div>
                             )}
 
                             <div className="flex-1">
-                              <div className="mb-1 flex items-center justify-between text-[11px] text-gray-400">
+                              <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
                                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 px-2 py-0.5 font-medium text-amber-400">
                                   <Trophy size={10} />
                                   Competition
@@ -509,10 +509,10 @@ export default function ProfilePage() {
                                   </span>
                                 </div>
                               </div>
-                              <p className="text-sm font-semibold text-white">
+                              <p className="text-sm font-semibold text-foreground">
                                 {competition.title}
                               </p>
-                              <p className="mt-0.5 text-xs text-gray-400">
+                              <p className="mt-0.5 text-xs text-muted-foreground">
                                 👥 {competition.participant_count ?? 0} anglers
                                 {competition.prize && ` · 🏆 ${competition.prize}`}
                               </p>
@@ -532,9 +532,9 @@ export default function ProfilePage() {
         {activeTab === 'catches' && (
           <div>
             {!catches || catches.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-400">
-                <p className="mb-1 font-medium text-white">No catches logged</p>
-                <p className="text-xs text-gray-500">Log your first catch from a session or directly from the logbook.</p>
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                <p className="mb-1 font-medium text-foreground">No catches logged</p>
+                <p className="text-xs text-muted-foreground">Log your first catch from a session or directly from the logbook.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -557,7 +557,7 @@ export default function ProfilePage() {
             {/* Competition Placements */}
             {competitionPlacements.length > 0 && (
               <div>
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Trophy className="h-4 w-4 text-amber-500" />
                   Competition Wins
                 </h3>
@@ -566,10 +566,10 @@ export default function ProfilePage() {
                     const positionEmoji = placement.position === 1 ? '🥇' : placement.position === 2 ? '🥈' : '🥉'
                     const positionLabel = placement.position === 1 ? '1st Place' : placement.position === 2 ? '2nd Place' : '3rd Place'
                     const bgColor = placement.position === 1 
-                      ? 'border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50' 
+                      ? 'border-amber-500/30 bg-amber-500/10' 
                       : placement.position === 2 
-                      ? 'border-gray-300 bg-gradient-to-r from-gray-50 to-slate-100'
-                      : 'border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50'
+                      ? 'border-border bg-muted/40'
+                      : 'border-orange-500/30 bg-orange-500/10'
                     
                     return (
                       <button
@@ -578,17 +578,17 @@ export default function ProfilePage() {
                         onClick={() => navigate(`/compete/${placement.competitionId}`)}
                         className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left shadow-sm transition-colors hover:shadow-md ${bgColor}`}
                       >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/80 text-2xl shadow-sm">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-background/80 text-2xl shadow-sm">
                           {positionEmoji}
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900">{placement.competitionTitle}</p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-sm font-semibold text-foreground">{placement.competitionTitle}</p>
+                          <p className="text-xs text-muted-foreground">
                             {positionLabel}
                             {placement.totalWeight ? ` · ${placement.totalWeight.toFixed(2)} kg` : ''}
                             {placement.catchCount ? ` · ${placement.catchCount} catches` : ''}
                           </p>
-                          <p className="mt-0.5 text-[11px] text-gray-500">
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">
                             {new Date(placement.endedAt).toLocaleDateString(undefined, {
                               day: 'numeric',
                               month: 'short',
@@ -606,7 +606,7 @@ export default function ProfilePage() {
             {/* Challenge Badges Section */}
             {userChallenges.length > 0 && (
               <div>
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Swords className="h-4 w-4 text-cyan-600" />
                   Challenge Badges
                 </h3>
@@ -614,9 +614,9 @@ export default function ProfilePage() {
             )}
 
             {userChallenges.length === 0 && competitionPlacements.length === 0 && (
-              <div className="py-10 text-center text-sm text-gray-500">
-                <p className="mb-1 font-medium text-gray-900">No achievements yet</p>
-                <p className="text-xs text-gray-500">Complete challenges and win competitions to unlock achievements.</p>
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                <p className="mb-1 font-medium text-foreground">No achievements yet</p>
+                <p className="text-xs text-muted-foreground">Complete challenges and win competitions to unlock achievements.</p>
               </div>
             )}
 
@@ -633,39 +633,39 @@ export default function ProfilePage() {
                     onClick={() => navigate(`/challenges/${uc.challenge?.slug}`)}
                     className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm shadow-sm transition-colors ${
                       completed
-                        ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-150'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                        ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/15'
+                        : 'border-border bg-card hover:bg-muted'
                     }`}
                   >
                     <div
                       className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
-                        completed ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600'
+                        completed ? 'bg-emerald-500 text-white' : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {uc.challenge?.icon || '🎣'}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-foreground">
                         {uc.challenge?.title || 'Challenge'}
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-muted-foreground">
                         {uc.challenge?.description || ''}
                       </p>
                       {!completed && (
                         <div className="mt-1">
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                             <div
                               className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
-                          <p className="mt-0.5 text-[11px] text-gray-600">
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">
                             {uc.progress}/{uc.target} · {pct}%
                           </p>
                         </div>
                       )}
                       {completed && (
-                        <p className="mt-0.5 text-[11px] font-semibold text-emerald-800">
+                        <p className="mt-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
                           ✓ Completed · +{uc.xp_awarded} XP
                         </p>
                       )}

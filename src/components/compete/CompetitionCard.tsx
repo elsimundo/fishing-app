@@ -46,13 +46,13 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
       className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm shadow-sm transition-colors ${
         isActive
           ? 'border-amber-500/40 bg-gradient-to-r from-amber-900/30 to-yellow-900/20 hover:from-amber-900/40 hover:to-yellow-900/30'
-          : 'border-[#334155] bg-[#243B4A] hover:border-[#1BA9A0]/40 hover:bg-[#1A2D3D]'
+          : 'border-border bg-card hover:border-primary/40 hover:bg-background'
       }`}
     >
       {/* Icon */}
       <div
         className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-xl ${
-          isActive ? 'bg-amber-500 text-white' : 'bg-[#1A2D3D] text-gray-400'
+          isActive ? 'bg-amber-500 text-white' : 'bg-background text-muted-foreground'
         }`}
       >
         <Swords size={24} />
@@ -61,7 +61,7 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
       {/* Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold text-white">
+          <p className="truncate text-sm font-semibold text-foreground">
             {competition.title}
           </p>
           {isActive && (
@@ -76,10 +76,10 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
             </span>
           )}
         </div>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground">
           {typeInfo.icon} {typeInfo.label}
         </p>
-        <div className="mt-1 flex items-center gap-3 text-[11px] text-gray-500">
+        <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1">
             <Users size={12} />
             {competition.participant_count ?? 0} anglers
@@ -100,7 +100,7 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
       </div>
 
       {/* Chevron */}
-      <ChevronRight size={18} className="flex-shrink-0 text-gray-400" />
+      <ChevronRight size={18} className="flex-shrink-0 text-muted-foreground" />
     </button>
   )
 }

@@ -44,18 +44,18 @@ export function DeleteAccountModal({ onClose }: DeleteAccountModalProps) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-[#243B4A] border border-[#334155] shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-900/30">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
               <AlertTriangle className="h-5 w-5 text-red-400" />
             </div>
-            <h2 className="text-lg font-bold text-white">Delete Account</h2>
+            <h2 className="text-lg font-bold text-foreground">Delete Account</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 hover:bg-[#334155] hover:text-white"
+            className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X size={20} />
           </button>
@@ -63,7 +63,7 @@ export function DeleteAccountModal({ onClose }: DeleteAccountModalProps) {
 
         {/* Content */}
         <div className="px-5 py-4">
-          <div className="mb-4 rounded-xl bg-amber-900/30 border border-amber-500/40 p-4">
+          <div className="mb-4 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-500/40 p-4">
             <h3 className="mb-2 font-semibold text-amber-300">What happens when you delete:</h3>
             <ul className="space-y-1 text-sm text-amber-400">
               <li>• Your profile will be hidden immediately</li>
@@ -74,14 +74,14 @@ export function DeleteAccountModal({ onClose }: DeleteAccountModalProps) {
             </ul>
           </div>
 
-          <div className="mb-4 rounded-xl bg-blue-900/30 border border-blue-500/40 p-4">
+          <div className="mb-4 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 p-4">
             <p className="text-sm text-blue-300">
               <strong>Want to come back?</strong> Just log in within 30 days and your account will be restored.
             </p>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-400">
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
               Type <span className="font-bold text-red-400">delete my account</span> to confirm
             </label>
             <input
@@ -89,23 +89,23 @@ export function DeleteAccountModal({ onClose }: DeleteAccountModalProps) {
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder="delete my account"
-              className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm text-white focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 border-t border-[#334155] px-5 py-4">
+        <div className="flex gap-3 border-t border-border px-5 py-4">
           <button
             onClick={onClose}
-            className="flex-1 rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 font-semibold text-gray-300 transition-colors hover:bg-[#334155]"
+            className="flex-1 rounded-xl border border-border bg-background px-4 py-3 font-semibold text-muted-foreground transition-colors hover:bg-muted"
           >
             Cancel
           </button>
           <button
             onClick={handleDelete}
             disabled={!canDelete || isDeleting}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-red-700 disabled:bg-[#334155] disabled:text-gray-500"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-red-700 disabled:bg-muted disabled:text-muted-foreground"
           >
             {isDeleting ? (
               <>

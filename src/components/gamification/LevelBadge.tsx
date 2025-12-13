@@ -18,9 +18,9 @@ export function LevelBadge({ level, size = 'md', showTier = false, className = '
       label: 'Bronze',
     },
     silver: {
-      bg: 'bg-gradient-to-br from-gray-300 to-gray-500',
-      border: 'ring-gray-200',
-      text: 'text-gray-800',
+      bg: 'bg-gradient-to-br from-slate-300 to-slate-500',
+      border: 'ring-slate-200',
+      text: 'text-slate-800',
       label: 'Silver',
     },
     gold: {
@@ -69,7 +69,7 @@ export function LevelBadge({ level, size = 'md', showTier = false, className = '
         {level}
       </div>
       {showTier && (
-        <span className="text-xs text-gray-500">{config.label}</span>
+        <span className="text-xs text-muted-foreground">{config.label}</span>
       )}
     </div>
   )
@@ -81,7 +81,7 @@ export function LevelBadgeInline({ level }: { level: number }) {
   
   const tierColors = {
     bronze: 'bg-amber-100 text-amber-700 border-amber-300',
-    silver: 'bg-gray-100 text-gray-700 border-gray-300',
+    silver: 'bg-slate-100 text-slate-700 border-slate-300',
     gold: 'bg-yellow-100 text-yellow-700 border-yellow-300',
     platinum: 'bg-cyan-100 text-cyan-700 border-cyan-300',
     diamond: 'bg-purple-100 text-purple-700 border-purple-300',

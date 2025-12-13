@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 import { LOCATION_PRIVACY_OPTIONS } from '../lib/constants'
 import { useFreshwaterEnabled } from '../hooks/useFeatureFlags'
+import { useTheme } from '../hooks/useTheme'
+import { Switch } from '../components/ui/switch'
 
 export default function SettingsPage() {
   const { user } = useAuth()
@@ -13,6 +15,7 @@ export default function SettingsPage() {
   const [showFishingPrefs, setShowFishingPrefs] = useState(false)
   const [isSavingPrivacy, setIsSavingPrivacy] = useState(false)
   const freshwaterEnabled = useFreshwaterEnabled()
+  const { theme, setTheme } = useTheme()
 
   type IdlePrefs = {
     // All values are in HOURS in the UI/storage
@@ -107,27 +110,43 @@ export default function SettingsPage() {
 
   if (!user || !profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#1A2D3D]">
-        <p className="text-sm text-gray-400">Loading settings…</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading settings…</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#1A2D3D]">
-      <div className="border-b border-[#334155] bg-[#243B4A] px-5 py-4">
-        <h1 className="text-xl font-bold text-white">Settings & Preferences</h1>
-        <p className="mt-1 text-sm text-gray-400">Control how the app works for you.</p>
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border bg-card px-5 py-4">
+        <h1 className="text-xl font-bold text-foreground">Settings & Preferences</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Control how the app works for you.</p>
       </div>
 
       <main className="mx-auto max-w-3xl px-5 py-6 space-y-4">
+        <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Appearance</h2>
+              <p className="mt-1 text-xs text-muted-foreground">Toggle between dark mode and a light mode.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Light</span>
+              <Switch
+                checked={theme === 'light'}
+                onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
+              />
+            </div>
+          </div>
+        </section>
+
         {/* Idle session settings */}
         {idlePrefs && (
-          <section className="rounded-2xl bg-[#243B4A] p-4 shadow-sm border border-[#334155]">
+          <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-white">Session idle time</h2>
-                <p className="mt-1 text-xs text-gray-400">
+                <h2 className="text-sm font-semibold text-foreground">Session idle time</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
                   Control how long we keep a session running with no activity before warning you and then
                   automatically ending it. Times are in <span className="font-semibold">hours</span>. We&apos;ll use
                   sensible defaults if you leave these alone.
@@ -135,15 +154,15 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-3 text-xs text-gray-300">
+            <div className="space-y-3 text-xs text-muted-foreground">
               {/* Sea / saltwater */}
-              <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-[#334155] pt-3 first:border-t-0 first:pt-0">
+              <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-border pt-3 first:border-t-0 first:pt-0">
                 <div>
-                  <p className="font-semibold text-white">Sea fishing</p>
-                  <p className="text-[11px] text-gray-500">Pier, boat, beach, shore sessions.</p>
+                  <p className="font-semibold text-foreground">Sea fishing</p>
+                  <p className="text-[11px] text-muted-foreground">Pier, boat, beach, shore sessions.</p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
+                  <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Warn after (hours)</label>
                   <input
                     type="number"
                     min={1}
@@ -151,11 +170,11 @@ export default function SettingsPage() {
                     step={0.5}
                     value={idlePrefs.seaWarn}
                     onChange={(e) => updateIdlePref('seaWarn', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-2 py-1.5 text-xs text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                    className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
+                  <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Auto-end after (hours)</label>
                   <input
                     type="number"
                     min={2}
@@ -163,20 +182,20 @@ export default function SettingsPage() {
                     step={0.5}
                     value={idlePrefs.seaEnd}
                     onChange={(e) => updateIdlePref('seaEnd', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-2 py-1.5 text-xs text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                    className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                   />
                 </div>
               </div>
 
               {/* Lakes / stillwater - only show when freshwater enabled */}
               {freshwaterEnabled && (
-                <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-[#334155] pt-3">
+                <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-border pt-3">
                   <div>
-                    <p className="font-semibold text-white">Lakes & stillwaters</p>
-                    <p className="text-[11px] text-gray-500">Typical carp/coarse sessions.</p>
+                    <p className="font-semibold text-foreground">Lakes & stillwaters</p>
+                    <p className="text-[11px] text-muted-foreground">Typical carp/coarse sessions.</p>
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
+                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Warn after (hours)</label>
                     <input
                       type="number"
                       min={0.5}
@@ -184,11 +203,11 @@ export default function SettingsPage() {
                       step={0.5}
                       value={idlePrefs.lakeWarn}
                       onChange={(e) => updateIdlePref('lakeWarn', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-2 py-1.5 text-xs text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
+                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Auto-end after (hours)</label>
                     <input
                       type="number"
                       min={1}
@@ -196,7 +215,7 @@ export default function SettingsPage() {
                       step={0.5}
                       value={idlePrefs.lakeEnd}
                       onChange={(e) => updateIdlePref('lakeEnd', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-2 py-1.5 text-xs text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                     />
                   </div>
                 </div>
@@ -204,13 +223,13 @@ export default function SettingsPage() {
 
               {/* Rivers / canals - only show when freshwater enabled */}
               {freshwaterEnabled && (
-                <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-[#334155] pt-3">
+                <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-t border-border pt-3">
                   <div>
-                    <p className="font-semibold text-white">Rivers & canals</p>
-                    <p className="text-[11px] text-gray-500">Usually shorter mobile sessions.</p>
+                    <p className="font-semibold text-foreground">Rivers & canals</p>
+                    <p className="text-[11px] text-muted-foreground">Usually shorter mobile sessions.</p>
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Warn after (hours)</label>
+                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Warn after (hours)</label>
                     <input
                       type="number"
                       min={0.25}
@@ -218,11 +237,11 @@ export default function SettingsPage() {
                       step={0.25}
                       value={idlePrefs.riverWarn}
                       onChange={(e) => updateIdlePref('riverWarn', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-2 py-1.5 text-xs text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-medium text-gray-500">Auto-end after (hours)</label>
+                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Auto-end after (hours)</label>
                     <input
                       type="number"
                       min={0.5}
@@ -230,13 +249,13 @@ export default function SettingsPage() {
                       step={0.25}
                       value={idlePrefs.riverEnd}
                       onChange={(e) => updateIdlePref('riverEnd', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-2 py-1.5 text-xs text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
                     />
                   </div>
                 </div>
               )}
 
-              <p className="mt-2 text-[11px] text-gray-500">
+              <p className="mt-2 text-[11px] text-muted-foreground">
                 We&apos;ll store these on this device for now. Later we can sync them to your account so they follow
                 you everywhere.
               </p>
@@ -246,11 +265,11 @@ export default function SettingsPage() {
 
         {/* Fishing style - only show when freshwater is enabled */}
         {freshwaterEnabled && (
-          <section className="rounded-2xl bg-[#243B4A] p-4 shadow-sm border border-[#334155]">
+          <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-white">Fishing style</h2>
-                <p className="mt-1 text-xs text-gray-400">
+                <h2 className="text-sm font-semibold text-foreground">Fishing style</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
                   Tell us what kind of fishing you do most so we can tune sessions, challenges, and recommendations.
                 </p>
                 {profile.fishing_preference && (
@@ -262,7 +281,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowFishingPrefs(true)}
-                className="rounded-lg bg-[#1BA9A0] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#14B8A6]"
+                className="rounded-lg bg-[#1BA9A0] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0D9488]"
               >
                 Choose style
               </button>
@@ -271,33 +290,33 @@ export default function SettingsPage() {
         )}
 
         {/* Privacy & Data Sharing */}
-        <section className="rounded-2xl bg-[#243B4A] p-4 shadow-sm border border-[#334155]">
+        <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
           <div className="mb-4">
-            <h2 className="text-sm font-semibold text-white">Privacy & Data Sharing</h2>
-            <p className="mt-1 text-xs text-gray-400">
+            <h2 className="text-sm font-semibold text-foreground">Privacy & Data Sharing</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
               Control how your fishing data is used and displayed.
             </p>
           </div>
 
           {/* Default Location Privacy */}
-          <div className="mb-4 rounded-lg border border-[#334155] bg-[#1A2D3D] p-3">
-            <h3 className="text-xs font-semibold text-white mb-2">Default Location Privacy</h3>
-            <p className="text-xs text-gray-400 mb-3">
+          <div className="mb-4 rounded-lg border border-border bg-background p-3">
+            <h3 className="text-xs font-semibold text-foreground mb-2">Default Location Privacy</h3>
+            <p className="text-xs text-muted-foreground mb-3">
               This controls how your session locations appear on the map. You can change this per-session when creating it.
             </p>
             <div className="space-y-2">
               {LOCATION_PRIVACY_OPTIONS.map((option) => (
                 <div key={option.value} className="flex items-start gap-2">
                   <div className="flex h-5 items-center">
-                    <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[#334155]">
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-border">
                       {option.value === 'general' && (
                         <div className="h-2 w-2 rounded-full bg-[#1BA9A0]" />
                       )}
                     </div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-white">{option.label}</p>
-                    <p className="text-[11px] text-gray-500">{option.description}</p>
+                    <p className="text-xs font-medium text-foreground">{option.label}</p>
+                    <p className="text-[11px] text-muted-foreground">{option.description}</p>
                   </div>
                 </div>
               ))}
@@ -308,14 +327,14 @@ export default function SettingsPage() {
           </div>
 
           {/* Data Sharing Toggle */}
-          <div className="rounded-lg border border-[#334155] bg-[#1A2D3D] p-3">
+          <div className="rounded-lg border border-border bg-background p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                <h3 className="text-xs font-semibold text-white">Community Data Sharing</h3>
-                <p className="mt-1 text-xs text-gray-400">
+                <h3 className="text-xs font-semibold text-foreground">Community Data Sharing</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
                   Help other anglers by contributing anonymized data to Local Intel and fishing insights. Your exact locations are never shared - only aggregated stats like species caught, baits used, and best times.
                 </p>
-                <p className="mt-2 text-[11px] text-gray-500">
+                <p className="mt-2 text-[11px] text-muted-foreground">
                   <strong>What's shared:</strong> Species, baits, catch times, weather conditions (all anonymized)
                   <br />
                   <strong>What's NOT shared:</strong> Your exact locations, personal info, or session details
@@ -343,12 +362,12 @@ export default function SettingsPage() {
         </section>
 
         {/* Account settings placeholder */}
-        <section className="rounded-2xl bg-[#243B4A] p-4 shadow-sm border border-[#334155]">
-          <h2 className="text-sm font-semibold text-white">Account</h2>
-          <p className="mt-1 text-xs text-gray-400">
-            Email: <span className="font-medium text-white">{user.email}</span>
+        <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
+          <h2 className="text-sm font-semibold text-foreground">Account</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Email: <span className="font-medium text-foreground">{user.email}</span>
           </p>
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             More account controls (password, deletion, etc.) will live here.
           </p>
         </section>

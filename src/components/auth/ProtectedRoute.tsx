@@ -40,7 +40,7 @@ export function ProtectedRoute() {
   if (loading || profileLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-slate-600">Checking session…</p>
+        <p className="text-sm text-muted-foreground">Checking session…</p>
       </div>
     )
   }

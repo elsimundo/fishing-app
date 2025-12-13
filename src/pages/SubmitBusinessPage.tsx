@@ -135,8 +135,8 @@ export default function SubmitBusinessPage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <CheckCircle size={32} className="text-green-600" />
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-gray-900">Submission Received!</h1>
-            <p className="mb-6 text-gray-600">
+            <h1 className="mb-2 text-2xl font-bold text-foreground">Submission Received!</h1>
+            <p className="mb-6 text-muted-foreground">
               Thank you for submitting your business. Our team will review it and get back to you
               within 2-3 business days.
             </p>
@@ -175,25 +175,25 @@ export default function SubmitBusinessPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="min-h-screen bg-background pb-20">
         {/* Header */}
-        <header className="sticky top-0 z-10 flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
+        <header className="sticky top-0 z-10 flex items-center gap-3 bg-card px-4 py-3 shadow-sm">
           <button
             onClick={() => navigate(-1)}
-            className="rounded-full p-2 hover:bg-gray-100"
+            className="rounded-full p-2 hover:bg-muted"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-lg font-bold text-gray-900">List Your Business</h1>
-            <p className="text-xs text-gray-500">Get discovered by local anglers</p>
+            <h1 className="text-lg font-bold text-foreground">List Your Business</h1>
+            <p className="text-xs text-muted-foreground">Get discovered by local anglers</p>
           </div>
         </header>
 
         <form onSubmit={handleSubmit} className="mx-auto max-w-lg p-4">
           {/* Business Type */}
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-semibold text-gray-900">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               Business Type <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -205,11 +205,11 @@ export default function SubmitBusinessPage() {
                   className={`rounded-xl border-2 p-3 text-left transition-colors ${
                     formData.type === type.value
                       ? 'border-navy-800 bg-navy-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-border hover:border-muted-foreground'
                   }`}
                 >
-                  <p className="text-sm font-semibold text-gray-900">{type.label}</p>
-                  <p className="text-xs text-gray-500">{type.description}</p>
+                  <p className="text-sm font-semibold text-foreground">{type.label}</p>
+                  <p className="text-xs text-muted-foreground">{type.description}</p>
                 </button>
               ))}
             </div>
@@ -217,7 +217,7 @@ export default function SubmitBusinessPage() {
 
           {/* Business Name */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-gray-900">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               <Store size={14} className="mr-1 inline" />
               Business Name <span className="text-red-500">*</span>
             </label>
@@ -226,14 +226,14 @@ export default function SubmitBusinessPage() {
               value={formData.name}
               onChange={(e) => updateField('name', e.target.value)}
               placeholder="e.g. Bob's Tackle & Bait"
-              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
               required
             />
           </div>
 
           {/* Address */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-gray-900">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               <MapPin size={14} className="mr-1 inline" />
               Street Address <span className="text-red-500">*</span>
             </label>
@@ -242,7 +242,7 @@ export default function SubmitBusinessPage() {
               value={formData.address}
               onChange={(e) => updateField('address', e.target.value)}
               placeholder="e.g. 123 High Street"
-              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
               required
             />
           </div>
@@ -250,7 +250,7 @@ export default function SubmitBusinessPage() {
           {/* City & Postcode */}
           <div className="mb-4 grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">
+              <label className="mb-2 block text-sm font-semibold text-foreground">
                 City <span className="text-red-500">*</span>
               </label>
               <input
@@ -258,25 +258,25 @@ export default function SubmitBusinessPage() {
                 value={formData.city}
                 onChange={(e) => updateField('city', e.target.value)}
                 placeholder="e.g. London"
-                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+                className="w-full rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
                 required
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-900">Postcode</label>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Postcode</label>
               <input
                 type="text"
                 value={formData.postcode}
                 onChange={(e) => updateField('postcode', e.target.value)}
                 placeholder="e.g. SW1A 1AA"
-                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+                className="w-full rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Phone */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-gray-900">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               <Phone size={14} className="mr-1 inline" />
               Phone Number
             </label>
@@ -285,13 +285,13 @@ export default function SubmitBusinessPage() {
               value={formData.phone}
               onChange={(e) => updateField('phone', e.target.value)}
               placeholder="e.g. 020 1234 5678"
-              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
             />
           </div>
 
           {/* Email */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-gray-900">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               <Mail size={14} className="mr-1 inline" />
               Email Address
             </label>
@@ -300,13 +300,13 @@ export default function SubmitBusinessPage() {
               value={formData.email}
               onChange={(e) => updateField('email', e.target.value)}
               placeholder="e.g. info@bobstackle.com"
-              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
             />
           </div>
 
           {/* Website */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-gray-900">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               <Globe size={14} className="mr-1 inline" />
               Website
             </label>
@@ -315,13 +315,13 @@ export default function SubmitBusinessPage() {
               value={formData.website}
               onChange={(e) => updateField('website', e.target.value)}
               placeholder="e.g. https://www.bobstackle.com"
-              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
             />
           </div>
 
           {/* Description */}
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-semibold text-gray-900">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               <FileText size={14} className="mr-1 inline" />
               Description
             </label>
@@ -330,7 +330,7 @@ export default function SubmitBusinessPage() {
               onChange={(e) => updateField('description', e.target.value)}
               placeholder="Tell anglers about your business, specialties, services offered..."
               rows={4}
-              className="w-full resize-none rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+              className="w-full resize-none rounded-xl border-2 border-border bg-background text-foreground px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
             />
           </div>
 

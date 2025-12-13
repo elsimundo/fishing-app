@@ -19,29 +19,29 @@ export function ProfileStatsGrid({
 }: ProfileStatsGridProps) {
   return (
     <div className="grid grid-cols-4 gap-2">
-      <div className="rounded-xl bg-[#1A2D3D] px-2.5 py-2 text-center">
-        <p className="text-base font-bold text-white">{postCount}</p>
-        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+      <div className="rounded-xl bg-background px-2.5 py-2 text-center">
+        <p className="text-base font-bold text-foreground">{postCount}</p>
+        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Posts
         </p>
       </div>
       <button
         type="button"
         onClick={onFollowersClick}
-        className="rounded-xl bg-[#1A2D3D] px-2.5 py-2 text-center hover:bg-[#0D4B4E]"
+        className="rounded-xl bg-background px-2.5 py-2 text-center hover:bg-muted"
       >
-        <p className="text-base font-bold text-white">{followerCount}</p>
-        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+        <p className="text-base font-bold text-foreground">{followerCount}</p>
+        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Followers
         </p>
       </button>
       <button
         type="button"
         onClick={onFollowingClick}
-        className="rounded-xl bg-[#1A2D3D] px-2.5 py-2 text-center hover:bg-[#0D4B4E]"
+        className="rounded-xl bg-background px-2.5 py-2 text-center hover:bg-muted"
       >
-        <p className="text-base font-bold text-white">{followingCount}</p>
-        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+        <p className="text-base font-bold text-foreground">{followingCount}</p>
+        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Following
         </p>
       </button>
@@ -49,17 +49,17 @@ export function ProfileStatsGrid({
         <button
           type="button"
           onClick={onFourthClick}
-          className="rounded-xl bg-[#1A2D3D] px-2.5 py-2 text-center hover:bg-[#0D4B4E]"
+          className="rounded-xl bg-background px-2.5 py-2 text-center hover:bg-muted"
         >
-          <p className="text-base font-bold text-white">{fourthStat.value}</p>
-          <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+          <p className="text-base font-bold text-foreground">{fourthStat.value}</p>
+          <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
             {fourthStat.label}
           </p>
         </button>
       ) : (
-        <div className="rounded-xl bg-[#1A2D3D] px-2.5 py-2 text-center">
-          <p className="text-base font-bold text-white">{fourthStat.value}</p>
-          <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+        <div className="rounded-xl bg-background px-2.5 py-2 text-center">
+          <p className="text-base font-bold text-foreground">{fourthStat.value}</p>
+          <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
             {fourthStat.label}
           </p>
         </div>

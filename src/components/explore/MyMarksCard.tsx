@@ -46,42 +46,42 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
   const hasSharedMarks = (sharedMarks?.length || 0) > 0
 
   return (
-    <div className="rounded-xl border border-[#334155] bg-[#243B4A] overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       {/* Header */}
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 hover:bg-[#1A2D3D] transition-colors"
+        className="flex w-full items-center justify-between p-4 transition-colors hover:bg-muted"
       >
         <div className="flex items-center gap-3">
           <span className="text-xl">📍</span>
           <div className="text-left">
-            <span className="text-sm font-medium text-white">My Marks</span>
-            <p className="text-xs text-gray-400">
+            <span className="text-sm font-medium text-foreground">My Marks</span>
+            <p className="text-xs text-muted-foreground">
               {isLoading ? 'Loading...' : `${marks.length} saved${hasSharedMarks ? `, ${sharedMarks?.length} shared` : ''}`}
             </p>
           </div>
         </div>
         {expanded ? (
-          <ChevronUp size={20} className="text-gray-400" />
+          <ChevronUp size={20} className="text-muted-foreground" />
         ) : (
-          <ChevronDown size={20} className="text-gray-400" />
+          <ChevronDown size={20} className="text-muted-foreground" />
         )}
       </button>
 
       {/* Content */}
       {expanded && (
-        <div className="border-t border-[#334155] px-4 pb-4">
+        <div className="border-t border-border px-4 pb-4">
           {/* Tabs */}
           {hasSharedMarks && (
-            <div className="mt-3 flex rounded-lg bg-[#1A2D3D] p-1">
+            <div className="mt-3 flex rounded-lg bg-muted p-1">
               <button
                 type="button"
                 onClick={() => setActiveTab('mine')}
                 className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-colors ${
                   activeTab === 'mine'
-                    ? 'bg-[#243B4A] text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground/70 hover:text-foreground'
                 }`}
               >
                 My Marks ({marks.length})
@@ -91,8 +91,8 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
                 onClick={() => setActiveTab('shared')}
                 className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-colors ${
                   activeTab === 'shared'
-                    ? 'bg-[#243B4A] text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground/70 hover:text-foreground'
                 }`}
               >
                 <Share2 size={12} className="inline mr-1" />
@@ -103,21 +103,21 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
 
           {(isLoading || sharedLoading) ? (
             <div className="flex items-center justify-center py-6">
-              <Loader2 size={20} className="animate-spin text-gray-400" />
+              <Loader2 size={20} className="animate-spin text-muted-foreground" />
             </div>
           ) : activeTab === 'mine' ? (
             // My Marks tab
             !hasMarks && !showAddForm ? (
-              <div className="mt-3 rounded-lg bg-[#1A2D3D] p-4 text-center">
+              <div className="mt-3 rounded-lg bg-muted p-4 text-center">
                 <span className="text-3xl">📍</span>
-                <p className="mt-2 text-sm font-medium text-gray-300">No saved marks yet</p>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-2 text-sm font-medium text-foreground">No saved marks yet</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   Save your favourite fishing spots for quick access
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowAddForm(true)}
-                  className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-semibold text-white hover:bg-[#14B8A6]"
+                  className="mt-3 inline-flex items-center gap-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
                 >
                   <Plus size={14} />
                   Add your first mark
@@ -130,7 +130,7 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
                   <button
                     type="button"
                     onClick={onAddMark || (() => setShowAddForm(true))}
-                    className="flex w-full items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#334155] py-2 text-xs font-medium text-gray-500 hover:border-[#1BA9A0] hover:text-gray-300"
+                    className="flex w-full items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border py-2 text-xs font-medium text-muted-foreground hover:border-primary hover:text-foreground"
                   >
                     <Plus size={14} />
                     Add new mark
@@ -171,10 +171,10 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
             // Shared with me tab
             <div className="mt-3 space-y-2">
               {!hasSharedMarks ? (
-                <div className="rounded-lg bg-[#1A2D3D] p-4 text-center">
+                <div className="rounded-lg bg-muted p-4 text-center">
                   <span className="text-3xl">🤝</span>
-                  <p className="mt-2 text-sm font-medium text-gray-300">No shared marks</p>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-2 text-sm font-medium text-foreground">No shared marks</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     When friends share marks with you, they'll appear here
                   </p>
                 </div>
@@ -222,31 +222,31 @@ interface MarkItemProps {
 function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sharedByName, onShowOnMap }: MarkItemProps) {
   return (
     <div
-      className="flex items-center gap-3 rounded-lg bg-[#1A2D3D] p-3 cursor-pointer hover:bg-[#0D4B4E]"
+      className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-background p-3 transition-colors hover:bg-muted"
       onClick={() => onSelect?.(mark)}
     >
       <span className="text-lg">{WATER_TYPE_ICONS[mark.water_type]}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">{mark.name}</p>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
+        <p className="truncate text-sm font-medium text-foreground">{mark.name}</p>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{WATER_TYPE_LABELS[mark.water_type]}</span>
           {isShared && sharedByName && (
-            <span className="rounded bg-green-900/30 px-1 py-0.5 text-[10px] text-green-400">
+            <span className="rounded bg-green-100 dark:bg-green-900/30 px-1 py-0.5 text-[10px] text-green-600 dark:text-green-400">
               from {sharedByName}
             </span>
           )}
           {!isShared && mark.privacy_level !== 'private' && (
             <span className={`rounded px-1 py-0.5 text-[10px] ${
               mark.privacy_level === 'public' 
-                ? 'bg-blue-900/30 text-blue-400' 
-                : 'bg-purple-900/30 text-purple-400'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
+                : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
             }`}>
               {mark.privacy_level === 'public' ? 'Public' : 'Shared'}
             </span>
           )}
         </div>
         {mark.notes && (
-          <p className="mt-1 text-xs text-gray-500 truncate">{mark.notes}</p>
+          <p className="mt-1 truncate text-xs text-muted-foreground">{mark.notes}</p>
         )}
       </div>
       <div className="flex items-center gap-1">
@@ -257,7 +257,7 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
               e.stopPropagation()
               onShare()
             }}
-            className="rounded-lg p-2 text-gray-400 hover:bg-purple-900/30 hover:text-purple-400"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-400"
             title="Share with friends"
           >
             <Share2 size={14} />
@@ -270,7 +270,7 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
               e.stopPropagation()
               onShowOnMap(mark)
             }}
-            className="rounded-lg p-2 text-gray-400 hover:bg-blue-900/30 hover:text-blue-400"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-400"
             title="Show on map"
           >
             <Crosshair size={14} />
@@ -281,7 +281,7 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="rounded-lg p-2 text-gray-400 hover:bg-[#334155] hover:text-white"
+          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           title="Get directions"
         >
           <Navigation size={14} />
@@ -294,7 +294,7 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
               onDelete()
             }}
             disabled={isDeleting}
-            className="rounded-lg p-2 text-gray-400 hover:bg-red-900/30 hover:text-red-400 disabled:opacity-50"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-400 disabled:opacity-50"
           >
             <Trash2 size={14} />
           </button>
@@ -355,31 +355,31 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-[#334155] bg-[#1A2D3D] p-3 space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-border bg-background p-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">Add New Mark</h3>
-        <button type="button" onClick={onCancel} className="text-gray-400 hover:text-white">
+        <h3 className="text-sm font-semibold text-foreground">Add New Mark</h3>
+        <button type="button" onClick={onCancel} className="text-muted-foreground hover:text-foreground">
           <X size={16} />
         </button>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">Name *</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Name *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. The Wreck, Bass Rock"
-          className="w-full rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-[#1BA9A0] focus:outline-none"
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
       {/* Location section */}
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">Location *</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Location *</label>
         
         {coords.lat !== null && coords.lng !== null ? (
-          <div className="flex items-center justify-between rounded-lg bg-emerald-900/30 border border-emerald-500/40 px-3 py-2">
+          <div className="flex items-center justify-between rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-500/40 px-3 py-2">
             <div className="flex items-center gap-2">
               <MapPin size={14} className="text-emerald-400" />
               <span className="text-xs text-emerald-400">
@@ -399,7 +399,7 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
             <button
               type="button"
               onClick={handleGetCurrentLocation}
-              className="w-full rounded-lg bg-[#243B4A] py-2.5 text-xs font-medium text-gray-300 hover:bg-[#334155] flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-card py-2.5 text-xs font-medium text-foreground hover:bg-muted"
             >
               <Navigation size={14} />
               Use my current location
@@ -407,7 +407,7 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
             <button
               type="button"
               onClick={() => setShowMap(true)}
-              className="w-full rounded-lg border border-[#334155] bg-[#243B4A] py-2.5 text-xs font-medium text-gray-300 hover:bg-[#334155] flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card py-2.5 text-xs font-medium text-foreground hover:bg-muted"
             >
               <MapPin size={14} />
               Drop pin on map
@@ -419,10 +419,10 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
       {/* Map picker modal */}
       {showMap && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-[#243B4A] overflow-hidden border border-[#334155]">
-            <div className="flex items-center justify-between border-b border-[#334155] px-4 py-3">
-              <h3 className="text-sm font-semibold text-white">Drop a pin</h3>
-              <button type="button" onClick={() => setShowMap(false)} className="text-gray-400 hover:text-white">
+          <div className="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <h3 className="text-sm font-semibold text-foreground">Drop a pin</h3>
+              <button type="button" onClick={() => setShowMap(false)} className="text-muted-foreground hover:text-foreground">
                 <X size={18} />
               </button>
             </div>
@@ -432,11 +432,11 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
                 onChange={(newCoords) => setCoords(newCoords)}
               />
             </div>
-            <div className="border-t border-[#334155] px-4 py-3">
+            <div className="border-t border-border px-4 py-3">
               <button
                 type="button"
                 onClick={() => setShowMap(false)}
-                className="w-full rounded-lg bg-[#1BA9A0] py-2 text-sm font-semibold text-white hover:bg-[#14B8A6]"
+                className="w-full rounded-lg bg-navy-800 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
               >
                 Confirm Location
               </button>
@@ -446,11 +446,11 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
       )}
 
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">Water Type</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Water Type</label>
         <select
           value={waterType}
           onChange={(e) => setWaterType(e.target.value as SavedMarkWaterType)}
-          className="w-full rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none"
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         >
           {Object.entries(WATER_TYPE_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
@@ -461,22 +461,22 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">Notes (optional)</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Notes (optional)</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Any notes about this spot..."
           rows={2}
-          className="w-full rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-[#1BA9A0] focus:outline-none resize-none"
+          className="w-full resize-none rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">Privacy</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Privacy</label>
         <select
           value={privacyLevel}
           onChange={(e) => setPrivacyLevel(e.target.value as MarkPrivacyLevel)}
-          className="w-full rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none"
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         >
           <option value="private">🔒 Private - Only you</option>
           <option value="friends">👥 Friends - Share with specific people</option>
@@ -488,14 +488,14 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 rounded-lg bg-[#334155] py-2 text-xs font-medium text-gray-300 hover:bg-[#243B4A]"
+          className="flex-1 rounded-lg border border-border bg-muted py-2 text-xs font-medium text-foreground hover:bg-muted/70"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={!canSubmit || isSubmitting}
-          className="flex-1 rounded-lg bg-[#1BA9A0] py-2 text-xs font-semibold text-white hover:bg-[#14B8A6] disabled:bg-[#1BA9A0]/60"
+          className="flex-1 rounded-lg bg-navy-800 py-2 text-xs font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
         >
           {isSubmitting ? 'Saving...' : 'Save Mark'}
         </button>

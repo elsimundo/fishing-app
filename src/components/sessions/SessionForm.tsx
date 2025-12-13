@@ -146,14 +146,14 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="title">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="title">
             Session title (optional)
           </label>
           <input
             id="title"
             type="text"
             placeholder="e.g. Morning bass hunt"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('title')}
           />
           {errors.title ? (
@@ -162,14 +162,14 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="location_name">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="location_name">
             Location name
           </label>
           <input
             id="location_name"
             type="text"
             placeholder="e.g. Southend Pier"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('location_name')}
           />
           {errors.location_name ? (
@@ -178,12 +178,12 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="water_type">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="water_type">
             Water type
           </label>
           <select
             id="water_type"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('water_type')}
           >
             <option value="">Select water type</option>
@@ -196,13 +196,13 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="started_at">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="started_at">
             Start time
           </label>
           <input
             id="started_at"
             type="datetime-local"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('started_at')}
           />
           {errors.started_at ? (
@@ -212,10 +212,10 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
 
         <div className="sm:col-span-2 space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-medium text-slate-700">Pick session location</p>
+            <p className="text-[11px] font-medium text-muted-foreground">Pick session location</p>
             <button
               type="button"
-              className="rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
+              className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted"
               onClick={() => {
                 if (!navigator.geolocation) {
                   setFormError('Geolocation is not available in this browser.')
@@ -256,12 +256,12 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div className="sm:col-span-2 space-y-2">
-          <p className="text-[11px] font-medium text-slate-700">Location privacy</p>
+          <p className="text-[11px] font-medium text-muted-foreground">Location privacy</p>
           <div className="space-y-1">
             {LOCATION_PRIVACY_OPTIONS.map((opt) => (
               <label
                 key={opt.value}
-                className="flex cursor-pointer items-start gap-2 rounded-md border border-slate-200 px-2 py-2 text-[11px] hover:bg-slate-50"
+                className="flex cursor-pointer items-start gap-2 rounded-md border border-border px-2 py-2 text-[11px] hover:bg-muted"
               >
                 <input
                   type="radio"
@@ -271,7 +271,7 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
                 />
                 <span>
                   <span className="block font-medium">{opt.label}</span>
-                  <span className="text-slate-500">{opt.description}</span>
+                  <span className="text-muted-foreground">{opt.description}</span>
                 </span>
               </label>
             ))}
@@ -279,12 +279,12 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="tide_state">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="tide_state">
             Tide (optional)
           </label>
           <select
             id="tide_state"
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('tide_state')}
           >
             <option value="">Not set</option>
@@ -297,21 +297,21 @@ export function SessionForm({ onSuccess }: SessionFormProps) {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700">Visibility</label>
-          <label className="inline-flex items-center gap-2 text-[11px] text-slate-700">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">Visibility</label>
+          <label className="inline-flex items-center gap-2 text-[11px] text-foreground">
             <input type="checkbox" className="h-3 w-3" {...register('is_public')} />
             <span>Make this session public (future social features)</span>
           </label>
         </div>
 
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-slate-700" htmlFor="session_notes">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="session_notes">
             Session notes (optional)
           </label>
           <textarea
             id="session_notes"
             rows={3}
-            className="block w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full resize-none rounded-md border border-border bg-background text-foreground px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="Plans, conditions, tactics for this trip"
             {...register('session_notes')}
           />

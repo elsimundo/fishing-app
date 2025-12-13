@@ -11,7 +11,7 @@ interface CompetitionLeaderboardProps {
 
 const podiumBg: Record<number, string> = {
   1: 'bg-yellow-900/30 border-yellow-500/50',
-  2: 'bg-gray-700/30 border-gray-500/50',
+  2: 'bg-slate-700/30 border-slate-500/50',
   3: 'bg-orange-900/30 border-orange-500/50',
 }
 
@@ -49,9 +49,9 @@ export function CompetitionLeaderboard({
   if (isLoading) {
     return (
       <div className="mt-4 px-5 py-6">
-        <h2 className="mb-4 text-lg font-bold text-white">Leaderboard</h2>
+        <h2 className="mb-4 text-lg font-bold text-foreground">Leaderboard</h2>
         <div className="flex justify-center py-8">
-          <div className="h-6 w-6 rounded-full border-2 border-[#334155] border-t-[#1BA9A0] animate-spin" />
+          <div className="h-6 w-6 rounded-full border-2 border-border border-t-primary animate-spin" />
         </div>
       </div>
     )
@@ -60,11 +60,11 @@ export function CompetitionLeaderboard({
   if (!entries || entries.length === 0) {
     return (
       <div className="mt-4 px-5 py-6">
-        <h2 className="mb-4 text-lg font-bold text-white">Leaderboard</h2>
+        <h2 className="mb-4 text-lg font-bold text-foreground">Leaderboard</h2>
         <div className="py-10 text-center">
           <div className="mb-3 text-5xl">🏆</div>
-          <p className="mb-1 text-base font-semibold text-white">No entries yet</p>
-          <p className="text-sm text-gray-500">Be the first to compete.</p>
+          <p className="mb-1 text-base font-semibold text-foreground">No entries yet</p>
+          <p className="text-sm text-muted-foreground">Be the first to compete.</p>
         </div>
       </div>
     )
@@ -73,8 +73,8 @@ export function CompetitionLeaderboard({
   return (
     <div className="mt-4 px-5 py-6">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-white">Leaderboard</h2>
-        <span className="text-sm text-gray-500">{entries.length} entries</span>
+        <h2 className="text-lg font-bold text-foreground">Leaderboard</h2>
+        <span className="text-sm text-muted-foreground">{entries.length} entries</span>
       </div>
 
       <div className="space-y-2">
@@ -90,13 +90,13 @@ export function CompetitionLeaderboard({
               onClick={() => entry.best_catch_id && navigate(`/catches/${entry.best_catch_id}`)}
               className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
                 isYou
-                  ? 'border-2 border-[#1BA9A0] bg-[#1BA9A0]/20'
+                  ? 'border-2 border-primary bg-primary/20'
                   : isPodium
                   ? `border-2 ${podiumBg[rank]}`
-                  : 'border-[#334155] hover:border-[#1BA9A0]/50 bg-[#1A2D3D]'
+                  : 'border-border hover:border-primary/50 bg-background'
               }`}
             >
-              <div className="w-8 text-center text-sm font-bold text-gray-400">
+              <div className="w-8 text-center text-sm font-bold text-muted-foreground">
                 {isPodium ? podiumIcon[rank] : `#${rank}`}
               </div>
 
@@ -105,20 +105,20 @@ export function CompetitionLeaderboard({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-white">
+                <p className="truncate text-sm font-semibold text-foreground">
                   {entry.username ?? 'Unknown'}
-                  {isYou && <span className="ml-1 text-xs text-[#1BA9A0]">(you)</span>}
+                  {isYou && <span className="ml-1 text-xs text-primary">(you)</span>}
                 </p>
                 {entry.best_catch_species && (
-                  <p className="truncate text-xs text-gray-500">{entry.best_catch_species}</p>
+                  <p className="truncate text-xs text-muted-foreground">{entry.best_catch_species}</p>
                 )}
               </div>
 
               <div className="text-right text-sm">
-                <p className="text-base font-bold text-white">
+                <p className="text-base font-bold text-foreground">
                   {entry.score != null ? entry.score.toFixed(2) : '0.00'}
                 </p>
-                <p className="text-xs text-gray-500">{unit}</p>
+                <p className="text-xs text-muted-foreground">{unit}</p>
               </div>
             </button>
           )

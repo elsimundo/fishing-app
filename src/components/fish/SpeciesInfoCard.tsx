@@ -41,9 +41,9 @@ export function SpeciesInfoCard({
   // If no local data and FishBase is loading
   if (!speciesInfo && fishBaseLoading) {
     return (
-      <div className="rounded-xl bg-[#243B4A] border border-[#334155] p-6 text-center">
-        <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-[#1BA9A0]" />
-        <p className="text-sm text-gray-400">Looking up species data...</p>
+      <div className="rounded-xl bg-card border border-border p-6 text-center">
+        <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Looking up species data...</p>
       </div>
     )
   }
@@ -77,7 +77,7 @@ export function SpeciesInfoCard({
             <div>
               <h3 className="text-xl font-bold">{fishBaseData.commonName || speciesName}</h3>
               {fishBaseData.species.sciname && (
-                <p className="mt-0.5 text-sm italic text-slate-300">{fishBaseData.species.sciname}</p>
+                <p className="mt-0.5 text-sm italic text-white/70">{fishBaseData.species.sciname}</p>
               )}
             </div>
             <div className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-xs">
@@ -86,31 +86,31 @@ export function SpeciesInfoCard({
             </div>
           </div>
           {description && (
-            <p className="mt-2 text-sm text-slate-200">{description}</p>
+            <p className="mt-2 text-sm text-white/80">{description}</p>
           )}
         </div>
 
         {/* Quick Stats from FishBase */}
         <div className="grid grid-cols-2 gap-2">
           {maxSize.lengthCm && (
-            <div className="rounded-lg bg-[#1A2D3D] p-3 text-center">
-              <Ruler className="mx-auto mb-1 h-5 w-5 text-gray-500" />
-              <p className="text-xs text-gray-500">Max Length</p>
-              <p className="text-sm font-semibold text-white">{maxSize.lengthCm} cm</p>
+            <div className="rounded-lg bg-background p-3 text-center">
+              <Ruler className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Max Length</p>
+              <p className="text-sm font-semibold text-foreground">{maxSize.lengthCm} cm</p>
             </div>
           )}
           {maxSize.weightKg && (
-            <div className="rounded-lg bg-[#1A2D3D] p-3 text-center">
-              <Scale className="mx-auto mb-1 h-5 w-5 text-gray-500" />
-              <p className="text-xs text-gray-500">Max Weight</p>
-              <p className="text-sm font-semibold text-white">{maxSize.weightKg.toFixed(1)} kg</p>
+            <div className="rounded-lg bg-background p-3 text-center">
+              <Scale className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Max Weight</p>
+              <p className="text-sm font-semibold text-foreground">{maxSize.weightKg.toFixed(1)} kg</p>
             </div>
           )}
         </div>
 
         {/* Water Type */}
         {waterType && (
-          <div className="flex items-center justify-center gap-2 rounded-lg bg-blue-900/30 border border-blue-500/40 py-2 text-sm text-blue-400">
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 py-2 text-sm text-blue-600 dark:text-blue-400">
             <Fish size={16} />
             <span className="capitalize">{waterType === 'both' ? 'Freshwater & Saltwater' : waterType}</span>
           </div>
@@ -131,20 +131,20 @@ export function SpeciesInfoCard({
 
         {/* App Stats */}
         {((catchCount ?? 0) > 0 || (anglerCount ?? 0) > 0) && (
-          <div className="flex items-center justify-center gap-6 rounded-lg bg-[#1A2D3D] py-3">
+          <div className="flex items-center justify-center gap-6 rounded-lg bg-background py-3">
             {catchCount !== undefined && catchCount > 0 && (
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Target className="h-4 w-4" />
                 <span className="text-sm">
-                  <span className="font-semibold text-white">{catchCount}</span> catches logged
+                  <span className="font-semibold text-foreground">{catchCount}</span> catches logged
                 </span>
               </div>
             )}
             {anglerCount !== undefined && anglerCount > 0 && (
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="h-4 w-4" />
                 <span className="text-sm">
-                  <span className="font-semibold text-white">{anglerCount}</span> anglers
+                  <span className="font-semibold text-foreground">{anglerCount}</span> anglers
                 </span>
               </div>
             )}
@@ -152,7 +152,7 @@ export function SpeciesInfoCard({
         )}
 
         {/* Note about data source */}
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-xs text-muted-foreground">
           Data from FishBase.org • Angling-specific info coming soon
         </p>
 
@@ -161,7 +161,7 @@ export function SpeciesInfoCard({
           <button
             type="button"
             onClick={onLogCatch}
-            className="w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+            className="w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
           >
             Log a {fishBaseData.commonName || speciesName} Catch
           </button>
@@ -173,17 +173,17 @@ export function SpeciesInfoCard({
   // No local data and no FishBase data
   if (!speciesInfo) {
     return (
-      <div className="rounded-xl bg-[#243B4A] border border-[#334155] p-4 text-center">
-        <Fish className="mx-auto mb-2 h-8 w-8 text-gray-500" />
-        <p className="text-sm text-gray-400">No detailed information available for this species yet.</p>
-        <p className="mt-1 text-xs text-gray-500">We're constantly adding more species data.</p>
+      <div className="rounded-xl bg-card border border-border p-4 text-center">
+        <Fish className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">No detailed information available for this species yet.</p>
+        <p className="mt-1 text-xs text-muted-foreground">We're constantly adding more species data.</p>
         
         {/* Still allow logging */}
         {showLogButton && onLogCatch && (
           <button
             type="button"
             onClick={onLogCatch}
-            className="mt-4 w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+            className="mt-4 w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
           >
             Log a {speciesName} Catch
           </button>
@@ -220,22 +220,22 @@ export function SpeciesInfoCard({
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-lg bg-[#1A2D3D] p-3 text-center">
-          <Scale className="mx-auto mb-1 h-5 w-5 text-gray-500" />
-          <p className="text-xs text-gray-500">Average</p>
-          <p className="text-sm font-semibold text-white">
+        <div className="rounded-lg bg-background p-3 text-center">
+          <Scale className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground">Average</p>
+          <p className="text-sm font-semibold text-foreground">
             {speciesInfo.averageWeightKg.min}-{speciesInfo.averageWeightKg.max} kg
           </p>
         </div>
-        <div className="rounded-lg bg-amber-900/30 border border-amber-500/40 p-3 text-center">
-          <Trophy className="mx-auto mb-1 h-5 w-5 text-amber-400" />
-          <p className="text-xs text-amber-400">Trophy</p>
-          <p className="text-sm font-semibold text-amber-300">{speciesInfo.trophyWeightKg}+ kg</p>
+        <div className="rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-500/40 p-3 text-center">
+          <Trophy className="mx-auto mb-1 h-5 w-5 text-amber-500 dark:text-amber-400" />
+          <p className="text-xs text-amber-600 dark:text-amber-400">Trophy</p>
+          <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">{speciesInfo.trophyWeightKg}+ kg</p>
         </div>
-        <div className="rounded-lg bg-[#1A2D3D] p-3 text-center">
-          <Ruler className="mx-auto mb-1 h-5 w-5 text-gray-500" />
-          <p className="text-xs text-gray-500">Length</p>
-          <p className="text-sm font-semibold text-white">
+        <div className="rounded-lg bg-background p-3 text-center">
+          <Ruler className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground">Length</p>
+          <p className="text-sm font-semibold text-foreground">
             {speciesInfo.averageLengthCm.min}-{speciesInfo.averageLengthCm.max} cm
           </p>
         </div>
@@ -243,18 +243,18 @@ export function SpeciesInfoCard({
 
       {/* Legal Size Warning */}
       {legalSize?.minLengthCm && (
-        <div className="flex items-start gap-3 rounded-lg bg-red-900/30 border border-red-500/40 p-3">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-900/50">
-            <Ruler className="h-4 w-4 text-red-400" />
+        <div className="flex items-start gap-3 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/40 p-3">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+            <Ruler className="h-4 w-4 text-red-500 dark:text-red-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-red-300">Minimum Legal Size</p>
-            <p className="text-lg font-bold text-red-200">{legalSize.minLengthCm} cm</p>
+            <p className="text-sm font-semibold text-red-700 dark:text-red-300">Minimum Legal Size</p>
+            <p className="text-lg font-bold text-red-800 dark:text-red-200">{legalSize.minLengthCm} cm</p>
             {legalSize.bagLimitPerDay && (
-              <p className="mt-0.5 text-xs text-red-400">Bag limit: {legalSize.bagLimitPerDay} per day</p>
+              <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">Bag limit: {legalSize.bagLimitPerDay} per day</p>
             )}
             {legalSize.notes && (
-              <p className="mt-1 text-xs text-red-400">{legalSize.notes}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{legalSize.notes}</p>
             )}
           </div>
         </div>
@@ -262,31 +262,31 @@ export function SpeciesInfoCard({
 
       {/* Habitat & Timing */}
       <div className="space-y-2">
-        <div className="flex items-start gap-2 rounded-lg bg-blue-900/30 border border-blue-500/40 p-3">
-          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-400" />
+        <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 p-3">
+          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" />
           <div>
-            <p className="text-xs font-medium text-blue-300">Habitat</p>
-            <p className="text-sm text-blue-400">{speciesInfo.habitat}</p>
+            <p className="text-xs font-medium text-blue-700 dark:text-blue-300">Habitat</p>
+            <p className="text-sm text-blue-600 dark:text-blue-400">{speciesInfo.habitat}</p>
           </div>
         </div>
         
         {(speciesInfo.bestSeason || speciesInfo.bestTime) && (
           <div className="grid grid-cols-2 gap-2">
             {speciesInfo.bestSeason && (
-              <div className="flex items-start gap-2 rounded-lg bg-emerald-900/30 border border-emerald-500/40 p-3">
-                <Calendar className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" />
+              <div className="flex items-start gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-500/40 p-3">
+                <Calendar className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400" />
                 <div>
-                  <p className="text-xs font-medium text-emerald-300">Best Season</p>
-                  <p className="text-xs text-emerald-400">{speciesInfo.bestSeason}</p>
+                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Best Season</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">{speciesInfo.bestSeason}</p>
                 </div>
               </div>
             )}
             {speciesInfo.bestTime && (
-              <div className="flex items-start gap-2 rounded-lg bg-purple-900/30 border border-purple-500/40 p-3">
-                <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-400" />
+              <div className="flex items-start gap-2 rounded-lg bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-500/40 p-3">
+                <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500 dark:text-purple-400" />
                 <div>
-                  <p className="text-xs font-medium text-purple-300">Best Time</p>
-                  <p className="text-xs text-purple-400">{speciesInfo.bestTime}</p>
+                  <p className="text-xs font-medium text-purple-700 dark:text-purple-300">Best Time</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400">{speciesInfo.bestTime}</p>
                 </div>
               </div>
             )}
@@ -297,19 +297,19 @@ export function SpeciesInfoCard({
       {/* Baits & Rigs */}
       {(baits.length > 0 || rigs.length > 0) && (
         <div className="space-y-3">
-          <h4 className="flex items-center gap-2 text-sm font-semibold text-white">
+          <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Anchor className="h-4 w-4" />
             Recommended Tackle
           </h4>
           
           {baits.length > 0 && (
             <div>
-              <p className="mb-1.5 text-xs font-medium text-gray-400">Baits</p>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">Baits</p>
               <div className="flex flex-wrap gap-1.5">
                 {baits.map((bait) => (
                   <span
                     key={bait}
-                    className="rounded-full bg-orange-900/30 border border-orange-500/40 px-2.5 py-1 text-xs font-medium text-orange-400"
+                    className="rounded-full bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-500/40 px-2.5 py-1 text-xs font-medium text-orange-600 dark:text-orange-400"
                   >
                     {bait}
                   </span>
@@ -320,12 +320,12 @@ export function SpeciesInfoCard({
           
           {rigs.length > 0 && (
             <div>
-              <p className="mb-1.5 text-xs font-medium text-gray-400">Rigs</p>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">Rigs</p>
               <div className="flex flex-wrap gap-1.5">
                 {rigs.map((rig) => (
                   <span
                     key={rig}
-                    className="rounded-full bg-[#334155] px-2.5 py-1 text-xs font-medium text-gray-300"
+                    className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
                   >
                     {rig}
                   </span>
@@ -338,7 +338,7 @@ export function SpeciesInfoCard({
 
       {/* Records Section */}
       <div className="space-y-2">
-        <h4 className="flex items-center gap-2 text-sm font-semibold text-white">
+        <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Trophy className="h-4 w-4" />
           Records
         </h4>
@@ -346,10 +346,10 @@ export function SpeciesInfoCard({
         <div className="grid grid-cols-2 gap-2">
           {/* World Record */}
           {speciesInfo.worldRecord && (
-            <div className="rounded-lg border border-amber-500/40 bg-amber-900/30 p-3">
-              <p className="text-xs font-medium text-amber-400">🌍 World Record</p>
-              <p className="text-lg font-bold text-amber-300">{speciesInfo.worldRecord.weightKg} kg</p>
-              <p className="text-xs text-amber-500">
+            <div className="rounded-lg border border-amber-200 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-900/30 p-3">
+              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">🌍 World Record</p>
+              <p className="text-lg font-bold text-amber-700 dark:text-amber-300">{speciesInfo.worldRecord.weightKg} kg</p>
+              <p className="text-xs text-amber-600 dark:text-amber-500">
                 {speciesInfo.worldRecord.location}, {speciesInfo.worldRecord.year}
               </p>
             </div>
@@ -380,20 +380,20 @@ export function SpeciesInfoCard({
 
       {/* Community Stats */}
       {(catchCount !== undefined || anglerCount !== undefined) && (
-        <div className="flex items-center justify-center gap-6 rounded-lg bg-[#1A2D3D] py-3">
+        <div className="flex items-center justify-center gap-6 rounded-lg bg-background py-3">
           {catchCount !== undefined && catchCount > 0 && (
-            <div className="flex items-center gap-2 text-gray-400">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Target className="h-4 w-4" />
               <span className="text-sm">
-                <span className="font-semibold text-white">{catchCount}</span> catches logged
+                <span className="font-semibold text-foreground">{catchCount}</span> catches logged
               </span>
             </div>
           )}
           {anglerCount !== undefined && anglerCount > 0 && (
-            <div className="flex items-center gap-2 text-gray-400">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Users className="h-4 w-4" />
               <span className="text-sm">
-                <span className="font-semibold text-white">{anglerCount}</span> anglers
+                <span className="font-semibold text-foreground">{anglerCount}</span> anglers
               </span>
             </div>
           )}
@@ -405,7 +405,7 @@ export function SpeciesInfoCard({
         <button
           type="button"
           onClick={onLogCatch}
-          className="w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+          className="w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
         >
           Log a {speciesInfo.commonName} Catch
         </button>

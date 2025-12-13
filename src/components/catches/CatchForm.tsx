@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useActiveSession } from '../../hooks/useActiveSession'
 import { useSessionParticipant } from '../../hooks/useSessionParticipant'
-import type { Catch, CatchFormInput } from '../../types'
+import type { Catch } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 import { FISH_SPECIES, getSpeciesByCategory } from '../../lib/constants'
@@ -43,36 +43,28 @@ const catchFormSchema = z.object({
   location_name: z.string().min(1, 'Location name is required'),
   latitude: z
     .string()
-    .transform((val) => Number(val))
-    .refine((val) => !Number.isNaN(val), { message: 'Latitude must be a number' }),
+    .min(1, 'Latitude is required')
+    .refine((val) => !Number.isNaN(Number(val)), { message: 'Latitude must be a number' }),
   longitude: z
     .string()
-    .transform((val) => Number(val))
-    .refine((val) => !Number.isNaN(val), { message: 'Longitude must be a number' }),
+    .min(1, 'Longitude is required')
+    .refine((val) => !Number.isNaN(Number(val)), { message: 'Longitude must be a number' }),
   weight_kg: z
     .string()
     .optional()
-    .transform((val) => (val === undefined || val === '' ? null : Number(val)))
-    .refine((val) => val === null || (!Number.isNaN(val) && val > 0), {
+    .refine((val) => !val || (!Number.isNaN(Number(val)) && Number(val) > 0), {
       message: 'Weight must be a positive number',
-    })
-    .nullable(),
+    }),
   length_cm: z
     .string()
     .optional()
-    .transform((val) => (val === undefined || val === '' ? null : Number(val)))
-    .refine((val) => val === null || (!Number.isNaN(val) && val > 0), {
+    .refine((val) => !val || (!Number.isNaN(Number(val)) && Number(val) > 0), {
       message: 'Length must be a positive number',
-    })
-    .nullable(),
-  bait: z.string().optional().transform((val) => (val === '' ? null : val)),
-  rig: z.string().optional().transform((val) => (val === '' ? null : val)),
-  fishing_style: z.string().optional().transform((val) => (val === '' ? null : val)),
-  notes: z
-    .string()
-    .max(500, 'Notes must be 500 characters or less')
-    .optional()
-    .transform((val) => (val === '' ? null : val)),
+    }),
+  bait: z.string().optional(),
+  rig: z.string().optional(),
+  fishing_style: z.string().optional(),
+  notes: z.string().max(500, 'Notes must be 500 characters or less').optional(),
 })
 
 type CatchFormValues = z.infer<typeof catchFormSchema>
@@ -343,6 +335,12 @@ export function CatchForm({
     }
 
     const caughtAtIso = new Date(values.caught_at).toISOString()
+
+    const latitudeNumber = values.latitude ? Number(values.latitude) : null
+    const longitudeNumber = values.longitude ? Number(values.longitude) : null
+
+    const weightKgNumber = values.weight_kg ? Number(values.weight_kg) : null
+    const lengthCmNumber = values.length_cm ? Number(values.length_cm) : null
     
     // Determine session_id - use existing or auto-create one
     let sessionId: string | undefined = undefined
@@ -355,8 +353,8 @@ export function CatchForm({
         try {
           sessionId = await getOrCreateSessionForCatch({
             userId: user.id,
-            latitude: typeof values.latitude === 'number' ? values.latitude : null,
-            longitude: typeof values.longitude === 'number' ? values.longitude : null,
+            latitude: latitudeNumber,
+            longitude: longitudeNumber,
             locationName: values.location_name,
             caughtAt: caughtAtIso,
           })
@@ -387,9 +385,9 @@ export function CatchForm({
     }
 
     // If no session snapshot, fetch weather directly for this catch location
-    if (weatherTemp === null && typeof values.latitude === 'number' && typeof values.longitude === 'number') {
+    if (weatherTemp === null && latitudeNumber != null && longitudeNumber != null) {
       try {
-        const weatherData = await getCompleteWeatherData(values.latitude, values.longitude).catch(() => null)
+        const weatherData = await getCompleteWeatherData(latitudeNumber, longitudeNumber).catch(() => null)
         if (weatherData?.current) {
           weatherTemp = weatherData.current.temperature
           windSpeed = weatherData.current.windSpeed
@@ -406,15 +404,15 @@ export function CatchForm({
       species: values.species,
       caught_at: caughtAtIso,
       location_name: values.location_name,
-      latitude: values.latitude,
-      longitude: values.longitude,
-      weight_kg: values.weight_kg ?? null,
-      length_cm: values.length_cm ?? null,
-      bait: values.bait ?? null,
-      rig: values.rig ?? null,
-      fishing_style: values.fishing_style ?? null,
+      latitude: latitudeNumber,
+      longitude: longitudeNumber,
+      weight_kg: weightKgNumber,
+      length_cm: lengthCmNumber,
+      bait: values.bait?.trim() ? values.bait.trim() : null,
+      rig: values.rig?.trim() ? values.rig.trim() : null,
+      fishing_style: values.fishing_style?.trim() ? values.fishing_style.trim() : null,
       photo_url: photoUrl,
-      notes: values.notes ?? null,
+      notes: values.notes?.trim() ? values.notes.trim() : null,
       session_id: sessionId,
       mark_id: markId,
       is_public: isPublic,
@@ -437,9 +435,9 @@ export function CatchForm({
     }
 
     // Detect country from coordinates
-    if (values.latitude && values.longitude) {
+    if (latitudeNumber != null && longitudeNumber != null) {
       try {
-        payload.country_code = await getCountryFromCoords(values.latitude, values.longitude)
+        payload.country_code = await getCountryFromCoords(latitudeNumber, longitudeNumber)
       } catch (err) {
         console.warn('Failed to detect country:', err)
       }
@@ -582,12 +580,12 @@ export function CatchForm({
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="species">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="species">
             Species
           </label>
           <select
             id="species"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('species')}
           >
             <option value="">Select species</option>
@@ -624,13 +622,13 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="caught_at">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="caught_at">
             Date & time
           </label>
           <input
             id="caught_at"
             type="datetime-local"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('caught_at')}
           />
           {errors.caught_at ? (
@@ -641,11 +639,11 @@ export function CatchForm({
         {/* Quick mark picker */}
         {savedMarks.length > 0 && (
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-gray-400">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
               Use a saved mark (optional)
             </label>
             <select
-              className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               onChange={(e) => {
                 const markId = e.target.value
                 if (!markId) return
@@ -668,13 +666,13 @@ export function CatchForm({
         )}
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="location_name">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="location_name">
             Location name
           </label>
           <input
             id="location_name"
             type="text"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="e.g. Chesil Beach, Dorset"
             {...register('location_name')}
           />
@@ -685,10 +683,10 @@ export function CatchForm({
 
         <div className="sm:col-span-2 space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-medium text-gray-400">Pick location on map</p>
+            <p className="text-[11px] font-medium text-muted-foreground">Pick location on map</p>
             <button
               type="button"
-              className="rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-2 py-1 text-[11px] text-gray-400 hover:bg-[#334155]"
+              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-muted"
               onClick={() => {
                 if (!navigator.geolocation) {
                   setFormError('Geolocation is not available in this browser.')
@@ -719,7 +717,7 @@ export function CatchForm({
               setValue('longitude', lng.toString(), { shouldValidate: true })
             }}
           />
-          <p className="mt-1 text-[11px] text-gray-500">
+          <p className="mt-1 text-[11px] text-muted-foreground">
             Tap or drag the pin to your fishing spot. Coordinates are saved automatically.
           </p>
           {errors.latitude ? (
@@ -731,7 +729,7 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="weight_kg">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="weight_kg">
             Weight (kg)
           </label>
           <input
@@ -739,7 +737,7 @@ export function CatchForm({
             type="number"
             inputMode="decimal"
             step="0.01"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('weight_kg')}
           />
           {errors.weight_kg ? (
@@ -748,7 +746,7 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="length_cm">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="length_cm">
             Length (cm)
           </label>
           <input
@@ -756,7 +754,7 @@ export function CatchForm({
             type="number"
             inputMode="decimal"
             step="0.1"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('length_cm')}
           />
           {errors.length_cm ? (
@@ -774,9 +772,9 @@ export function CatchForm({
                   type="checkbox"
                   checked={returned}
                   onChange={(e) => setReturned(e.target.checked)}
-                  className="h-4 w-4 rounded border-[#334155] bg-[#1A2D3D] text-white text-navy-800 focus:ring-navy-800"
+                  className="h-4 w-4 rounded border-border bg-background text-navy-800 focus:ring-navy-800"
                 />
-                <span className="text-xs text-gray-400">I returned this fish to the water</span>
+                <span className="text-xs text-muted-foreground">I returned this fish to the water</span>
               </label>
             </div>
           ) : legalStatus.status === 'legal' ? (
@@ -787,14 +785,14 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="bait">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="bait">
             Bait
           </label>
           <input
             id="bait"
             type="text"
             placeholder="e.g. lugworm, ragworm, squid"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('bait')}
           />
           {errors.bait ? (
@@ -803,14 +801,14 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="rig">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="rig">
             Rig
           </label>
           <input
             id="rig"
             type="text"
             placeholder="e.g. running ledger, paternoster"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('rig')}
           />
           {errors.rig ? (
@@ -819,12 +817,12 @@ export function CatchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="fishing_style">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="fishing_style">
             Fishing style
           </label>
           <select
             id="fishing_style"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('fishing_style')}
           >
             <option value="">Select style</option>
@@ -840,13 +838,13 @@ export function CatchForm({
         </div>
 
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="notes">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="notes">
             Notes
           </label>
           <textarea
             id="notes"
             rows={3}
-            className="block w-full resize-none rounded-md border border-[#334155] bg-[#1A2D3D] text-white px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="Conditions, tactics, who you were fishing with, etc."
             {...register('notes')}
           />
@@ -857,7 +855,7 @@ export function CatchForm({
 
         {/* Privacy Settings */}
         <div className="sm:col-span-2 space-y-3">
-          <p className="text-xs font-medium text-gray-400">Sharing</p>
+          <p className="text-xs font-medium text-muted-foreground">Sharing</p>
           
           {/* Public/Private Toggle */}
           <div className="flex gap-2">
@@ -866,8 +864,8 @@ export function CatchForm({
               onClick={() => setIsPublic(true)}
               className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
                 isPublic
-                  ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]'
-                  : 'border-[#334155] bg-[#1A2D3D] text-gray-400 hover:bg-[#334155]'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-background text-muted-foreground hover:bg-muted'
               }`}
             >
               <Globe size={14} />
@@ -878,8 +876,8 @@ export function CatchForm({
               onClick={() => setIsPublic(false)}
               className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
                 !isPublic
-                  ? 'border-[#1BA9A0] bg-[#1BA9A0]/20 text-[#1BA9A0]'
-                  : 'border-[#334155] bg-[#1A2D3D] text-gray-400 hover:bg-[#334155]'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-background text-muted-foreground hover:bg-muted'
               }`}
             >
               <Lock size={14} />
@@ -894,29 +892,29 @@ export function CatchForm({
                 type="checkbox"
                 checked={hideExactLocation}
                 onChange={(e) => setHideExactLocation(e.target.checked)}
-                className="h-4 w-4 rounded border-[#334155] bg-[#1A2D3D] text-white text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary"
               />
-              <span className="text-xs text-gray-400">Hide exact location (show region only)</span>
+              <span className="text-xs text-muted-foreground">Hide exact location (show region only)</span>
             </label>
           )}
 
           {/* Privacy Info Box */}
-          <div className="rounded-lg bg-[#1A2D3D] border border-[#334155] p-3 text-[11px] text-gray-400">
+          <div className="rounded-lg border border-border bg-muted p-3 text-[11px] text-muted-foreground">
             <div className="flex items-start gap-2">
-              <Info size={14} className="mt-0.5 shrink-0 text-slate-400" />
+              <Info size={14} className="mt-0.5 shrink-0 text-muted-foreground" />
               <div className="space-y-1.5">
-                <p className="font-medium text-gray-400">What's shared publicly?</p>
-                <ul className="space-y-0.5 text-gray-500">
+                <p className="font-medium text-muted-foreground">What's shared publicly?</p>
+                <ul className="space-y-0.5 text-muted-foreground">
                   <li>• Species, weight, and photo</li>
                   <li>• General area (e.g. "Cornwall")</li>
                   <li>• Date caught</li>
                 </ul>
-                <p className="font-medium text-gray-400 pt-1">🔒 Never shared:</p>
-                <ul className="space-y-0.5 text-gray-500">
+                <p className="pt-1 font-medium text-muted-foreground">🔒 Never shared:</p>
+                <ul className="space-y-0.5 text-muted-foreground">
                   <li>• Exact GPS coordinates</li>
                   <li>• Your precise fishing spot</li>
                 </ul>
-                <p className="text-slate-400 pt-1 italic">You can hide any catch from the feed later.</p>
+                <p className="pt-1 italic text-muted-foreground">You can hide any catch from the feed later.</p>
               </div>
             </div>
           </div>
@@ -927,7 +925,7 @@ export function CatchForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-xl bg-navy-800 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:opacity-70"
+          className="inline-flex items-center justify-center rounded-xl bg-navy-800 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Saving…' : 'Save Catch'}
         </button>

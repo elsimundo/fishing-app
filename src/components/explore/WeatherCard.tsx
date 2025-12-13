@@ -22,26 +22,26 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
 
   if (!lat || !lng) {
     return (
-      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
-        <div className="flex items-center gap-3 text-gray-400">
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center gap-3 text-muted-foreground">
           <CloudSun size={20} />
-          <span className="text-sm font-medium">Weather</span>
+          <span className="text-sm font-medium text-foreground">Weather</span>
         </div>
-        <p className="mt-2 text-xs text-gray-500">Search a location to see weather data</p>
+        <p className="mt-2 text-xs text-muted-foreground">Search a location to see weather data</p>
       </div>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
+      <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-900/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
             <Loader2 size={20} className="animate-spin text-amber-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">Loading Weather</p>
-            <p className="text-xs text-gray-400">Fetching conditions...</p>
+            <p className="text-sm font-semibold text-foreground">Loading Weather</p>
+            <p className="text-xs text-muted-foreground">Fetching conditions...</p>
           </div>
         </div>
       </div>
@@ -50,12 +50,12 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
 
   if (error || !weatherData || !fishingConditions) {
     return (
-      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
-        <div className="flex items-center gap-3 text-gray-400">
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center gap-3 text-muted-foreground">
           <CloudSun size={20} />
-          <span className="text-sm font-medium">Weather</span>
+          <span className="text-sm font-medium text-foreground">Weather</span>
         </div>
-        <p className="mt-2 text-xs text-gray-500">Weather data unavailable for this location</p>
+        <p className="mt-2 text-xs text-muted-foreground">Weather data unavailable for this location</p>
       </div>
     )
   }
@@ -71,32 +71,32 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
   }
 
   const ratingBgColors = {
-    excellent: 'bg-green-900/30 border-green-500/40',
-    good: 'bg-blue-900/30 border-blue-500/40',
-    fair: 'bg-yellow-900/30 border-yellow-500/40',
-    poor: 'bg-red-900/30 border-red-500/40',
+    excellent: 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-500/40',
+    good: 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-500/40',
+    fair: 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-500/40',
+    poor: 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-500/40',
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A]">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[#1A2D3D]"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-muted"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-900/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
             <span className="text-xl">{weatherInfo.icon}</span>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-white">Weather</p>
+              <p className="text-sm font-semibold text-foreground">Weather</p>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-semibold text-white ${ratingColors[fishingConditions.rating]}`}
               >
                 {fishingConditions.score}/100
               </span>
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {Math.round(current.temperature)}°C · {weatherInfo.description}
             </p>
           </div>
@@ -105,69 +105,69 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
         <div className="flex items-center gap-3">
           {!expanded && (
             <div className="text-right">
-              <p className="text-xs text-gray-500">Wind</p>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-xs text-muted-foreground">Wind</p>
+              <p className="text-sm font-semibold text-foreground">
                 {Math.round(current.windSpeed)} km/h
               </p>
             </div>
           )}
-          {expanded ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+          {expanded ? <ChevronUp size={20} className="text-muted-foreground" /> : <ChevronDown size={20} className="text-muted-foreground" />}
         </div>
       </button>
 
       {expanded && (
-        <div className="border-t border-[#334155] px-4 pb-4">
+        <div className="border-t border-border px-4 pb-4">
           <div className={`mt-3 rounded-lg border p-3 ${ratingBgColors[fishingConditions.rating]}`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Fishing Conditions</p>
-                <p className="mt-1 text-lg font-bold text-white capitalize">{fishingConditions.rating}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fishing Conditions</p>
+                <p className="mt-1 text-lg font-bold text-foreground capitalize">{fishingConditions.rating}</p>
               </div>
               <div className="text-right">
-                <p className="text-3xl font-bold text-white">{fishingConditions.score}</p>
-                <p className="text-xs text-gray-500">/100</p>
+                <p className="text-3xl font-bold text-foreground">{fishingConditions.score}</p>
+                <p className="text-xs text-muted-foreground">/100</p>
               </div>
             </div>
-            <p className="mt-2 text-xs text-gray-300">{fishingConditions.recommendation}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{fishingConditions.recommendation}</p>
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="rounded-lg bg-[#1A2D3D] p-3">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <div className="rounded-lg bg-background p-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Wind size={14} />
                 <span className="font-semibold">WIND</span>
               </div>
-              <p className="mt-1 text-lg font-bold text-white">{Math.round(current.windSpeed)} km/h</p>
-              <p className="text-xs text-gray-400">
+              <p className="mt-1 text-lg font-bold text-foreground">{Math.round(current.windSpeed)} km/h</p>
+              <p className="text-xs text-muted-foreground">
                 {getWindArrow(current.windDirection)} {getWindDirection(current.windDirection)} · Gusts {Math.round(current.windGusts)}
               </p>
             </div>
 
-            <div className="rounded-lg bg-[#1A2D3D] p-3">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <div className="rounded-lg bg-background p-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Gauge size={14} />
                 <span className="font-semibold">PRESSURE</span>
               </div>
-              <p className="mt-1 text-lg font-bold text-white">{Math.round(current.pressure)} hPa</p>
-              <p className="text-xs text-gray-400">{current.pressure >= 1013 ? '📈 High' : '📉 Low'}</p>
+              <p className="mt-1 text-lg font-bold text-foreground">{Math.round(current.pressure)} hPa</p>
+              <p className="text-xs text-muted-foreground">{current.pressure >= 1013 ? '📈 High' : '📉 Low'}</p>
             </div>
 
-            <div className="rounded-lg bg-[#1A2D3D] p-3">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <div className="rounded-lg bg-background p-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Droplets size={14} />
                 <span className="font-semibold">RAIN</span>
               </div>
-              <p className="mt-1 text-lg font-bold text-white">{current.precipitation} mm</p>
-              <p className="text-xs text-gray-400">{current.cloudCover}% clouds</p>
+              <p className="mt-1 text-lg font-bold text-foreground">{current.precipitation} mm</p>
+              <p className="text-xs text-muted-foreground">{current.cloudCover}% clouds</p>
             </div>
 
-            <div className="rounded-lg bg-[#1A2D3D] p-3">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <div className="rounded-lg bg-background p-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Sunrise size={14} />
                 <span className="font-semibold">SUN</span>
               </div>
-              <p className="mt-1 text-sm font-bold text-white">↑ {format(new Date(daily.sunrise[0]), 'h:mm a')}</p>
-              <p className="text-xs text-gray-400">↓ {format(new Date(daily.sunset[0]), 'h:mm a')}</p>
+              <p className="mt-1 text-sm font-bold text-foreground">↑ {format(new Date(daily.sunrise[0]), 'h:mm a')}</p>
+              <p className="text-xs text-muted-foreground">↓ {format(new Date(daily.sunset[0]), 'h:mm a')}</p>
             </div>
           </div>
 
@@ -175,13 +175,13 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
           {(() => {
             const moonData = getMoonPhase()
             const moonRatingColors = {
-              excellent: 'bg-green-900/30 border-green-500/40 text-green-400',
-              good: 'bg-blue-900/30 border-blue-500/40 text-blue-400',
-              fair: 'bg-yellow-900/30 border-yellow-500/40 text-yellow-400',
-              poor: 'bg-red-900/30 border-red-500/40 text-red-400',
+              excellent: 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-500/40 text-green-600 dark:text-green-400',
+              good: 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-500/40 text-blue-600 dark:text-blue-400',
+              fair: 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-500/40 text-yellow-600 dark:text-yellow-400',
+              poor: 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-500/40 text-red-600 dark:text-red-400',
             }
             return (
-              <div className="mt-3 rounded-lg border bg-indigo-900/30 border-indigo-500/40 p-3">
+              <div className="mt-3 rounded-lg border bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-500/40 p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Moon size={16} className="text-indigo-400" />
@@ -194,29 +194,29 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
                 <div className="mt-2 flex items-center gap-3">
                   <span className="text-3xl">{moonData.emoji}</span>
                   <div>
-                    <p className="text-sm font-bold text-white">{moonData.phase}</p>
-                    <p className="text-xs text-gray-400">{moonData.illumination}% illuminated</p>
+                    <p className="text-sm font-bold text-foreground">{moonData.phase}</p>
+                    <p className="text-xs text-muted-foreground">{moonData.illumination}% illuminated</p>
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-gray-400">{moonData.fishingTip}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{moonData.fishingTip}</p>
               </div>
             )
           })()}
 
           <div className="mt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">5-Day Forecast</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">5-Day Forecast</p>
             <div className="mt-2 flex gap-1">
               {daily.time.slice(0, 5).map((day, idx) => {
                 const dayWeather = WEATHER_CODES[daily.weatherCode[idx]] || WEATHER_CODES[0]
                 return (
-                  <div key={day} className="flex-1 rounded-lg bg-[#1A2D3D] p-2 text-center">
-                    <p className="text-[10px] font-semibold text-gray-400">{format(new Date(day), 'EEE')}</p>
+                  <div key={day} className="flex-1 rounded-lg bg-background p-2 text-center">
+                    <p className="text-[10px] font-semibold text-muted-foreground">{format(new Date(day), 'EEE')}</p>
                     <span className="text-lg">{dayWeather.icon}</span>
-                    <p className="text-xs font-bold text-white">{Math.round(daily.temperatureMax[idx])}°</p>
-                    <p className="text-[10px] text-gray-500">{Math.round(daily.temperatureMin[idx])}°</p>
+                    <p className="text-xs font-bold text-foreground">{Math.round(daily.temperatureMax[idx])}°</p>
+                    <p className="text-[10px] text-muted-foreground">{Math.round(daily.temperatureMin[idx])}°</p>
                     <div className="mt-1 flex items-center justify-center gap-0.5">
-                      <Wind size={10} className="text-gray-500" />
-                      <p className="text-[10px] font-medium text-gray-400">{Math.round(daily.windSpeedMax[idx])}</p>
+                      <Wind size={10} className="text-muted-foreground" />
+                      <p className="text-[10px] font-medium text-muted-foreground">{Math.round(daily.windSpeedMax[idx])}</p>
                     </div>
                   </div>
                 )
@@ -224,7 +224,7 @@ export function WeatherCard({ lat, lng }: WeatherCardProps) {
             </div>
           </div>
 
-          <p className="mt-3 text-center text-[10px] text-gray-500">
+          <p className="mt-3 text-center text-[10px] text-muted-foreground">
             Data from Open-Meteo · Free & unlimited
           </p>
         </div>

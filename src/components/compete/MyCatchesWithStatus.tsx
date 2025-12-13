@@ -10,21 +10,21 @@ export function MyCatchesWithStatus({ competitionId }: MyCatchesWithStatusProps)
   const { data: myCatches, isLoading } = useMyCompetitionCatches(competitionId)
 
   if (isLoading) {
-    return <div className="text-center py-8 text-gray-500">Loading your catches...</div>
+    return <div className="text-center py-8 text-muted-foreground">Loading your catches...</div>
   }
 
   if (!myCatches || myCatches.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600 font-semibold">No catches yet</p>
-        <p className="text-sm text-gray-500">Log your first catch to start competing!</p>
+        <p className="text-muted-foreground font-semibold">No catches yet</p>
+        <p className="text-sm text-muted-foreground">Log your first catch to start competing!</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-bold text-gray-900 mb-4">Your Catches ({myCatches.length})</h3>
+      <h3 className="text-lg font-bold text-foreground mb-4">Your Catches ({myCatches.length})</h3>
 
       {myCatches.map((catch_: any) => {
         const statusConfig = {
@@ -73,7 +73,7 @@ export function MyCatchesWithStatus({ competitionId }: MyCatchesWithStatusProps)
                   className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center text-2xl flex-shrink-0">
+                <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center text-2xl flex-shrink-0">
                   🐟
                 </div>
               )}
@@ -81,7 +81,7 @@ export function MyCatchesWithStatus({ competitionId }: MyCatchesWithStatusProps)
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="font-semibold text-gray-900">
+                  <h4 className="font-semibold text-foreground">
                     {catch_.species} - {catch_.weight_kg}kg
                   </h4>
                   <div
@@ -93,10 +93,10 @@ export function MyCatchesWithStatus({ competitionId }: MyCatchesWithStatusProps)
                 </div>
 
                 {catch_.length_cm && (
-                  <p className="text-sm text-gray-600">{catch_.length_cm}cm</p>
+                  <p className="text-sm text-muted-foreground">{catch_.length_cm}cm</p>
                 )}
 
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {formatDistanceToNow(new Date(catch_.created_at), { addSuffix: true })}
                 </p>
 

@@ -192,7 +192,7 @@ export default function BusinessesPage() {
       <div className="p-4 lg:p-8">
         <div className="mb-6 flex flex-col gap-4 lg:mb-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">Businesses</h1>
+            <h1 className="text-2xl font-bold text-foreground lg:text-3xl">Businesses</h1>
             <button
               onClick={() => setShowAddModal(true)}
               className="flex items-center gap-2 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
@@ -212,7 +212,7 @@ export default function BusinessesPage() {
                   className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
                     filter === f.value
                       ? 'bg-navy-800 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                      : 'bg-card text-muted-foreground hover:bg-muted'
                   }`}
                 >
                   {f.label}
@@ -223,7 +223,7 @@ export default function BusinessesPage() {
             {/* Search */}
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 size={20}
               />
               <input
@@ -231,7 +231,7 @@ export default function BusinessesPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search..."
-                className="w-full rounded-lg border-2 border-gray-200 py-2 pl-10 pr-4 text-sm focus:border-navy-800 focus:outline-none sm:w-64"
+                className="w-full rounded-lg border-2 border-border bg-background text-foreground py-2 pl-10 pr-4 text-sm focus:border-navy-800 focus:outline-none sm:w-64"
               />
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function BusinessesPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-48 animate-pulse rounded-xl bg-gray-100" />
+              <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
             ))}
           </div>
         ) : businesses && businesses.length > 0 ? (
@@ -264,7 +264,7 @@ export default function BusinessesPage() {
             ))}
           </div>
         ) : (
-          <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-6 text-gray-600">
+          <div className="flex items-center gap-2 rounded-xl bg-muted p-6 text-muted-foreground">
             <AlertCircle size={20} />
             <span>No businesses found for this filter</span>
           </div>
@@ -346,41 +346,41 @@ function AddBusinessModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-card p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Add Business</h2>
+          <h2 className="text-xl font-bold text-foreground">Add Business</h2>
           <button
             onClick={onClose}
-            className="rounded-full p-1 hover:bg-gray-100"
+            className="rounded-full p-1 hover:bg-muted"
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-muted-foreground" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">
               Business Name *
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
               placeholder="e.g. Bob's Tackle Shop"
             />
           </div>
 
           {/* Type */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">
               Type *
             </label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as BusinessType)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
             >
               <option value="tackle_shop">Tackle Shop</option>
               <option value="charter">Charter</option>
@@ -391,28 +391,28 @@ function AddBusinessModal({
 
           {/* Address */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">
               Address
             </label>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
               placeholder="123 High Street"
             />
           </div>
 
           {/* City */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">
               City
             </label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
               placeholder="London"
             />
           </div>
@@ -420,7 +420,7 @@ function AddBusinessModal({
           {/* Lat/Lng */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-muted-foreground">
                 Latitude *
               </label>
               <input
@@ -428,12 +428,12 @@ function AddBusinessModal({
                 step="any"
                 value={lat}
                 onChange={(e) => setLat(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
                 placeholder="51.5074"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-muted-foreground">
                 Longitude *
               </label>
               <input
@@ -441,7 +441,7 @@ function AddBusinessModal({
                 step="any"
                 value={lng}
                 onChange={(e) => setLng(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
                 placeholder="-0.1278"
               />
             </div>
@@ -449,42 +449,42 @@ function AddBusinessModal({
 
           {/* Phone */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">
               Phone
             </label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
               placeholder="+44 20 1234 5678"
             />
           </div>
 
           {/* Website */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">
               Website
             </label>
             <input
               type="url"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
               placeholder="https://example.com"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">
               Description
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full resize-none rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
               placeholder="Brief description of the business..."
             />
           </div>
@@ -495,7 +495,7 @@ function AddBusinessModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
               Cancel
             </button>
@@ -541,16 +541,16 @@ function BusinessCard({
     pending: 'bg-yellow-100 text-yellow-800',
     approved: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
-    suspended: 'bg-gray-100 text-gray-800',
+    suspended: 'bg-muted text-muted-foreground',
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm lg:p-6">
       {/* Header */}
       <div className="mb-3 flex items-start justify-between">
         <div className="flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-bold text-gray-900">{business.name}</h3>
+            <h3 className="text-lg font-bold text-foreground">{business.name}</h3>
             {business.is_premium && (
               <span className="flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-800">
                 <Crown size={12} />
@@ -563,7 +563,7 @@ function BusinessCard({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-600">{typeLabels[business.type]}</p>
+          <p className="text-sm text-muted-foreground">{typeLabels[business.type]}</p>
         </div>
         <span className={`rounded-full px-2 py-1 text-xs font-semibold ${statusColors[business.status]}`}>
           {business.status}
@@ -571,7 +571,7 @@ function BusinessCard({
       </div>
 
       {/* Details */}
-      <div className="mb-4 space-y-1.5 text-sm text-gray-600">
+      <div className="mb-4 space-y-1.5 text-sm text-muted-foreground">
         {business.address && (
           <div className="flex items-center gap-2">
             <MapPin size={14} className="flex-shrink-0" />
@@ -601,7 +601,7 @@ function BusinessCard({
       </div>
 
       {business.description && (
-        <p className="mb-4 line-clamp-2 text-sm text-gray-700">{business.description}</p>
+        <p className="mb-4 line-clamp-2 text-sm text-foreground">{business.description}</p>
       )}
 
       {/* Rejection Reason */}
@@ -613,14 +613,14 @@ function BusinessCard({
       )}
 
       {/* Meta */}
-      <div className="mb-4 flex items-center gap-3 text-xs text-gray-500">
+      <div className="mb-4 flex items-center gap-3 text-xs text-muted-foreground">
         <span>Source: {business.source}</span>
         <span>•</span>
         <span>{formatDistanceToNow(new Date(business.created_at), { addSuffix: true })}</span>
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+      <div className="flex flex-wrap gap-2 border-t border-border pt-4">
         {business.status === 'pending' && (
           <>
             <button
@@ -681,7 +681,7 @@ function BusinessCard({
           href={`https://www.google.com/maps?q=${business.lat},${business.lng}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+          className="flex items-center justify-center gap-1 rounded-lg bg-muted px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted/80"
         >
           <MapPin size={16} />
           <span>Map</span>

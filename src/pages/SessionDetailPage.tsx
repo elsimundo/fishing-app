@@ -83,10 +83,10 @@ export function SessionDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#1A2D3D]">
+      <main className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[#334155] border-t-[#1BA9A0]" />
-          <p className="mt-3 text-sm text-gray-400">Loading session…</p>
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-[#1BA9A0]" />
+          <p className="mt-3 text-sm text-muted-foreground">Loading session…</p>
         </div>
       </main>
     )
@@ -95,11 +95,11 @@ export function SessionDetailPage() {
   if (isError || !session) {
     const message = error instanceof Error ? error.message : 'Please try again in a moment.'
     return (
-      <main className="min-h-screen bg-[#1A2D3D] px-4 py-6">
+      <main className="min-h-screen bg-background px-4 py-6">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-4 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
+          className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft size={16} />
           Back
@@ -147,14 +147,14 @@ export function SessionDetailPage() {
   )
 
   return (
-    <main className="min-h-screen bg-[#1A2D3D] pb-24">
+    <main className="min-h-screen bg-background pb-24">
       {/* Pending invite banner for invited users */}
       {!isOwner && myParticipant && myParticipant.status === 'pending' && (
-        <div className="border-b border-amber-200 bg-amber-50/80">
+        <div className="border-b border-amber-500/40 bg-amber-900/30">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3 text-xs">
-            <div className="text-amber-900">
+            <div className="text-amber-200">
               <p className="font-semibold">Youve been invited to join this session</p>
-              <p className="text-[11px] text-amber-800/90">Accept to start logging catches and posting in this session.</p>
+              <p className="text-[11px] text-amber-200/80">Accept to start logging catches and posting in this session.</p>
             </div>
             <div className="flex flex-shrink-0 items-center gap-2">
               <button
@@ -169,7 +169,7 @@ export function SessionDetailPage() {
                     toast.error(message)
                   }
                 }}
-                className="rounded-full bg-primary px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-primary/90 disabled:bg-primary/60"
+                className="rounded-full bg-navy-800 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
               >
                 Accept
               </button>
@@ -186,7 +186,7 @@ export function SessionDetailPage() {
                     toast.error(message)
                   }
                 }}
-                className="rounded-full border border-amber-300 px-3 py-1.5 text-[11px] font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-60"
+                className="rounded-full border border-amber-500/40 px-3 py-1.5 text-[11px] font-semibold text-amber-200 hover:bg-amber-900/40 disabled:opacity-60"
               >
                 Decline
               </button>
@@ -195,12 +195,12 @@ export function SessionDetailPage() {
         </div>
       )}
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-[#334155] bg-[#243B4A]">
+      <header className="sticky top-0 z-10 border-b border-border bg-card">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-400 hover:text-white"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft size={20} />
           </button>
@@ -210,7 +210,7 @@ export function SessionDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowShareModal(true)}
-                className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <Share2 size={20} />
               </button>
@@ -219,7 +219,7 @@ export function SessionDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowActions(!showActions)}
-                className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <MoreHorizontal size={20} />
               </button>
@@ -229,11 +229,11 @@ export function SessionDetailPage() {
 
         {/* Actions dropdown - Owner */}
         {showActions && isOwner && (
-          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-[#243B4A] border border-[#334155] py-2 shadow-lg">
+          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-card border border-border py-2 shadow-lg">
             <button
               type="button"
               onClick={() => { setShowEditModal(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-muted"
             >
               <Pencil size={16} />
               Edit Session
@@ -241,7 +241,7 @@ export function SessionDetailPage() {
             <button
               type="button"
               onClick={() => { setShowShareModal(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-muted"
             >
               <Share2 size={16} />
               Share to Feed
@@ -266,7 +266,7 @@ export function SessionDetailPage() {
                 }
                 setShowActions(false)
               }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-muted"
             >
               <Share2 size={16} />
               Share Link
@@ -274,7 +274,7 @@ export function SessionDetailPage() {
             <button
               type="button"
               onClick={() => { setShowInviteModal(true); setShowActions(false) }}
-              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-muted"
             >
               <Plus size={16} />
               Invite Angler
@@ -296,7 +296,7 @@ export function SessionDetailPage() {
                   })
                   setShowActions(false)
                 }}
-                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-[#1A2D3D]"
+                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-muted"
               >
                 <Bookmark size={16} />
                 Save as Mark
@@ -304,7 +304,7 @@ export function SessionDetailPage() {
             )}
             {isActive && (
               <>
-                <div className="my-2 border-t border-[#334155]" />
+                <div className="my-2 border-t border-border" />
                 <button
                   type="button"
                   onClick={() => { setShowEndConfirm(true); setShowActions(false) }}
@@ -314,7 +314,7 @@ export function SessionDetailPage() {
                 </button>
               </>
             )}
-            <div className="my-2 border-t border-[#334155]" />
+            <div className="my-2 border-t border-border" />
             <button
               type="button"
               onClick={() => { setShowDeleteConfirm(true); setShowActions(false) }}
@@ -328,7 +328,7 @@ export function SessionDetailPage() {
 
         {/* Actions dropdown - Participant (not owner) */}
         {showActions && !isOwner && myParticipant && (
-          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-[#243B4A] border border-[#334155] py-2 shadow-lg">
+          <div className="absolute right-4 top-14 z-20 w-48 rounded-xl bg-card border border-border py-2 shadow-lg">
             <button
               type="button"
               onClick={() => { setShowLeaveConfirm(true); setShowActions(false) }}
@@ -343,7 +343,7 @@ export function SessionDetailPage() {
 
       <div className="mx-auto max-w-2xl px-4 py-4">
         {/* Hero image / cover */}
-        <div className="relative mb-4 overflow-hidden rounded-2xl bg-slate-900">
+        <div className="relative mb-4 overflow-hidden rounded-2xl bg-background">
           {session.cover_photo_url ? (
             <img
               src={session.cover_photo_url}
@@ -368,19 +368,19 @@ export function SessionDetailPage() {
           )}
 
           {/* Hero badge */}
-          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-navy-900 shadow-sm">
+          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-card/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
             <span>{typeof session.water_type === 'string' && session.water_type.includes('Sea') ? '🌊' : '🏞️'}</span>
             <span>
               {typeof session.water_type === 'string' ? session.water_type : 'Session'}
             </span>
             {isActive && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
                 Live
               </span>
             )}
             {!isActive && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700">
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                 Completed
               </span>
             )}
@@ -388,44 +388,44 @@ export function SessionDetailPage() {
 
           {/* Hero stats */}
           <div className="absolute bottom-4 left-4 right-4 flex gap-2">
-            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
-              <p className="text-base font-bold text-slate-900">{session.stats.total_catches}</p>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Catches</p>
+            <div className="flex-1 rounded-xl bg-card/95 px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-foreground">{session.stats.total_catches}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Catches</p>
             </div>
-            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
-              <p className="text-base font-bold text-slate-900">{session.stats.duration_hours.toFixed(1)}h</p>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Duration</p>
+            <div className="flex-1 rounded-xl bg-card/95 px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-foreground">{session.stats.duration_hours.toFixed(1)}h</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Duration</p>
             </div>
-            <div className="flex-1 rounded-xl bg-white/95 px-3 py-2 text-center text-xs backdrop-blur">
-              <p className="text-base font-bold text-slate-900">
+            <div className="flex-1 rounded-xl bg-card/95 px-3 py-2 text-center text-xs backdrop-blur">
+              <p className="text-base font-bold text-foreground">
                 {session.stats.biggest_catch?.weight_kg != null
                   ? `${session.stats.biggest_catch.weight_kg.toFixed(1)}kg`
                   : session.stats.total_weight_kg > 0
                     ? `${session.stats.total_weight_kg.toFixed(1)}kg`
                     : '—'}
               </p>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Biggest</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Biggest</p>
             </div>
           </div>
         </div>
 
         {/* Info section */}
-        <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+        <div className="rounded-2xl bg-card border border-border p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
-              <h1 className="text-lg font-bold text-white">{title}</h1>
+              <h1 className="text-lg font-bold text-foreground">{title}</h1>
               {sessionDate && (
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {sessionDate} · {sessionTime}
                 </p>
               )}
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
                   <MapPin size={13} />
                   <span>{session.location_name || 'Unknown location'}</span>
                 </span>
                 {session.location_privacy !== 'exact' && (
-                  <span className="rounded-full bg-[#334155] px-2 py-0.5 text-[10px] font-medium text-gray-400">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                     {session.location_privacy === 'private'
                       ? '🔒 Location hidden'
                       : '📍 General area only'}
@@ -440,8 +440,8 @@ export function SessionDetailPage() {
                   isOwner
                     ? 'bg-navy-800 text-white'
                     : mySessionRole === 'contributor'
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-gray-100 text-gray-600'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {isOwner ? 'Owner' : mySessionRole === 'contributor' ? 'Contributor' : 'Viewer'}
@@ -460,7 +460,7 @@ export function SessionDetailPage() {
           </div>
 
           {session.session_notes && (
-            <p className="mt-3 text-sm text-gray-400">
+            <p className="mt-3 text-sm text-muted-foreground">
               {session.session_notes}
             </p>
           )}
@@ -521,26 +521,26 @@ export function SessionDetailPage() {
 
             {/* Quick stats */}
             <div className="mt-4 grid grid-cols-3 gap-2">
-              <div className="rounded-xl border border-[#334155] bg-[#243B4A] px-3 py-3 text-center text-xs">
+              <div className="rounded-xl border border-border bg-card px-3 py-3 text-center text-xs">
                 <div className="mb-1 text-lg">🐟</div>
-                <p className="text-base font-bold text-white">{session.stats.total_catches}</p>
-                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Catches</p>
+                <p className="text-base font-bold text-foreground">{session.stats.total_catches}</p>
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Catches</p>
               </div>
-              <div className="rounded-xl border border-[#334155] bg-[#243B4A] px-3 py-3 text-center text-xs">
+              <div className="rounded-xl border border-border bg-card px-3 py-3 text-center text-xs">
                 <div className="mb-1 text-lg">⚖️</div>
-                <p className="text-base font-bold text-white">
+                <p className="text-base font-bold text-foreground">
                   {session.stats.biggest_catch?.weight_kg != null
                     ? `${session.stats.biggest_catch.weight_kg.toFixed(1)}kg`
                     : '—'}
                 </p>
-                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Biggest</p>
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Biggest</p>
               </div>
-              <div className="rounded-xl border border-[#334155] bg-[#243B4A] px-3 py-3 text-center text-xs">
+              <div className="rounded-xl border border-border bg-card px-3 py-3 text-center text-xs">
                 <div className="mb-1 text-lg">📸</div>
-                <p className="text-base font-bold text-white">
+                <p className="text-base font-bold text-foreground">
                   {sortedCatches.filter((c) => c.photo_url).length}
                 </p>
-                <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">Photos</p>
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Photos</p>
               </div>
             </div>
 
@@ -549,7 +549,7 @@ export function SessionDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsQuickLogOpen(true)}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
               >
                 <Plus size={18} />
                 Log new catch
@@ -557,14 +557,14 @@ export function SessionDetailPage() {
             )}
 
             {/* Timeline */}
-            <div className="mt-4 rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+            <div className="mt-4 rounded-2xl bg-card border border-border p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-white">Session timeline</h2>
+                <h2 className="text-sm font-semibold text-foreground">Session timeline</h2>
                 {canLogCatches && (session.allow_posts || session.allow_comments) && (
                   <button
                     type="button"
                     onClick={() => setShowAddPostModal(true)}
-                    className="flex items-center gap-1 rounded-lg bg-[#1A2D3D] px-2 py-1 text-xs font-medium text-gray-300 hover:bg-[#334155]"
+                    className="flex items-center gap-1 rounded-lg bg-muted px-2 py-1 text-xs font-medium text-foreground hover:bg-muted/80"
                   >
                     <MessageSquare size={14} />
                     Add post
@@ -572,12 +572,12 @@ export function SessionDetailPage() {
                 )}
               </div>
               {sortedCatches.length === 0 && sessionPosts.length === 0 ? (
-                <div className="py-6 text-center text-xs text-gray-500">
+                <div className="py-6 text-center text-xs text-muted-foreground">
                   No activity yet. Log a catch or add a post to start the timeline.
                 </div>
               ) : (
                 <div className="relative">
-                  <div className="absolute left-3 top-2 bottom-2 w-px bg-[#334155]" />
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-border" />
                   <div className="space-y-4">
                     {/* Merge catches and posts, sort by time */}
                     {[
@@ -603,21 +603,21 @@ export function SessionDetailPage() {
                                   className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
                                 />
                               ) : (
-                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-lg">
+                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-muted text-lg">
                                   🐟
                                 </div>
                               )}
                               <div className="flex-1 text-xs">
                                 <div className="flex items-center justify-between">
-                                  <p className="text-sm font-semibold text-gray-900">
+                                  <p className="text-sm font-semibold text-foreground">
                                     {c.species}
                                     {c.weight_kg != null && ` • ${c.weight_kg.toFixed(1)}kg`}
                                   </p>
-                                  <span className="ml-2 text-[11px] text-gray-500">
+                                  <span className="ml-2 text-[11px] text-muted-foreground">
                                     {format(new Date(c.caught_at), 'HH:mm')}
                                   </span>
                                 </div>
-                                <p className="mt-0.5 text-[11px] text-gray-600">
+                                <p className="mt-0.5 text-[11px] text-muted-foreground">
                                   {c.bait && c.bait !== '0' ? c.bait : '—'}
                                   {c.released ? ' • Released' : ''}
                                 </p>
@@ -637,17 +637,17 @@ export function SessionDetailPage() {
                                   className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
                                 />
                               ) : (
-                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-lg">
+                                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-muted text-lg">
                                   💬
                                 </div>
                               )}
                               <div className="flex-1 text-xs">
                                 <div className="flex items-center justify-between">
-                                  <p className="text-xs font-medium text-gray-700">
+                                  <p className="text-xs font-medium text-muted-foreground">
                                     {p.user.full_name || p.user.username}
                                   </p>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[11px] text-gray-500">
+                                    <span className="text-[11px] text-muted-foreground">
                                       {format(new Date(p.created_at), 'HH:mm')}
                                     </span>
                                     {canDeletePost && (
@@ -663,7 +663,7 @@ export function SessionDetailPage() {
                                             }
                                           }
                                         }}
-                                        className="opacity-0 group-hover:opacity-100 rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 transition-opacity"
+                                        className="opacity-0 group-hover:opacity-100 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-red-600 transition-opacity"
                                       >
                                         <XIcon size={14} />
                                       </button>
@@ -671,7 +671,7 @@ export function SessionDetailPage() {
                                   </div>
                                 </div>
                                 {p.caption && (
-                                  <p className="mt-0.5 text-[11px] text-gray-900">{p.caption}</p>
+                                  <p className="mt-0.5 text-[11px] text-foreground">{p.caption}</p>
                                 )}
                               </div>
                             </div>
@@ -699,9 +699,9 @@ export function SessionDetailPage() {
 
         {/* Participants */}
         {participants.length > 0 && (
-          <div className="mt-4 rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+          <div className="mt-4 rounded-2xl bg-card border border-border p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-white">Participants</h2>
+              <h2 className="text-sm font-semibold text-foreground">Participants</h2>
               {isOwner && (
                 <button
                   type="button"
@@ -728,7 +728,7 @@ export function SessionDetailPage() {
 
         {/* Location Map */}
         {canSeeExactLocation && session.latitude && session.longitude && (
-          <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="mt-4 overflow-hidden rounded-2xl bg-card border border-border shadow-sm">
             <div className="h-48 w-full">
               <Map 
                 catches={session.catches} 
@@ -742,13 +742,13 @@ export function SessionDetailPage() {
 
         {/* Catches */}
         <div className="mt-4">
-          <h2 className="mb-3 text-sm font-semibold text-white">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">
             Catches ({session.catches.length})
           </h2>
           {session.catches.length === 0 ? (
-            <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-6 text-center shadow-sm">
-              <Fish size={32} className="mx-auto text-gray-500" />
-              <p className="mt-2 text-sm text-gray-400">No catches logged yet</p>
+            <div className="rounded-2xl bg-card border border-border p-6 text-center shadow-sm">
+              <Fish size={32} className="mx-auto text-muted-foreground" />
+              <p className="mt-2 text-sm text-muted-foreground">No catches logged yet</p>
               {canLogCatches && (
                 <button
                   type="button"

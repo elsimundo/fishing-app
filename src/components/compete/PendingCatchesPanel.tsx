@@ -17,15 +17,15 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
   const [rejectionReason, setRejectionReason] = useState('')
 
   if (isLoading) {
-    return <div className="text-center py-8 text-gray-500">Loading pending catches...</div>
+    return <div className="text-center py-8 text-muted-foreground">Loading pending catches...</div>
   }
 
   if (!pendingCatches || pendingCatches.length === 0) {
     return (
       <div className="text-center py-8">
-        <Clock size={48} className="mx-auto text-gray-400 mb-3" />
-        <p className="text-gray-600 font-semibold">No pending catches</p>
-        <p className="text-sm text-gray-500">All catches have been validated</p>
+        <Clock size={48} className="mx-auto text-muted-foreground mb-3" />
+        <p className="text-muted-foreground font-semibold">No pending catches</p>
+        <p className="text-sm text-muted-foreground">All catches have been validated</p>
       </div>
     )
   }
@@ -33,7 +33,7 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900">
+        <h3 className="text-lg font-bold text-foreground">
           Pending Validation ({pendingCatches.length})
         </h3>
         <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
@@ -55,21 +55,21 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
                 className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center text-3xl flex-shrink-0">
+              <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center text-3xl flex-shrink-0">
                 🐟
               </div>
             )}
 
             {/* Catch Info */}
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-gray-900">
+              <h4 className="font-semibold text-foreground">
                 {catch_.species} - {catch_.weight_kg}kg
                 {catch_.length_cm && (
-                  <span className="text-gray-600 text-sm ml-2">({catch_.length_cm}cm)</span>
+                  <span className="text-muted-foreground text-sm ml-2">({catch_.length_cm}cm)</span>
                 )}
               </h4>
-              <p className="text-sm text-gray-600 mt-1">by @{catch_.user.username}</p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">by @{catch_.user.username}</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 {formatDistanceToNow(new Date(catch_.created_at), { addSuffix: true })}
               </p>
             </div>
@@ -82,7 +82,7 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="Reason for rejection (required)..."
-                className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg resize-none focus:outline-none focus:border-navy-800"
+                className="w-full px-3 py-2 border-2 border-border bg-background text-foreground rounded-lg resize-none focus:outline-none focus:border-navy-800"
                 rows={2}
                 autoFocus
               />
@@ -100,7 +100,7 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
                     )
                   }}
                   disabled={!rejectionReason.trim() || rejectCatch.isPending}
-                  className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:bg-gray-300 transition-colors"
+                  className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
                 >
                   Confirm Reject
                 </button>
@@ -109,7 +109,7 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
                     setRejectingCatchId(null)
                     setRejectionReason('')
                   }}
-                  className="px-3 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50"
+                  className="px-3 py-2 border-2 border-border text-muted-foreground rounded-lg font-semibold hover:bg-muted"
                 >
                   Cancel
                 </button>

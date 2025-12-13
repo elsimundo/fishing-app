@@ -39,7 +39,7 @@ function getNotificationIcon(type: Notification['type']) {
     case 'lake_problem_reported':
       return <AlertTriangle size={20} className="text-amber-500" />
     default:
-      return <Fish size={20} className="text-gray-500" />
+      return <Fish size={20} className="text-muted-foreground" />
   }
 }
 
@@ -48,8 +48,8 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
   const content = (
     <div
-      className={`flex gap-3 p-4 hover:bg-[#1A2D3D] transition-colors cursor-pointer ${
-        !notification.is_read ? 'bg-[#1A2D3D]' : ''
+      className={`flex gap-3 p-4 hover:bg-muted transition-colors cursor-pointer ${
+        !notification.is_read ? 'bg-muted' : ''
       }`}
       onClick={onClick}
     >
@@ -60,15 +60,15 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white">{notification.title}</p>
-        <p className="text-sm text-gray-400 mt-0.5">{notification.message}</p>
-        <p className="text-xs text-gray-500 mt-1">{timeAgo}</p>
+        <p className="text-sm font-medium text-foreground">{notification.title}</p>
+        <p className="text-sm text-muted-foreground mt-0.5">{notification.message}</p>
+        <p className="text-xs text-muted-foreground mt-1">{timeAgo}</p>
       </div>
 
       {/* Unread indicator */}
       {!notification.is_read && (
         <div className="flex-shrink-0">
-          <div className="h-2 w-2 rounded-full bg-[#1BA9A0]" />
+          <div className="h-2 w-2 rounded-full bg-primary" />
         </div>
       )}
     </div>

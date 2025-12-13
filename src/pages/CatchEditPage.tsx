@@ -12,7 +12,7 @@ export function CatchEditPage() {
     return (
       <main className="min-h-screen bg-background px-4 py-6">
         <div className="flex h-full items-center justify-center">
-          <p className="text-sm text-slate-600">Loading catch</p>
+          <p className="text-sm text-muted-foreground">Loading catch</p>
         </div>
       </main>
     )
@@ -38,14 +38,14 @@ export function CatchEditPage() {
   return (
     <main className="min-h-screen bg-background px-4 py-4">
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
-        <div className="flex items-center justify-between text-xs text-slate-600">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <Link to={`/catches/${id}`} className="text-secondary hover:underline">
             ← Back to catch
           </Link>
         </div>
 
         <section className="overflow-hidden rounded-xl bg-surface p-4 shadow">
-          <h1 className="mb-3 text-base font-semibold text-slate-900">Edit catch</h1>
+          <h1 className="mb-3 text-base font-semibold text-foreground">Edit catch</h1>
           <CatchForm
             mode="edit"
             catchId={id}

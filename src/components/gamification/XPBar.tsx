@@ -13,7 +13,7 @@ export function XPBar({ showLevel = true, size = 'md', className = '' }: XPBarPr
   if (isLoading || !userData) {
     return (
       <div className={`animate-pulse ${className}`}>
-        <div className="h-2 bg-gray-200 rounded-full" />
+        <div className="h-2 bg-muted rounded-full" />
       </div>
     )
   }
@@ -43,7 +43,7 @@ export function XPBar({ showLevel = true, size = 'md', className = '' }: XPBarPr
       )}
       
       <div className="flex-1">
-        <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${heights[size]}`}>
+        <div className={`w-full bg-muted rounded-full overflow-hidden ${heights[size]}`}>
           <div 
             className={`h-full bg-gradient-to-r ${tierColors[tier]} rounded-full transition-all duration-500 ease-out`}
             style={{ width: `${progress.percentage}%` }}
@@ -52,10 +52,10 @@ export function XPBar({ showLevel = true, size = 'md', className = '' }: XPBarPr
         
         {size !== 'sm' && (
           <div className="flex justify-between mt-1">
-            <span className="text-[10px] text-gray-500">
+            <span className="text-[10px] text-muted-foreground">
               {progress.current.toLocaleString()} / {progress.needed.toLocaleString()} XP
             </span>
-            <span className="text-[10px] text-gray-500">
+            <span className="text-[10px] text-muted-foreground">
               Level {level + 1}
             </span>
           </div>

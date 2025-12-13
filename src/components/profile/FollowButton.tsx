@@ -31,7 +31,7 @@ export function FollowButton({ userId, isFollowing, className = '' }: FollowButt
       className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
         isFollowing
           ? 'bg-[#0D4B4E] text-[#1BA9A0] hover:bg-[#1A2D3D]'
-          : 'bg-[#1BA9A0] text-white hover:bg-[#14B8A6]'
+          : 'bg-[#1BA9A0] text-white hover:bg-[#0D9488]'
       } ${className}`}
     >
       {isPending ? (

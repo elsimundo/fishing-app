@@ -47,16 +47,16 @@ export function DeclareWinnerModal({ competitionId, onClose }: DeclareWinnerModa
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-5">
-      <div className="bg-[#243B4A] border border-[#334155] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-card border border-border rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[#334155]">
+        <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-2">
             <Trophy size={24} className="text-yellow-500" />
-            <h2 className="text-lg font-bold text-white">Declare Winner</h2>
+            <h2 className="text-lg font-bold text-foreground">Declare Winner</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[#334155] rounded-full transition-colors text-gray-400"
+            className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground"
           >
             <X size={20} />
           </button>
@@ -66,13 +66,13 @@ export function DeclareWinnerModal({ competitionId, onClose }: DeclareWinnerModa
         <div className="p-5 space-y-4">
           {/* Select Winner */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Select Winner <span className="text-red-400">*</span>
             </label>
             <select
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-[#334155] bg-[#1A2D3D] text-white rounded-xl focus:outline-none focus:border-[#1BA9A0]"
+              className="w-full px-4 py-3 border-2 border-border bg-background text-foreground rounded-xl focus:outline-none focus:border-primary"
             >
               <option value="">Choose competitor...</option>
               {leaderboard?.map((entry) => (
@@ -85,13 +85,13 @@ export function DeclareWinnerModal({ competitionId, onClose }: DeclareWinnerModa
 
           {/* Category */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Category <span className="text-red-400">*</span>
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-[#334155] bg-[#1A2D3D] text-white rounded-xl focus:outline-none focus:border-[#1BA9A0] mb-2"
+              className="w-full px-4 py-3 border-2 border-border bg-background text-foreground rounded-xl focus:outline-none focus:border-primary mb-2"
             >
               <option value="">Choose category...</option>
               {predefinedCategories.map((cat) => (
@@ -108,7 +108,7 @@ export function DeclareWinnerModal({ competitionId, onClose }: DeclareWinnerModa
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
                 placeholder="Enter custom category name..."
-                className="w-full px-4 py-3 border-2 border-[#334155] bg-[#1A2D3D] text-white rounded-xl focus:outline-none focus:border-[#1BA9A0]"
+                className="w-full px-4 py-3 border-2 border-border bg-background text-foreground rounded-xl focus:outline-none focus:border-primary"
                 maxLength={50}
               />
             )}
@@ -116,26 +116,26 @@ export function DeclareWinnerModal({ competitionId, onClose }: DeclareWinnerModa
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Notes (Optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any notes about this winner..."
-              className="w-full px-4 py-3 border-2 border-[#334155] bg-[#1A2D3D] text-white rounded-xl resize-none focus:outline-none focus:border-[#1BA9A0]"
+              className="w-full px-4 py-3 border-2 border-border bg-background text-foreground rounded-xl resize-none focus:outline-none focus:border-primary"
               rows={3}
               maxLength={200}
             />
-            <p className="text-xs text-gray-500 mt-1 text-right">{notes.length}/200</p>
+            <p className="text-xs text-muted-foreground mt-1 text-right">{notes.length}/200</p>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 p-5 border-t border-[#334155]">
+        <div className="flex gap-3 p-5 border-t border-border">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-3 border-2 border-[#334155] bg-[#1A2D3D] text-gray-300 rounded-xl font-semibold hover:bg-[#334155]"
+            className="flex-1 px-4 py-3 border-2 border-border bg-background text-muted-foreground rounded-xl font-semibold hover:bg-muted"
           >
             Cancel
           </button>
@@ -146,7 +146,7 @@ export function DeclareWinnerModal({ competitionId, onClose }: DeclareWinnerModa
               (!category || (category === 'custom' && !customCategory.trim())) ||
               declareWinner.isPending
             }
-            className="flex-1 px-4 py-3 bg-yellow-500 text-white rounded-xl font-semibold hover:bg-yellow-600 disabled:bg-[#334155] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 bg-yellow-500 text-white rounded-xl font-semibold hover:bg-yellow-600 disabled:bg-muted disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Trophy size={18} />
             <span>{declareWinner.isPending ? 'Declaring...' : 'Declare Winner'}</span>

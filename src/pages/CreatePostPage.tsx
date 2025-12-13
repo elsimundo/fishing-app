@@ -103,11 +103,11 @@ export default function CreatePostPage() {
     <Layout>
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#334155] bg-[#243B4A] px-4 py-3">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-4 py-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-full p-2 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
+            className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X size={22} />
           </button>
@@ -116,7 +116,7 @@ export default function CreatePostPage() {
             type="button"
             onClick={handleSubmit}
             disabled={!canPost || isSubmitting}
-            className="rounded-full bg-[#1BA9A0] px-5 py-2 text-sm font-bold text-white hover:bg-[#14B8A6] disabled:bg-[#334155] disabled:text-gray-500"
+            className="rounded-full bg-navy-800 px-5 py-2 text-sm font-bold text-white hover:bg-navy-900 disabled:bg-navy-400 disabled:text-white/60"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
@@ -130,8 +130,8 @@ export default function CreatePostPage() {
         </header>
 
         {/* Composer Card */}
-        <div className="flex-1 bg-[#1A2D3D] p-4">
-          <div className="rounded-2xl bg-[#243B4A] shadow-sm border border-[#334155]">
+        <div className="flex-1 bg-background p-4">
+          <div className="rounded-2xl bg-card shadow-sm border border-border">
             {/* User info + textarea */}
             <div className="p-4">
               <div className="flex gap-3">
@@ -145,7 +145,7 @@ export default function CreatePostPage() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="What's happening on the water?"
-                    className="min-h-[120px] w-full resize-none border-none bg-transparent text-[15px] leading-relaxed text-white placeholder-gray-500 focus:outline-none"
+                    className="min-h-[120px] w-full resize-none border-none bg-transparent text-[15px] leading-relaxed text-foreground placeholder-muted-foreground focus:outline-none"
                     maxLength={500}
                     autoFocus
                   />
@@ -174,7 +174,7 @@ export default function CreatePostPage() {
             )}
 
             {/* Actions bar */}
-            <div className="flex items-center justify-between border-t border-[#334155] px-4 py-3">
+            <div className="flex items-center justify-between border-t border-border px-4 py-3">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -182,7 +182,7 @@ export default function CreatePostPage() {
                   className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     imagePreview
                       ? 'bg-emerald-900/30 text-emerald-400'
-                      : 'text-gray-400 hover:bg-[#1A2D3D]'
+                      : 'text-muted-foreground hover:bg-muted'
                   }`}
                 >
                   <Image size={20} />
@@ -198,7 +198,7 @@ export default function CreatePostPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[#334155]">
+                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
                   <div
                     className={`h-full rounded-full transition-all ${
                       content.length > 450
@@ -210,7 +210,7 @@ export default function CreatePostPage() {
                     style={{ width: `${Math.min((content.length / 500) * 100, 100)}%` }}
                   />
                 </div>
-                <span className={`text-xs font-medium ${content.length > 450 ? 'text-red-400' : 'text-gray-500'}`}>
+                <span className={`text-xs font-medium ${content.length > 450 ? 'text-red-400' : 'text-muted-foreground'}`}>
                   {500 - content.length}
                 </span>
               </div>

@@ -33,16 +33,16 @@ export default function FeedView() {
 
   if (!posts || posts.length === 0) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center p-5 text-center bg-[#1A2D3D]">
+      <div className="flex h-screen flex-col items-center justify-center p-5 text-center bg-background">
         <div className="mb-4 text-5xl">🎣</div>
-        <p className="mb-2 text-lg font-semibold text-white">Your feed is empty</p>
-        <p className="mb-6 text-sm text-gray-400">
+        <p className="mb-2 text-lg font-semibold text-foreground">Your feed is empty</p>
+        <p className="mb-6 text-sm text-muted-foreground">
           Follow other anglers to see their catches and sessions here!
         </p>
         <button
           type="button"
           onClick={() => navigate('/discover')}
-          className="rounded-xl bg-[#1BA9A0] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#14B8A6]"
+          className="rounded-xl bg-navy-800 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900"
         >
           Discover Anglers
         </button>
@@ -58,15 +58,15 @@ export default function FeedView() {
       : posts
 
   return (
-    <div className="min-h-screen bg-[#1A2D3D]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-[#334155] bg-[#1A2D3D] px-5 pt-4 pb-3">
+      <div className="sticky top-0 z-10 border-b border-border bg-background px-5 pt-4 pb-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">Feed</h1>
+          <h1 className="text-xl font-bold text-foreground">Feed</h1>
           <button
             type="button"
             onClick={() => navigate('/discover')}
-            className="flex items-center gap-2 rounded-full bg-[#243B4A] px-3 py-2 text-sm font-medium text-white hover:bg-[#0D4B4E] transition-colors"
+            className="flex items-center gap-2 rounded-full bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
           >
             <Search size={16} />
             <span className="hidden sm:inline">Find Anglers</span>
@@ -74,12 +74,12 @@ export default function FeedView() {
         </div>
 
         {/* Tabs: Me / Friends / Global */}
-        <div className="mt-3 inline-flex rounded-full bg-[#243B4A] p-1 text-xs font-medium text-gray-400">
+        <div className="mt-3 inline-flex rounded-full bg-card p-1 text-xs font-medium text-muted-foreground">
           <button
             type="button"
             onClick={() => setActiveTab('my')}
             className={`rounded-full px-3 py-1 transition-colors ${
-              activeTab === 'my' ? 'bg-[#1BA9A0] text-white shadow-sm' : 'text-gray-400 hover:text-white'
+              activeTab === 'my' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Me
@@ -88,7 +88,7 @@ export default function FeedView() {
             type="button"
             onClick={() => setActiveTab('friends')}
             className={`rounded-full px-3 py-1 transition-colors ${
-              activeTab === 'friends' ? 'bg-[#1BA9A0] text-white shadow-sm' : 'text-gray-400 hover:text-white'
+              activeTab === 'friends' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Friends
@@ -97,7 +97,7 @@ export default function FeedView() {
             type="button"
             onClick={() => setActiveTab('global')}
             className={`rounded-full px-3 py-1 transition-colors ${
-              activeTab === 'global' ? 'bg-[#1BA9A0] text-white shadow-sm' : 'text-gray-400 hover:text-white'
+              activeTab === 'global' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Global
@@ -107,7 +107,7 @@ export default function FeedView() {
 
       {/* Feed Posts with pull-to-refresh */}
       <PullToRefresh onRefresh={refetch}>
-        <div className="divide-y divide-[#334155]">
+        <div className="divide-y divide-border">
           {isLoading ? (
             <>
               <PostSkeleton />
@@ -121,11 +121,11 @@ export default function FeedView() {
 
         {/* Load more posts */}
         {!isLoading && posts.length >= pageSize && (
-          <div className="border-t border-[#334155] bg-[#1A2D3D] px-5 py-4 text-center">
+          <div className="border-t border-border bg-background px-5 py-4 text-center">
             <button
               type="button"
               onClick={() => setPageSize((prev) => prev + 10)}
-              className="text-sm font-semibold text-[#1BA9A0] hover:text-[#14B8A6]"
+              className="text-sm font-semibold text-primary hover:text-primary/80"
             >
               Load more posts
             </button>
@@ -133,7 +133,7 @@ export default function FeedView() {
         )}
 
         {!isLoading && posts.length > 0 && posts.length < pageSize && (
-          <div className="border-t border-[#334155] bg-[#1A2D3D] px-5 py-4 text-center text-xs text-gray-400">
+          <div className="border-t border-border bg-background px-5 py-4 text-center text-xs text-muted-foreground">
             You're all caught up! 🎣
           </div>
         )}

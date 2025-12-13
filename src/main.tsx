@@ -6,6 +6,8 @@ import { Toaster } from 'react-hot-toast'
 import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './hooks/useAuth'
+import { ThemeProvider } from './hooks/useTheme'
+import { ThemeLoader } from './components/ThemeLoader'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 const queryClient = new QueryClient()
@@ -15,7 +17,11 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <App />
+          <ThemeProvider>
+            <ThemeLoader>
+              <App />
+            </ThemeLoader>
+          </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
       <Toaster position="top-center" toastOptions={{ duration: 3000 }} />

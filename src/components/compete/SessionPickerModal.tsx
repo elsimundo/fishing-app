@@ -54,13 +54,13 @@ export function SessionPickerModal({ competition, onClose }: SessionPickerModalP
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
-      <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#243B4A] border border-[#334155] md:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
-          <h2 className="text-lg font-bold text-white">Choose your session</h2>
+      <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-card border border-border md:rounded-2xl">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 className="text-lg font-bold text-foreground">Choose your session</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full px-3 py-1 text-sm font-semibold text-gray-400 hover:bg-[#334155]"
+            className="rounded-full px-3 py-1 text-sm font-semibold text-muted-foreground hover:bg-muted"
           >
             Close
           </button>
@@ -69,13 +69,13 @@ export function SessionPickerModal({ competition, onClose }: SessionPickerModalP
         <div className="flex-1 overflow-y-auto p-5">
           {isLoading ? (
             <div className="flex justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#1BA9A0] border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           ) : !sessions || sessions.length === 0 ? (
             <div className="py-12 text-center">
               <div className="mb-3 text-5xl">📝</div>
-              <p className="mb-1 text-base font-semibold text-white">No eligible sessions</p>
-              <p className="mb-4 text-sm text-gray-400">
+              <p className="mb-1 text-base font-semibold text-foreground">No eligible sessions</p>
+              <p className="mb-4 text-sm text-muted-foreground">
                 You don&apos;t have any sessions that fall within this competition&apos;s dates.
               </p>
             </div>
@@ -88,18 +88,18 @@ export function SessionPickerModal({ competition, onClose }: SessionPickerModalP
                   onClick={() => setSelectedSessionId(session.id)}
                   className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-all ${
                     selectedSessionId === session.id
-                      ? 'border-[#1BA9A0] bg-[#1BA9A0]/20'
-                      : 'border-[#334155] hover:border-[#1BA9A0]/50'
+                      ? 'border-primary bg-primary/20'
+                      : 'border-border hover:border-primary/50'
                   }`}
                 >
                   <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-emerald-500 text-xl text-white">
                     🎣
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-white">
+                    <p className="truncate text-sm font-semibold text-foreground">
                       {session.title || 'Untitled session'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {new Date(session.started_at).toLocaleDateString()} · {session.location_name}
                     </p>
                   </div>
@@ -110,11 +110,11 @@ export function SessionPickerModal({ competition, onClose }: SessionPickerModalP
         </div>
 
         {sessions && sessions.length > 0 && (
-          <div className="flex gap-3 border-t border-[#334155] px-5 py-4">
+          <div className="flex gap-3 border-t border-border px-5 py-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border-2 border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm font-semibold text-gray-300 hover:bg-[#334155]"
+              className="flex-1 rounded-xl border-2 border-border bg-background px-4 py-3 text-sm font-semibold text-muted-foreground hover:bg-muted"
             >
               Cancel
             </button>
@@ -122,7 +122,7 @@ export function SessionPickerModal({ competition, onClose }: SessionPickerModalP
               type="button"
               onClick={handleSubmit}
               disabled={!selectedSessionId || submitEntry.isPending}
-              className="flex-1 rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#14B8A6] disabled:cursor-not-allowed disabled:bg-[#334155]"
+              className="flex-1 rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
             >
               {submitEntry.isPending ? 'Submitting…' : 'Submit entry'}
             </button>

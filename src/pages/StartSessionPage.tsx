@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Loader2, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -481,14 +481,14 @@ export default function StartSessionPage() {
     const progress = (step / 4) * 100
     return (
       <div className="mb-4">
-        <div className="mb-1 flex items-center justify-between text-[11px] text-gray-500">
+        <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
           <span>
             Step {step} of 4
           </span>
         </div>
-        <div className="h-1 rounded-full bg-[#334155]">
+        <div className="h-1 rounded-full bg-muted">
           <div
-            className="h-1 rounded-full bg-[#1BA9A0] transition-all"
+            className="h-1 rounded-full bg-primary transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -505,11 +505,11 @@ export default function StartSessionPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="text-xs font-medium text-gray-400 hover:underline"
+            className="text-xs font-medium text-muted-foreground hover:underline"
           >
             Cancel
           </button>
-          <h1 className="text-sm font-semibold text-white">Start Session</h1>
+          <h1 className="text-sm font-semibold text-foreground">Start Session</h1>
           <div className="w-10" />
         </header>
       )
@@ -520,11 +520,11 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={handleBack}
-          className="text-xs font-medium text-gray-400 hover:underline"
+          className="text-xs font-medium text-muted-foreground hover:underline"
         >
           Back
         </button>
-        <h1 className="text-sm font-semibold text-white">Start Session</h1>
+        <h1 className="text-sm font-semibold text-foreground">Start Session</h1>
         <div className="w-10" />
       </header>
     )
@@ -537,8 +537,8 @@ export default function StartSessionPage() {
     
     return (
     <>
-      <h2 className="mb-1 text-lg font-bold text-white">Start your session</h2>
-      <p className="mb-4 text-sm text-gray-400">
+      <h2 className="mb-1 text-lg font-bold text-foreground">Start your session</h2>
+      <p className="mb-4 text-sm text-muted-foreground">
         {preSelectedMark 
           ? `Starting at ${preSelectedMark.name}` 
           : 'Choose how you\'d like to begin your fishing session.'}
@@ -548,37 +548,37 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={handleQuickStart}
-          className="flex items-center gap-3 rounded-2xl border-2 border-[#1BA9A0] bg-[#243B4A] p-4 text-left shadow-sm transition-colors hover:border-[#14B8A6]"
+          className="flex items-center gap-3 rounded-2xl border-2 border-primary bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/80"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1BA9A0] text-2xl text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-2xl text-white">
             ⚡
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-white">Quick Start</p>
-            <p className="mt-0.5 text-xs text-gray-400">
+            <p className="text-sm font-semibold text-foreground">Quick Start</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
               {preSelectedMark ? `Start at ${preSelectedMark.name}` : 'Use current location & smart defaults'}
             </p>
           </div>
-          <ChevronRight size={18} className="text-[#1BA9A0]" />
+          <ChevronRight size={18} className="text-primary" />
         </button>
 
         <button
           type="button"
           onClick={handleFullSetup}
-          className="flex items-center gap-3 rounded-2xl border-2 border-[#334155] bg-[#243B4A] p-4 text-left shadow-sm transition-colors hover:border-[#1BA9A0]"
+          className="flex items-center gap-3 rounded-2xl border-2 border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1A2D3D] text-2xl text-[#1BA9A0]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-2xl text-primary">
             ⚙️
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-white">Full Setup</p>
-            <p className="mt-0.5 text-xs text-gray-400">Customize location, privacy, and details</p>
+            <p className="text-sm font-semibold text-foreground">Full Setup</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">Customize location, privacy, and details</p>
           </div>
-          <ChevronRight size={18} className="text-gray-400" />
+          <ChevronRight size={18} className="text-muted-foreground" />
         </button>
       </div>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         {preSelectedMark 
           ? `💡 Quick Start will use your saved mark "${preSelectedMark.name}" as the location.`
           : '💡 Quick Start defaults: Uses your current GPS location, general area privacy, and auto-detects water type. You can edit everything later.'}
@@ -597,22 +597,22 @@ export default function StartSessionPage() {
 
     return (
       <>
-        <h2 className="mb-1 text-lg font-bold text-white">Where are you fishing?</h2>
-        <p className="mb-4 text-sm text-gray-400">Set your spot and give your session a name.</p>
+        <h2 className="mb-1 text-lg font-bold text-foreground">Where are you fishing?</h2>
+        <p className="mb-4 text-sm text-muted-foreground">Set your spot and give your session a name.</p>
         
         {/* Pre-selected mark indicator */}
         {preSelectedMark && (
-          <div className="mb-4 rounded-xl border-2 border-[#1BA9A0] bg-[#1BA9A0]/20 p-3">
+          <div className="mb-4 rounded-xl border-2 border-primary bg-primary/10 p-3">
             <div className="flex items-center gap-3">
               <span className="text-2xl">📍</span>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white">Starting at: {preSelectedMark.name}</p>
-                <p className="text-xs text-gray-400">Your saved mark</p>
+                <p className="text-sm font-semibold text-foreground">Starting at: {preSelectedMark.name}</p>
+                <p className="text-xs text-muted-foreground">Your saved mark</p>
               </div>
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, markId: null }))}
-                className="text-xs text-gray-400 hover:text-white"
+                className="text-xs text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
@@ -623,9 +623,9 @@ export default function StartSessionPage() {
         {/* Choose from existing saved marks */}
         {savedMarks.length > 0 && (
           <div className="mb-4">
-            <label className="mb-1 block text-xs font-medium text-gray-400">Use one of your marks</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Use one of your marks</label>
             <select
-              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               value={formData.markId ?? ''}
               onChange={(e) => {
                 const value = e.target.value
@@ -655,7 +655,7 @@ export default function StartSessionPage() {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[11px] text-gray-500">Well reuse this marks name and coordinates.</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">Well reuse this marks name and coordinates.</p>
           </div>
         )}
 
@@ -663,7 +663,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={openLocationPicker}
           className={`mb-4 flex items-center justify-between rounded-xl border-2 p-4 transition-colors ${
-            hasLocation ? 'border-[#1BA9A0] bg-[#1A2D3D]' : 'border-[#334155] bg-[#243B4A] hover:border-[#1BA9A0]'
+            hasLocation ? 'border-primary bg-background' : 'border-border bg-card hover:border-primary'
           }`}
         >
           <div className="flex items-center gap-3">
@@ -671,38 +671,38 @@ export default function StartSessionPage() {
               📍
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-foreground">
                 {hasLocation ? formData.locationName : 'Choose location'}
               </p>
-              <p className="mt-0.5 text-xs text-gray-400">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {hasLocation ? 'Tap to change your spot' : 'Tap to set your fishing spot'}
               </p>
             </div>
           </div>
-          <span className="text-xs font-semibold text-[#1BA9A0]">
+          <span className="text-xs font-semibold text-primary">
             {hasLocation ? 'Change' : 'Set'}
           </span>
         </button>
 
         <div className="mb-1">
-          <label className="mb-1 block text-xs font-medium text-gray-400">Session Title (optional)</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">Session Title (optional)</label>
           <input
             type="text"
             value={formData.title}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, title: e.target.value }))
             }
-            className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder={`${formData.locationName || 'Fishing'} · ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
           />
         </div>
-        <p className="mb-4 text-xs text-gray-500">💡 Leave blank for auto-generated name based on location & date</p>
+        <p className="mb-4 text-xs text-muted-foreground">💡 Leave blank for auto-generated name based on location & date</p>
 
         <button
           type="button"
           onClick={handleNext}
           disabled={!hasLocation}
-          className="mt-2 w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6] disabled:bg-[#334155] disabled:cursor-not-allowed"
+          className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-primary/60 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -721,7 +721,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={() => setFormData((prev) => ({ ...prev, waterType: type }))}
           className={`flex items-center justify-between rounded-xl border-2 p-4 text-left transition-colors ${
-            isSelected ? 'border-[#1BA9A0] bg-[#1A2D3D]' : 'border-[#334155] bg-[#243B4A]'
+            isSelected ? 'border-primary bg-background' : 'border-border bg-card'
           }`}
         >
           <div className="flex items-center gap-3">
@@ -733,13 +733,13 @@ export default function StartSessionPage() {
               {icon}
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">{title}</p>
-              <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+              <p className="text-sm font-semibold text-foreground">{title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
             </div>
           </div>
           <div
             className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
-              isSelected ? 'bg-[#1BA9A0] text-white' : 'border border-[#334155] bg-[#243B4A] text-transparent'
+              isSelected ? 'bg-primary text-white' : 'border border-border bg-card text-transparent'
             }`}
           >
             ✔
@@ -750,8 +750,8 @@ export default function StartSessionPage() {
 
     return (
       <>
-        <h2 className="mb-1 text-lg font-bold text-white">What type of water?</h2>
-        <p className="mb-4 text-sm text-gray-400">
+        <h2 className="mb-1 text-lg font-bold text-foreground">What type of water?</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
           This helps us show you the right species and fishing data.
         </p>
 
@@ -762,14 +762,14 @@ export default function StartSessionPage() {
 
         {/* Lake selector for freshwater */}
         {selected === 'freshwater' && nearbyLakes && nearbyLakes.length > 0 && (
-          <div className="mt-4 rounded-xl border-2 border-[#334155] bg-[#243B4A] p-4">
-            <label className="mb-2 block text-sm font-semibold text-white">
+          <div className="mt-4 rounded-xl border-2 border-border bg-card p-4">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               🏞️ Link to a fishing venue (optional)
             </label>
             <select
               value={formData.lakeId ?? ''}
               onChange={(e) => setFormData(prev => ({ ...prev, lakeId: e.target.value || null }))}
-              className="w-full rounded-lg border-2 border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none"
+              className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             >
               <option value="">No specific venue</option>
               {nearbyLakes.map((lake: Lake) => (
@@ -778,7 +778,7 @@ export default function StartSessionPage() {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Linking helps build local fishing intel
             </p>
           </div>
@@ -786,8 +786,8 @@ export default function StartSessionPage() {
 
         {/* Saved mark selector for saltwater */}
         {selected === 'saltwater' && allMarks && allMarks.length > 0 && (
-          <div className="mt-4 rounded-xl border-2 border-[#334155] bg-[#243B4A] p-4">
-            <label className="mb-2 block text-sm font-semibold text-white">
+          <div className="mt-4 rounded-xl border-2 border-border bg-card p-4">
+            <label className="mb-2 block text-sm font-semibold text-foreground">
               📍 Start at a saved mark (optional)
             </label>
             <select
@@ -806,7 +806,7 @@ export default function StartSessionPage() {
                   } : {})
                 }))
               }}
-              className="w-full rounded-lg border-2 border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none"
+              className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             >
               <option value="">Choose a mark...</option>
               {savedMarks.map((mark) => (
@@ -824,7 +824,7 @@ export default function StartSessionPage() {
                 </optgroup>
               )}
             </select>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Your saved spots and marks shared with you
             </p>
           </div>
@@ -834,7 +834,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={handleNext}
           disabled={!selected}
-          className="mt-4 w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6] disabled:bg-[#334155] disabled:cursor-not-allowed"
+          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-primary/60 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -853,7 +853,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={() => setFormData((prev) => ({ ...prev, privacy: value }))}
           className={`flex items-center justify-between rounded-xl border-2 p-4 text-left transition-colors ${
-            isSelected ? 'border-[#1BA9A0] bg-[#1A2D3D]' : 'border-[#334155] bg-[#243B4A]'
+            isSelected ? 'border-primary bg-background' : 'border-border bg-card'
           } ${extraClasses}`}
         >
           <div className="flex items-center gap-3">
@@ -869,13 +869,13 @@ export default function StartSessionPage() {
               {icon}
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">{title}</p>
-              <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+              <p className="text-sm font-semibold text-foreground">{title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
             </div>
           </div>
           <div
             className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
-              isSelected ? 'bg-[#1BA9A0] text-white' : 'border border-[#334155] bg-[#243B4A] text-transparent'
+              isSelected ? 'bg-primary text-white' : 'border border-border bg-card text-transparent'
             }`}
           >
             ✔
@@ -886,18 +886,18 @@ export default function StartSessionPage() {
 
     return (
       <>
-        <h2 className="mb-1 text-lg font-bold text-white">Location privacy</h2>
-        <p className="mb-4 text-sm text-gray-400">
+        <h2 className="mb-1 text-lg font-bold text-foreground">Location privacy</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
           Control how much location detail you share with others.
         </p>
 
         <div className="space-y-3">
           {makeCard('private', '🔒', 'Private', 'Location completely hidden')}
-          {makeCard('general', '📍', 'General Area', 'Show approximate location (~5 km)', 'border-[#1BA9A0] bg-[#1A2D3D]')}
+          {makeCard('general', '📍', 'General Area', 'Show approximate location (~5 km)', 'border-primary bg-background')}
           {makeCard('exact', '🎯', 'Exact Location', 'Share precise GPS coordinates')}
         </div>
 
-        <p className="mt-4 text-xs text-gray-500">
+        <p className="mt-4 text-xs text-muted-foreground">
           💡 You can always change this later. We recommend 'General Area' to protect your fishing spots while still
           helping the community.
         </p>
@@ -905,7 +905,7 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={handleNext}
-          className="mt-4 w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
         >
           Continue
         </button>
@@ -915,30 +915,30 @@ export default function StartSessionPage() {
 
   const renderStep4 = () => (
     <>
-      <h2 className="mb-1 text-lg font-bold text-white">Add session details</h2>
-      <p className="mb-4 text-sm text-gray-400">
+      <h2 className="mb-1 text-lg font-bold text-foreground">Add session details</h2>
+      <p className="mb-4 text-sm text-muted-foreground">
         Tell your story! What are you hoping to catch? What's the weather like?
       </p>
 
       <div className="mb-1">
-        <label className="mb-1 block text-xs font-medium text-gray-400">Description (Optional)</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Description (Optional)</label>
         <textarea
           rows={6}
           value={formData.notes ?? ''}
           onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-          className="w-full resize-none rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder="e.g., Perfect conditions today! Clear skies, light wind, incoming tide. Targeting bass with live sandeel..."
         />
       </div>
 
-      <p className="mb-4 text-xs text-gray-500">
+      <p className="mb-4 text-xs text-muted-foreground">
         📝 You can add photos and catches once your session starts
       </p>
 
       <button
         type="button"
         onClick={handleNext}
-        className="mt-2 w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+        className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
       >
         Start Session
       </button>
@@ -947,12 +947,12 @@ export default function StartSessionPage() {
 
   const renderLoading = () => (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1BA9A0]/20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#1BA9A0]" />
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
       <div>
-        <p className="text-sm font-semibold text-white">Setting up your session…</p>
-        <p className="mt-1 text-xs text-gray-400">{loadingMessage}</p>
+        <p className="text-sm font-semibold text-foreground">Setting up your session…</p>
+        <p className="mt-1 text-xs text-muted-foreground">{loadingMessage}</p>
       </div>
     </div>
   )
@@ -963,8 +963,8 @@ export default function StartSessionPage() {
         🎣
       </div>
       <div className="max-w-xs">
-        <h2 className="text-xl font-bold text-white">Session Started!</h2>
-        <p className="mt-2 text-sm text-gray-400">
+        <h2 className="text-xl font-bold text-foreground">Session Started!</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
           Your fishing session is now active. Start logging catches and share your adventure!
         </p>
       </div>
@@ -972,7 +972,7 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={() => navigate(`/sessions/${createdSessionId}`)}
-          className="mt-2 rounded-xl bg-[#1BA9A0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+          className="mt-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
         >
           View Active Session
         </button>
@@ -1020,25 +1020,25 @@ export default function StartSessionPage() {
 
     return (
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
-        <div className="w-full max-w-xl rounded-xl bg-white p-4 shadow-lg">
+        <div className="w-full max-w-xl rounded-xl bg-card p-4 shadow-lg">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">Set your spot</h3>
+            <h3 className="text-sm font-semibold text-foreground">Set your spot</h3>
             <button
               type="button"
               onClick={() => setIsLocationPickerOpen(false)}
-              className="text-xs font-medium text-gray-500 hover:underline"
+              className="text-xs font-medium text-muted-foreground hover:underline"
             >
               Close
             </button>
           </div>
 
           {locationError ? (
-            <div className="mb-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">{locationError}</div>
+            <div className="mb-2 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">{locationError}</div>
           ) : null}
 
-          <p className="mb-2 text-xs text-gray-600">We use your current location and let you drop a pin.</p>
+          <p className="mb-2 text-xs text-muted-foreground">We use your current location and let you drop a pin.</p>
 
-          <div className="overflow-hidden rounded-lg border border-gray-200">
+          <div className="overflow-hidden rounded-lg border border-border">
             <LocationPicker value={locationCoords} onChange={handleLocationChange} />
           </div>
 
@@ -1047,22 +1047,20 @@ export default function StartSessionPage() {
             <button
               type="button"
               onClick={() => setShowSaveMarkInput(true)}
-              className="mt-3 w-full rounded-lg border border-dashed border-emerald-400 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+              className="mt-3 w-full rounded-lg border border-dashed border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/15 dark:text-emerald-300"
             >
-              📍 Save this spot as a mark for future sessions
+              + Save this spot as a Mark
             </button>
           )}
 
-          {/* Save mark input */}
-          {showSaveMarkInput && (
-            <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-              <label className="mb-1 block text-xs font-medium text-emerald-800">Name this spot</label>
+          {isNewLocation && showSaveMarkInput && (
+            <div className="mt-3 rounded-lg border border-border bg-muted/50 p-3">
               <input
                 type="text"
                 value={newMarkName}
                 onChange={(e) => setNewMarkName(e.target.value)}
                 placeholder="e.g., Southend Pier, My secret spot"
-                className="mb-2 w-full rounded-lg border border-emerald-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="mb-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 autoFocus
               />
               <div className="flex gap-2">
@@ -1072,7 +1070,7 @@ export default function StartSessionPage() {
                     setShowSaveMarkInput(false)
                     setNewMarkName('')
                   }}
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                  className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
                   Cancel
                 </button>
@@ -1080,7 +1078,7 @@ export default function StartSessionPage() {
                   type="button"
                   onClick={handleSaveAsMark}
                   disabled={!newMarkName.trim() || isSavingMark}
-                  className="flex-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:bg-emerald-400"
+                  className="flex-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:bg-primary/60"
                 >
                   {isSavingMark ? 'Saving...' : 'Save Mark'}
                 </button>
@@ -1092,7 +1090,7 @@ export default function StartSessionPage() {
             type="button"
             disabled={!canConfirm}
             onClick={handleConfirmLocation}
-            className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-gray-300"
+            className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
           >
             Use this spot
           </button>
@@ -1101,7 +1099,7 @@ export default function StartSessionPage() {
     )
   }
 
-  let content: JSX.Element
+  let content: ReactNode
 
   if (loading) {
     content = renderLoading()
@@ -1121,11 +1119,11 @@ export default function StartSessionPage() {
 
   return (
     <Layout>
-      <main className="px-4 py-4 bg-[#1A2D3D] min-h-screen">
+      <main className="min-h-screen bg-background px-4 py-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
           {renderHeader()}
           {renderProgress()}
-          <section className="rounded-2xl bg-[#243B4A] p-4 text-xs text-gray-300 shadow border border-[#334155]">
+          <section className="rounded-2xl border border-border bg-card p-4 text-xs text-muted-foreground shadow">
             {content}
           </section>
         </div>

@@ -59,9 +59,9 @@ function SessionBannerItem({ session }: { session: Session }) {
               Live · {durationLabel}
             </span>
             {waterBadge ? (
-              <span className="rounded-full bg-[#1A2D3D] px-2 py-0.5 text-gray-300">{waterBadge}</span>
+              <span className="rounded-full bg-background px-2 py-0.5 text-muted-foreground">{waterBadge}</span>
             ) : null}
-            <span className="rounded-full bg-[#1A2D3D] px-2 py-0.5 text-gray-300">
+            <span className="rounded-full bg-background px-2 py-0.5 text-muted-foreground">
               {catches.length} {catches.length === 1 ? 'catch' : 'catches'}
             </span>
           </div>
@@ -69,7 +69,7 @@ function SessionBannerItem({ session }: { session: Session }) {
         <div className="flex flex-col items-end gap-1">
           <Link
             to={`/sessions/${session.id}`}
-            className="rounded-full bg-[#1BA9A0] px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-[#14B8A6]"
+            className="rounded-full bg-navy-800 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-navy-900"
           >
             View
           </Link>

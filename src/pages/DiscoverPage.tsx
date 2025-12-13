@@ -18,24 +18,24 @@ export default function DiscoverPage() {
   const isSearching = debouncedQuery.trim().length > 0
 
   return (
-    <div className="min-h-screen bg-[#1A2D3D]">
-      <div className="sticky top-0 z-10 border-b border-[#334155] bg-[#243B4A]">
+    <div className="min-h-screen bg-background">
+      <div className="sticky top-0 z-10 border-b border-border bg-card">
         <div className="px-5 py-4">
-          <h1 className="mb-4 text-xl font-bold text-white">Discover</h1>
+          <h1 className="mb-4 text-xl font-bold text-foreground">Discover</h1>
           <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
+            <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search anglers..."
-              className="w-full rounded-xl border-2 border-[#334155] bg-[#1A2D3D] px-12 py-3 text-sm text-white placeholder-gray-500 focus:border-[#1BA9A0] focus:outline-none transition-colors"
+              className="w-full rounded-xl border-2 border-border bg-background px-12 py-3 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X size={20} />
               </button>

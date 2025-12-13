@@ -29,12 +29,12 @@ export function BottomNav() {
     >
       <Icon
         size={22}
-        className={active ? 'text-[#1BA9A0]' : 'text-gray-400'}
+        className={active ? 'text-primary' : 'text-muted-foreground'}
         fill={active && filled ? 'currentColor' : 'none'}
       />
       <span
         className={`text-[10px] font-medium ${
-          active ? 'text-[#1BA9A0]' : 'text-gray-400'
+          active ? 'text-primary' : 'text-muted-foreground'
         }`}
       >
         {label}
@@ -44,7 +44,7 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#1A2D3D] border-t border-[#334155] z-50 safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 safe-area-pb">
         <div className="flex items-stretch h-14">
           <NavButton
             onClick={() => navigate('/feed')}

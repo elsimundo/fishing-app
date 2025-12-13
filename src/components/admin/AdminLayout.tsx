@@ -33,10 +33,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-50">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-navy-800" />
-          <p className="mt-2 text-sm text-gray-600">Verifying access...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Verifying access...</p>
         </div>
       </div>
     )
@@ -53,7 +53,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   ]
 
   return (
-    <div className="fixed inset-0 z-[100] flex bg-gray-50">
+    <div className="fixed inset-0 z-[100] flex bg-background">
       {/* Mobile Header */}
       <div className="fixed left-0 right-0 top-0 z-50 flex h-14 items-center justify-between bg-navy-900 px-4 lg:hidden">
         <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <Shield size={32} className="text-yellow-400" />
             <div>
               <h1 className="text-xl font-bold">Admin Panel</h1>
-              <p className="text-xs capitalize text-gray-400">{role}</p>
+              <p className="text-xs capitalize text-white/60">{role}</p>
             </div>
           </div>
 

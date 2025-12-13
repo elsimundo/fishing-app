@@ -135,45 +135,45 @@ export default function PartnersPage() {
             <Handshake size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">Sales Partners</h1>
-            <p className="text-sm text-gray-600">Manage partner applications and commissions</p>
+            <h1 className="text-2xl font-bold text-foreground lg:text-3xl">Sales Partners</h1>
+            <p className="text-sm text-muted-foreground">Manage partner applications and commissions</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-500">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Users size={16} />
               <span className="text-xs font-medium">Active Partners</span>
             </div>
-            <p className="mt-1 text-2xl font-bold text-gray-900">{activePartners.length}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{activePartners.length}</p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-500">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <TrendingUp size={16} />
               <span className="text-xs font-medium">Total Signups</span>
             </div>
-            <p className="mt-1 text-2xl font-bold text-gray-900">{totalSignups}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{totalSignups}</p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-500">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <DollarSign size={16} />
               <span className="text-xs font-medium">Total Earnings</span>
             </div>
-            <p className="mt-1 text-2xl font-bold text-gray-900">£{totalEarnings.toFixed(2)}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">£{totalEarnings.toFixed(2)}</p>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="mb-4 flex gap-2 border-b border-gray-200">
+        <div className="mb-4 flex gap-2 border-b border-border">
           <button
             type="button"
             onClick={() => setActiveTab('applications')}
             className={`px-4 py-2 text-sm font-medium ${
               activeTab === 'applications'
                 ? 'border-b-2 border-purple-600 text-purple-600'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Applications {pendingApps.length > 0 && `(${pendingApps.length})`}
@@ -184,7 +184,7 @@ export default function PartnersPage() {
             className={`px-4 py-2 text-sm font-medium ${
               activeTab === 'partners'
                 ? 'border-b-2 border-purple-600 text-purple-600'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             All Partners ({partners.length})
@@ -196,37 +196,37 @@ export default function PartnersPage() {
           <div>
             {appsLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : pendingApps.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-                <p className="text-sm text-gray-500">No pending applications</p>
+              <div className="rounded-xl border border-border bg-card p-8 text-center">
+                <p className="text-sm text-muted-foreground">No pending applications</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {pendingApps.map((app) => (
-                  <div key={app.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <div key={app.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{app.full_name}</h3>
-                        <p className="text-sm text-gray-600">{app.email}</p>
-                        {app.phone && <p className="text-sm text-gray-600">{app.phone}</p>}
+                        <h3 className="font-semibold text-foreground">{app.full_name}</h3>
+                        <p className="text-sm text-muted-foreground">{app.email}</p>
+                        {app.phone && <p className="text-sm text-muted-foreground">{app.phone}</p>}
                         <div className="mt-3 space-y-2">
                           <div>
-                            <p className="text-xs font-medium text-gray-500">Why join:</p>
-                            <p className="text-sm text-gray-700">{app.why_join}</p>
+                            <p className="text-xs font-medium text-muted-foreground">Why join:</p>
+                            <p className="text-sm text-foreground">{app.why_join}</p>
                           </div>
                           {app.experience && (
                             <div>
-                              <p className="text-xs font-medium text-gray-500">Experience:</p>
-                              <p className="text-sm text-gray-700">{app.experience}</p>
+                              <p className="text-xs font-medium text-muted-foreground">Experience:</p>
+                              <p className="text-sm text-foreground">{app.experience}</p>
                             </div>
                           )}
                           <div>
-                            <p className="text-xs font-medium text-gray-500">Expected signups:</p>
-                            <p className="text-sm text-gray-700">{app.expected_signups} businesses</p>
+                            <p className="text-xs font-medium text-muted-foreground">Expected signups:</p>
+                            <p className="text-sm text-foreground">{app.expected_signups} businesses</p>
                           </div>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-muted-foreground">
                             Applied {format(new Date(app.created_at), 'MMM d, yyyy')}
                           </p>
                         </div>
@@ -250,7 +250,7 @@ export default function PartnersPage() {
                             }
                           }}
                           disabled={rejectApplication.isPending}
-                          className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-card px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
                         >
                           <X size={16} />
                           Reject
@@ -269,36 +269,36 @@ export default function PartnersPage() {
           <div>
             {partnersLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : partners.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-                <p className="text-sm text-gray-500">No partners yet</p>
+              <div className="rounded-xl border border-border bg-card p-8 text-center">
+                <p className="text-sm text-muted-foreground">No partners yet</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+              <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-muted">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Partner Code</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Commission</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Signups</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Earnings</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Joined</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Partner Code</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Commission</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Signups</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Earnings</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Joined</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-border">
                     {partners.map((partner) => (
-                      <tr key={partner.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                      <tr key={partner.id} className="hover:bg-muted">
+                        <td className="px-4 py-3 text-sm font-medium text-foreground">
                           {partner.partner_code}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
+                        <td className="px-4 py-3 text-sm text-muted-foreground">
                           {(partner.commission_rate * 100).toFixed(0)}%
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{partner.total_signups}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        <td className="px-4 py-3 text-sm text-muted-foreground">{partner.total_signups}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-foreground">
                           £{Number(partner.total_earnings).toFixed(2)}
                         </td>
                         <td className="px-4 py-3">
@@ -306,13 +306,13 @@ export default function PartnersPage() {
                             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                               partner.status === 'active'
                                 ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-700'
+                                : 'bg-muted text-muted-foreground'
                             }`}
                           >
                             {partner.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-500">
+                        <td className="px-4 py-3 text-sm text-muted-foreground">
                           {format(new Date(partner.created_at), 'MMM d, yyyy')}
                         </td>
                       </tr>

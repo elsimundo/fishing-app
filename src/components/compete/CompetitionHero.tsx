@@ -15,7 +15,7 @@ const typeLabels: Record<Competition['type'], { label: string; emoji: string }> 
 const statusClasses: Record<Competition['status'], string> = {
   upcoming: 'bg-blue-900/50 text-blue-300',
   active: 'bg-emerald-900/50 text-emerald-300',
-  ended: 'bg-gray-700/50 text-gray-300',
+  ended: 'bg-slate-700/50 text-slate-300',
   cancelled: 'bg-red-900/50 text-red-300',
 }
 
@@ -43,11 +43,11 @@ export function CompetitionHero({ competition, userEntry }: CompetitionHeroProps
           >
             {competition.status.charAt(0).toUpperCase() + competition.status.slice(1)}
           </span>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#243B4A]/90 text-white">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-card/90 text-foreground">
             {typeInfo.emoji} {typeInfo.label}
           </span>
           {userEntry?.rank && (
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-gray-900">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-slate-900">
               🏅 Your rank: #{userEntry.rank}
             </span>
           )}
@@ -56,7 +56,7 @@ export function CompetitionHero({ competition, userEntry }: CompetitionHeroProps
         <h1 className="text-2xl font-bold mb-2 line-clamp-2">{competition.title}</h1>
 
         {competition.prize && (
-          <div className="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-3 py-2 text-sm font-semibold text-gray-900">
+          <div className="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-3 py-2 text-sm font-semibold text-slate-900">
             <span>🏆</span>
             <span className="line-clamp-1">{competition.prize}</span>
           </div>

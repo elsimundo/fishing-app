@@ -63,10 +63,10 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
 
   if (catches.length === 0) {
     return (
-      <div className="py-10 text-center text-sm text-gray-500">
-        <Fish className="mx-auto mb-2 h-10 w-10 text-gray-500" />
-        <p className="mb-1 font-medium text-white">No species caught yet</p>
-        <p className="text-xs text-gray-500">Log your first catch to start building your collection.</p>
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        <Fish className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
+        <p className="mb-1 font-medium text-foreground">No species caught yet</p>
+        <p className="text-xs text-muted-foreground">Log your first catch to start building your collection.</p>
       </div>
     )
   }
@@ -82,7 +82,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
         <button
           type="button"
           onClick={() => setSelectedSpecies(null)}
-          className="mb-4 flex items-center gap-1 text-sm font-medium text-[#1BA9A0] hover:text-[#14B8A6]"
+          className="mb-4 flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"
         >
           ← Back to collection
         </button>
@@ -103,7 +103,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
         </div>
 
         {/* Personal best highlight */}
-        <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-900/30 p-3">
+        <div className="mb-4 rounded-xl border border-amber-200 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-900/30 p-3">
           <div className="mb-2 flex items-center gap-2">
             <Trophy className="h-4 w-4 text-amber-400" />
             <span className="text-xs font-semibold text-amber-300">Personal Best</span>
@@ -152,7 +152,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
               key={c.id}
               type="button"
               onClick={() => navigate(`/catches/${c.id}`)}
-              className="flex w-full items-center gap-3 rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-left transition-colors hover:border-[#1BA9A0]/50"
+              className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:border-primary/50"
             >
               {c.photo_url ? (
                 <img
@@ -161,14 +161,14 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                   className="h-12 w-12 rounded-lg object-cover"
                 />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#1A2D3D] text-xl">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background text-xl">
                   🐟
                 </div>
               )}
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   {index === 0 && (
-                    <span className="rounded-full bg-amber-900/30 border border-amber-500/40 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400">
+                    <span className="rounded-full bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-500/40 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
                       PB
                     </span>
                   )}
@@ -177,7 +177,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                     {c.length_cm ? ` · ${c.length_cm} cm` : ''}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {new Date(c.caught_at).toLocaleDateString(undefined, {
                     day: 'numeric',
                     month: 'short',
@@ -185,7 +185,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                   })}
                 </p>
               </div>
-              <ChevronRight className="h-4 w-4 text-gray-500" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>
           ))}
         </div>
@@ -197,7 +197,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-gray-400">
+        <p className="text-sm font-medium text-muted-foreground">
           {speciesStats.length} {speciesStats.length === 1 ? 'species' : 'species'} caught
         </p>
       </div>
@@ -208,7 +208,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
             key={stats.species}
             type="button"
             onClick={() => setSelectedSpecies(stats.species)}
-            className="group relative overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A] p-3 text-left transition-all hover:border-[#1BA9A0]/50 hover:shadow-md"
+            className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-primary/50 hover:shadow-md"
           >
             {/* Photo or placeholder */}
             {stats.bestCatch.photo_url ? (
@@ -219,14 +219,14 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                <div className="absolute bottom-1 right-1 rounded-full bg-[#243B4A]/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                <div className="absolute bottom-1 right-1 rounded-full bg-card/90 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
                   {stats.count}×
                 </div>
               </div>
             ) : (
-              <div className="relative mb-2 flex h-24 w-full items-center justify-center rounded-lg bg-gradient-to-br from-cyan-900/30 to-blue-900/30">
+              <div className="relative mb-2 flex h-24 w-full items-center justify-center rounded-lg bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30">
                 <span className="text-4xl">🐟</span>
-                <div className="absolute bottom-1 right-1 rounded-full bg-[#243B4A]/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                <div className="absolute bottom-1 right-1 rounded-full bg-card/90 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
                   {stats.count}×
                 </div>
               </div>
@@ -236,7 +236,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
             <p className="truncate text-sm font-semibold text-white">{stats.species}</p>
 
             {/* Best catch stats */}
-            <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-400">
+            <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
               {stats.bestCatch.weight_kg && (
                 <span className="flex items-center gap-0.5">
                   <Scale size={10} />

@@ -10,8 +10,8 @@ interface SortSelectorProps {
 
 export function SortSelector({ value, onChange, hasUserLocation }: SortSelectorProps) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-[#334155] bg-[#243B4A] p-2 text-xs shadow-sm">
-      <ArrowUpDown size={14} className="text-gray-500" />
+    <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2 text-xs shadow-sm">
+      <ArrowUpDown size={14} className="text-muted-foreground" />
       <div className="flex gap-1">
         <button
           type="button"
@@ -19,10 +19,10 @@ export function SortSelector({ value, onChange, hasUserLocation }: SortSelectorP
           disabled={!hasUserLocation}
           className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
             value === 'distance' && hasUserLocation
-              ? 'bg-[#1BA9A0] text-white'
+              ? 'bg-primary text-white'
               : hasUserLocation
-              ? 'text-gray-300 hover:bg-[#1A2D3D]'
-              : 'cursor-not-allowed text-gray-600'
+              ? 'text-muted-foreground hover:bg-muted'
+              : 'cursor-not-allowed text-muted-foreground/50'
           }`}
         >
           <span className="mr-1">📍</span>
@@ -32,7 +32,7 @@ export function SortSelector({ value, onChange, hasUserLocation }: SortSelectorP
           type="button"
           onClick={() => onChange('date')}
           className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
-            value === 'date' ? 'bg-[#1BA9A0] text-white' : 'text-gray-300 hover:bg-[#1A2D3D]'
+            value === 'date' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
           }`}
         >
           <span className="mr-1">📅</span>

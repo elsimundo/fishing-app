@@ -69,11 +69,11 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-[#243B4A] border border-[#334155] p-5 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-card border border-border p-5 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-white">Claim this business?</h2>
-            <p className="mt-1 text-xs text-gray-400">
+            <h2 className="text-base font-semibold text-foreground">Claim this business?</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
               Tell us how you&apos;re connected to this place so we can verify your ownership and give you
               control of the listing.
             </p>
@@ -82,23 +82,23 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-full p-1 hover:bg-[#334155] disabled:opacity-50"
+            className="rounded-full p-1 hover:bg-muted disabled:opacity-50"
           >
-            <X size={16} className="text-gray-400" />
+            <X size={16} className="text-muted-foreground" />
           </button>
         </div>
 
         {/* Business summary */}
-        <div className="mb-4 rounded-xl bg-[#1A2D3D] p-3">
+        <div className="mb-4 rounded-xl bg-background p-3">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-900/30">
               <Icon size={18} className="text-amber-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-white">{business.name}</p>
-              <p className="text-[10px] text-gray-500">{TYPE_LABELS[business.type] || 'Business'}</p>
+              <p className="text-sm font-semibold text-foreground">{business.name}</p>
+              <p className="text-[10px] text-muted-foreground">{TYPE_LABELS[business.type] || 'Business'}</p>
               {business.address && (
-                <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-400">
+                <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
                   <MapPin size={10} />
                   <span className="line-clamp-1">{business.address}</span>
                 </p>
@@ -110,11 +110,11 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* Relationship */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-400">Your role</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Your role</label>
             <select
               value={relationship}
               onChange={(e) => setRelationship(e.target.value)}
-              className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]/20"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="owner">Owner</option>
               <option value="manager">Manager</option>
@@ -125,14 +125,14 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
 
           {/* Email */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-400">Contact email</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Contact email</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+              <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] py-2 pl-9 pr-3 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]/20"
+                className="w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="you@example.com"
               />
             </div>
@@ -140,7 +140,7 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
 
           {/* Proof notes */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-400">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <FileText size={12} />
                 Proof / extra details
@@ -151,7 +151,7 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
               onChange={(e) => setProofNotes(e.target.value)}
               rows={4}
               maxLength={500}
-              className="w-full resize-none rounded-xl border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]/20"
+              className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               placeholder="Example: I am the owner; my name is on the website and utility bills."
             />
           </div>
@@ -161,14 +161,14 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-2 text-sm font-medium text-gray-300 hover:bg-[#334155] disabled:opacity-50"
+              className="flex-1 rounded-xl border border-border bg-background px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 rounded-xl bg-[#1BA9A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
+              className="flex-1 rounded-xl bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
             >
               {isSubmitting ? (
                 <span className="inline-flex items-center gap-2">
@@ -182,7 +182,7 @@ export function ClaimBusinessModal({ business, onClose }: ClaimBusinessModalProp
           </div>
         </form>
 
-        <p className="mt-3 text-center text-[11px] text-gray-500">
+        <p className="mt-3 text-center text-[11px] text-muted-foreground">
           We may contact you for additional verification before approving your claim.
         </p>
       </div>

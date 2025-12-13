@@ -69,7 +69,7 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
         type="button"
         onClick={handleLike}
         disabled={isPending}
-        className="flex items-center gap-1.5 text-gray-400 transition-colors hover:text-red-400 disabled:opacity-50"
+        className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-red-400 disabled:opacity-50"
       >
         <Heart size={20} className={effectiveIsLiked ? 'fill-red-500 text-red-500' : ''} />
         <span className="text-sm font-medium">{effectiveLikeCount}</span>
@@ -78,7 +78,7 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
       <button
         type="button"
         onClick={handleOpenComments}
-        className="flex items-center gap-1.5 text-gray-400 transition-colors hover:text-[#1BA9A0]"
+        className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary"
       >
         <MessageCircle size={20} />
         <span className="text-sm font-medium">{effectiveCommentCount}</span>
@@ -87,7 +87,7 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
       <button
         type="button"
         onClick={handleOpenRepost}
-        className="flex items-center gap-1.5 text-gray-400 transition-colors hover:text-[#1BA9A0]"
+        className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary"
       >
         <Send size={20} />
       </button>
@@ -96,9 +96,9 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
         <div className="flex max-h-[65vh] flex-col gap-3 pb-2">
           <div className="flex-1 overflow-y-auto pr-1">
             {isLoading ? (
-              <p className="text-xs text-slate-500">Loading comments…</p>
+              <p className="text-xs text-muted-foreground">Loading comments…</p>
             ) : comments.length === 0 ? (
-              <p className="text-xs text-slate-500">No comments yet. Be the first to comment!</p>
+              <p className="text-xs text-muted-foreground">No comments yet. Be the first to comment!</p>
             ) : (
               <ul className="space-y-3 text-xs">
                 {comments.map((c) => {
@@ -120,12 +120,12 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
                       )}
                       <div className="flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-[11px] font-semibold text-slate-900">
+                          <p className="text-[11px] font-semibold text-foreground">
                             {c.user.username || c.user.full_name || 'Angler'}
                           </p>
-                          <span className="text-[10px] text-slate-400">{timeAgo}</span>
+                          <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
                         </div>
-                        <p className="mt-0.5 text-[11px] text-slate-700">{c.text}</p>
+                        <p className="mt-0.5 text-[11px] text-foreground">{c.text}</p>
                       </div>
                     </li>
                   )
@@ -135,7 +135,7 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
           </div>
 
           <div
-            className="sticky bottom-0 rounded-xl border border-slate-200 bg-surface p-2 shadow-sm"
+            className="sticky bottom-0 rounded-xl border border-border bg-card p-2 shadow-sm"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)' }}
           >
             <div className="flex items-end gap-2">
@@ -143,7 +143,7 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder={user ? 'Add a comment…' : 'Sign in to comment'}
-                className="h-16 flex-1 resize-none rounded-lg border border-slate-200 px-3 py-2 text-xs shadow-inner focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50"
+                className="h-16 flex-1 resize-none rounded-lg border border-border bg-background text-foreground px-3 py-2 text-xs shadow-inner focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-muted"
                 disabled={!user || isAddingComment}
               />
               <button
@@ -160,24 +160,24 @@ export function PostActions({ postId, likeCount, commentCount, isLiked }: PostAc
       </BottomSheet>
 
       <BottomSheet open={isRepostOpen} title="Repost" onClose={() => setIsRepostOpen(false)}>
-        <p className="mb-2 text-xs text-slate-600">
+        <p className="mb-2 text-xs text-muted-foreground">
           Repost this catch or session to your own feed. Your followers will see it as a new post.
         </p>
         <textarea
           value={repostCaption}
           onChange={(e) => setRepostCaption(e.target.value)}
           placeholder="Add an optional caption…"
-          className="h-20 w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="h-20 w-full resize-none rounded-xl border border-border bg-background text-foreground px-3 py-2 text-xs shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           maxLength={280}
         />
-        <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400">
+        <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground">
           <span>{repostCaption.length}/280</span>
         </div>
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={() => setIsRepostOpen(false)}
-            className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+            className="rounded-full border border-border px-3 py-1 text-[11px] font-medium text-muted-foreground hover:bg-muted"
           >
             Cancel
           </button>

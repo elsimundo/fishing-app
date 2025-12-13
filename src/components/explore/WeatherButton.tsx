@@ -49,25 +49,25 @@ export function WeatherButton({ lat, lng, className = '' }: WeatherButtonProps) 
             onClick={e => e.stopPropagation()}
           >
             {isLoading ? (
-              <div className="bg-[#243B4A] border border-[#334155] rounded-t-2xl md:rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-card border border-border rounded-t-2xl md:rounded-2xl p-8 text-center">
+                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
                 </div>
-                <p className="font-semibold text-white mb-1">Loading Weather</p>
-                <p className="text-sm text-gray-400">Fetching conditions...</p>
+                <p className="font-semibold text-foreground mb-1">Loading Weather</p>
+                <p className="text-sm text-muted-foreground">Fetching conditions...</p>
               </div>
             ) : error || !weatherData ? (
-              <div className="bg-[#243B4A] border border-[#334155] rounded-t-2xl md:rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-[#1A2D3D] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CloudSun className="w-8 h-8 text-gray-500" />
+              <div className="bg-card border border-border rounded-t-2xl md:rounded-2xl p-8 text-center">
+                <div className="w-16 h-16 bg-background rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CloudSun className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <p className="font-semibold text-white mb-2">Weather Unavailable</p>
-                <p className="text-sm text-gray-400 mb-6">
+                <p className="font-semibold text-foreground mb-2">Weather Unavailable</p>
+                <p className="text-sm text-muted-foreground mb-6">
                   Unable to load weather data for this location.
                 </p>
                 <button
                   onClick={handleClose}
-                  className="px-6 py-2.5 bg-[#1A2D3D] text-gray-300 rounded-xl font-semibold hover:bg-[#334155] transition-colors"
+                  className="px-6 py-2.5 bg-background text-muted-foreground rounded-xl font-semibold hover:bg-muted transition-colors"
                 >
                   Close
                 </button>

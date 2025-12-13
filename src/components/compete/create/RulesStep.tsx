@@ -35,12 +35,12 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
 
   return (
     <div>
-      <h2 className="mb-2 text-xl font-bold text-gray-900">Rules</h2>
-      <p className="mb-6 text-sm text-gray-600">Set simple rules so anglers know what counts.</p>
+      <h2 className="mb-2 text-xl font-bold text-foreground">Rules</h2>
+      <p className="mb-6 text-sm text-muted-foreground">Set simple rules so anglers know what counts.</p>
 
       <div className="space-y-6">
         <div>
-          <label className="mb-3 block text-sm font-semibold text-gray-900">Allowed species</label>
+          <label className="mb-3 block text-sm font-semibold text-foreground">Allowed species</label>
           <div className="mb-2 flex flex-wrap gap-2">
             {COMMON_SPECIES.map((species) => (
               <button
@@ -50,14 +50,14 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                   data.allowed_species.includes(species)
                     ? 'bg-primary text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
                 {species}
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             {data.allowed_species.length === 0
               ? 'All species allowed.'
               : `${data.allowed_species.length} species selected.`}
@@ -65,7 +65,7 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
         </div>
 
         <div>
-          <label className="mb-3 block text-sm font-semibold text-gray-900">Water type</label>
+          <label className="mb-3 block text-sm font-semibold text-foreground">Water type</label>
           <div className="grid grid-cols-3 gap-2 text-sm">
             {(['saltwater', 'freshwater', 'any'] as Competition['water_type'][]).map((type) => (
               <button
@@ -75,7 +75,7 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
                 className={`rounded-xl border-2 px-4 py-3 font-medium capitalize transition-all ${
                   data.water_type === type
                     ? 'border-navy-800 bg-navy-50 text-navy-900'
-                    : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                    : 'border-border text-muted-foreground hover:border-muted-foreground'
                 }`}
               >
                 {type}
@@ -85,7 +85,7 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-900">Entry fee (£)</label>
+          <label className="mb-2 block text-sm font-semibold text-foreground">Entry fee (£)</label>
           <input
             type="number"
             min={0}
@@ -94,13 +94,13 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
             onChange={(e) =>
               onChange({ entry_fee: Number.isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value) })
             }
-            className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+            className="w-full rounded-xl border-2 border-border px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">Set to 0 for free entry.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Set to 0 for free entry.</p>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-900">Max participants</label>
+          <label className="mb-2 block text-sm font-semibold text-foreground">Max participants</label>
           <input
             type="number"
             min={1}
@@ -111,9 +111,9 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
               })
             }
             placeholder="Unlimited"
-            className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+            className="w-full rounded-xl border-2 border-border px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">Leave blank for unlimited participants.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Leave blank for unlimited participants.</p>
         </div>
       </div>
     </div>

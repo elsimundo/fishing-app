@@ -126,10 +126,10 @@ export function ExploreSearch({ onSelectResult }: ExploreSearchProps) {
 
   const getTypeBgColor = (type: SearchResult['type']) => {
     switch (type) {
-      case 'lake': return 'bg-sky-900/30'
-      case 'shop': return 'bg-orange-900/30'
-      case 'charter': return 'bg-rose-900/30'
-      case 'club': return 'bg-violet-900/30'
+      case 'lake': return 'bg-sky-100 dark:bg-sky-900/30'
+      case 'shop': return 'bg-orange-100 dark:bg-orange-900/30'
+      case 'charter': return 'bg-rose-100 dark:bg-rose-900/30'
+      case 'club': return 'bg-violet-100 dark:bg-violet-900/30'
     }
   }
 
@@ -143,7 +143,7 @@ export function ExploreSearch({ onSelectResult }: ExploreSearchProps) {
   return (
     <div ref={containerRef} className="relative flex-1">
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
           ref={inputRef}
           type="text"
@@ -154,7 +154,7 @@ export function ExploreSearch({ onSelectResult }: ExploreSearchProps) {
           }}
           onFocus={() => setIsOpen(true)}
           placeholder="Search lakes, shops, charters..."
-          className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] py-2 pl-9 pr-8 text-sm text-white placeholder-gray-500 focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+          className="w-full rounded-xl border border-border bg-background py-2 pl-9 pr-8 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         {query && (
           <button
@@ -164,7 +164,7 @@ export function ExploreSearch({ onSelectResult }: ExploreSearchProps) {
               setResults([])
               inputRef.current?.focus()
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-[#334155] hover:text-white"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X size={14} />
           </button>
@@ -173,23 +173,23 @@ export function ExploreSearch({ onSelectResult }: ExploreSearchProps) {
 
       {/* Results dropdown */}
       {isOpen && (query.length >= 2 || results.length > 0) && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-y-auto rounded-xl border border-[#334155] bg-[#243B4A] shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
           {isSearching ? (
             <div className="flex items-center justify-center gap-2 py-6">
-              <Loader2 size={16} className="animate-spin text-gray-400" />
-              <span className="text-sm text-gray-400">Searching...</span>
+              <Loader2 size={16} className="animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Searching...</span>
             </div>
           ) : results.length === 0 ? (
             <div className="py-6 text-center">
-              <MapPin size={24} className="mx-auto mb-2 text-gray-500" />
-              <p className="text-sm text-gray-400">No results found</p>
-              <p className="text-xs text-gray-500">Try a different search term</p>
+              <MapPin size={24} className="mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">No results found</p>
+              <p className="text-xs text-muted-foreground">Try a different search term</p>
             </div>
           ) : (
             <div className="py-1">
               {Object.entries(groupedResults).map(([type, items]) => (
                 <div key={type}>
-                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                     {type === 'lake' ? 'Lakes' : type === 'shop' ? 'Tackle Shops' : type === 'charter' ? 'Charters' : 'Clubs'}
                   </div>
                   {items.map((result) => (
@@ -197,18 +197,18 @@ export function ExploreSearch({ onSelectResult }: ExploreSearchProps) {
                       key={result.id}
                       type="button"
                       onClick={() => handleSelect(result)}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-[#1A2D3D]"
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted"
                     >
                       <div className={`flex h-8 w-8 items-center justify-center rounded-full ${getTypeBgColor(result.type)}`}>
                         {getIcon(result.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{result.name}</p>
+                        <p className="text-sm font-medium text-foreground truncate">{result.name}</p>
                         {result.region && (
-                          <p className="text-xs text-gray-500 truncate">{result.region}</p>
+                          <p className="text-xs text-muted-foreground truncate">{result.region}</p>
                         )}
                       </div>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium text-gray-300 ${getTypeBgColor(result.type)}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium text-muted-foreground ${getTypeBgColor(result.type)}`}>
                         {getTypeLabel(result.type)}
                       </span>
                     </button>

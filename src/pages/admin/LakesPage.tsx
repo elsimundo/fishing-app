@@ -456,7 +456,7 @@ export default function LakesPage() {
     <AdminLayout>
       <div className="p-4 lg:p-8">
         <div className="mb-6 flex flex-col gap-4 lg:mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">Lakes & Venues</h1>
+          <h1 className="text-2xl font-bold text-foreground lg:text-3xl">Lakes & Venues</h1>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Filter Tabs */}
@@ -468,7 +468,7 @@ export default function LakesPage() {
                   className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
                     filter === f.value
                       ? 'bg-navy-800 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                      : 'bg-card text-muted-foreground hover:bg-muted'
                   }`}
                 >
                   {f.label}
@@ -480,7 +480,7 @@ export default function LakesPage() {
               {/* Search */}
               <div className="relative">
                 <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                   size={20}
                 />
                 <input
@@ -488,7 +488,7 @@ export default function LakesPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search lakes..."
-                  className="w-full rounded-lg border-2 border-gray-200 py-2 pl-10 pr-4 text-sm focus:border-navy-800 focus:outline-none sm:w-64"
+                  className="w-full rounded-lg border-2 border-border bg-background text-foreground py-2 pl-10 pr-4 text-sm focus:border-navy-800 focus:outline-none sm:w-64"
                 />
               </div>
 
@@ -507,7 +507,7 @@ export default function LakesPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-48 animate-pulse rounded-xl bg-gray-100" />
+              <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
             ))}
           </div>
         ) : lakes && lakes.length > 0 ? (
@@ -540,7 +540,7 @@ export default function LakesPage() {
         ) : filter === 'reports' ? (
           /* Reports View */
           reportsLoading ? (
-            <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-6 text-gray-600">
+            <div className="flex items-center gap-2 rounded-xl bg-muted p-6 text-muted-foreground">
               <span>Loading reports...</span>
             </div>
           ) : reports.length > 0 ? (
@@ -572,13 +572,13 @@ export default function LakesPage() {
               ))}
             </div>
           ) : (
-            <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-6 text-gray-600">
+            <div className="flex items-center gap-2 rounded-xl bg-muted p-6 text-muted-foreground">
               <Check size={20} className="text-green-500" />
               <span>No pending reports</span>
             </div>
           )
         ) : (
-          <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-6 text-gray-600">
+          <div className="flex items-center gap-2 rounded-xl bg-muted p-6 text-muted-foreground">
             <AlertCircle size={20} />
             <span>No lakes found for this filter</span>
           </div>
@@ -588,59 +588,59 @@ export default function LakesPage() {
       {/* Add Lake Modal */}
       {showAddLake && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
-            <h2 className="mb-3 text-lg font-bold text-gray-900">Add Lake</h2>
+          <div className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl">
+            <h2 className="mb-3 text-lg font-bold text-foreground">Add Lake</h2>
 
             <div className="space-y-3 text-sm">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-gray-700">Name</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Name</label>
                 <input
                   type="text"
                   value={newLake.name}
                   onChange={(e) => setNewLake((l) => ({ ...l, name: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-700">Latitude</label>
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Latitude</label>
                   <input
                     type="text"
                     value={newLake.latitude}
                     onChange={(e) => setNewLake((l) => ({ ...l, latitude: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-700">Longitude</label>
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Longitude</label>
                   <input
                     type="text"
                     value={newLake.longitude}
                     onChange={(e) => setNewLake((l) => ({ ...l, longitude: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-gray-700">Region</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Region</label>
                 <input
                   type="text"
                   value={newLake.region}
                   onChange={(e) => setNewLake((l) => ({ ...l, region: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-gray-700">Water type</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Water type</label>
                 <select
                   value={newLake.water_type}
                   onChange={(e) =>
                     setNewLake((l) => ({ ...l, water_type: e.target.value as any }))
                   }
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
                 >
                   <option value="lake">Lake</option>
                   <option value="pond">Pond</option>
@@ -653,7 +653,7 @@ export default function LakesPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-700">
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                     Day ticket price (£)
                   </label>
                   <input
@@ -662,16 +662,16 @@ export default function LakesPage() {
                     onChange={(e) =>
                       setNewLake((l) => ({ ...l, day_ticket_price: e.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-700">Website</label>
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Website</label>
                   <input
                     type="text"
                     value={newLake.website}
                     onChange={(e) => setNewLake((l) => ({ ...l, website: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none"
                   />
                 </div>
               </div>
@@ -681,7 +681,7 @@ export default function LakesPage() {
               <button
                 type="button"
                 onClick={() => setShowAddLake(false)}
-                className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+                className="rounded-lg bg-muted px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted/80"
               >
                 Cancel
               </button>
@@ -791,23 +791,23 @@ function TeamManagementModal({
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl max-h-[80vh] overflow-y-auto">
+      <div className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Manage Team</h2>
-            <p className="text-sm text-gray-500">{lakeName}</p>
+            <h2 className="text-lg font-bold text-foreground">Manage Team</h2>
+            <p className="text-sm text-muted-foreground">{lakeName}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X size={20} />
           </button>
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-gray-500 py-4">Loading team...</p>
+          <p className="text-sm text-muted-foreground py-4">Loading team...</p>
         ) : (
           <div className="space-y-4">
             {/* Owner */}
@@ -817,7 +817,7 @@ function TeamManagementModal({
                   {(teamData.owner as any).display_name?.[0] || (teamData.owner as any).username?.[0] || '?'}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-foreground">
                     {(teamData.owner as any).display_name || (teamData.owner as any).username || 'Unknown'}
                   </p>
                   <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
@@ -828,29 +828,29 @@ function TeamManagementModal({
             )}
 
             {!teamData?.owner && (
-              <div className="p-3 rounded-lg bg-gray-50 text-center">
-                <p className="text-sm text-gray-500">No owner assigned</p>
-                <p className="text-xs text-gray-400 mt-1">Use "Assign Owner" on the lake card</p>
+              <div className="p-3 rounded-lg bg-muted text-center">
+                <p className="text-sm text-muted-foreground">No owner assigned</p>
+                <p className="text-xs text-muted-foreground mt-1">Use "Assign Owner" on the lake card</p>
               </div>
             )}
 
             {/* Team members */}
             {teamData?.team && teamData.team.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-semibold text-gray-700">Team Members</p>
+                <p className="text-xs font-semibold text-foreground">Team Members</p>
                 {teamData.team.map((member) => (
-                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
+                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted">
+                    <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground font-bold text-sm">
                       {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {member.profile?.display_name || member.profile?.username || 'Unknown'}
                       </p>
                       <select
                         value={member.role}
                         onChange={(e) => handleRoleChange(member.id, e.target.value as 'manager' | 'bailiff')}
-                        className="mt-1 text-xs rounded border-gray-200 py-0.5 px-1"
+                        className="mt-1 text-xs rounded border-border bg-background py-0.5 px-1"
                       >
                         <option value="manager">Manager</option>
                         <option value="bailiff">Bailiff</option>
@@ -859,7 +859,7 @@ function TeamManagementModal({
                     <button
                       type="button"
                       onClick={() => handleRemove(member.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -869,8 +869,8 @@ function TeamManagementModal({
             )}
 
             {/* Add team member form */}
-            <form onSubmit={handleAddMember} className="border-t border-gray-100 pt-4">
-              <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+            <form onSubmit={handleAddMember} className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1">
                 <Users size={14} /> Add Team Member
               </p>
               <div className="flex gap-2">
@@ -879,12 +879,12 @@ function TeamManagementModal({
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Username or email"
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                  className="flex-1 rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
                 />
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as 'manager' | 'bailiff')}
-                  className="rounded-lg border border-gray-300 px-2 py-2 text-sm"
+                  className="rounded-lg border border-border bg-background text-foreground px-2 py-2 text-sm"
                 >
                   <option value="bailiff">Bailiff</option>
                   <option value="manager">Manager</option>
@@ -897,7 +897,7 @@ function TeamManagementModal({
               >
                 {isAdding || isSearching ? 'Adding...' : 'Add Member'}
               </button>
-              <p className="mt-2 text-[11px] text-gray-500">
+              <p className="mt-2 text-[11px] text-muted-foreground">
                 <strong>Manager:</strong> Can edit lake details and see all stats.{' '}
                 <strong>Bailiff:</strong> View-only dashboard access.
               </p>
@@ -941,12 +941,12 @@ function LakeCard({
   const hasPendingClaims = (lake.claims?.length || 0) > 0
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm lg:p-6">
       {/* Header */}
       <div className="mb-3 flex items-start justify-between">
         <div className="flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-bold text-gray-900">{lake.name}</h3>
+            <h3 className="text-lg font-bold text-foreground">{lake.name}</h3>
             {lake.is_verified && (
               <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
                 <UserCheck size={12} />
@@ -960,9 +960,9 @@ function LakeCard({
               </span>
             )}
           </div>
-          {lake.region && <p className="text-sm text-gray-600">{lake.region}</p>}
+          {lake.region && <p className="text-sm text-muted-foreground">{lake.region}</p>}
           {lake.owner && (
-            <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+            <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
               <User size={12} className="flex-shrink-0" />
               <span className="truncate">
                 Owner: {lake.owner.username || lake.owner.email || lake.owner.id}
@@ -978,7 +978,7 @@ function LakeCard({
       </div>
 
       {/* Details */}
-      <div className="mb-4 space-y-1.5 text-sm text-gray-600">
+      <div className="mb-4 space-y-1.5 text-sm text-muted-foreground">
         {lake.address && (
           <div className="flex items-center gap-2">
             <MapPin size={14} className="flex-shrink-0" />
@@ -998,7 +998,7 @@ function LakeCard({
             </a>
           </div>
         )}
-        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
           {typeof lake.total_sessions === 'number' && (
             <span>Sessions: {lake.total_sessions}</span>
           )}
@@ -1010,7 +1010,7 @@ function LakeCard({
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+      <div className="flex flex-wrap gap-2 border-t border-border pt-4">
         {/* Verify / Unverify */}
         <button
           type="button"
@@ -1037,7 +1037,7 @@ function LakeCard({
             type="button"
             onClick={onClearPremium}
             disabled={isUpdatingPremium}
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200 disabled:opacity-60"
+            className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-muted px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted/80 disabled:opacity-60"
           >
             <Crown size={16} />
             <span>{isUpdatingPremium ? 'Updating...' : 'Remove Premium'}</span>
@@ -1062,7 +1062,7 @@ function LakeCard({
           href={`https://www.google.com/maps?q=${lake.latitude},${lake.longitude}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-1 rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+          className="flex items-center justify-center gap-1 rounded-lg bg-muted px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted/80"
         >
           <MapPin size={16} />
           <span>Map</span>
@@ -1081,7 +1081,7 @@ function LakeCard({
 
       {/* Claim review (collapsed by default) */}
       {hasPendingClaims && (
-        <details className="mt-4 rounded-lg border border-amber-100 bg-amber-50 p-3 text-xs text-gray-800">
+        <details className="mt-4 rounded-lg border border-amber-100 bg-amber-50 p-3 text-xs text-foreground">
           <summary className="cursor-pointer list-none font-semibold text-amber-800">
             Review claims ({lake.claims!.length})
           </summary>
@@ -1093,15 +1093,15 @@ function LakeCard({
               return (
                 <div
                   key={claim.id}
-                  className="rounded-md bg-white p-3 shadow-sm ring-1 ring-amber-100"
+                  className="rounded-md bg-card p-3 shadow-sm ring-1 ring-amber-100"
                 >
                   {/* Header */}
                   <div className="mb-2 flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs font-semibold text-gray-900">
+                      <p className="text-xs font-semibold text-foreground">
                         {claimant?.username || claimant?.email || claim.user_id}
                       </p>
-                      <p className="text-[11px] text-gray-500">
+                      <p className="text-[11px] text-muted-foreground">
                         {new Date(claim.created_at).toLocaleString()}
                       </p>
                     </div>
@@ -1113,16 +1113,16 @@ function LakeCard({
                   </div>
 
                   {/* Role & Business */}
-                  <div className="mb-2 space-y-1 border-b border-gray-100 pb-2">
+                  <div className="mb-2 space-y-1 border-b border-border pb-2">
                     {claim.role && (
                       <p className="text-[11px]">
-                        <span className="font-medium text-gray-700">Role:</span>{' '}
+                        <span className="font-medium text-foreground">Role:</span>{' '}
                         <span className="capitalize">{claim.role}</span>
                       </p>
                     )}
                     {claim.business_name && (
                       <p className="text-[11px]">
-                        <span className="font-medium text-gray-700">Business:</span> {claim.business_name}
+                        <span className="font-medium text-foreground">Business:</span> {claim.business_name}
                       </p>
                     )}
                   </div>
@@ -1148,9 +1148,9 @@ function LakeCard({
 
                   {/* Proof */}
                   {claim.proof_type && (
-                    <div className="mb-2 rounded bg-gray-50 p-2">
+                    <div className="mb-2 rounded bg-muted p-2">
                       <p className="text-[11px]">
-                        <span className="font-medium text-gray-700">Proof:</span>{' '}
+                        <span className="font-medium text-foreground">Proof:</span>{' '}
                         <span className="capitalize">{claim.proof_type.replace(/_/g, ' ')}</span>
                       </p>
                       {claim.proof_url && (
@@ -1168,32 +1168,32 @@ function LakeCard({
 
                   {/* Venue Details */}
                   {Object.keys(details).length > 0 && (
-                    <div className="mb-2 rounded bg-gray-50 p-2 text-[11px]">
-                      <p className="mb-1 font-medium text-gray-700">Submitted venue details:</p>
-                      <div className="grid grid-cols-2 gap-1 text-gray-600">
+                    <div className="mb-2 rounded bg-muted p-2 text-[11px]">
+                      <p className="mb-1 font-medium text-foreground">Submitted venue details:</p>
+                      <div className="grid grid-cols-2 gap-1 text-muted-foreground">
                         {details.water_type && <span>Water: {details.water_type}</span>}
                         {details.lake_type && <span>Type: {details.lake_type}</span>}
                         {details.day_ticket_price && <span>Day: £{details.day_ticket_price}</span>}
                         {details.night_ticket_price && <span>Night: £{details.night_ticket_price}</span>}
                       </div>
                       {details.facilities?.length > 0 && (
-                        <p className="mt-1 text-gray-600">
+                        <p className="mt-1 text-muted-foreground">
                           Facilities: {details.facilities.join(', ')}
                         </p>
                       )}
                       {details.description && (
-                        <p className="mt-1 text-gray-600 line-clamp-2">{details.description}</p>
+                        <p className="mt-1 text-muted-foreground line-clamp-2">{details.description}</p>
                       )}
                     </div>
                   )}
 
                   {/* Legacy message */}
                   {claim.message && (
-                    <p className="mb-2 text-[11px] italic text-gray-600">"{claim.message}"</p>
+                    <p className="mb-2 text-[11px] italic text-muted-foreground">"{claim.message}"</p>
                   )}
 
                   {/* Actions */}
-                  <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-2">
+                  <div className="flex flex-wrap gap-2 border-t border-border pt-2">
                     <button
                       type="button"
                       disabled={isUpdating}
@@ -1210,7 +1210,7 @@ function LakeCard({
                         const reason = window.prompt('Reason for rejection (optional):')
                         onRejectClaim(claim, reason ?? null)
                       }}
-                      className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-semibold text-gray-700 hover:bg-gray-200 disabled:opacity-60"
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-muted px-3 py-1.5 text-[11px] font-semibold text-muted-foreground hover:bg-muted/80 disabled:opacity-60"
                     >
                       <X size={12} />
                       <span>{isUpdating ? 'Rejecting…' : 'Reject'}</span>
@@ -1239,32 +1239,32 @@ function ReportCard({
   isUpdating: boolean
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <Flag size={16} className="text-amber-500" />
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-foreground">
               {REPORT_REASON_LABELS[report.reason]}
             </span>
           </div>
           
           {report.lake && (
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-foreground">
               <span className="font-medium">{report.lake.name}</span>
               {report.lake.region && (
-                <span className="text-gray-500"> · {report.lake.region}</span>
+                <span className="text-muted-foreground"> · {report.lake.region}</span>
               )}
             </p>
           )}
 
           {report.details && (
-            <p className="mt-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
+            <p className="mt-2 text-sm text-muted-foreground bg-muted rounded-lg p-2">
               "{report.details}"
             </p>
           )}
 
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+          <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
             {report.reporter && (
               <span>Reported by: {report.reporter.display_name || report.reporter.username}</span>
             )}
@@ -1287,7 +1287,7 @@ function ReportCard({
             type="button"
             onClick={onDismiss}
             disabled={isUpdating}
-            className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+            className="flex items-center gap-1 rounded-lg bg-muted px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted/80 disabled:opacity-50"
           >
             <X size={14} />
             Dismiss

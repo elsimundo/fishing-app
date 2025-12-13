@@ -42,32 +42,32 @@ export function UpgradeToPremiumCard({
             <Crown size={24} className="text-amber-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Premium Active</h3>
-            <p className="text-sm text-gray-400">{lakeName}</p>
+            <h3 className="text-lg font-bold text-foreground">Premium Active</h3>
+            <p className="text-sm text-muted-foreground">{lakeName}</p>
           </div>
         </div>
 
         <div className="space-y-3 mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Check size={16} className="text-emerald-400" />
             Featured placement in search
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Check size={16} className="text-emerald-400" />
             Analytics dashboard
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Check size={16} className="text-emerald-400" />
             Photo gallery
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Check size={16} className="text-emerald-400" />
             Priority support
           </div>
         </div>
 
         {premiumExpiresAt && (
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-muted-foreground mb-4">
             Renews on {new Date(premiumExpiresAt).toLocaleDateString('en-GB', {
               day: 'numeric',
               month: 'long',
@@ -80,7 +80,7 @@ export function UpgradeToPremiumCard({
           type="button"
           onClick={handleManage}
           disabled={manageSubscription.isPending}
-          className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] py-2 text-sm font-medium text-gray-300 hover:bg-[#334155] disabled:opacity-50"
+          className="w-full rounded-lg border border-border bg-background py-2 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
         >
           {manageSubscription.isPending ? (
             <Loader2 size={16} className="inline animate-spin mr-2" />
@@ -92,26 +92,26 @@ export function UpgradeToPremiumCard({
   }
 
   return (
-    <div className="rounded-xl border-2 border-[#334155] bg-[#243B4A] p-6">
+    <div className="rounded-xl border-2 border-border bg-card p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500">
           <Crown size={24} className="text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white">Upgrade to Premium</h3>
-          <p className="text-sm text-gray-400">Unlock all features for {lakeName}</p>
+          <h3 className="text-lg font-bold text-foreground">Upgrade to Premium</h3>
+          <p className="text-sm text-muted-foreground">Unlock all features for {lakeName}</p>
         </div>
       </div>
 
       {/* Billing toggle */}
-      <div className="flex rounded-lg bg-[#1A2D3D] p-1 mb-6">
+      <div className="flex rounded-lg bg-background p-1 mb-6">
         <button
           type="button"
           onClick={() => setBillingInterval('monthly')}
           className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
             billingInterval === 'monthly'
-              ? 'bg-[#334155] text-white shadow-sm'
-              : 'text-gray-400 hover:text-gray-300'
+              ? 'bg-muted text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
         >
           Monthly
@@ -121,8 +121,8 @@ export function UpgradeToPremiumCard({
           onClick={() => setBillingInterval('yearly')}
           className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
             billingInterval === 'yearly'
-              ? 'bg-[#334155] text-white shadow-sm'
-              : 'text-gray-400 hover:text-gray-300'
+              ? 'bg-muted text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
         >
           Yearly
@@ -135,15 +135,15 @@ export function UpgradeToPremiumCard({
       {/* Price display */}
       <div className="text-center mb-6">
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-3xl font-bold text-white">
+          <span className="text-3xl font-bold text-foreground">
             £{billingInterval === 'yearly' ? pricing.yearly.amount : pricing.monthly.amount}
           </span>
-          <span className="text-gray-500">
+          <span className="text-muted-foreground">
             /{billingInterval === 'yearly' ? 'year' : 'month'}
           </span>
         </div>
         {billingInterval === 'yearly' && (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             That's just £{(pricing.yearly.amount / 12).toFixed(2)}/month
           </p>
         )}
@@ -151,27 +151,27 @@ export function UpgradeToPremiumCard({
 
       {/* Features */}
       <div className="space-y-3 mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-300">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Check size={16} className="text-emerald-400" />
           Featured placement in search results
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-300">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Check size={16} className="text-emerald-400" />
           Full analytics dashboard
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-300">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Check size={16} className="text-emerald-400" />
           Photo gallery (up to 20 photos)
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-300">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Check size={16} className="text-emerald-400" />
           Booking link integration
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-300">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Check size={16} className="text-emerald-400" />
           Remove competitor ads
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-300">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Check size={16} className="text-emerald-400" />
           Priority support
         </div>
@@ -196,7 +196,7 @@ export function UpgradeToPremiumCard({
         )}
       </button>
 
-      <p className="text-center text-[10px] text-gray-500 mt-3">
+      <p className="text-center text-[10px] text-muted-foreground mt-3">
         Cancel anytime. Secure payment via Stripe.
       </p>
     </div>

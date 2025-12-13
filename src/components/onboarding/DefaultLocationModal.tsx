@@ -188,16 +188,16 @@ export function DefaultLocationModal({ onComplete }: DefaultLocationModalProps) 
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-navy-900/95 p-4">
-      <div className="flex h-full max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#243B4A] border border-[#334155]">
+      <div className="flex h-full max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-card border border-border">
         {/* Header */}
-        <div className="border-b border-[#334155] px-5 py-4">
+        <div className="border-b border-border px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1BA9A0]/20">
-              <MapPin className="h-5 w-5 text-[#1BA9A0]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
+              <MapPin className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">Set Your Home Area</h1>
-              <p className="text-sm text-gray-400">
+              <h1 className="text-lg font-bold text-foreground">Set Your Home Area</h1>
+              <p className="text-sm text-muted-foreground">
                 Where do you usually fish? This helps us center your maps.
               </p>
             </div>
@@ -205,24 +205,24 @@ export function DefaultLocationModal({ onComplete }: DefaultLocationModalProps) 
         </div>
 
         {/* Search */}
-        <div className="border-b border-[#334155] px-5 py-3">
+        <div className="border-b border-border px-5 py-3">
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search for a town or city..."
-                className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] py-2.5 pl-10 pr-4 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                className="w-full rounded-xl border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <button
               type="button"
               onClick={handleSearch}
               disabled={isSearching || !searchQuery.trim()}
-              className="rounded-xl bg-[#1BA9A0] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
+              className="rounded-xl bg-navy-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-muted"
             >
               {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
             </button>
@@ -230,15 +230,15 @@ export function DefaultLocationModal({ onComplete }: DefaultLocationModalProps) 
 
           {/* Search Results */}
           {searchResults.length > 0 && (
-            <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-[#334155] bg-[#1A2D3D]">
+            <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-border bg-background">
               {searchResults.map((result) => (
                 <button
                   key={result.id}
                   type="button"
                   onClick={() => handleSelectSearchResult(result)}
-                  className="flex w-full items-center gap-2 border-b border-[#334155] px-3 py-2 text-left text-sm text-gray-300 hover:bg-[#334155] last:border-b-0"
+                  className="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted last:border-b-0"
                 >
-                  <MapPin size={14} className="flex-shrink-0 text-gray-500" />
+                  <MapPin size={14} className="flex-shrink-0 text-muted-foreground" />
                   <span className="truncate">{result.place_name}</span>
                 </button>
               ))}
@@ -255,7 +255,7 @@ export function DefaultLocationModal({ onComplete }: DefaultLocationModalProps) 
             type="button"
             onClick={handleUseCurrentLocation}
             disabled={isLocating}
-            className="absolute bottom-4 left-4 flex items-center gap-2 rounded-xl bg-[#243B4A] border border-[#334155] px-4 py-2.5 text-sm font-medium text-gray-300 shadow-lg hover:bg-[#334155] disabled:opacity-50"
+            className="absolute bottom-4 left-4 flex items-center gap-2 rounded-xl bg-card border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground shadow-lg hover:bg-muted disabled:opacity-50"
           >
             {isLocating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -267,9 +267,9 @@ export function DefaultLocationModal({ onComplete }: DefaultLocationModalProps) 
 
           {/* Selected Location Badge */}
           {selectedLocation && locationName && (
-            <div className="absolute left-4 right-4 top-4 flex items-center gap-2 rounded-xl bg-[#243B4A]/95 border border-[#334155] px-4 py-3 shadow-lg backdrop-blur-sm">
-              <MapPin className="h-4 w-4 flex-shrink-0 text-[#1BA9A0]" />
-              <span className="flex-1 truncate text-sm font-medium text-white">
+            <div className="absolute left-4 right-4 top-4 flex items-center gap-2 rounded-xl bg-card/95 border border-border px-4 py-3 shadow-lg backdrop-blur-sm">
+              <MapPin className="h-4 w-4 flex-shrink-0 text-primary" />
+              <span className="flex-1 truncate text-sm font-medium text-foreground">
                 {locationName}
               </span>
               <button
@@ -279,24 +279,24 @@ export function DefaultLocationModal({ onComplete }: DefaultLocationModalProps) 
                   setLocationName('')
                   marker.current?.remove()
                 }}
-                className="rounded-full p-1 hover:bg-[#334155]"
+                className="rounded-full p-1 hover:bg-muted"
               >
-                <X size={16} className="text-gray-400" />
+                <X size={16} className="text-muted-foreground" />
               </button>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#334155] px-5 py-4">
-          <p className="mb-3 text-center text-xs text-gray-500">
+        <div className="border-t border-border px-5 py-4">
+          <p className="mb-3 text-center text-xs text-muted-foreground">
             Tap on the map or search to set your default area
           </p>
           <div className="flex gap-3">
             <button
               type="button"
               onClick={handleSkip}
-              className="flex-1 rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 font-semibold text-gray-300 transition-colors hover:bg-[#334155]"
+              className="flex-1 rounded-xl border border-border bg-background px-4 py-3 font-semibold text-muted-foreground transition-colors hover:bg-muted"
             >
               Skip
             </button>
@@ -304,7 +304,7 @@ export function DefaultLocationModal({ onComplete }: DefaultLocationModalProps) 
               type="button"
               onClick={handleSave}
               disabled={!selectedLocation || isSaving}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] px-4 py-3 font-semibold text-white transition-colors hover:bg-[#14B8A6] disabled:bg-[#334155]"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-3 font-semibold text-white transition-colors hover:bg-navy-900 disabled:bg-navy-400"
             >
               {isSaving ? (
                 <>

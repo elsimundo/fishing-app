@@ -33,15 +33,15 @@ import type { Lake } from '../types'
 type ExploreFilterKey = 'zones' | 'shops' | 'clubs' | 'charters' | 'lakes' | 'marks'
 
 const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; className: string }> = {
-  session: { label: 'Session', icon: '🎣', className: 'bg-emerald-100 text-emerald-700' },
-  catch: { label: 'Catch', icon: '🐟', className: 'bg-sky-100 text-sky-700' },
-  shop: { label: 'Tackle shop', icon: '🛒', className: 'bg-amber-100 text-amber-800' },
-  club: { label: 'Club', icon: '👥', className: 'bg-indigo-100 text-indigo-700' },
-  charter: { label: 'Charter boat', icon: '⛵', className: 'bg-rose-100 text-rose-700' },
-  lake: { label: 'Lake', icon: '🏞️', className: 'bg-sky-100 text-sky-700' },
-  mark: { label: 'My Mark', icon: '📍', className: 'bg-red-100 text-red-700' },
-  'shared-mark': { label: 'Shared Mark', icon: '🤝', className: 'bg-green-100 text-green-700' },
-  zone: { label: 'Fishing Zone', icon: '🎯', className: 'bg-purple-100 text-purple-700' },
+  session: { label: 'Session', icon: '🎣', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
+  catch: { label: 'Catch', icon: '🐟', className: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300' },
+  shop: { label: 'Tackle shop', icon: '🛒', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' },
+  club: { label: 'Club', icon: '👥', className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' },
+  charter: { label: 'Charter boat', icon: '⛵', className: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300' },
+  lake: { label: 'Lake', icon: '🏞️', className: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300' },
+  mark: { label: 'My Mark', icon: '📍', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+  'shared-mark': { label: 'Shared Mark', icon: '🤝', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+  zone: { label: 'Fishing Zone', icon: '🎯', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
 }
 
 export default function ExplorePage() {
@@ -503,12 +503,12 @@ export default function ExplorePage() {
 
   // Chip colors matching marker colors
   const chipColors: Record<ExploreFilterKey, { active: string; inactive: string }> = {
-    zones: { active: 'bg-blue-600 text-white', inactive: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
-    shops: { active: 'bg-orange-500 text-white', inactive: 'bg-orange-100 text-orange-700 hover:bg-orange-200' },
-    lakes: { active: 'bg-sky-500 text-white', inactive: 'bg-sky-100 text-sky-700 hover:bg-sky-200' },
-    clubs: { active: 'bg-violet-600 text-white', inactive: 'bg-violet-100 text-violet-700 hover:bg-violet-200' },
-    charters: { active: 'bg-rose-600 text-white', inactive: 'bg-rose-100 text-rose-700 hover:bg-rose-200' },
-    marks: { active: 'bg-red-600 text-white', inactive: 'bg-red-100 text-red-700 hover:bg-red-200' },
+    zones: { active: 'bg-blue-600 text-white', inactive: 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50' },
+    shops: { active: 'bg-orange-500 text-white', inactive: 'bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50' },
+    lakes: { active: 'bg-sky-500 text-white', inactive: 'bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-900/50' },
+    clubs: { active: 'bg-violet-600 text-white', inactive: 'bg-violet-100 text-violet-700 hover:bg-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:hover:bg-violet-900/50' },
+    charters: { active: 'bg-rose-600 text-white', inactive: 'bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50' },
+    marks: { active: 'bg-red-600 text-white', inactive: 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50' },
   }
 
   const renderFilterChip = (key: ExploreFilterKey, label: string, count?: number) => (
@@ -553,16 +553,16 @@ export default function ExplorePage() {
     <Layout>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col pb-24">
         {/* Header */}
-        <header className="sticky top-0 z-10 bg-[#1A2D3D] px-4 py-3 border-b border-[#334155]">
+        <header className="sticky top-0 z-10 bg-background px-4 py-3 border-b border-border">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-lg font-bold text-white">Explore</h1>
-              <p className="text-xs text-gray-400">Find fishing spots & conditions</p>
+              <h1 className="text-lg font-bold text-foreground">Explore</h1>
+              <p className="text-xs text-muted-foreground">Find fishing spots & conditions</p>
             </div>
             <button
               type="button"
               onClick={handleUseMyLocation}
-              className="flex items-center gap-1.5 rounded-full bg-[#1BA9A0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#14B8A6]"
+              className="flex items-center gap-1.5 rounded-full bg-[#1BA9A0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0D9488]"
             >
               <Navigation size={14} />
               {isLocating ? 'Locating…' : 'My Location'}
@@ -581,12 +581,12 @@ export default function ExplorePage() {
         </header>
 
         {/* Compact Map */}
-        <section id="explore-map" className="relative h-[35vh] min-h-[200px] bg-[#243B4A]">
+        <section id="explore-map" className="relative h-[35vh] min-h-[200px] bg-card">
           {pillVisible && (
             <button
               type="button"
               onClick={applyBounds}
-              className="absolute left-1/2 top-3 z-[5] -translate-x-1/2 rounded-full bg-[#1BA9A0] px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-[#14B8A6]"
+              className="absolute left-1/2 top-3 z-[5] -translate-x-1/2 rounded-full bg-[#1BA9A0] px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-[#0D9488]"
             >
               Search this area
               {visibleMarkersCount > 0 && (
@@ -606,19 +606,19 @@ export default function ExplorePage() {
                 setLiveBounds(null)
                 setSelectedMarker(null)
               }}
-              className="absolute bottom-3 right-3 z-20 rounded-full bg-[#243B4A] px-3 py-1.5 text-[11px] font-medium text-white shadow-md hover:bg-[#1A2D3D] border border-[#334155]"
+              className="absolute bottom-3 right-3 z-20 rounded-full bg-card px-3 py-1.5 text-[11px] font-medium text-foreground shadow-md hover:bg-muted border border-border"
             >
               ↻ Reset
             </button>
           )}
 
           {selectedMarker && (
-            <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-[#243B4A]/95 p-3 text-xs shadow-lg backdrop-blur border border-[#334155]">
+            <div className="absolute bottom-3 left-3 right-3 z-20 rounded-xl bg-card p-3 text-xs shadow-lg backdrop-blur border border-border">
               <div className="mb-2 flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-white">{selectedMarker.title}</p>
+                  <p className="text-sm font-semibold text-foreground">{selectedMarker.title}</p>
                   {selectedMarker.distance !== undefined && (
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-muted-foreground">
                       📍 {formatDistance(selectedMarker.distance)} away
                     </p>
                   )}
@@ -631,7 +631,7 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedMarker(null)}
-                  className="text-xs font-medium text-gray-400 hover:text-white"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground"
                 >
                   ✕
                 </button>
@@ -640,7 +640,7 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={handleViewDetails}
-                  className="w-full rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
+                  className="w-full rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D9488]"
                 >
                   {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
                 </button>
@@ -652,7 +652,7 @@ export default function ExplorePage() {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-center text-xs font-medium text-white hover:bg-[#0D4B4E]"
+                      className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-center text-xs font-medium text-foreground hover:bg-muted"
                     >
                       📍 Directions
                     </a>
@@ -662,7 +662,7 @@ export default function ExplorePage() {
                         const lakeId = selectedMarker.id.replace('lake-', '')
                         navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
                       }}
-                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
+                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D9488]"
                     >
                       🎣 Log Session
                     </button>
@@ -691,7 +691,7 @@ export default function ExplorePage() {
                         setAssignOwnerLakeId(lakeId)
                         setAssignOwnerLakeName(selectedMarker.title)
                       }}
-                      className="w-full rounded-lg border border-purple-300 bg-purple-50 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100"
+                      className="w-full rounded-lg border border-purple-300 bg-purple-50 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100 dark:border-purple-500/40 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
                     >
                       <UserPlus size={12} className="inline mr-1" />
                       Assign Owner
@@ -706,7 +706,7 @@ export default function ExplorePage() {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-center text-xs font-medium text-white hover:bg-[#0D4B4E]"
+                      className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-center text-xs font-medium text-foreground hover:bg-muted"
                     >
                       <Navigation size={12} className="inline mr-1" />
                       Directions
@@ -717,13 +717,13 @@ export default function ExplorePage() {
                         const markId = selectedMarker.id.replace('mark-', '').replace('shared-mark-', '')
                         navigate('/sessions/new', { state: { markId, markName: selectedMarker.title } })
                       }}
-                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
+                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D9488]"
                     >
                       🎣 Log Session
                     </button>
                   </div>
                   {selectedMarker.type === 'shared-mark' && (
-                    <p className="text-center text-[10px] text-gray-400">
+                    <p className="text-center text-[10px] text-muted-foreground">
                       Shared with you by a friend
                     </p>
                   )}
@@ -733,12 +733,12 @@ export default function ExplorePage() {
           )}
 
           {showMarkHint && (
-            <div className="absolute left-3 bottom-24 z-20 max-w-[260px] rounded-2xl bg-[#243B4A]/95 px-3 py-2 text-[11px] text-gray-300 shadow-md backdrop-blur border border-[#334155]">
+            <div className="absolute left-3 bottom-24 z-20 max-w-[260px] rounded-2xl bg-card/95 px-3 py-2 text-[11px] text-muted-foreground shadow-md backdrop-blur border border-border">
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 text-lg">💡</span>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-white">Drop a private mark</p>
-                  <p className="mt-0.5 text-[11px] text-gray-400">
+                  <p className="text-xs font-semibold text-foreground">Drop a private mark</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
                     Double tap the map to quickly save your own fishing spot.
                   </p>
                 </div>
@@ -750,7 +750,7 @@ export default function ExplorePage() {
                       localStorage.setItem('explore-mark-hint-dismissed', 'true')
                     } catch {}
                   }}
-                  className="ml-1 rounded-full p-1 text-gray-400 hover:bg-[#1A2D3D] hover:text-white"
+                  className="ml-1 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
                   <X size={14} />
                 </button>
@@ -786,12 +786,12 @@ export default function ExplorePage() {
         </section>
 
         {/* Data Cards */}
-        <section className="flex flex-col gap-3 px-4 py-4 bg-[#1A2D3D]">
+        <section className="flex flex-col gap-3 px-4 py-4 bg-background">
           {/* Location indicator with default area controls */}
           <div className="flex items-center justify-between">
             {mapCenter && (
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <MapPin size={14} className="text-gray-500" />
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <MapPin size={14} className="text-muted-foreground" />
                 <span>
                   Showing data for {mapCenter.lat.toFixed(3)}, {mapCenter.lng.toFixed(3)}
                 </span>
@@ -805,7 +805,7 @@ export default function ExplorePage() {
                   type="button"
                   onClick={() => hasDefaultArea ? setShowDefaultConfirm(true) : saveAsDefaultArea()}
                   disabled={isSavingDefault}
-                  className="rounded-full bg-[#1BA9A0] px-3 py-1 text-[11px] font-medium text-white hover:bg-[#14B8A6] disabled:bg-[#0D4B4E]"
+                  className="rounded-full bg-[#1BA9A0] px-3 py-1 text-[11px] font-medium text-white hover:bg-[#0D9488] disabled:bg-[#0D4B4E]"
                 >
                   {isSavingDefault ? '...' : '⭐ Set as default'}
                 </button>
@@ -901,43 +901,43 @@ export default function ExplorePage() {
       {/* Quick Save Mark Modal */}
       {pendingMark && (
         <div className="fixed inset-0 z-[65] flex items-end justify-center bg-black/40 px-4 pb-6 pt-12 md:items-center">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+          <div className="w-full max-w-md rounded-2xl bg-card border border-border p-5 shadow-xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-base font-semibold text-slate-900">Save mark here?</h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <h2 className="text-base font-semibold text-foreground">Save mark here?</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {pendingMark.lat.toFixed(4)}, {pendingMark.lng.toFixed(4)}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setPendingMark(null)}
-                className="rounded-full p-1 hover:bg-slate-100"
+                className="rounded-full p-1 hover:bg-muted"
               >
-                <X size={16} className="text-slate-500" />
+                <X size={16} className="text-muted-foreground" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Name</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
                 <input
                   type="text"
                   value={pendingMarkName}
                   onChange={(e) => setPendingMarkName(e.target.value)}
                   maxLength={80}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+                  className="w-full rounded-xl border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
                   placeholder="Eg. Brighton Pier mark"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-700">Notes (optional)</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">Notes (optional)</label>
                 <textarea
                   value={pendingMarkNotes}
                   onChange={(e) => setPendingMarkNotes(e.target.value)}
                   rows={3}
                   maxLength={300}
-                  className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
+                  className="w-full resize-none rounded-xl border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-navy-800"
                   placeholder="Tide, depth, structure, etc."
                 />
               </div>
@@ -947,7 +947,7 @@ export default function ExplorePage() {
               <button
                 type="button"
                 onClick={() => setPendingMark(null)}
-                className="flex-1 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="flex-1 rounded-xl border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
               >
                 Cancel
               </button>
@@ -1057,16 +1057,16 @@ function AssignOwnerModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl border border-border">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Assign Owner</h2>
-            <p className="text-sm text-gray-500">{lakeName}</p>
+            <h2 className="text-lg font-bold text-foreground">Assign Owner</h2>
+            <p className="text-sm text-muted-foreground">{lakeName}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X size={20} />
           </button>
@@ -1074,7 +1074,7 @@ function AssignOwnerModal({
 
         {/* Search */}
         <div className="mb-4">
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-foreground">
             Search by username
           </label>
           <div className="flex gap-2">
@@ -1084,7 +1084,7 @@ function AssignOwnerModal({
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Enter username..."
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
             />
             <button
               type="button"
@@ -1099,7 +1099,7 @@ function AssignOwnerModal({
 
         {/* Results */}
         {searchResults.length > 0 && (
-          <div className="mb-4 max-h-48 overflow-y-auto rounded-lg border border-gray-200">
+          <div className="mb-4 max-h-48 overflow-y-auto rounded-lg border border-border">
             {searchResults.map((user) => (
               <button
                 key={user.id}
@@ -1107,21 +1107,21 @@ function AssignOwnerModal({
                 onClick={() => setSelectedUser({ id: user.id, username: user.username })}
                 className={`flex w-full items-center gap-3 p-3 text-left transition-colors ${
                   selectedUser?.id === user.id
-                    ? 'bg-navy-50 border-l-4 border-navy-800'
-                    : 'hover:bg-gray-50 border-l-4 border-transparent'
+                    ? 'bg-navy-50 border-l-4 border-navy-800 dark:bg-navy-900/30'
+                    : 'hover:bg-muted border-l-4 border-transparent'
                 }`}
               >
                 {user.avatar_url ? (
                   <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
                     {user.username?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-medium text-gray-900">@{user.username}</p>
+                  <p className="text-sm font-medium text-foreground">@{user.username}</p>
                   {user.display_name && (
-                    <p className="text-xs text-gray-500">{user.display_name}</p>
+                    <p className="text-xs text-muted-foreground">{user.display_name}</p>
                   )}
                 </div>
               </button>
@@ -1130,13 +1130,13 @@ function AssignOwnerModal({
         )}
 
         {searchResults.length === 0 && searchTerm && !isSearching && (
-          <p className="mb-4 text-center text-sm text-gray-500">No users found</p>
+          <p className="mb-4 text-center text-sm text-muted-foreground">No users found</p>
         )}
 
         {/* Selected user confirmation */}
         {selectedUser && (
-          <div className="mb-4 rounded-lg bg-green-50 p-3">
-            <p className="text-sm text-green-800">
+          <div className="mb-4 rounded-lg bg-green-900/20 border border-green-500/30 p-3">
+            <p className="text-sm text-green-300">
               <span className="font-medium">@{selectedUser.username}</span> will be assigned as owner of this lake.
             </p>
           </div>
@@ -1147,7 +1147,7 @@ function AssignOwnerModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
           >
             Cancel
           </button>
@@ -1155,7 +1155,7 @@ function AssignOwnerModal({
             type="button"
             onClick={handleAssign}
             disabled={!selectedUser || isAssigning}
-            className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:bg-primary/60"
+            className="flex-1 rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
           >
             {isAssigning ? 'Assigning...' : 'Assign Owner'}
           </button>

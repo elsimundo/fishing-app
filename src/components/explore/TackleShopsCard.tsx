@@ -19,12 +19,12 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
 
   if (nearbyShops.length === 0) {
     return (
-      <div className="rounded-xl border border-[#334155] bg-[#243B4A] p-4">
-        <div className="flex items-center gap-3 text-gray-400">
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center gap-3 text-muted-foreground">
           <Store size={20} />
           <span className="text-sm font-medium">Tackle Shops</span>
         </div>
-        <p className="mt-2 text-xs text-gray-500">No tackle shops found nearby</p>
+        <p className="mt-2 text-xs text-muted-foreground">No tackle shops found nearby</p>
       </div>
     )
   }
@@ -32,18 +32,18 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
   const nearestShop = nearbyShops[0]
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#334155] bg-[#243B4A]">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[#1A2D3D]"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-muted"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-900/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
             <Store size={20} className="text-amber-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">Tackle Shops</p>
-            <p className="text-xs text-gray-400">
+            <p className="text-sm font-semibold text-foreground">Tackle Shops</p>
+            <p className="text-xs text-muted-foreground">
               {nearbyShops.length} nearby · {nearestShop.name}
             </p>
           </div>
@@ -52,31 +52,31 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
         <div className="flex items-center gap-3">
           {!expanded && nearestShop.distance !== undefined && (
             <div className="text-right">
-              <p className="text-xs text-gray-500">Nearest</p>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-xs text-muted-foreground">Nearest</p>
+              <p className="text-sm font-semibold text-foreground">
                 {formatDistance(nearestShop.distance)}
               </p>
             </div>
           )}
           {expanded ? (
-            <ChevronUp size={20} className="text-gray-400" />
+            <ChevronUp size={20} className="text-muted-foreground" />
           ) : (
-            <ChevronDown size={20} className="text-gray-400" />
+            <ChevronDown size={20} className="text-muted-foreground" />
           )}
         </div>
       </button>
 
       {expanded && (
-        <div className="border-t border-[#334155] px-4 pb-4">
+        <div className="border-t border-border px-4 pb-4">
           <div className="mt-3 space-y-3">
             {nearbyShops.slice(0, 10).map((shop) => (
-              <div key={shop.id} className="rounded-lg bg-[#1A2D3D] p-3">
+              <div key={shop.id} className="rounded-lg bg-background p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">🎣</span>
                   <div>
-                    <p className="text-sm font-semibold text-white">{shop.name}</p>
+                    <p className="text-sm font-semibold text-foreground">{shop.name}</p>
                     {shop.distance !== undefined && (
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-muted-foreground">
                         {formatDistance(shop.distance)} away
                       </p>
                     )}
@@ -84,7 +84,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                 </div>
 
                 {shop.address && (
-                  <p className="mb-2 text-xs text-gray-400">{shop.address}</p>
+                  <p className="mb-2 text-xs text-muted-foreground">{shop.address}</p>
                 )}
 
 
@@ -92,7 +92,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                   {shop.phone && (
                     <a
                       href={`tel:${shop.phone}`}
-                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D4B4E]"
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-muted"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Phone size={14} />
@@ -104,7 +104,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                       href={shop.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#334155] bg-[#243B4A] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D4B4E]"
+                      className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-muted"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Globe size={14} />
@@ -115,7 +115,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#14B8A6]"
+                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-white hover:bg-primary/90"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Navigation size={14} />
@@ -145,7 +145,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
             ))}
           </div>
 
-          <p className="mt-3 text-center text-xs text-gray-400">
+          <p className="mt-3 text-center text-xs text-muted-foreground">
             Data from OpenStreetMap contributors
           </p>
         </div>

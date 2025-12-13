@@ -67,8 +67,8 @@ export default function ResetPasswordPage() {
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="w-full max-w-md">
           <div className="rounded-xl bg-surface p-6 shadow-lg text-center">
-            <h1 className="mb-2 text-xl font-semibold text-slate-900">Invalid or expired link</h1>
-            <p className="mb-4 text-sm text-slate-600">
+            <h1 className="mb-2 text-xl font-semibold text-foreground">Invalid or expired link</h1>
+            <p className="mb-4 text-sm text-muted-foreground">
               This password reset link is invalid or has expired. Please request a new one.
             </p>
             <a
@@ -88,18 +88,18 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="rounded-xl bg-surface p-6 shadow-lg">
           <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>
-          <p className="mb-6 text-center text-sm text-slate-600">Create a new password</p>
+          <p className="mb-6 text-center text-sm text-muted-foreground">Create a new password</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="password">
+              <label className="mb-1 block text-sm font-medium text-muted-foreground" htmlFor="password">
                 New password
               </label>
               <input
                 id="password"
                 type="password"
                 autoComplete="new-password"
-                className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 {...register('password')}
               />
               {errors.password && (
@@ -108,14 +108,14 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="confirmPassword">
+              <label className="mb-1 block text-sm font-medium text-muted-foreground" htmlFor="confirmPassword">
                 Confirm new password
               </label>
               <input
                 id="confirmPassword"
                 type="password"
                 autoComplete="new-password"
-                className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="block w-full rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 {...register('confirmPassword')}
               />
               {errors.confirmPassword && (

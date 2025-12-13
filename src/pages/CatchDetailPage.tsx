@@ -40,9 +40,9 @@ export function CatchDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#1A2D3D] px-4 py-6">
+      <main className="min-h-screen bg-background px-4 py-6">
         <div className="flex h-full items-center justify-center">
-          <p className="text-sm text-gray-400">Loading catch…</p>
+          <p className="text-sm text-muted-foreground">Loading catch…</p>
         </div>
       </main>
     )
@@ -52,11 +52,11 @@ export function CatchDetailPage() {
     const message = error instanceof Error ? error.message : 'Please try again in a moment.'
 
     return (
-      <main className="min-h-screen bg-[#1A2D3D] px-4 py-6">
+      <main className="min-h-screen bg-background px-4 py-6">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-4 inline-flex items-center gap-1 text-xs text-[#1BA9A0] hover:underline"
+          className="mb-4 inline-flex items-center gap-1 text-xs text-primary hover:underline"
         >
           <ArrowLeft size={14} />
           Back
@@ -80,14 +80,14 @@ export function CatchDetailPage() {
   const locationLabel = catchItem.location_name || 'Unknown location'
 
   return (
-    <main className="min-h-screen bg-[#1A2D3D] px-4 py-4">
+    <main className="min-h-screen bg-background px-4 py-4">
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         {/* Back link */}
-        <div className="flex items-center justify-between text-xs text-gray-400">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1 text-[#1BA9A0] hover:underline"
+            className="inline-flex items-center gap-1 text-primary hover:underline"
           >
             <ArrowLeft size={14} />
             Back
@@ -95,10 +95,10 @@ export function CatchDetailPage() {
         </div>
 
         {/* Catch hero card */}
-        <section className="overflow-hidden rounded-2xl bg-[#243B4A] border border-[#334155] shadow-sm">
+        <section className="overflow-hidden rounded-2xl bg-card border border-border shadow-sm">
           {/* Photo */}
           {catchItem.photo_url ? (
-            <div className="relative h-64 w-full overflow-hidden bg-slate-900">
+            <div className="relative h-64 w-full overflow-hidden bg-background">
               <img
                 src={catchItem.photo_url}
                 alt={catchItem.species}
@@ -112,16 +112,16 @@ export function CatchDetailPage() {
             </div>
           )}
 
-          <div className="p-4 text-xs text-gray-400">
+          <div className="p-4 text-xs text-muted-foreground">
             {/* Header row: species + actions */}
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-white">
+                  <h1 className="text-lg font-bold text-foreground">
                     {catchItem.species}
                   </h1>
                 </div>
-                <p className="mt-1 text-[11px] text-gray-500">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   📍 {locationLabel}
                   {dateLabel && ` • ${dateLabel}`}
                 </p>
@@ -130,7 +130,7 @@ export function CatchDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowShareModal(true)}
-                  className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-[#334155] bg-[#1A2D3D] px-3 text-[11px] font-medium text-gray-300 hover:bg-[#334155]"
+                  className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-border bg-background px-3 text-[11px] font-medium text-muted-foreground hover:bg-muted"
                 >
                   <Share2 size={14} />
                   Share
@@ -142,7 +142,7 @@ export function CatchDetailPage() {
                     <button
                       type="button"
                       onClick={() => setShowMenu(!showMenu)}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#334155] bg-[#1A2D3D] text-gray-300 hover:bg-[#334155]"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground hover:bg-muted"
                     >
                       <MoreHorizontal size={16} />
                     </button>
@@ -150,14 +150,14 @@ export function CatchDetailPage() {
                     {showMenu && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                        <div className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-[#334155] bg-[#243B4A] py-1 shadow-xl">
+                        <div className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-border bg-card py-1 shadow-xl">
                           <button
                             type="button"
                             onClick={() => {
                               setShowMenu(false)
                               navigate(`/catches/${catchItem.id}/edit`)
                             }}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 hover:bg-[#1A2D3D]"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
                           >
                             <Pencil size={14} />
                             <span>Edit Catch</span>
@@ -178,7 +178,7 @@ export function CatchDetailPage() {
                                 })
                                 setShowMenu(false)
                               }}
-                              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 hover:bg-[#1A2D3D]"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
                             >
                               <Bookmark size={14} />
                               <span>Save as Mark</span>
@@ -212,17 +212,17 @@ export function CatchDetailPage() {
 
             {/* Stats grid */}
             <div className="grid grid-cols-3 gap-2 text-[11px] sm:text-xs">
-              <div className="rounded-xl bg-[#1A2D3D] px-3 py-2 text-center">
-                <p className="text-[10px] text-gray-500">Weight</p>
-                <p className="mt-1 text-sm font-semibold text-white">{weightLabel}</p>
+              <div className="rounded-xl bg-background px-3 py-2 text-center">
+                <p className="text-[10px] text-muted-foreground">Weight</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{weightLabel}</p>
               </div>
-              <div className="rounded-xl bg-[#1A2D3D] px-3 py-2 text-center">
-                <p className="text-[10px] text-gray-500">Length</p>
-                <p className="mt-1 text-sm font-semibold text-white">{lengthLabel}</p>
+              <div className="rounded-xl bg-background px-3 py-2 text-center">
+                <p className="text-[10px] text-muted-foreground">Length</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{lengthLabel}</p>
               </div>
-              <div className="rounded-xl bg-[#1A2D3D] px-3 py-2 text-center">
-                <p className="text-[10px] text-gray-500">Time</p>
-                <p className="mt-1 text-sm font-semibold text-white">{timeLabel}</p>
+              <div className="rounded-xl bg-background px-3 py-2 text-center">
+                <p className="text-[10px] text-muted-foreground">Time</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{timeLabel}</p>
               </div>
             </div>
 
@@ -233,18 +233,18 @@ export function CatchDetailPage() {
               </div>
             )}
 
-            <div className="mt-4 h-px bg-[#334155]" />
+            <div className="mt-4 h-px bg-border" />
 
             {/* Location */}
             <div className="mt-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Location</p>
-              <p className="mt-1 text-sm text-white">📍 {locationLabel}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Location</p>
+              <p className="mt-1 text-sm text-foreground">📍 {locationLabel}</p>
             </div>
 
             {/* Method */}
             <div className="mt-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Method</p>
-              <div className="mt-1 space-y-1 text-sm text-white">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Method</p>
+              <div className="mt-1 space-y-1 text-sm text-foreground">
                 <p>
                   🎣 <span className="font-semibold">Bait:</span>{' '}
                   {catchItem.bait && catchItem.bait !== '0' ? catchItem.bait : '—'}
@@ -263,8 +263,8 @@ export function CatchDetailPage() {
             {/* Conditions */}
             {(catchItem.weather_temp != null || catchItem.weather_condition || catchItem.wind_speed != null) && (
               <div className="mt-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Conditions</p>
-                <div className="mt-1 space-y-1 text-sm text-white">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Conditions</p>
+                <div className="mt-1 space-y-1 text-sm text-foreground">
                   {catchItem.weather_temp != null && (
                     <p>
                       🌡️ <span className="font-semibold">Temp:</span>{' '}
@@ -289,8 +289,8 @@ export function CatchDetailPage() {
             {/* Notes */}
             {catchItem.notes && (
               <div className="mt-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Notes</p>
-                <p className="mt-1 text-sm text-white">{catchItem.notes}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
+                <p className="mt-1 text-sm text-foreground">{catchItem.notes}</p>
               </div>
             )}
           </div>

@@ -76,34 +76,34 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
   }, [zoneId])
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-50 mx-3 max-h-[55vh] overflow-hidden rounded-2xl border border-[#334155] bg-[#243B4A] shadow-2xl md:absolute md:inset-auto md:bottom-4 md:right-4 md:mx-0 md:w-80 md:max-h-[70vh]">
+    <div className="fixed inset-x-0 bottom-20 z-50 mx-3 max-h-[55vh] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl md:absolute md:inset-auto md:bottom-4 md:right-4 md:mx-0 md:w-80 md:max-h-[70vh]">
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#334155] bg-[#243B4A] px-4 py-3">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-900/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
             <MapPin size={20} className="text-blue-400" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Fishing Zone</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="text-sm font-semibold text-foreground">Fishing Zone</h3>
+            <p className="text-xs text-muted-foreground">
               {totalCatches} catches logged · ~1km area
             </p>
-            <p className="text-[10px] text-gray-600 font-mono truncate max-w-[180px]">
+            <p className="text-[10px] text-muted-foreground/60 font-mono truncate max-w-[180px]">
               {zoneId}
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="rounded-full p-2 text-gray-400 hover:bg-[#334155] hover:text-white"
+          className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <X size={20} />
         </button>
       </div>
 
       {/* Zone info */}
-      <div className="border-b border-[#334155] bg-[#1A2D3D] px-4 py-2">
-        <p className="text-xs text-gray-500">
+      <div className="border-b border-border bg-background px-4 py-2">
+        <p className="text-xs text-muted-foreground">
           Zones are ~1km hotspots. Exact marks stay private.
         </p>
         {topSpecies && (
@@ -141,9 +141,9 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
                   navigate(`/profile/${topAngler.user_id}`)
                 }
               }}
-              className="mt-2 flex w-full items-center gap-2 rounded-lg bg-amber-900/30 border border-amber-500/40 p-2 text-left transition-colors hover:bg-amber-900/50"
+              className="mt-2 flex w-full items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-500/40 p-2 text-left transition-colors hover:bg-amber-100 dark:hover:bg-amber-900/50"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-900/50">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
                 {topAngler.avatar_url ? (
                   <img
                     src={topAngler.avatar_url}
@@ -156,7 +156,7 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] text-amber-400 font-medium">Top Angler</p>
-                <p className="text-xs font-semibold text-white truncate">
+                <p className="text-xs font-semibold text-foreground truncate">
                   {topAngler.username ? `@${topAngler.username}` : 'Angler'}
                 </p>
               </div>
@@ -173,31 +173,31 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
       <div className="max-h-[35vh] overflow-y-auto p-4 md:max-h-[50vh]">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 size={24} className="animate-spin text-gray-400" />
+            <Loader2 size={24} className="animate-spin text-muted-foreground" />
           </div>
         ) : error ? (
           <div className="py-8 text-center">
-            <Fish size={32} className="mx-auto mb-2 text-gray-500" />
-            <p className="text-sm text-gray-400">{error}</p>
+            <Fish size={32} className="mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">{error}</p>
           </div>
         ) : catches.length === 0 ? (
           <div className="py-8 text-center">
-            <Fish size={32} className="mx-auto mb-2 text-gray-500" />
-            <p className="text-sm text-gray-400">No public catches in this zone</p>
-            <p className="mt-1 text-xs text-gray-500">
+            <Fish size={32} className="mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">No public catches in this zone</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               Catches may be private or hidden
             </p>
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Recent Catches
             </p>
             {catches.map((c) => (
               <button
                 key={c.id}
                 onClick={() => navigate(`/catches/${c.id}`)}
-                className="flex w-full items-center gap-3 rounded-lg bg-[#1A2D3D] p-3 text-left transition-colors hover:bg-[#334155]"
+                className="flex w-full items-center gap-3 rounded-lg bg-background p-3 text-left transition-colors hover:bg-muted"
               >
                 {c.photo_url ? (
                   <img
@@ -206,15 +206,15 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
                     className="h-10 w-10 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-900/30">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-900/30">
                     <Fish size={20} className="text-sky-400" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
+                  <p className="text-sm font-semibold text-foreground truncate">
                     {c.species}
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     {c.profiles?.username && (
                       <span className="text-[#1BA9A0]">@{c.profiles.username}</span>
                     )}
@@ -226,7 +226,7 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
                     )}
                   </div>
                 </div>
-                <span className="text-xs text-gray-500">View →</span>
+                <span className="text-xs text-muted-foreground">View →</span>
               </button>
             ))}
           </div>

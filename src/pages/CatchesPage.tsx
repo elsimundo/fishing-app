@@ -17,11 +17,11 @@ export default function CatchesPage() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft size={20} />
             </button>
-            <h1 className="text-xl font-bold text-gray-900">All Catches</h1>
+            <h1 className="text-xl font-bold text-foreground">All Catches</h1>
           </div>
           <Link
             to="/catches/new"
@@ -36,12 +36,12 @@ export default function CatchesPage() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100" />
+              <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />
             ))}
           </div>
         ) : !catches || catches.length === 0 ? (
-          <div className="rounded-xl bg-gray-50 p-8 text-center">
-            <p className="text-gray-500">No catches logged yet</p>
+          <div className="rounded-xl bg-muted p-8 text-center">
+            <p className="text-muted-foreground">No catches logged yet</p>
             <Link
               to="/catches/new"
               className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"

@@ -159,15 +159,15 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center">
-      <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-[#243B4A] md:max-w-lg md:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-[#334155] px-5 py-4">
-          <h2 className="text-lg font-bold text-white">Edit Profile</h2>
+      <div className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-card md:max-w-lg md:rounded-2xl">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 className="text-lg font-bold text-foreground">Edit Profile</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 transition-colors hover:bg-[#1A2D3D]"
+            className="rounded-full p-2 transition-colors hover:bg-muted"
           >
-            <X size={20} className="text-gray-400" />
+            <X size={20} className="text-muted-foreground" />
           </button>
         </div>
 
@@ -189,7 +189,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#1BA9A0] text-white shadow-lg hover:bg-[#14B8A6]"
+                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#1BA9A0] text-white shadow-lg hover:bg-[#0D9488]"
               >
                 <Camera size={16} />
               </button>
@@ -201,75 +201,75 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
                 className="hidden"
               />
             </div>
-            <p className="mt-2 text-xs text-gray-500">Tap to change photo</p>
+            <p className="mt-2 text-xs text-muted-foreground">Tap to change photo</p>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-white">Username</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">Username</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">@</span>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => handleUsernameChange(e.target.value)}
                 maxLength={20}
-                className={`w-full rounded-xl border bg-[#1A2D3D] px-4 py-3 pl-8 text-sm text-white focus:border-transparent focus:outline-none focus:ring-2 ${
-                  usernameError ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:ring-[#1BA9A0]'
+                className={`w-full rounded-xl border bg-background px-4 py-3 pl-8 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 ${
+                  usernameError ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-primary'
                 }`}
                 placeholder="username"
               />
               {isCheckingUsername && (
-                <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
+                <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
               )}
             </div>
             {usernameError && (
               <p className="mt-1 text-xs text-red-400">{usernameError}</p>
             )}
-            <p className="mt-1 text-xs text-gray-500">3-20 characters, letters, numbers, underscores only</p>
+            <p className="mt-1 text-xs text-muted-foreground">3-20 characters, letters, numbers, underscores only</p>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-white">Full name</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">Full name</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               maxLength={100}
-              className="w-full rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]"
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-white">Bio</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">Bio</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={4}
               maxLength={200}
-              className="w-full resize-none rounded-xl border border-[#334155] bg-[#1A2D3D] px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1BA9A0]"
+              className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Tell others about yourself…"
             />
-            <p className="mt-1 text-right text-xs text-gray-500">{bio.length}/200</p>
+            <p className="mt-1 text-right text-xs text-muted-foreground">{bio.length}/200</p>
           </div>
 
           {/* Privacy Toggle */}
-          <div className="rounded-xl border border-[#334155] bg-[#1A2D3D] p-4">
+          <div className="rounded-xl border border-border bg-background p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {isPrivate ? (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-900/30">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
                     <Lock size={20} className="text-amber-400" />
                   </div>
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-900/30">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
                     <Globe size={20} className="text-emerald-400" />
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-foreground">
                     {isPrivate ? 'Private Account' : 'Public Account'}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {isPrivate
                       ? 'Only followers can see your posts in the feed'
                       : 'Anyone can see your posts in the feed'}
@@ -280,7 +280,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
                 type="button"
                 onClick={() => setIsPrivate(!isPrivate)}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  isPrivate ? 'bg-amber-500' : 'bg-[#334155]'
+                  isPrivate ? 'bg-amber-500' : 'bg-muted'
                 }`}
               >
                 <span
@@ -294,11 +294,11 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
 
         </div>
 
-        <div className="flex gap-3 border-t border-[#334155] px-5 py-4">
+        <div className="flex gap-3 border-t border-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl border border-[#334155] px-4 py-3 font-semibold text-gray-300 transition-colors hover:bg-[#1A2D3D]"
+            className="flex-1 rounded-xl border border-border px-4 py-3 font-semibold text-muted-foreground transition-colors hover:bg-muted"
           >
             Cancel
           </button>
@@ -306,7 +306,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
             type="button"
             onClick={handleSave}
             disabled={isSaving || isUploading}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] px-4 py-3 font-semibold text-white transition-colors hover:bg-[#14B8A6] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-3 font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSaving ? (
               <>

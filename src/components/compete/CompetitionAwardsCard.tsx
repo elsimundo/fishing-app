@@ -44,12 +44,12 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+      <div className="rounded-2xl bg-card border border-border p-4 shadow-sm">
         <div className="animate-pulse">
-          <div className="mb-3 h-4 w-24 rounded bg-[#334155]" />
+          <div className="mb-3 h-4 w-24 rounded bg-muted" />
           <div className="space-y-2">
-            <div className="h-12 rounded-lg bg-[#1A2D3D]" />
-            <div className="h-12 rounded-lg bg-[#1A2D3D]" />
+            <div className="h-12 rounded-lg bg-background" />
+            <div className="h-12 rounded-lg bg-background" />
           </div>
         </div>
       </div>
@@ -61,12 +61,12 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
   }
 
   return (
-    <div className="rounded-2xl bg-[#243B4A] border border-[#334155] p-4 shadow-sm">
+    <div className="rounded-2xl bg-card border border-border p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-900/30">
           <Trophy size={14} className="text-amber-400" />
         </div>
-        <h3 className="text-sm font-bold text-white">Award Categories</h3>
+        <h3 className="text-sm font-bold text-foreground">Award Categories</h3>
         <span className="rounded-full bg-amber-900/30 px-2 py-0.5 text-xs font-semibold text-amber-400">
           {awards.length}
         </span>
@@ -78,15 +78,15 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
           return (
             <div
               key={award.id}
-              className="flex items-center gap-3 rounded-xl bg-[#1A2D3D] p-3"
+              className="flex items-center gap-3 rounded-xl bg-background p-3"
             >
               <div className={`flex h-8 w-8 items-center justify-center rounded-full ${info.color}`}>
                 {info.icon}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-gray-500">#{index + 1}</span>
-                  <p className="text-sm font-semibold text-white">{award.title}</p>
+                  <span className="text-xs font-semibold text-muted-foreground">#{index + 1}</span>
+                  <p className="text-sm font-semibold text-foreground">{award.title}</p>
                   {award.target_species && (
                     <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-[10px] font-medium text-blue-400">
                       🐟 {award.target_species}
@@ -94,7 +94,7 @@ export function CompetitionAwardsCard({ competitionId }: CompetitionAwardsCardPr
                   )}
                 </div>
                 {award.prize && (
-                  <p className="text-xs text-gray-500">🏆 {award.prize}</p>
+                  <p className="text-xs text-muted-foreground">🏆 {award.prize}</p>
                 )}
               </div>
             </div>

@@ -13,20 +13,20 @@ export default function SearchUsersPage() {
   const hasQuery = query.trim().length > 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="border-b border-gray-200 bg-white px-5 py-3">
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border bg-card px-5 py-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700"
+            className="rounded-full bg-muted px-3 py-1 text-sm font-medium text-foreground"
           >
             Back
           </button>
-          <div className="flex flex-1 items-center gap-2 rounded-full bg-gray-100 px-3 py-2">
-            <Search size={16} className="text-gray-500" />
+          <div className="flex flex-1 items-center gap-2 rounded-full bg-muted px-3 py-2">
+            <Search size={16} className="text-muted-foreground" />
             <input
-              className="w-full bg-transparent text-sm text-gray-900 outline-none"
+              className="w-full bg-transparent text-sm text-foreground outline-none"
               placeholder="Search anglers…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -37,7 +37,7 @@ export default function SearchUsersPage() {
 
       <div className="p-4">
         {!hasQuery && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Start typing to search for anglers by name or @username.
           </p>
         )}
@@ -49,7 +49,7 @@ export default function SearchUsersPage() {
         )}
 
         {hasQuery && !isLoading && (!results || results.length === 0) && (
-          <p className="py-8 text-sm text-gray-500">No anglers found.</p>
+          <p className="py-8 text-sm text-muted-foreground">No anglers found.</p>
         )}
 
         {hasQuery && results && results.length > 0 && (
@@ -69,7 +69,7 @@ function SearchResultRow({ profile }: { profile: any }) {
   const navigate = useNavigate()
 
   return (
-    <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 shadow-sm">
+    <div className="flex items-center justify-between rounded-xl bg-card px-3 py-2 shadow-sm">
       <button
         type="button"
         onClick={() => {
@@ -93,12 +93,12 @@ function SearchResultRow({ profile }: { profile: any }) {
           </div>
         )}
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-gray-900">
+          <p className="truncate text-sm font-semibold text-foreground">
             {profile.full_name || profile.username || 'Unnamed User'}
           </p>
-          <p className="truncate text-xs text-gray-500">@{profile.username || 'user'}</p>
+          <p className="truncate text-xs text-muted-foreground">@{profile.username || 'user'}</p>
           {profile.location && (
-            <p className="truncate text-[11px] text-gray-400">📍 {profile.location}</p>
+            <p className="truncate text-[11px] text-muted-foreground">📍 {profile.location}</p>
           )}
         </div>
       </button>

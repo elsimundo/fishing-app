@@ -131,13 +131,13 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-[#243B4A] border border-[#334155] shadow-xl">
+      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-border shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#334155] px-4 py-3">
-          <h2 className="text-lg font-bold text-white">Edit Session</h2>
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h2 className="text-lg font-bold text-foreground">Edit Session</h2>
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-gray-400 hover:bg-[#334155]"
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
           >
             <X size={20} />
           </button>
@@ -147,7 +147,7 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Cover Photo */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Cover Photo (optional)
             </label>
             {coverPhotoPreview ? (
@@ -166,10 +166,10 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
                 </button>
               </div>
             ) : (
-              <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#334155] bg-[#1A2D3D] p-6 hover:bg-[#334155]">
-                <ImageIcon size={32} className="text-gray-500" />
-                <p className="mt-2 text-sm font-medium text-gray-300">Upload cover photo</p>
-                <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+              <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-background p-6 hover:bg-muted">
+                <ImageIcon size={32} className="text-muted-foreground" />
+                <p className="mt-2 text-sm font-medium text-muted-foreground">Upload cover photo</p>
+                <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -182,7 +182,7 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Session Title (optional)
             </label>
             <input
@@ -190,12 +190,12 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Morning Bass Session"
-              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Location
             </label>
             <input
@@ -203,18 +203,18 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
               placeholder="e.g., Brighton Marina"
-              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Water Type
             </label>
             <select
               value={waterType}
               onChange={(e) => setWaterType(e.target.value)}
-              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Select water type</option>
               {WATER_TYPES.map((type) => (
@@ -226,7 +226,7 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Location Privacy
             </label>
             <div className="space-y-2">
@@ -235,8 +235,8 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
                   key={option.value}
                   className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
                     locationPrivacy === option.value
-                      ? 'border-[#1BA9A0] bg-[#1BA9A0]/20'
-                      : 'border-[#334155] hover:border-[#1BA9A0]/50'
+                      ? 'border-primary bg-primary/20'
+                      : 'border-border hover:border-primary/50'
                   }`}
                 >
                   <input
@@ -248,8 +248,8 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
                     className="mt-0.5"
                   />
                   <div>
-                    <p className="text-sm font-medium text-white">{option.label}</p>
-                    <p className="text-xs text-gray-500">{option.description}</p>
+                    <p className="text-sm font-medium text-foreground">{option.label}</p>
+                    <p className="text-xs text-muted-foreground">{option.description}</p>
                   </div>
                 </label>
               ))}
@@ -257,7 +257,7 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Notes (optional)
             </label>
             <textarea
@@ -265,37 +265,37 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any notes about this session..."
               rows={3}
-              className="w-full rounded-lg border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0] resize-none"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
             />
           </div>
 
           {/* Post & Comment Settings */}
-          <div className="space-y-3 rounded-lg border border-[#334155] bg-[#1A2D3D] p-3">
-            <p className="text-sm font-medium text-white">Timeline Settings</p>
+          <div className="space-y-3 rounded-lg border border-border bg-background p-3">
+            <p className="text-sm font-medium text-foreground">Timeline Settings</p>
             
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-gray-300">Allow image posts</p>
-                <p className="text-xs text-gray-500">Participants can add photos to the timeline</p>
+                <p className="text-sm font-medium text-muted-foreground">Allow image posts</p>
+                <p className="text-xs text-muted-foreground">Participants can add photos to the timeline</p>
               </div>
               <input
                 type="checkbox"
                 checked={allowPosts}
                 onChange={(e) => setAllowPosts(e.target.checked)}
-                className="h-4 w-4 rounded border-[#334155] text-[#1BA9A0] focus:ring-[#1BA9A0]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
             </label>
 
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-gray-300">Allow text comments</p>
-                <p className="text-xs text-gray-500">Participants can add text updates to the timeline</p>
+                <p className="text-sm font-medium text-muted-foreground">Allow text comments</p>
+                <p className="text-xs text-muted-foreground">Participants can add text updates to the timeline</p>
               </div>
               <input
                 type="checkbox"
                 checked={allowComments}
                 onChange={(e) => setAllowComments(e.target.checked)}
-                className="h-4 w-4 rounded border-[#334155] text-[#1BA9A0] focus:ring-[#1BA9A0]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
             </label>
           </div>
@@ -305,14 +305,14 @@ export function EditSessionModal({ session, onClose, onSuccess }: EditSessionMod
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-[#334155] bg-[#1A2D3D] px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-[#334155]"
+              className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending || uploading}
-              className="flex-1 rounded-lg bg-[#1BA9A0] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#14B8A6] disabled:bg-[#334155]"
+              className="flex-1 rounded-lg bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
             >
               {uploading ? (
                 <span className="flex items-center justify-center gap-2">

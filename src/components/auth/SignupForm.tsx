@@ -81,9 +81,9 @@ export function SignupForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-xl bg-[#243B4A] p-6 shadow-lg border border-[#334155]">
-      <h1 className="mb-1 text-center text-2xl font-semibold text-[#1BA9A0]">{APP_NAME}</h1>
-      <p className="mb-6 text-center text-sm text-gray-400">Create a new account</p>
+    <div className="mx-auto w-full max-w-md rounded-xl bg-card p-6 shadow-lg border border-border">
+      <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>
+      <p className="mb-6 text-center text-sm text-muted-foreground">Create a new account</p>
 
       {formError ? (
         <div className="mb-4 rounded-md bg-red-900/30 px-3 py-2 text-sm text-red-400">
@@ -99,18 +99,18 @@ export function SignupForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-300" htmlFor="username">
+          <label className="mb-1 block text-sm font-medium text-muted-foreground" htmlFor="username">
             Username
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+            <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
               @
             </span>
             <input
               id="username"
               type="text"
               autoComplete="username"
-              className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 pl-5 text-sm text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+              className="block w-full rounded-md border border-border bg-background px-3 py-2 pl-5 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               maxLength={20}
               {...register('username')}
             />
@@ -127,14 +127,14 @@ export function SignupForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-300" htmlFor="email">
+          <label className="mb-1 block text-sm font-medium text-muted-foreground" htmlFor="email">
             Email
           </label>
           <input
             id="email"
             type="email"
             autoComplete="email"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('email')}
           />
           {errors.email ? (
@@ -143,14 +143,14 @@ export function SignupForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-300" htmlFor="password">
+          <label className="mb-1 block text-sm font-medium text-muted-foreground" htmlFor="password">
             Password
           </label>
           <input
             id="password"
             type="password"
             autoComplete="new-password"
-            className="block w-full rounded-md border border-[#334155] bg-[#1A2D3D] px-3 py-2 text-sm text-white shadow-sm focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('password')}
           />
           {errors.password ? (
@@ -161,7 +161,7 @@ export function SignupForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center rounded-md bg-[#1BA9A0] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#14B8A6] disabled:bg-[#0D4B4E]"
+          className="flex w-full items-center justify-center rounded-md bg-navy-800 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400"
         >
           {isSubmitting ? 'Creating account…' : 'Create account'}
         </button>

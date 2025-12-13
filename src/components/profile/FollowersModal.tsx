@@ -52,28 +52,28 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-t-2xl bg-[#243B4A] border border-[#334155] sm:rounded-2xl">
+      <div className="relative w-full max-w-md rounded-t-2xl bg-card border border-border sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#334155] px-4 py-3">
-          <h2 className="text-lg font-bold text-white">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h2 className="text-lg font-bold text-foreground">
             {activeTab === 'followers' ? 'Followers' : 'Following'}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-gray-400 hover:bg-[#334155]"
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-[#334155]">
+        <div className="flex border-b border-border">
           <button
             onClick={() => setActiveTab('followers')}
             className={`flex-1 py-3 text-sm font-semibold transition-colors ${
               activeTab === 'followers'
-                ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
-                : 'text-gray-500 hover:text-gray-400'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Followers ({followers.length})
@@ -82,8 +82,8 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
             onClick={() => setActiveTab('following')}
             className={`flex-1 py-3 text-sm font-semibold transition-colors ${
               activeTab === 'following'
-                ? 'border-b-2 border-[#1BA9A0] text-[#1BA9A0]'
-                : 'text-gray-500 hover:text-gray-400'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Following ({following.length})
@@ -94,10 +94,10 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
         <div className="max-h-[60vh] overflow-y-auto p-4">
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : users.length === 0 ? (
-            <div className="py-8 text-center text-sm text-gray-500">
+            <div className="py-8 text-center text-sm text-muted-foreground">
               {activeTab === 'followers'
                 ? 'No followers yet'
                 : 'Not following anyone yet'}
@@ -112,7 +112,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                 return (
                   <div
                     key={user.id}
-                    className="relative flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-[#1A2D3D]"
+                    className="relative flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-muted"
                   >
                     <button
                       onClick={() => handleUserClick(user)}
@@ -130,10 +130,10 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-white">
+                        <p className="truncate font-semibold text-foreground">
                           {user.full_name || user.username}
                         </p>
-                        <p className="truncate text-sm text-gray-500">@{user.username}</p>
+                        <p className="truncate text-sm text-muted-foreground">@{user.username}</p>
                       </div>
                     </button>
 
@@ -142,7 +142,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                       <div className="relative">
                         <button
                           onClick={() => setMenuOpenFor(menuOpenFor === user.id ? null : user.id)}
-                          className="rounded-full p-1.5 text-gray-400 hover:bg-[#334155] hover:text-white"
+                          className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                         >
                           <MoreHorizontal size={18} />
                         </button>
@@ -153,7 +153,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                               className="fixed inset-0 z-10"
                               onClick={() => setMenuOpenFor(null)}
                             />
-                            <div className="absolute right-0 top-8 z-20 w-40 rounded-xl border border-[#334155] bg-[#1A2D3D] py-1 shadow-lg">
+                            <div className="absolute right-0 top-8 z-20 w-40 rounded-xl border border-border bg-background py-1 shadow-lg">
                               {showUnfollowActions && (
                                 <button
                                   onClick={async () => {
@@ -166,7 +166,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                                     }
                                   }}
                                   disabled={isUnfollowing}
-                                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 hover:bg-[#334155] disabled:opacity-50"
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted disabled:opacity-50"
                                 >
                                   <UserMinus size={14} />
                                   <span>Unfollow</span>
@@ -184,7 +184,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                                   }
                                 }}
                                 disabled={isBlocking}
-                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/30 disabled:opacity-50"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 disabled:opacity-50"
                               >
                                 <Ban size={14} />
                                 <span>Block</span>
