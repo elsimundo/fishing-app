@@ -25,6 +25,7 @@ import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { useFishingZones } from '../hooks/useFishingZones'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { MapPin, Navigation, Store, X, UserPlus, Loader2, Search } from 'lucide-react'
+// import { ExploreSearch } from '../components/explore/ExploreSearch' // Parked for now
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
 

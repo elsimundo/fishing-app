@@ -59,7 +59,7 @@ function parseOverpassResponse(data: {
     center?: { lat: number; lon: number }
     tags?: Record<string, string>
   }>
-}): TackleShop[] {
+}, queryType?: 'shops' | 'clubs' | 'charters'): TackleShop[] {
   if (!data.elements || data.elements.length === 0) {
     return []
   }
@@ -76,6 +76,63 @@ function parseOverpassResponse(data: {
     if (!lat || !lng) continue
 
     const tags = element.tags || {}
+
+    // Filter out chartered surveyors for charters query
+    if (queryType === 'charters') {
+      const name = (tags.name || '').toLowerCase()
+      
+      // Exclude list - surveyors, accountants, architects, etc.
+      const excludeKeywords = [
+        'survey', 'surveyor', 'chartered surveyor', 'marine surveyor',
+        'hydrographic', 'surveying', 'measurement', 'valuation',
+        'accountant', 'architect', 'financial', 'consultant',
+        'logistics', 'transport', 'flight', 'air', 'jet', 'travel', 'bus', 'coach', 'taxi', 'limo',
+        'standard chartered', 'bank', 'school', 'college', 'university',
+        'legal', 'law', 'solicitor', 'attorney', 'chambers',
+        'estate', 'property', 'realty', 'letting',
+        'clinic', 'health', 'medical', 'dental', 'physio', 'vet',
+        'engineer', 'engineering', 'mechanical', 'electrical',
+        'insurance', 'underwriting', 'broker', 'agency',
+        'hotel', 'inn', 'pub', 'restaurant', 'cafe', 'bar',
+        'club', 'society', 'institute', 'association',
+        'audit', 'tax', 'payroll', 'bookkeeping', 'advisory',
+        'wealth', 'capital', 'asset', 'investment', 'fund',
+        'construction', 'building', 'project', 'safety', 'compliance',
+        'solutions', 'systems', 'group', 'holdings', 'partners', 'associates'
+      ]
+      
+      // Skip if contains excluded keyword (unless it's clearly a fishing club/boat)
+      if (excludeKeywords.some(keyword => name.includes(keyword))) {
+        const isClearlyFishing = name.includes('fishing') || name.includes('angler')
+        if (!isClearlyFishing) {
+          console.log(`[OSM] Filtered out (keyword): ${tags.name}`)
+          continue
+        }
+      }
+
+      // If matched via the general "charter" keyword, enforce fishing/boat context
+      const isBoatContext = 
+        tags['sport'] === 'fishing' || 
+        tags['leisure'] === 'fishing' || 
+        tags['amenity'] === 'boat_rental' ||
+        tags['boat'] === 'yes' ||
+        name.includes('boat') ||
+        name.includes('fishing') ||
+        /\bsea\b/.test(name) || // Whole word "sea" only
+        name.includes('angler') ||
+        name.includes('skipper') ||
+        name.includes('tours') ||
+        name.includes('trips') ||
+        name.includes('excursions') ||
+        name.includes('yacht') ||
+        name.includes('sailing') ||
+        name.includes('cruise')
+
+      if (!isBoatContext) {
+        console.log(`[OSM] Filtered out (context): ${tags.name}`)
+        continue
+      }
+    }
 
     // Dedupe by name+location
     const key = `${tags.name || ''}-${lat.toFixed(4)}-${lng.toFixed(4)}`
@@ -128,7 +185,7 @@ export async function getTackleShopsInBounds(bounds: {
     }
 
     const data = await response.json()
-    const shops = parseOverpassResponse(data)
+    const shops = parseOverpassResponse(data, 'shops')
 
     console.log(`[OSM] Found ${shops.length} tackle shops in area`)
 
@@ -196,7 +253,7 @@ export async function getClubsInBounds(bounds: {
     }
 
     const data = await response.json()
-    const shops = parseOverpassResponse(data)
+    const shops = parseOverpassResponse(data, 'clubs')
 
     console.log(`[OSM] Found ${shops.length} fishing clubs in area`)
 
@@ -223,6 +280,7 @@ function buildChartersQuery(bounds: {
   const { south, west, north, east } = bounds
 
   // Search for charter boats, fishing trips, boat hire with fishing
+  // Exclude chartered surveyors by checking for survey/maritime keywords
   return `
     [out:json][timeout:25];
     (
@@ -262,7 +320,7 @@ export async function getChartersInBounds(bounds: {
     }
 
     const data = await response.json()
-    const shops = parseOverpassResponse(data)
+    const shops = parseOverpassResponse(data, 'charters')
 
     console.log(`[OSM] Found ${shops.length} charter boats in area`)
 
