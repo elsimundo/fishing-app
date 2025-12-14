@@ -119,7 +119,9 @@ export function SignupForm() {
             <p className="mt-1 text-xs text-red-400">{usernameValidation.error}</p>
           ) : null}
           {watchedUsername && usernameValidation.valid && availability && !availability.available ? (
-            <p className="mt-1 text-xs text-red-400">@{normalizeUsername(watchedUsername)} is already taken</p>
+            <p className="mt-1 text-xs text-red-400">
+              @{normalizeUsername(watchedUsername)} is {availability.reason === 'reserved' ? 'reserved' : 'already taken'}
+            </p>
           ) : null}
           {watchedUsername && usernameValidation.valid && availability?.available ? (
             <p className="mt-1 text-xs text-emerald-400">@{normalizeUsername(watchedUsername)} is available</p>

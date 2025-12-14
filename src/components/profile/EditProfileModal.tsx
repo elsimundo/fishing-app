@@ -34,10 +34,22 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
     return null
   }
 
-  // Check if username is available
-  const checkUsernameAvailable = async (value: string): Promise<boolean> => {
-    if (value.toLowerCase() === profile.username?.toLowerCase()) return true
+  // Check if username is available (not taken and not reserved)
+  const checkUsernameAvailable = async (value: string): Promise<{ available: boolean; reason?: 'taken' | 'reserved' }> => {
+    if (value.toLowerCase() === profile.username?.toLowerCase()) return { available: true }
     
+    // Check reserved usernames first
+    const { data: reserved } = await supabase
+      .from('reserved_usernames')
+      .select('username, claimed_by')
+      .ilike('username', value)
+      .maybeSingle()
+    
+    if (reserved && !reserved.claimed_by) {
+      return { available: false, reason: 'reserved' }
+    }
+    
+    // Check if taken by another user
     const { data } = await supabase
       .from('profiles')
       .select('id')
@@ -45,7 +57,11 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
       .neq('id', profile.id)
       .limit(1)
     
-    return !data || data.length === 0
+    if (data && data.length > 0) {
+      return { available: false, reason: 'taken' }
+    }
+    
+    return { available: true }
   }
 
   const handleUsernameChange = (value: string) => {
@@ -119,11 +135,11 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
       // Check username availability if changed
       if (username.toLowerCase() !== profile.username?.toLowerCase()) {
         setIsCheckingUsername(true)
-        const isAvailable = await checkUsernameAvailable(username)
+        const result = await checkUsernameAvailable(username)
         setIsCheckingUsername(false)
         
-        if (!isAvailable) {
-          setUsernameError('Username is already taken')
+        if (!result.available) {
+          setUsernameError(result.reason === 'reserved' ? 'This username is reserved' : 'Username is already taken')
           setIsSaving(false)
           return
         }

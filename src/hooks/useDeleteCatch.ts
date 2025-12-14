@@ -395,6 +395,10 @@ export function useDeleteCatch() {
       void queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
       void queryClient.invalidateQueries({ queryKey: ['user-weekly-stats'] })
       void queryClient.invalidateQueries({ queryKey: ['profile'] })
+      // Invalidate explore map data (public sessions contain catches)
+      void queryClient.invalidateQueries({ queryKey: ['sessions', 'public'] })
+      void queryClient.invalidateQueries({ queryKey: ['fishing-zones'] })
+      void queryClient.invalidateQueries({ queryKey: ['zone-catches'] })
       
       if (data.xpReversed > 0) {
         toast(`-${data.xpReversed} XP`, { icon: '↩️', duration: 2000 })

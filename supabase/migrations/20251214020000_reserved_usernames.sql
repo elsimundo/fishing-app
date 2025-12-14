@@ -1,0 +1,266 @@
+-- Reserved Usernames: Protect brand names, influencers, and publications from squatting
+-- Usernames in this table cannot be claimed during signup
+
+CREATE TABLE IF NOT EXISTS reserved_usernames (
+  username text PRIMARY KEY,
+  reason text NOT NULL DEFAULT 'brand',  -- 'brand', 'influencer', 'publication', 'offensive', 'system'
+  reserved_for text,                      -- Contact email or notes for claiming
+  claimed_by uuid REFERENCES profiles(id),
+  claimed_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Index for fast lookups during signup validation
+CREATE INDEX IF NOT EXISTS idx_reserved_usernames_lower ON reserved_usernames(lower(username));
+
+-- RLS
+ALTER TABLE reserved_usernames ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can check if a username is reserved (for signup validation)
+DROP POLICY IF EXISTS "Anyone can view reserved usernames" ON reserved_usernames;
+CREATE POLICY "Anyone can view reserved usernames"
+  ON reserved_usernames FOR SELECT USING (true);
+
+-- Only admins can manage reserved usernames (insert/update/delete done via SQL editor or admin panel)
+
+-- =============================================================================
+-- SEED DATA: Reserved usernames
+-- =============================================================================
+
+-- SYSTEM/GENERIC (always protect these)
+INSERT INTO reserved_usernames (username, reason, reserved_for) VALUES
+  ('admin', 'system', 'System reserved'),
+  ('administrator', 'system', 'System reserved'),
+  ('support', 'system', 'System reserved'),
+  ('help', 'system', 'System reserved'),
+  ('info', 'system', 'System reserved'),
+  ('contact', 'system', 'System reserved'),
+  ('official', 'system', 'System reserved'),
+  ('verified', 'system', 'System reserved'),
+  ('fishing', 'system', 'System reserved'),
+  ('fishingapp', 'system', 'System reserved'),
+  ('theswim', 'system', 'System reserved'),
+  ('moderator', 'system', 'System reserved'),
+  ('mod', 'system', 'System reserved'),
+  ('staff', 'system', 'System reserved'),
+  ('team', 'system', 'System reserved'),
+  ('api', 'system', 'System reserved'),
+  ('dev', 'system', 'System reserved'),
+  ('test', 'system', 'System reserved'),
+  ('root', 'system', 'System reserved'),
+  ('null', 'system', 'System reserved'),
+  ('undefined', 'system', 'System reserved')
+ON CONFLICT (username) DO NOTHING;
+
+-- UK FISHING TACKLE BRANDS
+INSERT INTO reserved_usernames (username, reason, reserved_for) VALUES
+  ('korda', 'brand', 'Korda Developments'),
+  ('kordaofficial', 'brand', 'Korda Developments'),
+  ('nash', 'brand', 'Nash Tackle'),
+  ('nashtackle', 'brand', 'Nash Tackle'),
+  ('fox', 'brand', 'Fox International'),
+  ('foxint', 'brand', 'Fox International'),
+  ('foxinternational', 'brand', 'Fox International'),
+  ('daiwa', 'brand', 'Daiwa Sports'),
+  ('daiwauk', 'brand', 'Daiwa UK'),
+  ('shimano', 'brand', 'Shimano'),
+  ('shimanouk', 'brand', 'Shimano UK'),
+  ('shimanoeurope', 'brand', 'Shimano Europe'),
+  ('preston', 'brand', 'Preston Innovations'),
+  ('prestoninnovations', 'brand', 'Preston Innovations'),
+  ('matrix', 'brand', 'Matrix Fishing'),
+  ('matrixfishing', 'brand', 'Matrix Fishing'),
+  ('sonik', 'brand', 'Sonik Sports'),
+  ('soniksports', 'brand', 'Sonik Sports'),
+  ('trakker', 'brand', 'Trakker Products'),
+  ('aqua', 'brand', 'Aqua Products'),
+  ('aquaproducts', 'brand', 'Aqua Products'),
+  ('ridgemonkey', 'brand', 'RidgeMonkey'),
+  ('gardnertackle', 'brand', 'Gardner Tackle'),
+  ('gardner', 'brand', 'Gardner Tackle'),
+  ('esp', 'brand', 'ESP Tackle'),
+  ('esptackle', 'brand', 'ESP Tackle'),
+  ('avid', 'brand', 'Avid Carp'),
+  ('avidcarp', 'brand', 'Avid Carp'),
+  ('mainline', 'brand', 'Mainline Baits'),
+  ('mainlinebaits', 'brand', 'Mainline Baits'),
+  ('sticky', 'brand', 'Sticky Baits'),
+  ('stickybaits', 'brand', 'Sticky Baits'),
+  ('ccmoore', 'brand', 'CC Moore'),
+  ('dynamitebaits', 'brand', 'Dynamite Baits'),
+  ('dynamite', 'brand', 'Dynamite Baits'),
+  ('sonubaits', 'brand', 'Sonu Baits'),
+  ('baittech', 'brand', 'Bait-Tech'),
+  ('ringers', 'brand', 'Ringers Baits'),
+  ('ringersbaits', 'brand', 'Ringers Baits'),
+  ('middy', 'brand', 'Middy Tackle'),
+  ('maver', 'brand', 'Maver UK'),
+  ('maveruk', 'brand', 'Maver UK'),
+  ('drennan', 'brand', 'Drennan International'),
+  ('drennaninternational', 'brand', 'Drennan International'),
+  ('guru', 'brand', 'Guru Tackle'),
+  ('gurutackle', 'brand', 'Guru Tackle'),
+  ('pensuk', 'brand', 'Penn UK'),
+  ('penn', 'brand', 'Penn Fishing'),
+  ('abu', 'brand', 'Abu Garcia'),
+  ('abugarcia', 'brand', 'Abu Garcia'),
+  ('shakespeare', 'brand', 'Shakespeare Fishing'),
+  ('wychwood', 'brand', 'Wychwood'),
+  ('tfgear', 'brand', 'TF Gear'),
+  ('jrc', 'brand', 'JRC Carp'),
+  ('jrccarp', 'brand', 'JRC Carp'),
+  ('chub', 'brand', 'Chub Fishing'),
+  ('solar', 'brand', 'Solar Tackle'),
+  ('solartackle', 'brand', 'Solar Tackle'),
+  ('delkim', 'brand', 'Delkim'),
+  ('deeper', 'brand', 'Deeper Sonar'),
+  ('deepersonar', 'brand', 'Deeper Sonar'),
+  ('fortis', 'brand', 'Fortis Eyewear'),
+  ('fortiseyewear', 'brand', 'Fortis Eyewear'),
+  ('tfg', 'brand', 'Total Fishing Gear'),
+  ('totalfishinggear', 'brand', 'Total Fishing Gear'),
+  ('anaconda', 'brand', 'Anaconda'),
+  ('sportex', 'brand', 'Sportex'),
+  ('century', 'brand', 'Century Composites'),
+  ('centurycomposites', 'brand', 'Century Composites'),
+  ('harrison', 'brand', 'Harrison Rods'),
+  ('harrisonrods', 'brand', 'Harrison Rods'),
+  ('freeflow', 'brand', 'Free Flow'),
+  ('greys', 'brand', 'Greys Fishing'),
+  ('greysfishing', 'brand', 'Greys Fishing'),
+  ('hardygrey', 'brand', 'Hardy & Greys'),
+  ('hardy', 'brand', 'Hardy Fishing'),
+  ('hardyfishing', 'brand', 'Hardy Fishing'),
+  ('scierra', 'brand', 'Scierra'),
+  ('airflo', 'brand', 'Airflo'),
+  ('orvis', 'brand', 'Orvis'),
+  ('sage', 'brand', 'Sage Fly Fishing'),
+  ('loop', 'brand', 'Loop Tackle'),
+  ('looptackle', 'brand', 'Loop Tackle'),
+  ('guideline', 'brand', 'Guideline Fly Fishing'),
+  ('tightlines', 'brand', 'Tight Lines'),
+  ('fladen', 'brand', 'Fladen Fishing'),
+  ('imax', 'brand', 'IMAX'),
+  ('snowbee', 'brand', 'Snowbee'),
+  ('waveinn', 'brand', 'Waveinn'),
+  ('anglingtechnics', 'brand', 'Angling Technics'),
+  ('anglingdirect', 'brand', 'Angling Direct'),
+  ('tackletribe', 'brand', 'Tackle Tribe'),
+  ('tackleuk', 'brand', 'Tackle UK'),
+  ('tackleguru', 'brand', 'Tackle Guru'),
+  ('fishingrepublic', 'brand', 'Fishing Republic'),
+  ('fishtec', 'brand', 'Fishtec'),
+  ('johnnorris', 'brand', 'John Norris'),
+  ('veals', 'brand', 'Veals Mail Order'),
+  ('vealsmailorder', 'brand', 'Veals Mail Order'),
+  ('chapmansangling', 'brand', 'Chapmans Angling')
+ON CONFLICT (username) DO NOTHING;
+
+-- UK FISHING PUBLICATIONS
+INSERT INTO reserved_usernames (username, reason, reserved_for) VALUES
+  ('anglingtimes', 'publication', 'Angling Times'),
+  ('carpology', 'publication', 'Carpology Magazine'),
+  ('carptalk', 'publication', 'Carp Talk'),
+  ('totalcarp', 'publication', 'Total Carp Magazine'),
+  ('totalcarpmagazine', 'publication', 'Total Carp Magazine'),
+  ('bigcarp', 'publication', 'Big Carp Magazine'),
+  ('bigcarpmagazine', 'publication', 'Big Carp Magazine'),
+  ('advancedcarp', 'publication', 'Advanced Carp Fishing'),
+  ('carpworld', 'publication', 'Carp World'),
+  ('improvedcoarsefishing', 'publication', 'Improve Your Coarse Fishing'),
+  ('matchfishing', 'publication', 'Match Fishing Magazine'),
+  ('matchfishingmag', 'publication', 'Match Fishing Magazine'),
+  ('polefishing', 'publication', 'Pole Fishing Magazine'),
+  ('polefishingmag', 'publication', 'Pole Fishing Magazine'),
+  ('seaangler', 'publication', 'Sea Angler Magazine'),
+  ('seaanglermagazine', 'publication', 'Sea Angler Magazine'),
+  ('totalseafishing', 'publication', 'Total Sea Fishing'),
+  ('troutandsalmon', 'publication', 'Trout & Salmon'),
+  ('troutfisherman', 'publication', 'Trout Fisherman'),
+  ('flyfishing', 'publication', 'Fly Fishing Magazine'),
+  ('flyfishingmag', 'publication', 'Fly Fishing Magazine'),
+  ('pikeangler', 'publication', 'Pike Angler'),
+  ('pikeanglerclub', 'publication', 'Pike Anglers Club'),
+  ('anglingmail', 'publication', 'Angling Mail'),
+  ('fishingmonthly', 'publication', 'Fishing Monthly'),
+  ('coarsefishing', 'publication', 'Coarse Fishing Magazine'),
+  ('coarsefishingmag', 'publication', 'Coarse Fishing Magazine')
+ON CONFLICT (username) DO NOTHING;
+
+-- UK FISHING INFLUENCERS / YOUTUBE CHANNELS
+INSERT INTO reserved_usernames (username, reason, reserved_for) VALUES
+  ('carpspy', 'influencer', 'Carp Spy'),
+  ('fishingbritain', 'influencer', 'Fishing Britain'),
+  ('carlnash', 'influencer', 'Carl & Alex Nash'),
+  ('alannash', 'influencer', 'Alan Nash'),
+  ('alanblairangling', 'influencer', 'Alan Blair'),
+  ('alanblairfishing', 'influencer', 'Alan Blair'),
+  ('alanscottfishing', 'influencer', 'Alan Scott'),
+  ('dannyfarbanks', 'influencer', 'Danny Fairbrass'),
+  ('dannyfairbrass', 'influencer', 'Danny Fairbrass'),
+  ('adampenning', 'influencer', 'Adam Penning'),
+  ('terryhearn', 'influencer', 'Terry Hearn'),
+  ('terryhearnfishing', 'influencer', 'Terry Hearn'),
+  ('tommaker', 'influencer', 'Tom Maker'),
+  ('tommakermatching', 'influencer', 'Tom Maker'),
+  ('matthayes', 'influencer', 'Matt Hayes'),
+  ('matthayesfishing', 'influencer', 'Matt Hayes'),
+  ('deanmacey', 'influencer', 'Dean Macey'),
+  ('deanmaceyfishing', 'influencer', 'Dean Macey'),
+  ('talfishing', 'influencer', 'TAL Fishing'),
+  ('catchingcarptv', 'influencer', 'Catching Carp TV'),
+  ('carpfishinguk', 'influencer', 'Carp Fishing UK'),
+  ('onthebank', 'influencer', 'On The Bank'),
+  ('onthebankfishing', 'influencer', 'On The Bank'),
+  ('tightlinesuk', 'influencer', 'Tight Lines UK'),
+  ('monstercarphunts', 'influencer', 'Monster Carp Hunts'),
+  ('anglingescapes', 'influencer', 'Angling Escapes'),
+  ('thecarpkingdom', 'influencer', 'The Carp Kingdom'),
+  ('carpkingdom', 'influencer', 'The Carp Kingdom'),
+  ('ukcoarsefishing', 'influencer', 'UK Coarse Fishing'),
+  ('martinbowler', 'influencer', 'Martin Bowler'),
+  ('martinbowlerfishing', 'influencer', 'Martin Bowler'),
+  ('johnwilson', 'influencer', 'John Wilson'),
+  ('johnwilsonfishing', 'influencer', 'John Wilson'),
+  ('bobnutt', 'influencer', 'Bob Nutt'),
+  ('bobnuttfishing', 'influencer', 'Bob Nutt'),
+  ('destucker', 'influencer', 'Des Taylor'),
+  ('destaylor', 'influencer', 'Des Taylor'),
+  ('keitharthur', 'influencer', 'Keith Arthur'),
+  ('keitharthurfishing', 'influencer', 'Keith Arthur'),
+  ('fishingwithjason', 'influencer', 'Fishing With Jason'),
+  ('andymay', 'influencer', 'Andy May'),
+  ('andymayfishing', 'influencer', 'Andy May'),
+  ('steveringer', 'influencer', 'Steve Ringer'),
+  ('steveringerfishing', 'influencer', 'Steve Ringer'),
+  ('willraison', 'influencer', 'Will Raison'),
+  ('willraisonfishing', 'influencer', 'Will Raison')
+ON CONFLICT (username) DO NOTHING;
+
+-- FISHING VENUES / LAKES (Major ones)
+INSERT INTO reserved_usernames (username, reason, reserved_for) VALUES
+  ('linearfisheries', 'brand', 'Linear Fisheries'),
+  ('linear', 'brand', 'Linear Fisheries'),
+  ('bluebell', 'brand', 'Bluebell Lakes'),
+  ('bluebellakes', 'brand', 'Bluebell Lakes'),
+  ('embryo', 'brand', 'Embryo Angling'),
+  ('embryoangling', 'brand', 'Embryo Angling'),
+  ('elphicks', 'brand', 'Elphicks Fisheries'),
+  ('elphicksfisheries', 'brand', 'Elphicks Fisheries'),
+  ('farlows', 'brand', 'Farlows Lake'),
+  ('farlowslake', 'brand', 'Farlows Lake'),
+  ('yateleylakes', 'brand', 'Yateley Lakes'),
+  ('yateley', 'brand', 'Yateley Lakes'),
+  ('wraysbury', 'brand', 'Wraysbury'),
+  ('horseshoe', 'brand', 'Horseshoe Lake'),
+  ('horseshoelake', 'brand', 'Horseshoe Lake'),
+  ('stives', 'brand', 'St Ives Lakes'),
+  ('stiveslakes', 'brand', 'St Ives Lakes'),
+  ('orchidlakes', 'brand', 'Orchid Lakes'),
+  ('orchid', 'brand', 'Orchid Lakes'),
+  ('gigantica', 'brand', 'Lac de Gigantica'),
+  ('raintolakes', 'brand', 'Rainbow Lakes'),
+  ('rainbowlakes', 'brand', 'Rainbow Lakes')
+ON CONFLICT (username) DO NOTHING;
+
+COMMENT ON TABLE reserved_usernames IS 'Protected usernames that cannot be claimed during signup. Reserved for brands, influencers, and system use.';
