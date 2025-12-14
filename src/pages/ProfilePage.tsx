@@ -175,14 +175,6 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Badges/Achievements Card - full width */}
-        <div className="mt-4">
-          <BadgesSummaryCard
-            completedChallenges={completedChallenges}
-            onClick={() => setShowBadgesModal(true)}
-          />
-        </div>
-
         {/* Lifetime Stats */}
         <div className="mt-4">
           <LifetimeStatsCard
@@ -191,6 +183,14 @@ export default function ProfilePage() {
             totalWeightKg={totalWeight}
             personalBestLabel={personalBestLabel}
             topSpeciesLabel={topSpeciesLabel}
+          />
+        </div>
+
+        {/* Badges/Achievements - below stats */}
+        <div className="mt-3">
+          <BadgesSummaryCard
+            completedChallenges={completedChallenges}
+            onClick={() => setShowBadgesModal(true)}
           />
         </div>
 
