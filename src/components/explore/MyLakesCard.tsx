@@ -113,19 +113,17 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                       <div className="flex items-center gap-1">
                         <Link
                           to={`/lakes/${lake.slug || lake.id}`}
-                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                           onClick={(e) => e.stopPropagation()}
                           title="View as angler"
-                          style={{ color: '#374151' }}
                         >
                           <MapPin size={14} />
                         </Link>
                         <Link
                           to={`/lakes/${lake.id}/dashboard`}
-                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                           onClick={(e) => e.stopPropagation()}
                           title="Dashboard"
-                          style={{ color: '#374151' }}
                         >
                           <Shield size={14} />
                         </Link>
@@ -135,9 +133,8 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                             e.stopPropagation()
                             onSelectLake?.(lake)
                           }}
-                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                           title="Show on map"
-                          style={{ color: '#374151' }}
                         >
                           <Navigation size={14} />
                         </button>
@@ -190,9 +187,9 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                         <div className="flex items-center gap-1">
                           <Link
                             to={`/lakes/${lake.id}`}
-                            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                            onClick={(e) => e.stopPropagation()}
-                            style={{ color: '#374151' }}
+                            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                            onClick={(e) => e.stopPropagation()
+                            }
                           >
                             <MapPin size={14} />
                           </Link>
@@ -201,8 +198,7 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                            style={{ color: '#374151' }}
+                            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                           >
                             <Navigation size={14} />
                           </a>

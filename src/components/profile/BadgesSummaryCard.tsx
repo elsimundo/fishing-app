@@ -19,7 +19,7 @@ export function BadgesSummaryCard({
       className="flex w-full items-center justify-between rounded-xl bg-violet-900/80 px-4 py-3 text-left transition-colors hover:bg-violet-900"
     >
       <div className="flex items-center gap-2">
-        <Award size={16} className="text-white" />
+        <Award size={16} className="text-amber-400" />
         <span className="text-sm font-medium text-white">
           Badges & Achievements
         </span>

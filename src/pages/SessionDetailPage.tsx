@@ -528,7 +528,18 @@ export function SessionDetailPage() {
                 {session.stats.duration_hours.toFixed(1)}h
               </p>
               {sessionTime && (
-                <p className="text-xs text-emerald-100">Started at {sessionTime}</p>
+                <div className="flex items-center justify-center gap-1.5">
+                  <p className="text-xs text-emerald-100">Started at {sessionTime}</p>
+                  {isOwner && (
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(true)}
+                      className="rounded px-1.5 py-0.5 text-[10px] font-medium text-white/80 hover:bg-white/20 hover:text-white"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
               )}
             </div>
 
