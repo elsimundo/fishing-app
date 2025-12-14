@@ -567,6 +567,23 @@ export function CatchForm({
           })
         }
 
+        // Auto-post public catches to feed (multi-catch mode)
+        if (isPublic) {
+          try {
+            const postPayloads = insertedCatches.map((catchData) => ({
+              user_id: user.id,
+              type: 'catch' as const,
+              catch_id: catchData.id,
+              caption: null,
+              photo_url: catchData.photo_url,
+              is_public: true,
+            }))
+            await supabase.from('posts').insert(postPayloads)
+          } catch (postErr) {
+            console.warn('Failed to auto-post catches to feed:', postErr)
+          }
+        }
+
         toast.success(`Logged ${insertedCatches.length} catches!`)
       }
 
@@ -657,27 +674,17 @@ export function CatchForm({
         console.error('[CatchForm] XP mutation error:', err)
       })
 
-      // Auto-post to feed if catch is public and user has a public profile
+      // Auto-post to feed if catch is public (friends feed visibility is handled by follow/privacy rules)
       if (isPublic) {
         try {
-          // Check if user's profile is public
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_private')
-            .eq('id', user.id)
-            .single()
-
-          if (profile && !profile.is_private) {
-            // Create a post for this catch
-            await supabase.from('posts').insert({
-              user_id: user.id,
-              type: 'catch',
-              catch_id: data.id,
-              caption: null, // User can edit caption later if they want
-              photo_url: data.photo_url,
-              is_public: true,
-            })
-          }
+          await supabase.from('posts').insert({
+            user_id: user.id,
+            type: 'catch',
+            catch_id: data.id,
+            caption: null, // User can edit caption later if they want
+            photo_url: data.photo_url,
+            is_public: true,
+          })
         } catch (postErr) {
           // Don't fail the catch creation if auto-post fails
           console.warn('Failed to auto-post catch to feed:', postErr)

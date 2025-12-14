@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Loader2, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -36,6 +36,8 @@ export default function StartSessionPage() {
   const location = useLocation()
   const { user } = useAuth()
   const { data: profile } = useProfile()
+
+  const isCreatingSessionRef = useRef(false)
 
   const [step, setStep] = useState(0) // 0 = choice, 1-4 = full setup
   const [loading, setLoading] = useState(false)
@@ -134,6 +136,10 @@ export default function StartSessionPage() {
       navigate('/login')
       return
     }
+
+    // Prevent duplicate creation (StrictMode / event races)
+    if (isCreatingSessionRef.current) return
+    isCreatingSessionRef.current = true
 
     setStep(0)
     setShowSuccess(false)
@@ -296,6 +302,7 @@ export default function StartSessionPage() {
     if (error || !data) {
       console.error('Error creating quick start session', error)
       setLoading(false)
+      isCreatingSessionRef.current = false
       alert('Something went wrong starting your session. Please try again.')
       return
     }
@@ -398,6 +405,10 @@ export default function StartSessionPage() {
       return
     }
 
+    // Prevent duplicate creation (StrictMode / event races)
+    if (isCreatingSessionRef.current) return
+    isCreatingSessionRef.current = true
+
     setLoading(true)
     setLoadingMessage('Fetching weather conditions...')
 
@@ -466,6 +477,7 @@ export default function StartSessionPage() {
     if (error || !data) {
       console.error('Error creating session', error)
       setLoading(false)
+      isCreatingSessionRef.current = false
       alert('Something went wrong starting your session. Please try again.')
       return
     }

@@ -4,6 +4,30 @@ import { useAuth } from './useAuth'
 import { toast } from 'react-hot-toast'
 import { postBadgeEarned, postLevelUp, postNewSpecies, postPersonalBest, postCatchMilestone } from '../lib/milestonePost'
 
+function normalizeSpeciesForChallenge(species: string): { base: string; slugPart: string } {
+  const base = species
+    .toLowerCase()
+    .split('(')[0]
+    .trim()
+
+  const slugPart = base
+    .replace(/[^a-z\s]/g, '')
+    .trim()
+    .replace(/\s+/g, '_')
+
+  return { base, slugPart }
+}
+
+function normalizeWaterType(value: string | null | undefined): 'saltwater' | 'freshwater' | null {
+  if (!value) return null
+  const v = value.toLowerCase()
+  if (v.includes('salt')) return 'saltwater'
+  if (v.includes('fresh') || v.includes('lake') || v.includes('reservoir') || v.includes('river') || v.includes('canal')) {
+    return 'freshwater'
+  }
+  return null
+}
+
 interface CatchXPInput {
   catchId: string
   species: string
@@ -243,7 +267,12 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     .select('species')
     .eq('user_id', userId)
   
-  const speciesCount = new Set(speciesData?.map(c => c.species.toLowerCase())).size
+  const speciesCount = new Set(
+    (speciesData ?? [])
+      .map((c) => (c as { species?: string | null }).species)
+      .filter((s): s is string => Boolean(s))
+      .map((s) => s.toLowerCase()),
+  ).size
   
   
   // ============================================
@@ -276,7 +305,8 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   // ============================================
   // 2. SPECIES-SPECIFIC CHALLENGES
   // ============================================
-  const speciesSlug = `catch_${input.species.toLowerCase().replace(/\s+/g, '_')}`
+  const { base: baseSpecies, slugPart: speciesSlugPart } = normalizeSpeciesForChallenge(input.species)
+  const speciesSlug = `catch_${speciesSlugPart}`
   await completeChallenge(userId, speciesSlug, 1, 1, completed, input.catchId)
   
   // Check if this is a NEW species (first time catching it)
@@ -284,7 +314,7 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     .from('catches')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .ilike('species', input.species)
+    .ilike('species', `%${baseSpecies}%`)
   
   if (speciesCatchCount === 1) {
     // First time catching this species - auto-post
@@ -384,7 +414,7 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     const { data: speciesInfo } = await supabase
       .from('species_info')
       .select('specimen_weight_lb')
-      .ilike('display_name', input.species)
+      .ilike('display_name', `%${baseSpecies}%`)
       .maybeSingle()
     
     if (speciesInfo?.specimen_weight_lb) {
@@ -501,13 +531,29 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     if (input.moonPhase === 'New Moon') {
       await completeChallenge(userId, 'new_moon_catch', 1, 1, completed, input.catchId)
     }
-    
-    // Track unique moon phases caught
-    await checkMoonPhasesChallenge(userId, completed)
   }
 
   // ============================================
-  // 10. COUNTRY-SCOPED CHALLENGES
+  // 10. WATER TYPE CHALLENGES
+  // ============================================
+  if (input.sessionId) {
+    const { data: sessionRow } = await supabase
+      .from('sessions')
+      .select('water_type')
+      .eq('id', input.sessionId)
+      .maybeSingle()
+
+    const normalized = normalizeWaterType((sessionRow as { water_type?: string | null } | null)?.water_type ?? null)
+    if (normalized === 'freshwater') {
+      await completeChallenge(userId, 'freshwater_fan', 1, 1, completed, input.catchId)
+    }
+    if (normalized === 'saltwater') {
+      await completeChallenge(userId, 'sea_legs', 1, 1, completed, input.catchId)
+    }
+  }
+
+  // ============================================
+  // 11. COUNTRY-SCOPED CHALLENGES
   // ============================================
   if (input.countryCode) {
     await checkCountryChallenges(userId, input.countryCode, input.species, completed, input.catchId)

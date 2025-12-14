@@ -2,6 +2,67 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { Post, PostWithUser, Session, Catch } from '../types'
 
+async function enrichPosts(basePosts: Post[]): Promise<PostWithUser[]> {
+  const enrichedPosts = await Promise.all(
+    basePosts.map(async (post): Promise<PostWithUser | null> => {
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .eq('id', post.user_id)
+        .single()
+
+      if (userError) throw new Error(userError.message)
+
+      let sessionData: (Session & { catches: Catch[] | null }) | null = null
+      if (post.session_id) {
+        const { data: session, error: sessionError } = await supabase
+          .from('sessions')
+          .select('*, catches(*)')
+          .eq('id', post.session_id)
+          .single()
+
+        if (sessionError) throw new Error(sessionError.message)
+        sessionData = session as Session & { catches: Catch[] | null }
+      }
+
+      let catchData: Catch | null = null
+      if (post.catch_id) {
+        const { data: catchRow, error: catchError } = await supabase
+          .from('catches')
+          .select('*')
+          .eq('id', post.catch_id)
+          .eq('is_public', true)
+          .maybeSingle()
+
+        if (catchError) throw new Error(catchError.message)
+        catchData = catchRow as Catch | null
+      }
+
+      // Skip posts where the linked catch is private
+      if (post.catch_id && !catchData) {
+        return null
+      }
+
+      return {
+        ...post,
+        user: {
+          id: userData.id,
+          username: userData.username,
+          full_name: userData.full_name,
+          avatar_url: userData.avatar_url ?? null,
+        },
+        session: sessionData ?? undefined,
+        catch: catchData ?? undefined,
+        like_count: 0,
+        comment_count: 0,
+        is_liked_by_user: false,
+      }
+    }),
+  )
+
+  return enrichedPosts.filter((post): post is PostWithUser => post !== null)
+}
+
 // Fetch user's feed (posts from followed users + own posts)
 // pageLimit/pageOffset allow simple client-side pagination (e.g. Load More)
 export function useFeed(userId: string, pageLimit = 20, pageOffset = 0) {
@@ -17,65 +78,29 @@ export function useFeed(userId: string, pageLimit = 20, pageOffset = 0) {
       if (error) throw new Error(error.message)
       const basePosts = (data ?? []) as Post[]
 
-      const enrichedPosts = await Promise.all(
-        basePosts.map(async (post): Promise<PostWithUser | null> => {
-          const { data: userData, error: userError } = await supabase
-            .from('profiles')
-            .select('id, username, full_name, avatar_url')
-            .eq('id', post.user_id)
-            .single()
+      return enrichPosts(basePosts)
+    },
+    enabled: Boolean(userId),
+  })
+}
 
-          if (userError) throw new Error(userError.message)
+// Fetch global feed (only posts from public profiles)
+export function useGlobalFeed(userId: string, pageLimit = 20, pageOffset = 0) {
+  return useQuery<PostWithUser[]>({
+    queryKey: ['feed', 'global', userId, pageLimit, pageOffset],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, profiles!inner(is_private)')
+        .eq('is_public', true)
+        .eq('profiles.is_private', false)
+        .order('created_at', { ascending: false })
+        .range(pageOffset, pageOffset + pageLimit - 1)
 
-          let sessionData: (Session & { catches: Catch[] | null }) | null = null
-          if (post.session_id) {
-            const { data: session, error: sessionError } = await supabase
-              .from('sessions')
-              .select('*, catches(*)')
-              .eq('id', post.session_id)
-              .single()
+      if (error) throw new Error(error.message)
+      const basePosts = (data ?? []) as unknown as Post[]
 
-            if (sessionError) throw new Error(sessionError.message)
-            sessionData = session as Session & { catches: Catch[] | null }
-          }
-
-          let catchData: Catch | null = null
-          if (post.catch_id) {
-            const { data: catchRow, error: catchError } = await supabase
-              .from('catches')
-              .select('*')
-              .eq('id', post.catch_id)
-              .eq('is_public', true) // Only show public catches in feed
-              .maybeSingle()
-
-            if (catchError) throw new Error(catchError.message)
-            catchData = catchRow as Catch | null
-          }
-
-          // Skip posts where the linked catch is private
-          if (post.catch_id && !catchData) {
-            return null
-          }
-
-          return {
-            ...post,
-            user: {
-              id: userData.id,
-              username: userData.username,
-              full_name: userData.full_name,
-              avatar_url: userData.avatar_url ?? null,
-            },
-            session: sessionData ?? undefined,
-            catch: catchData ?? undefined,
-            like_count: 0,
-            comment_count: 0,
-            is_liked_by_user: false,
-          }
-        }),
-      )
-
-      // Filter out null entries (private catches)
-      return enrichedPosts.filter((post): post is PostWithUser => post !== null)
+      return enrichPosts(basePosts)
     },
     enabled: Boolean(userId),
   })

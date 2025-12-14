@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import PullToRefresh from 'react-simple-pull-to-refresh'
 import { useAuth } from '../hooks/useAuth'
-import { useFeed } from '../hooks/usePosts'
+import { useFeed, useGlobalFeed } from '../hooks/usePosts'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { PostSkeleton } from '../components/feed/PostSkeleton'
 import { ErrorState } from '../components/ui/ErrorState'
@@ -16,22 +16,34 @@ export default function FeedView() {
   const [pageSize, setPageSize] = useState(20)
 
   const {
-    data: posts,
-    isLoading,
-    error,
-    refetch,
+    data: friendsPosts,
+    isLoading: isLoadingFriends,
+    error: friendsError,
+    refetch: refetchFriends,
   } = useFeed(userId, pageSize, 0)
+
+  const {
+    data: globalPosts,
+    isLoading: isLoadingGlobal,
+    error: globalError,
+    refetch: refetchGlobal,
+  } = useGlobalFeed(userId, pageSize, 0)
 
   if (!user) {
     return <Navigate to="/login" replace />
   }
+
+  const activePosts = activeTab === 'global' ? globalPosts : friendsPosts
+  const isLoading = activeTab === 'global' ? isLoadingGlobal : isLoadingFriends
+  const error = activeTab === 'global' ? globalError : friendsError
+  const refetch = activeTab === 'global' ? refetchGlobal : refetchFriends
 
   if (error) {
     const message = error instanceof Error ? error.message : 'Something went wrong'
     return <ErrorState title="Unable to load feed" message={message} onRetry={refetch} />
   }
 
-  if (!posts || posts.length === 0) {
+  if (!activePosts || activePosts.length === 0) {
     return (
       <div className="flex h-screen flex-col items-center justify-center p-5 text-center bg-background">
         <div className="mb-4 text-5xl">🎣</div>
@@ -54,8 +66,8 @@ export default function FeedView() {
   // My only shows posts authored by the current user.
   const filteredPosts =
     activeTab === 'my' && userId
-      ? posts.filter((post) => post.user_id === userId)
-      : posts
+      ? activePosts.filter((post) => post.user_id === userId)
+      : activePosts
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,7 +132,7 @@ export default function FeedView() {
         </div>
 
         {/* Load more posts */}
-        {!isLoading && posts.length >= pageSize && (
+        {!isLoading && activePosts.length >= pageSize && (
           <div className="border-t border-border bg-background px-5 py-4 text-center">
             <button
               type="button"
@@ -132,7 +144,7 @@ export default function FeedView() {
           </div>
         )}
 
-        {!isLoading && posts.length > 0 && posts.length < pageSize && (
+        {!isLoading && activePosts.length > 0 && activePosts.length < pageSize && (
           <div className="border-t border-border bg-background px-5 py-4 text-center text-xs text-muted-foreground">
             You're all caught up! 🎣
           </div>
