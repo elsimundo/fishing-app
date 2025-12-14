@@ -15,6 +15,12 @@ export type Profile = {
   default_longitude?: number | null
   share_data_for_insights?: boolean
   created_at: string
+  // Gamification
+  xp?: number
+  level?: number
+  current_streak?: number
+  longest_streak?: number
+  total_challenges_completed?: number
 }
 
 export type WaterType = 'Sea/Coastal' | 'River' | 'Lake/Reservoir' | 'Canal' | 'Pond' | 'Other'

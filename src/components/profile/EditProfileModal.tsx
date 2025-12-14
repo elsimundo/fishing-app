@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Loader2, X, Camera, Lock, Globe } from 'lucide-react'
+import { Loader2, X, Camera, Lock, Globe, Trophy } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { compressAvatar } from '../../utils/imageCompression'
 import type { Profile } from '../../types'
@@ -18,6 +18,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [isPrivate, setIsPrivate] = useState(profile.is_private ?? false)
+  const [autoShareAchievements, setAutoShareAchievements] = useState((profile as any).auto_share_achievements ?? true)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [usernameError, setUsernameError] = useState<string | null>(null)
@@ -142,6 +143,7 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
           bio: bio.trim() || null,
           avatar_url: newAvatarUrl,
           is_private: isPrivate,
+          auto_share_achievements: autoShareAchievements,
         })
         .eq('id', profile.id)
 
@@ -286,6 +288,40 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
                 <span
                   className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
                     isPrivate ? 'left-[22px]' : 'left-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Auto-Share Achievements Toggle */}
+          <div className="rounded-xl border border-border bg-background p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${autoShareAchievements ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-muted'}`}>
+                  <Trophy size={20} className={autoShareAchievements ? 'text-yellow-500' : 'text-muted-foreground'} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Auto-Share Achievements
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {autoShareAchievements
+                      ? 'Badges, level ups & PBs posted to your feed'
+                      : 'Achievements stay private'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAutoShareAchievements(!autoShareAchievements)}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  autoShareAchievements ? 'bg-yellow-500' : 'bg-muted'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                    autoShareAchievements ? 'left-[22px]' : 'left-0.5'
                   }`}
                 />
               </button>

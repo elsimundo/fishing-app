@@ -8,6 +8,8 @@ import App from './App.tsx'
 import { AuthProvider } from './hooks/useAuth'
 import { ThemeProvider } from './hooks/useTheme'
 import { ThemeLoader } from './components/ThemeLoader'
+import { AchievementCelebrationProvider } from './hooks/useAchievementCelebration.tsx'
+import { AchievementCelebrationGlobal } from './components/gamification/AchievementCelebrationGlobal'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 const queryClient = new QueryClient()
@@ -19,7 +21,10 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <ThemeProvider>
             <ThemeLoader>
-              <App />
+              <AchievementCelebrationProvider>
+                <App />
+                <AchievementCelebrationGlobal />
+              </AchievementCelebrationProvider>
             </ThemeLoader>
           </ThemeProvider>
         </AuthProvider>

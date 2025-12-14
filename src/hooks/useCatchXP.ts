@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { toast } from 'react-hot-toast'
+import { postBadgeEarned, postLevelUp, postNewSpecies, postPersonalBest, postCatchMilestone } from '../lib/milestonePost'
 
 interface CatchXPInput {
   catchId: string
@@ -49,8 +50,8 @@ const XP_VALUES = {
 }
 
 const RATE_LIMITS = {
-  MAX_CATCHES_PER_HOUR: 10,
-  MAX_CATCHES_PER_DAY: 50,
+  MAX_CATCHES_PER_HOUR: 30, // Increased for testing
+  MAX_CATCHES_PER_DAY: 100, // Increased for testing
 }
 
 // Anti-cheat: minimum session duration (in minutes) for location-based challenges
@@ -195,6 +196,7 @@ export function useCatchXP() {
       }
     },
     onSuccess: (data) => {
+      console.log('[useCatchXP] onSuccess - challengesCompleted:', data.challengesCompleted)
       queryClient.invalidateQueries({ queryKey: ['user-xp'] })
       queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
       queryClient.invalidateQueries({ queryKey: ['user-weekly-stats'] })
@@ -207,18 +209,18 @@ export function useCatchXP() {
         toast.success(`+${data.xpAwarded} XP${bonusText}`, { icon: '⭐', duration: 3000 })
       }
       
-      // Level up celebration
+      // Level up celebration + auto-post
       if (data.leveledUp) {
         setTimeout(() => {
           toast.success(`Level Up! You're now level ${data.newLevel}! 🎉`, { duration: 5000, icon: '🏆' })
         }, 500)
+        // Auto-post level up to feed
+        void postLevelUp(user?.id || '', data.newLevel)
       }
       
-      // Challenge completion
+      // Challenge completion - toast is now secondary to the celebration modal
       if (data.challengesCompleted.length > 0) {
-        setTimeout(() => {
-          toast.success(`Challenge completed! 🏅`, { duration: 4000 })
-        }, 1000)
+        console.log('[useCatchXP] Challenges completed:', data.challengesCompleted)
       }
     },
     onError: (error) => {
@@ -238,6 +240,8 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
   
+  console.log('[Challenges] Total catch count for user:', totalCatches)
+  
   // Get unique species count
   const { data: speciesData } = await supabase
     .from('catches')
@@ -245,6 +249,8 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     .eq('user_id', userId)
   
   const speciesCount = new Set(speciesData?.map(c => c.species.toLowerCase())).size
+  
+  console.log('[Challenges] Unique species count:', speciesCount)
   
   // ============================================
   // 1. MILESTONE CHALLENGES (catch count, species count)
@@ -262,9 +268,16 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   
   for (const m of milestones) {
     const current = m.type === 'catch' ? (totalCatches || 0) : speciesCount
+    console.log(`[Challenges] Checking ${m.slug}: current=${current}, need=${m.value}, will award=${current >= m.value}`)
     if (current >= m.value) {
       await completeChallenge(userId, m.slug, current, m.value, completed, input.catchId)
     }
+  }
+  
+  // Auto-post for catch milestones (10, 50, 100, 500)
+  const catchMilestones = [10, 50, 100, 500]
+  if (totalCatches && catchMilestones.includes(totalCatches)) {
+    void postCatchMilestone(userId, totalCatches)
   }
   
   // ============================================
@@ -272,6 +285,45 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   // ============================================
   const speciesSlug = `catch_${input.species.toLowerCase().replace(/\s+/g, '_')}`
   await completeChallenge(userId, speciesSlug, 1, 1, completed, input.catchId)
+  
+  // Check if this is a NEW species (first time catching it)
+  const { count: speciesCatchCount } = await supabase
+    .from('catches')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .ilike('species', input.species)
+  
+  if (speciesCatchCount === 1) {
+    // First time catching this species - auto-post
+    const { data: catchData } = await supabase
+      .from('catches')
+      .select('photo_url')
+      .eq('id', input.catchId)
+      .maybeSingle()
+    
+    void postNewSpecies(userId, input.species, input.catchId, catchData?.photo_url || undefined)
+  }
+  
+  // Check for personal best (heaviest catch)
+  if (input.weightKg && input.weightKg > 0) {
+    const { data: heavierCatches } = await supabase
+      .from('catches')
+      .select('id')
+      .eq('user_id', userId)
+      .gt('weight_kg', input.weightKg)
+      .limit(1)
+    
+    // If no heavier catches exist, this is a PB
+    if (!heavierCatches || heavierCatches.length === 0) {
+      const { data: catchData } = await supabase
+        .from('catches')
+        .select('photo_url')
+        .eq('id', input.catchId)
+        .maybeSingle()
+      
+      void postPersonalBest(userId, input.species, input.weightKg, input.catchId, catchData?.photo_url || undefined)
+    }
+  }
   
   // ============================================
   // 3. PHOTO CHALLENGES
@@ -741,7 +793,10 @@ async function completeChallenge(
     .eq('slug', slug)
     .maybeSingle()
   
-  if (!challenge) return
+  if (!challenge) {
+    console.log(`[completeChallenge] Challenge not found: ${slug}`)
+    return
+  }
   
   // Check if already completed
   const { data: existingRows } = await supabase
@@ -752,6 +807,7 @@ async function completeChallenge(
     .limit(1)
   
   const existing = existingRows?.[0]
+  console.log(`[completeChallenge] ${slug}: existing=${JSON.stringify(existing)}, already_completed=${!!existing?.completed_at}`)
   if (existing?.completed_at) return
   
   // Complete the challenge
@@ -787,6 +843,24 @@ async function completeChallenge(
     p_reference_type: 'challenge',
     p_reference_id: challenge.id,
   })
+  
+  // Get challenge details for auto-post
+  const { data: challengeDetails } = await supabase
+    .from('challenges')
+    .select('title, description, icon')
+    .eq('slug', slug)
+    .maybeSingle()
+  
+  // Auto-post badge earned to feed
+  if (challengeDetails) {
+    void postBadgeEarned(
+      userId,
+      challengeDetails.title,
+      challengeDetails.description || '',
+      challengeDetails.icon || '🏆',
+      challenge.id
+    )
+  }
   
   completed.push(slug)
 }
@@ -1019,19 +1093,18 @@ export function usePhotoAddedXP() {
 }
 
 /**
- * Calculate level from XP (same formula as database)
+ * Calculate level from XP - faster early progression
  */
 function calculateLevel(xp: number): number {
-  if (xp < 100) return 1
-  if (xp < 300) return 2
-  if (xp < 600) return 3
-  if (xp < 1000) return 4
-  if (xp < 1500) return 5
-  if (xp < 2100) return 6
-  if (xp < 2800) return 7
-  if (xp < 3600) return 8
-  if (xp < 4500) return 9
-  if (xp < 5500) return 10
-  // Beyond level 10: every 1000 XP
-  return 10 + Math.floor((xp - 5500) / 1000)
+  if (xp < 50) return 1
+  if (xp < 120) return 2
+  if (xp < 220) return 3
+  if (xp < 350) return 4
+  if (xp < 520) return 5
+  if (xp < 750) return 6
+  if (xp < 1050) return 7
+  if (xp < 1400) return 8
+  if (xp < 1800) return 9
+  if (xp < 2300) return 10
+  return 10 + Math.floor((xp - 2300) / 600)
 }

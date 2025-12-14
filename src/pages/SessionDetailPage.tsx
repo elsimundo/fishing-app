@@ -22,6 +22,7 @@ import { ErrorState } from '../components/ui/ErrorState'
 import { useDeleteSession } from '../hooks/useDeleteSession'
 import { useSavedMarks } from '../hooks/useSavedMarks'
 import { useSessionXP } from '../hooks/useCatchXP'
+import { useCelebrateChallenges } from '../hooks/useCelebrateChallenges'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
 
@@ -80,6 +81,7 @@ export function SessionDetailPage() {
   const { mutateAsync: removeParticipant } = useRemoveParticipant()
   const { mutateAsync: deleteSession, isPending: isDeleting } = useDeleteSession()
   const sessionXP = useSessionXP()
+  const { celebrateChallenges } = useCelebrateChallenges()
 
   if (isLoading) {
     return (
@@ -135,7 +137,17 @@ export function SessionDetailPage() {
     
     // Award XP for completing the session
     const catchCount = session.catches?.length || 0
-    sessionXP.mutate({ sessionId: session.id, catchCount })
+    sessionXP.mutate({ sessionId: session.id, catchCount }, {
+      onSuccess: (result) => {
+        // Trigger celebration for completed challenges
+        if (result.challengesCompleted && result.challengesCompleted.length > 0) {
+          celebrateChallenges(result.challengesCompleted, {
+            newLevel: result.new_level,
+            leveledUp: result.leveled_up,
+          })
+        }
+      },
+    })
     
     await refetch()
   }

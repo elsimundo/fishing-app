@@ -122,7 +122,7 @@ export function Dashboard() {
             </div>
             <div className="space-y-2">
               {recentCatches.map((item) => (
-                <CatchCard key={item.id} item={item} />
+                <CatchCard key={item.id} item={item} showDelete />
               ))}
             </div>
           </section>

@@ -4,20 +4,20 @@ import { useAuth } from './useAuth'
 import { toast } from 'react-hot-toast'
 
 /**
- * Calculate level from XP (same formula as database)
+ * Calculate level from XP - faster early progression
  */
 function calculateLevel(xp: number): number {
-  if (xp < 100) return 1
-  if (xp < 300) return 2
-  if (xp < 600) return 3
-  if (xp < 1000) return 4
-  if (xp < 1500) return 5
-  if (xp < 2100) return 6
-  if (xp < 2800) return 7
-  if (xp < 3600) return 8
-  if (xp < 4500) return 9
-  if (xp < 5500) return 10
-  return 10 + Math.floor((xp - 5500) / 1000)
+  if (xp < 50) return 1
+  if (xp < 120) return 2
+  if (xp < 220) return 3
+  if (xp < 350) return 4
+  if (xp < 520) return 5
+  if (xp < 750) return 6
+  if (xp < 1050) return 7
+  if (xp < 1400) return 8
+  if (xp < 1800) return 9
+  if (xp < 2300) return 10
+  return 10 + Math.floor((xp - 2300) / 600)
 }
 
 /**
@@ -29,20 +29,18 @@ async function reverseAffectedChallenges(
   hadPhoto: boolean,
   challengesLost: string[]
 ) {
-  // Get updated counts AFTER the catch was deleted
-  const { count: totalCatches } = await supabase
+  // Fetch all remaining catches (single source of truth)
+  const { data: catches } = await supabase
     .from('catches')
-    .select('*', { count: 'exact', head: true })
+    .select('species, photo_url, latitude, longitude, caught_at, weather_condition, moon_phase, weight_kg, country_code')
     .eq('user_id', userId)
-  
-  const { data: speciesData } = await supabase
-    .from('catches')
-    .select('species')
-    .eq('user_id', userId)
-  
-  const uniqueSpecies = new Set(speciesData?.map(c => c.species.toLowerCase()) || [])
+
+  const catchRows = (catches ?? []) as CatchRow[]
+  const totalCatches = catchRows.length
+
+  const uniqueSpecies = new Set(catchRows.map(c => c.species.toLowerCase()))
   const speciesCount = uniqueSpecies.size
-  
+
   // Check if user still has this species
   const stillHasSpecies = uniqueSpecies.has(species.toLowerCase())
   
@@ -73,11 +71,7 @@ async function reverseAffectedChallenges(
   
   // Check photo challenge if the deleted catch had a photo
   if (hadPhoto) {
-    const { count: photoCount } = await supabase
-      .from('catches')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .not('photo_url', 'is', null)
+    const photoCount = catchRows.filter(c => !!c.photo_url).length
     
     if ((photoCount || 0) < 10) {
       await reverseChallenge(userId, 'photo_pro', challengesLost)
@@ -88,25 +82,124 @@ async function reverseAffectedChallenges(
   }
   
   // Check location challenges
-  const { data: locations } = await supabase
-    .from('catches')
-    .select('latitude, longitude')
-    .eq('user_id', userId)
-    .not('latitude', 'is', null)
-  
-  if (locations) {
-    const uniqueLocations = new Set(
-      locations.map(l => `${Math.round(l.latitude * 100)},${Math.round(l.longitude * 100)}`)
+  const locationRows = catchRows.filter(c => c.latitude != null && c.longitude != null)
+  const uniqueLocations = new Set(
+    locationRows.map(l => `${Math.round((l.latitude as number) * 100)},${Math.round((l.longitude as number) * 100)}`)
+  )
+  if (uniqueLocations.size < 5) {
+    await reverseChallenge(userId, 'new_waters', challengesLost)
+  }
+  if (uniqueLocations.size < 10) {
+    await reverseChallenge(userId, 'explorer', challengesLost)
+  }
+  if (uniqueLocations.size < 25) {
+    await reverseChallenge(userId, 'adventurer', challengesLost)
+  }
+
+  // Time-based progress challenges
+  const dawnCount = catchRows.filter(c => {
+    const hour = new Date(c.caught_at).getHours()
+    return hour >= 4 && hour < 6
+  }).length
+  const earlyCount = catchRows.filter(c => {
+    const hour = new Date(c.caught_at).getHours()
+    return hour >= 5 && hour < 7
+  }).length
+  const nightCount = catchRows.filter(c => {
+    const hour = new Date(c.caught_at).getHours()
+    return hour >= 22 || hour < 5
+  }).length
+  const goldenCount = catchRows.filter(c => {
+    const hour = new Date(c.caught_at).getHours()
+    return hour >= 18 && hour < 20
+  }).length
+
+  if (dawnCount < 5) await reverseChallenge(userId, 'dawn_patrol', challengesLost)
+  if (earlyCount < 10) await reverseChallenge(userId, 'early_bird', challengesLost)
+  if (nightCount < 5) await reverseChallenge(userId, 'night_owl', challengesLost)
+  if (goldenCount < 10) await reverseChallenge(userId, 'golden_hour', challengesLost)
+
+  // Weather-based challenges
+  const lowerConditions = catchRows.map(c => (c.weather_condition ?? '').toLowerCase())
+  const rainCount = lowerConditions.filter(c => c.includes('rain') || c.includes('drizzle') || c.includes('shower')).length
+  const sunnyCount = lowerConditions.filter(c => c.includes('clear') || c.includes('sunny')).length
+  const hasStorm = lowerConditions.some(c => c.includes('thunder') || c.includes('storm'))
+  const hasFog = lowerConditions.some(c => c.includes('fog') || c.includes('mist'))
+  if (rainCount < 5) await reverseChallenge(userId, 'weather_warrior', challengesLost)
+  if (sunnyCount < 10) await reverseChallenge(userId, 'sunny_fisher', challengesLost)
+  if (!hasStorm) await reverseChallenge(userId, 'storm_chaser', challengesLost)
+  if (!hasFog) await reverseChallenge(userId, 'fog_fisher', challengesLost)
+
+  // Moon challenges
+  const moonPhases = new Set(catchRows.map(c => c.moon_phase).filter(Boolean) as string[])
+  if (!moonPhases.has('Full Moon')) await reverseChallenge(userId, 'full_moon_catch', challengesLost)
+  if (!moonPhases.has('New Moon')) await reverseChallenge(userId, 'new_moon_catch', challengesLost)
+  if (moonPhases.size < 4) await reverseChallenge(userId, 'moon_master', challengesLost)
+
+  // Weight challenges
+  const weights = catchRows.map(c => c.weight_kg ?? 0)
+  const hasBigFish = weights.some(w => w >= 5)
+  const hasMonsterFish = weights.some(w => w >= 10)
+  if (!hasBigFish) await reverseChallenge(userId, 'big_fish', challengesLost)
+  if (!hasMonsterFish) await reverseChallenge(userId, 'monster_catch', challengesLost)
+
+  // Weekly streak challenges (by week presence)
+  const weeksWithCatches = new Set<string>()
+  catchRows.forEach(c => {
+    const date = new Date(c.caught_at)
+    const weekStart = getWeekStart(date)
+    weeksWithCatches.add(weekStart.toISOString().split('T')[0])
+  })
+  const sortedWeeks = Array.from(weeksWithCatches).sort().reverse()
+  let consecutiveWeeks = sortedWeeks.length > 0 ? 1 : 0
+  for (let i = 1; i < sortedWeeks.length; i++) {
+    const prevWeek = new Date(sortedWeeks[i - 1])
+    const currWeek = new Date(sortedWeeks[i])
+    const diffDays = (prevWeek.getTime() - currWeek.getTime()) / (1000 * 60 * 60 * 24)
+    if (diffDays === 7) {
+      consecutiveWeeks++
+    } else {
+      break
+    }
+  }
+  if (consecutiveWeeks < 4) await reverseChallenge(userId, 'weekly_warrior', challengesLost)
+  if (consecutiveWeeks < 8) await reverseChallenge(userId, 'dedicated_angler', challengesLost)
+
+  // If the user has zero catches left, aggressively revoke all catch_* and country/catch travel achievements
+  if (totalCatches === 0) {
+    // Reverse any species-specific challenges (catch_*)
+    const { data: catchChallenges } = await supabase
+      .from('challenges')
+      .select('slug')
+      .ilike('slug', 'catch_%')
+
+    for (const row of catchChallenges ?? []) {
+      const s = (row as any).slug as string
+      await reverseChallenge(userId, s, challengesLost)
+    }
+
+    // Reverse any completed country/travel challenges (we don't need to know codes in advance)
+    const { data: completedGeo } = await supabase
+      .from('user_challenges')
+      .select('challenges!inner(slug)')
+      .eq('user_id', userId)
+      .not('completed_at', 'is', null)
+
+    const geoSlugs = new Set(
+      (completedGeo ?? [])
+        .map((r: any) => r.challenges?.slug)
+        .filter((s: any) => typeof s === 'string')
+        .filter((s: string) =>
+          s.endsWith('_first_catch') ||
+          s.endsWith('_explorer_10') ||
+          s.endsWith('_explorer_50') ||
+          s.startsWith('world_traveler_') ||
+          s === 'european_tour'
+        )
     )
-    
-    if (uniqueLocations.size < 5) {
-      await reverseChallenge(userId, 'new_waters', challengesLost)
-    }
-    if (uniqueLocations.size < 10) {
-      await reverseChallenge(userId, 'explorer', challengesLost)
-    }
-    if (uniqueLocations.size < 25) {
-      await reverseChallenge(userId, 'adventurer', challengesLost)
+
+    for (const s of geoSlugs) {
+      await reverseChallenge(userId, s, challengesLost)
     }
   }
 }
@@ -134,6 +227,12 @@ async function reverseChallenge(userId: string, slug: string, challengesLost: st
   
   if (!userChallenge?.completed_at) return // Not completed, nothing to reverse
   
+  // Remove any recorded contributing catches (if table has FK it will cascade, but do it explicitly)
+  await supabase
+    .from('challenge_catches')
+    .delete()
+    .eq('user_challenge_id', userChallenge.id)
+
   // Delete the user_challenge record (or reset it)
   await supabase
     .from('user_challenges')
@@ -168,6 +267,27 @@ async function reverseChallenge(userId: string, slug: string, challengesLost: st
   challengesLost.push(slug)
 }
 
+function getWeekStart(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  d.setDate(diff)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+type CatchRow = {
+  species: string
+  photo_url: string | null
+  latitude: number | null
+  longitude: number | null
+  caught_at: string
+  weather_condition: string | null
+  moon_phase: string | null
+  weight_kg: number | null
+  country_code: string | null
+}
+
 export function useDeleteCatch() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
@@ -186,13 +306,16 @@ export function useDeleteCatch() {
           .single()
         
         // Find and reverse XP transaction for this catch
-        const { data: transaction } = await supabase
+        const { data: transaction, error: txError } = await supabase
           .from('xp_transactions')
           .select('id, amount')
           .eq('user_id', user.id)
           .eq('reference_type', 'catch')
           .eq('reference_id', id)
           .maybeSingle()
+        
+        console.log('[DeleteCatch] Looking for XP transaction for catch:', id)
+        console.log('[DeleteCatch] Transaction found:', transaction, 'error:', txError)
         
         if (transaction && transaction.amount > 0) {
           // Get current XP and subtract
@@ -202,12 +325,18 @@ export function useDeleteCatch() {
             .eq('id', user.id)
             .single()
           
+          console.log('[DeleteCatch] Current profile XP:', profile?.xp)
+          
           const newXP = Math.max(0, (profile?.xp || 0) - transaction.amount)
           
-          await supabase
+          console.log('[DeleteCatch] Reversing', transaction.amount, 'XP, new XP will be:', newXP)
+          
+          const { error: updateError } = await supabase
             .from('profiles')
             .update({ xp: newXP, level: calculateLevel(newXP) })
             .eq('id', user.id)
+          
+          console.log('[DeleteCatch] Profile update error:', updateError)
           
           // Mark transaction as reversed
           await supabase
@@ -216,6 +345,8 @@ export function useDeleteCatch() {
             .eq('id', transaction.id)
           
           xpReversed = transaction.amount
+        } else {
+          console.log('[DeleteCatch] No XP transaction found to reverse')
         }
         
         // Delete the catch first
@@ -241,12 +372,29 @@ export function useDeleteCatch() {
       return { xpReversed, challengesLost }
     },
     onSuccess: (data) => {
-      void queryClient.invalidateQueries({ queryKey: ['catches'] })
-      void queryClient.invalidateQueries({ queryKey: ['sessions'] })
+      console.log('[DeleteCatch] Invalidating all catch-related queries')
+      // Invalidate ALL catches queries using predicate to match any query starting with these keys
+      void queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0]
+          return key === 'catches' || 
+                 key === 'user-catches' ||
+                 key === 'mark-catches' ||
+                 key === 'lake-catches' ||
+                 key === 'challenge-catches' ||
+                 key === 'my-competition-catches' ||
+                 key === 'sessions' ||
+                 key === 'session' ||
+                 key === 'my-sessions' ||
+                 key === 'user-streaks'
+        }
+      })
       void queryClient.invalidateQueries({ queryKey: ['feed'] })
       void queryClient.invalidateQueries({ queryKey: ['posts'] })
       void queryClient.invalidateQueries({ queryKey: ['user-xp'] })
       void queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
+      void queryClient.invalidateQueries({ queryKey: ['user-weekly-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['profile'] })
       
       if (data.xpReversed > 0) {
         toast(`-${data.xpReversed} XP`, { icon: '↩️', duration: 2000 })

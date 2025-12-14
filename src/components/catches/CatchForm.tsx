@@ -14,6 +14,7 @@ import { FISH_SPECIES, getSpeciesByCategory } from '../../lib/constants'
 import { useFreshwaterEnabled } from '../../hooks/useFeatureFlags'
 import { getOrCreateSessionForCatch } from '../../lib/autoSession'
 import { useCatchXP } from '../../hooks/useCatchXP'
+import { useCelebrateChallenges } from '../../hooks/useCelebrateChallenges'
 import { Globe, Lock, Info } from 'lucide-react'
 import { getCompleteWeatherData } from '../../services/open-meteo'
 import { WEATHER_CODES } from '../../types/weather'
@@ -164,6 +165,7 @@ export function CatchForm({
   const { user } = useAuth()
   const { data: activeSession } = useActiveSession()
   const catchXP = useCatchXP()
+  const { celebrateChallenges } = useCelebrateChallenges()
   const freshwaterEnabled = useFreshwaterEnabled()
   
   // Get species categories based on freshwater feature flag
@@ -460,7 +462,7 @@ export function CatchForm({
 
     // Award XP for new catches (not edits)
     if (!isEdit && data) {
-      catchXP.mutate({
+      catchXP.mutateAsync({
         catchId: data.id,
         species: data.species,
         weightKg: data.weight_kg,
@@ -470,12 +472,21 @@ export function CatchForm({
         caughtAt: data.caught_at,
         latitude: data.latitude,
         longitude: data.longitude,
-        // Environmental data for condition-based challenges
         weatherCondition: data.weather_condition,
         windSpeed: data.wind_speed,
         moonPhase: data.moon_phase,
-        // Country code for geographic challenges
         countryCode: payload.country_code,
+      }).then((result) => {
+        console.log('[CatchForm] XP mutation success:', result)
+        if (result.challengesCompleted.length > 0) {
+          console.log('[CatchForm] Celebrating challenges:', result.challengesCompleted)
+          celebrateChallenges(result.challengesCompleted, {
+            newLevel: result.newLevel,
+            leveledUp: result.leveledUp,
+          })
+        }
+      }).catch((err) => {
+        console.error('[CatchForm] XP mutation error:', err)
       })
 
       // Auto-post to feed if catch is public and user has a public profile

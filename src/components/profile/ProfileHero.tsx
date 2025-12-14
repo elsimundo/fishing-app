@@ -14,16 +14,19 @@ interface ProfileHeroProps {
 export function ProfileHero({ profile, level, xp }: ProfileHeroProps) {
   const xpProg = xpProgress(xp, level)
 
+  // Faster early progression - exit "Novice" quickly
   const rankLabel =
-    level < 5
-      ? 'Beginner Angler'
-      : level < 10
-        ? 'Developing Angler'
-        : level < 20
-          ? 'Intermediate Angler'
-          : level < 30
+    level < 3
+      ? 'Novice Angler'
+      : level < 6
+        ? 'Apprentice Angler'
+        : level < 10
+          ? 'Skilled Angler'
+          : level < 15
             ? 'Experienced Angler'
-            : 'Seasoned Angler'
+            : level < 25
+              ? 'Expert Angler'
+              : 'Master Angler'
 
   return (
     <div className="flex items-start gap-4">

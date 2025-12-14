@@ -53,7 +53,7 @@ export default function CatchesPage() {
         ) : (
           <div className="space-y-3">
             {catches.map((item) => (
-              <CatchCard key={item.id} item={item} />
+              <CatchCard key={item.id} item={item} showDelete />
             ))}
           </div>
         )}

@@ -3,10 +3,16 @@ import { supabase } from '../lib/supabase'
 import type { Session } from '../types'
 
 // How long (in hours) before a session is considered "stale" without activity
-const STALE_THRESHOLD_HOURS = 8
+const STALE_THRESHOLD_HOURS = 4
+
+// How long (in hours) before we show a warning state (amber)
+export const WARNING_THRESHOLD_HOURS = 4
+
+// How long (in hours) before we show a critical state (red)
+export const CRITICAL_THRESHOLD_HOURS = 8
 
 // How long (in hours) before we auto-end a session (user ignored all prompts)
-const AUTO_END_THRESHOLD_HOURS = 48
+const AUTO_END_THRESHOLD_HOURS = 24
 
 export interface ZombieSession extends Session {
   hoursSinceStart: number

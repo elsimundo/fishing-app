@@ -1,15 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { useAuth } from './useAuth'
 import type { Catch, WaterType } from '../types'
 
 export type CatchWithWaterType = Catch & {
   water_type?: WaterType | null
 }
 
-async function fetchCatches(sessionId?: string): Promise<CatchWithWaterType[]> {
+async function fetchCatches(userId: string, sessionId?: string): Promise<CatchWithWaterType[]> {
   let query = supabase
     .from('catches')
     .select('*, session:sessions(water_type)')
+    .eq('user_id', userId) // CRITICAL: Only fetch user's own catches
     .order('caught_at', { ascending: false })
 
   if (sessionId) {
@@ -31,9 +33,12 @@ async function fetchCatches(sessionId?: string): Promise<CatchWithWaterType[]> {
 }
 
 export function useCatches(sessionId?: string) {
+  const { user } = useAuth()
+  
   const query = useQuery({
-    queryKey: ['catches', sessionId ?? 'all'],
-    queryFn: () => fetchCatches(sessionId),
+    queryKey: ['catches', user?.id, sessionId ?? 'all'],
+    queryFn: () => fetchCatches(user!.id, sessionId),
+    enabled: !!user,
   })
 
   return {

@@ -24,6 +24,7 @@ import { FollowersModal } from '../components/profile/FollowersModal'
 import { DeleteAccountModal } from '../components/profile/DeleteAccountModal'
 import { FishingPreferenceModal } from '../components/onboarding/FishingPreferenceModal'
 import { SpeciesCollectionTab } from '../components/profile/SpeciesCollectionTab'
+import { StreakDisplay } from '../components/gamification/StreakDisplay'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
@@ -175,6 +176,17 @@ export default function ProfilePage() {
             onFollowersClick={() => setFollowersModalTab('followers')}
             onFollowingClick={() => setFollowersModalTab('following')}
             onFourthClick={() => navigate('/sessions')}
+          />
+        </div>
+
+        {/* Streak & Badges row */}
+        <div className="mt-4 flex gap-3">
+          {/* Streak */}
+          <StreakDisplay
+            currentStreak={profile?.current_streak ?? 0}
+            longestStreak={profile?.longest_streak ?? 0}
+            size="md"
+            showDetails
           />
         </div>
 
@@ -539,7 +551,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-3">
                 {catches.map((c) => (
-                  <CatchCard key={c.id} item={c} />
+                  <CatchCard key={c.id} item={c} showDelete />
                 ))}
               </div>
             )}

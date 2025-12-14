@@ -5,6 +5,7 @@ import { useProfile } from '../../hooks/useProfile'
 import { ResponsiveLayout } from '../../components/layout/ResponsiveLayout'
 import { DefaultLocationModal } from '../onboarding/DefaultLocationModal'
 import { ZombieSessionChecker } from '../sessions/ZombieSessionChecker'
+import { SessionDurationPill } from '../sessions/SessionDurationPill'
 import { supabase } from '../../lib/supabase'
 
 type OnboardingStep = 'default_location' | null
@@ -62,6 +63,8 @@ export function ProtectedRoute() {
       )}
       {/* Check for stale/zombie sessions and prompt user to end them */}
       {!onboardingStep && <ZombieSessionChecker />}
+      {/* Floating pill reminder for long-running sessions */}
+      {!onboardingStep && <SessionDurationPill />}
     </ResponsiveLayout>
   )
 }

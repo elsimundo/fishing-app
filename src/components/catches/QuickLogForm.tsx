@@ -10,6 +10,7 @@ import { useFreshwaterEnabled } from '../../hooks/useFeatureFlags'
 import { Camera, X, Globe, Lock, Info, MapPin, ChevronDown } from 'lucide-react'
 import { useCatchXP } from '../../hooks/useCatchXP'
 import { useSavedMarks } from '../../hooks/useSavedMarks'
+import { useCelebrateChallenges } from '../../hooks/useCelebrateChallenges'
 import { compressPhoto } from '../../utils/imageCompression'
 import { getCountryFromCoords } from '../../utils/reverseGeocode'
 
@@ -51,6 +52,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const catchXP = useCatchXP()
   const { marks = [] } = useSavedMarks()
+  const { celebrateChallenges } = useCelebrateChallenges()
   const freshwaterEnabled = useFreshwaterEnabled()
   
   // Get species categories based on freshwater feature flag
@@ -262,8 +264,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
 
     const created = data as Catch
     
-    // Award XP for the catch (don't await - let it run in background)
-    catchXP.mutate({
+    // Award XP for the catch and trigger celebration
+    catchXP.mutateAsync({
       catchId: created.id,
       species: created.species,
       weightKg: created.weight_kg,
@@ -273,12 +275,21 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       caughtAt: created.caught_at,
       latitude: created.latitude,
       longitude: created.longitude,
-      // Environmental data for condition-based challenges
       weatherCondition: created.weather_condition,
       windSpeed: created.wind_speed,
       moonPhase: created.moon_phase,
-      // Country code for geographic challenges
       countryCode,
+    }).then((result) => {
+      console.log('[QuickLogForm] XP mutation success:', result)
+      if (result.challengesCompleted.length > 0) {
+        console.log('[QuickLogForm] Celebrating challenges:', result.challengesCompleted)
+        celebrateChallenges(result.challengesCompleted, {
+          newLevel: result.newLevel,
+          leveledUp: result.leveledUp,
+        })
+      }
+    }).catch((err) => {
+      console.error('[QuickLogForm] XP mutation error:', err)
     })
     
     onLogged(created)
