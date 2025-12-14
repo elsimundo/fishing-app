@@ -66,7 +66,6 @@ export async function getLocalIntel(
 
   let catches = rawCatches ?? []
   
-  console.log(`[LocalIntel] Fetched ${catches.length} catches and ${zones?.length ?? 0} zones from database`)
   
   // NOTE: We deliberately do not filter by waterPreference here.
   // Local Intel should reflect everything in the visible area
@@ -90,20 +89,15 @@ export async function getLocalIntel(
   }
 
   if (!catches || catches.length === 0) {
-    console.log('[LocalIntel] No catches found after filtering')
     return emptyResult
   }
 
   // Filter by bounds if provided, otherwise use a default radius
   let nearbyCatches: typeof catches
   if (bounds) {
-    console.log(`[LocalIntel] Filtering with bounds:`, JSON.stringify(bounds))
-    console.log(`[LocalIntel] Bounds: N=${bounds.north}, S=${bounds.south}, E=${bounds.east}, W=${bounds.west}`)
-    console.log(`[LocalIntel] Total catches to filter: ${catches.length}`)
     
     nearbyCatches = catches.filter((c) => {
       if (!c.latitude || !c.longitude) {
-        console.log(`[LocalIntel] Catch ${c.id} has no coordinates`)
         return false
       }
       const inBounds = (
@@ -112,19 +106,15 @@ export async function getLocalIntel(
         c.longitude >= bounds.west &&
         c.longitude <= bounds.east
       )
-      console.log(`[LocalIntel] Catch at (${c.latitude}, ${c.longitude}): ${inBounds ? 'IN' : 'OUT'} bounds`)
       return inBounds
     })
-    console.log(`[LocalIntel] Found ${nearbyCatches.length} catches within map bounds`)
   } else {
-    console.log(`[LocalIntel] No bounds provided, using 50km radius fallback`)
     // Fallback to 50km radius if no bounds provided
     nearbyCatches = catches.filter((c) => {
       if (!c.latitude || !c.longitude) return false
       const distance = calculateDistance(lat, lng, c.latitude, c.longitude)
       return distance <= 50
     })
-    console.log(`[LocalIntel] Found ${nearbyCatches.length} catches within 50km of (${lat.toFixed(3)}, ${lng.toFixed(3)})`)
   }
 
   // Add zone data to the totals
@@ -141,10 +131,8 @@ export async function getLocalIntel(
   const totalZoneCatches = zonesInBounds.reduce((sum, z) => sum + (z.total_catches || 0), 0)
   const totalZoneAnglers = zonesInBounds.reduce((sum, z) => sum + (z.unique_anglers || 0), 0)
 
-  console.log(`[LocalIntel] Found ${zonesInBounds.length} zones with ${totalZoneCatches} total catches, plus ${nearbyCatches.length} individual catches for detail`)
 
   if (totalZoneCatches === 0) {
-    console.log('[LocalIntel] No catches in area')
     return emptyResult
   }
 

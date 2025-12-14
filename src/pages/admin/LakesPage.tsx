@@ -443,6 +443,24 @@ export default function LakesPage() {
     },
   })
 
+  const deleteLake = useMutation({
+    mutationFn: async ({ lakeId }: { lakeId: string }) => {
+      // Delete lake - cascades will handle related records (lake_team, lake_announcements, etc.)
+      const { error } = await supabase
+        .from('lakes')
+        .delete()
+        .eq('id', lakeId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      invalidate()
+      toast.success('Lake deleted')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+
   const filters: { value: LakeFilter; label: string }[] = [
     { value: 'unverified', label: 'Unverified' },
     { value: 'verified', label: 'Verified' },
@@ -519,13 +537,10 @@ export default function LakesPage() {
                 onVerify={(verified) => verifyLake.mutate({ lakeId: lake.id, verified })}
                 onSetPremium={(months) => setPremium.mutate({ lakeId: lake.id, months })}
                 onClearPremium={() => clearPremium.mutate({ lakeId: lake.id })}
-                onClearOwner={() => clearOwner.mutate({ lakeId: lake.id })}
-                onAssignOwner={(email) => assignOwner.mutate({ lakeId: lake.id, email })}
                 isUpdatingVerify={verifyingLakeId === lake.id && verifyLake.isPending}
                 isUpdatingPremium={
                   premiumLakeId === lake.id && (setPremium.isPending || clearPremium.isPending)
                 }
-                isUpdatingOwner={ownerLakeId === lake.id && (clearOwner.isPending || assignOwner.isPending)}
                 claimUpdatingId={claimUpdatingId}
                 onApproveClaim={(claim) =>
                   approveClaim.mutate({ claimId: claim.id, lakeId: lake.id, userId: claim.user_id })
@@ -534,6 +549,12 @@ export default function LakesPage() {
                   rejectClaim.mutate({ claimId: claim.id, reason: reason || null })
                 }
                 onManageTeam={() => setTeamModalLakeId(lake.id)}
+                onDelete={() => {
+                  if (confirm(`Are you sure you want to delete "${lake.name}"? This cannot be undone.`)) {
+                    deleteLake.mutate({ lakeId: lake.id })
+                  }
+                }}
+                isDeleting={deleteLake.isPending}
               />
             ))}
           </div>
@@ -720,42 +741,110 @@ function TeamManagementModal({
   lakeName: string
   onClose: () => void
 }) {
+  const queryClient = useQueryClient()
   const [username, setUsername] = useState('')
-  const [role, setRole] = useState<'manager' | 'bailiff'>('bailiff')
+  const [role, setRole] = useState<'manager' | 'bailiff' | 'owner'>('bailiff')
   const [isSearching, setIsSearching] = useState(false)
+  const [suggestions, setSuggestions] = useState<{ id: string; username: string; email: string | null }[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
 
-  const { data: teamData, isLoading } = useLakeTeam(lakeId)
+  const { data: teamData, isLoading, refetch } = useLakeTeam(lakeId)
   const { mutate: addMember, isPending: isAdding } = useAddLakeTeamMember()
   const { mutate: removeMember } = useRemoveLakeTeamMember()
   const { mutate: updateRole } = useUpdateLakeTeamRole()
+
+  // Search for users as they type
+  const handleUsernameChange = async (value: string) => {
+    setUsername(value)
+    setSelectedUserId(null)
+    
+    if (value.trim().length < 2) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, username, email')
+      .or(`username.ilike.%${value}%,email.ilike.%${value}%`)
+      .limit(5)
+
+    setSuggestions(data || [])
+    setShowSuggestions(true)
+  }
+
+  const selectSuggestion = (profile: { id: string; username: string; email: string | null }) => {
+    setUsername(profile.username || profile.email || '')
+    setSelectedUserId(profile.id)
+    setShowSuggestions(false)
+    setSuggestions([])
+  }
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!username.trim()) return
 
-    setIsSearching(true)
+    let userId = selectedUserId
 
-    // Look up user by username or email
-    const searchTerm = username.trim().toLowerCase()
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('id, username, email')
-      .or(`username.eq.${searchTerm},email.eq.${searchTerm}`)
-      .maybeSingle()
+    // If no user selected from suggestions, search for exact match
+    if (!userId) {
+      setIsSearching(true)
+      const searchTerm = username.trim().toLowerCase()
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id, username, email')
+        .or(`username.eq.${searchTerm},email.eq.${searchTerm}`)
+        .maybeSingle()
 
-    setIsSearching(false)
+      setIsSearching(false)
 
-    if (error || !profile) {
-      toast.error('User not found. Check the username or email.')
+      if (error || !profile) {
+        toast.error('User not found. Check the username or email.')
+        return
+      }
+      userId = profile.id
+    }
+
+    // Handle owner assignment separately
+    if (role === 'owner') {
+      const { error } = await supabase
+        .from('lakes')
+        .update({ claimed_by: userId, claimed_at: new Date().toISOString() })
+        .eq('id', lakeId)
+
+      if (error) {
+        toast.error('Failed to assign owner')
+        return
+      }
+
+      // Send notification to the new owner
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'lake_owner_assigned',
+        title: 'You\'re now a lake owner!',
+        message: `You have been assigned as the owner of ${lakeName}`,
+        related_lake_id: lakeId,
+        action_url: `/lakes/${lakeId}/dashboard`,
+      })
+
+      toast.success('Owner assigned!')
+      setUsername('')
+      setSelectedUserId(null)
+      refetch()
+      queryClient.invalidateQueries({ queryKey: ['admin-lakes'] })
       return
     }
 
     addMember(
-      { lakeId, userId: profile.id, role },
+      { lakeId, userId: userId!, role: role as 'manager' | 'bailiff' },
       {
         onSuccess: () => {
           toast.success('Team member added!')
           setUsername('')
+          setSelectedUserId(null)
+          refetch()
         },
         onError: (err) => {
           if (err.message.includes('duplicate')) {
@@ -777,6 +866,24 @@ function TeamManagementModal({
         onError: () => toast.error('Failed to remove'),
       }
     )
+  }
+
+  const handleRemoveOwner = async () => {
+    if (!confirm('Remove the owner from this lake?')) return
+    
+    const { error } = await supabase
+      .from('lakes')
+      .update({ claimed_by: null, claimed_at: null })
+      .eq('id', lakeId)
+
+    if (error) {
+      toast.error('Failed to remove owner')
+      return
+    }
+
+    toast.success('Owner removed')
+    refetch()
+    queryClient.invalidateQueries({ queryKey: ['admin-lakes'] })
   }
 
   const handleRoleChange = (memberId: string, newRole: 'manager' | 'bailiff') => {
@@ -812,25 +919,33 @@ function TeamManagementModal({
           <div className="space-y-4">
             {/* Owner */}
             {teamData?.owner && (
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50">
-                <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 font-bold text-sm">
-                  {(teamData.owner as any).display_name?.[0] || (teamData.owner as any).username?.[0] || '?'}
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-900/20 border border-amber-500/30">
+                <div className="h-10 w-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-bold text-sm">
+                  {(teamData.owner as any).full_name?.[0] || (teamData.owner as any).username?.[0] || '?'}
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">
-                    {(teamData.owner as any).display_name || (teamData.owner as any).username || 'Unknown'}
+                    {(teamData.owner as any).full_name || (teamData.owner as any).username || 'Unknown'}
                   </p>
-                  <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                  <p className="text-xs text-amber-500 font-medium flex items-center gap-1">
                     <Crown size={12} /> Owner
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveOwner}
+                  className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Remove owner"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             )}
 
             {!teamData?.owner && (
               <div className="p-3 rounded-lg bg-muted text-center">
                 <p className="text-sm text-muted-foreground">No owner assigned</p>
-                <p className="text-xs text-muted-foreground mt-1">Use "Assign Owner" on the lake card</p>
+                <p className="text-xs text-muted-foreground mt-1">Select "Owner" role below to assign</p>
               </div>
             )}
 
@@ -838,33 +953,38 @@ function TeamManagementModal({
             {teamData?.team && teamData.team.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-foreground">Team Members</p>
-                {teamData.team.map((member) => (
-                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted">
-                    <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground font-bold text-sm">
-                      {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {member.profile?.display_name || member.profile?.username || 'Unknown'}
-                      </p>
-                      <select
-                        value={member.role}
-                        onChange={(e) => handleRoleChange(member.id, e.target.value as 'manager' | 'bailiff')}
-                        className="mt-1 text-xs rounded border-border bg-background py-0.5 px-1"
+                {teamData.team.map((member) => {
+                  const profile = member.profile as any
+                  const displayName = profile?.full_name || profile?.username || 'Unknown'
+                  const initial = displayName[0]?.toUpperCase() || '?'
+                  return (
+                    <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted">
+                      <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground font-bold text-sm">
+                        {initial}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {displayName}
+                        </p>
+                        <select
+                          value={member.role}
+                          onChange={(e) => handleRoleChange(member.id, e.target.value as 'manager' | 'bailiff')}
+                          className="mt-1 text-xs rounded border-border bg-background py-0.5 px-1"
+                        >
+                          <option value="manager">Manager</option>
+                          <option value="bailiff">Bailiff</option>
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemove(member.id)}
+                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       >
-                        <option value="manager">Manager</option>
-                        <option value="bailiff">Bailiff</option>
-                      </select>
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemove(member.id)}
-                      className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
 
@@ -874,20 +994,48 @@ function TeamManagementModal({
                 <Users size={14} /> Add Team Member
               </p>
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Username or email"
-                  className="flex-1 rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
-                />
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => handleUsernameChange(e.target.value)}
+                    onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    placeholder="Username or email"
+                    className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                  />
+                  {/* Autocomplete dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card shadow-lg max-h-48 overflow-y-auto">
+                      {suggestions.map((profile) => (
+                        <button
+                          key={profile.id}
+                          type="button"
+                          onClick={() => selectSuggestion(profile)}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+                        >
+                          <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                            {profile.username?.[0]?.toUpperCase() || '?'}
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{profile.username || 'No username'}</p>
+                            {profile.email && (
+                              <p className="text-xs text-muted-foreground">{profile.email}</p>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <select
                   value={role}
-                  onChange={(e) => setRole(e.target.value as 'manager' | 'bailiff')}
+                  onChange={(e) => setRole(e.target.value as 'manager' | 'bailiff' | 'owner')}
                   className="rounded-lg border border-border bg-background text-foreground px-2 py-2 text-sm"
                 >
-                  <option value="bailiff">Bailiff</option>
+                  <option value="owner">Owner</option>
                   <option value="manager">Manager</option>
+                  <option value="bailiff">Bailiff</option>
                 </select>
               </div>
               <button
@@ -898,8 +1046,9 @@ function TeamManagementModal({
                 {isAdding || isSearching ? 'Adding...' : 'Add Member'}
               </button>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                <strong>Manager:</strong> Can edit lake details and see all stats.{' '}
-                <strong>Bailiff:</strong> View-only dashboard access.
+                <strong>Owner:</strong> Full control, can manage team.{' '}
+                <strong>Manager:</strong> Can edit lake details.{' '}
+                <strong>Bailiff:</strong> View-only access.
               </p>
             </form>
           </div>
@@ -914,29 +1063,27 @@ function LakeCard({
   onVerify,
   onSetPremium,
   onClearPremium,
-  onClearOwner,
-  onAssignOwner,
   isUpdatingVerify,
   isUpdatingPremium,
-  isUpdatingOwner,
   claimUpdatingId,
   onApproveClaim,
   onRejectClaim,
   onManageTeam,
+  onDelete,
+  isDeleting,
 }: {
   lake: AdminLake
   onVerify: (verified: boolean) => void
   onSetPremium: (months: number) => void
   onClearPremium: () => void
-  onClearOwner: () => void
-  onAssignOwner: (email: string) => void
   isUpdatingVerify: boolean
   isUpdatingPremium: boolean
-  isUpdatingOwner: boolean
   claimUpdatingId: string | null
   onApproveClaim: (claim: AdminLakeClaim) => void
   onRejectClaim: (claim: AdminLakeClaim, reason: string | null) => void
   onManageTeam: () => void
+  onDelete: () => void
+  isDeleting: boolean
 }) {
   const hasPendingClaims = (lake.claims?.length || 0) > 0
 
@@ -1076,6 +1223,17 @@ function LakeCard({
         >
           <Users size={16} />
           <span>Team</span>
+        </button>
+
+        {/* Delete Lake */}
+        <button
+          type="button"
+          onClick={onDelete}
+          disabled={isDeleting}
+          className="flex items-center justify-center gap-1 rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200 disabled:opacity-60"
+        >
+          <Trash2 size={16} />
+          <span>{isDeleting ? '...' : 'Delete'}</span>
         </button>
       </div>
 

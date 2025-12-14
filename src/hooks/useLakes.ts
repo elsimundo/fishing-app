@@ -53,7 +53,6 @@ export function useLakes({ lat, lng, bounds, radiusKm = 50, enabled = true }: Us
             seenIds.add(lake.id)
             allLakes.push(lake as Lake)
           }
-          console.log(`[useLakes] Found ${supabaseLakes.length} lakes from Supabase`)
         }
       } catch (err) {
         console.error('[useLakes] Supabase error:', err)
@@ -87,7 +86,6 @@ export function useLakes({ lat, lng, bounds, radiusKm = 50, enabled = true }: Us
               } as Lake)
             }
           }
-          console.log(`[useLakes] Added ${osmLakes.length} lakes from OSM (after dedup)`)
         } catch (err) {
           console.error('[useLakes] OSM error:', err)
         }

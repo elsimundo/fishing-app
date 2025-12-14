@@ -11,7 +11,9 @@ import { ClaimLakeModal } from '../components/lakes/ClaimLakeModal'
 import { toast } from 'react-hot-toast'
 import { useSavedLakes } from '../hooks/useSavedLakes'
 import { useLakeTeam, useLakeRole } from '../hooks/useLakeTeam'
-import { useSubmitLakeReport, REPORT_REASON_LABELS, type LakeReportReason } from '../hooks/useLakeReports'
+import { useSubmitLakeReport, REPORT_REASON_LABELS, REPORT_REASON_CATEGORIES, type LakeReportReason } from '../hooks/useLakeReports'
+import { useLakeAnnouncements } from '../hooks/useLakeAnnouncements'
+import { useLakeStats } from '../hooks/useLakeStats'
 
 export default function LakeDetailPage() {
   const { slugOrId } = useParams<{ slugOrId: string }>()
@@ -29,6 +31,12 @@ export default function LakeDetailPage() {
   // Lake team/role (for showing owner/team section and dashboard access)
   const { data: userRole } = useLakeRole(lake?.id)
   const { data: teamData } = useLakeTeam(lake?.id)
+  
+  // Lake announcements
+  const { data: announcements } = useLakeAnnouncements(lake?.id)
+  
+  // Lake stats (records, top anglers, etc.)
+  const { data: lakeStats } = useLakeStats(lake?.id)
   
   const canAccessDashboard = userRole === 'owner' || userRole === 'manager' || userRole === 'bailiff'
 
@@ -331,20 +339,171 @@ export default function LakeDetailPage() {
               </div>
             )}
 
+            {/* Announcements from Staff */}
+            {announcements && announcements.length > 0 && (
+              <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Flag size={16} className="text-amber-500" />
+                  Venue Updates
+                </h2>
+                <div className="space-y-3">
+                  {announcements.slice(0, 3).map((announcement) => (
+                    <div
+                      key={announcement.id}
+                      className={`rounded-lg p-3 ${
+                        announcement.is_pinned
+                          ? 'bg-amber-900/20 border border-amber-500/30'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                            {announcement.is_pinned && (
+                              <span className="text-amber-500 text-xs">📌</span>
+                            )}
+                            {announcement.title}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                            {announcement.content}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
+                        <span>
+                          {announcement.author?.full_name || announcement.author?.username || 'Staff'}
+                        </span>
+                        <span>·</span>
+                        <span>
+                          {new Date(announcement.created_at).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Community Stats */}
             <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold text-foreground">Community Activity</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-lg bg-muted p-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">{lake.total_sessions || 0}</p>
-                  <p className="text-xs text-muted-foreground">Sessions logged</p>
+                  <p className="text-2xl font-bold text-foreground">{lakeStats?.totalSessions || lake.total_sessions || 0}</p>
+                  <p className="text-xs text-muted-foreground">Sessions</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">{lake.total_catches || 0}</p>
-                  <p className="text-xs text-muted-foreground">Catches recorded</p>
+                  <p className="text-2xl font-bold text-foreground">{lakeStats?.totalCatches || lake.total_catches || 0}</p>
+                  <p className="text-xs text-muted-foreground">Catches</p>
+                </div>
+                <div className="rounded-lg bg-muted p-3 text-center">
+                  <p className="text-2xl font-bold text-foreground">{lakeStats?.uniqueAnglers || 0}</p>
+                  <p className="text-xs text-muted-foreground">Anglers</p>
                 </div>
               </div>
             </div>
+
+            {/* Lake Record - Biggest Catch */}
+            {lakeStats?.biggestCatch && (
+              <div className="rounded-2xl bg-gradient-to-br from-amber-900/30 to-amber-800/10 border border-amber-500/30 p-5 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Crown size={16} className="text-amber-500" />
+                  Lake Record
+                </h2>
+                <div className="flex items-center gap-4">
+                  {lakeStats.biggestCatch.photo_url ? (
+                    <img
+                      src={lakeStats.biggestCatch.photo_url}
+                      alt="Record catch"
+                      className="h-16 w-16 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-amber-900/30">
+                      <Fish size={24} className="text-amber-500" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="text-lg font-bold text-foreground">
+                      {lakeStats.biggestCatch.weight_kg?.toFixed(2)} kg
+                    </p>
+                    <p className="text-sm text-muted-foreground">{lakeStats.biggestCatch.species}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      by {lakeStats.biggestCatch.user?.full_name || lakeStats.biggestCatch.user?.username || 'Anonymous'} ·{' '}
+                      {new Date(lakeStats.biggestCatch.caught_at).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Top Anglers */}
+            {lakeStats?.topAnglers && lakeStats.topAnglers.length > 0 && (
+              <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Users size={16} className="text-muted-foreground" />
+                  Top Anglers
+                </h2>
+                <div className="space-y-2">
+                  {lakeStats.topAnglers.slice(0, 5).map((angler, index) => (
+                    <div key={angler.user_id} className="flex items-center gap-3 p-2 rounded-lg bg-muted">
+                      <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                        index === 0 ? 'bg-amber-500 text-white' :
+                        index === 1 ? 'bg-gray-400 text-white' :
+                        index === 2 ? 'bg-amber-700 text-white' :
+                        'bg-muted-foreground/20 text-muted-foreground'
+                      }`}>
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {angler.full_name || angler.username || 'Anonymous'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {angler.total_catches} catches · {angler.total_sessions} sessions
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Top Species Caught */}
+            {lakeStats?.topSpecies && lakeStats.topSpecies.length > 0 && (
+              <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Fish size={16} className="text-emerald-500" />
+                  Most Caught Species
+                </h2>
+                <div className="space-y-2">
+                  {lakeStats.topSpecies.map((item, index) => (
+                    <div key={item.species} className="flex items-center gap-3">
+                      <span className="w-5 text-center text-xs font-bold text-muted-foreground">#{index + 1}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground">{item.species}</span>
+                          <span className="text-xs text-muted-foreground">{item.count} catches</span>
+                        </div>
+                        <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-emerald-500"
+                            style={{ width: `${(item.count / lakeStats.topSpecies[0].count) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Species */}
             {lake.species && lake.species.length > 0 && (
@@ -471,20 +630,9 @@ function ReportProblemModal({
     )
   }
 
-  const reasons: LakeReportReason[] = [
-    'not_a_fishing_lake',
-    'incorrect_info',
-    'duplicate',
-    'closed_permanently',
-    'safety_issue',
-    'access_problem',
-    'inappropriate_content',
-    'other',
-  ]
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-card p-5 shadow-xl border border-border">
+      <div className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl bg-card p-5 shadow-xl border border-border">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-bold text-foreground">Report a Problem</h2>
@@ -500,15 +648,45 @@ function ReportProblemModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Venue Issues - most common for anglers */}
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              What's the problem?
+            <label className="block text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">
+              {REPORT_REASON_CATEGORIES.venue.label}
             </label>
-            <div className="space-y-2">
-              {reasons.map((r) => (
+            <div className="space-y-1.5">
+              {REPORT_REASON_CATEGORIES.venue.reasons.map((r) => (
                 <label
                   key={r}
-                  className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 rounded-lg border p-2.5 cursor-pointer transition-colors ${
+                    reason === r
+                      ? 'border-navy-800 bg-navy-50 dark:bg-navy-900/30'
+                      : 'border-border hover:bg-muted'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="reason"
+                    value={r}
+                    checked={reason === r}
+                    onChange={() => setReason(r)}
+                    className="h-4 w-4 text-navy-800 focus:ring-navy-800"
+                  />
+                  <span className="text-sm text-foreground">{REPORT_REASON_LABELS[r]}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Listing Issues */}
+          <div>
+            <label className="block text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">
+              {REPORT_REASON_CATEGORIES.listing.label}
+            </label>
+            <div className="space-y-1.5">
+              {REPORT_REASON_CATEGORIES.listing.reasons.map((r) => (
+                <label
+                  key={r}
+                  className={`flex items-center gap-3 rounded-lg border p-2.5 cursor-pointer transition-colors ${
                     reason === r
                       ? 'border-navy-800 bg-navy-50 dark:bg-navy-900/30'
                       : 'border-border hover:bg-muted'

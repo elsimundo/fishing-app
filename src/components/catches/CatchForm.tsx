@@ -15,7 +15,7 @@ import { useFreshwaterEnabled } from '../../hooks/useFeatureFlags'
 import { getOrCreateSessionForCatch } from '../../lib/autoSession'
 import { useCatchXP } from '../../hooks/useCatchXP'
 import { useCelebrateChallenges } from '../../hooks/useCelebrateChallenges'
-import { Globe, Lock, Info } from 'lucide-react'
+import { Globe, Lock, Info, X, Plus } from 'lucide-react'
 import { getCompleteWeatherData } from '../../services/open-meteo'
 import { WEATHER_CODES } from '../../types/weather'
 import { getMoonPhase } from '../../utils/moonPhase'
@@ -185,15 +185,15 @@ export function CatchForm({
   const { marks: savedMarks } = useSavedMarks()
   
   // Debug logging
-  console.log('CatchForm - URL params:', window.location.search)
-  console.log('CatchForm - requestedSessionId:', requestedSessionId)
-  console.log('CatchForm - activeSession?.id:', activeSession?.id)
-  console.log('CatchForm - targetSessionId:', targetSessionId)
-  console.log('CatchForm - participantSpot:', participantSpot)
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(prefilledPhotoFile || null)
   const [isPublic, setIsPublic] = useState(true)
   const [hideExactLocation, setHideExactLocation] = useState(false)
+  
+  // Multi-catch mode (for feathers, multi-hook rigs)
+  const [isMultiCatch, setIsMultiCatch] = useState(false)
+  const [multiCatchSpecies, setMultiCatchSpecies] = useState<string[]>([])
+  const [selectedSpeciesForMulti, setSelectedSpeciesForMulti] = useState('')
   
   // Legal size tracking
   const [speciesId, setSpeciesId] = useState<string | null>(null)
@@ -320,6 +320,13 @@ export function CatchForm({
       return
     }
 
+    // Validate multi-catch mode has at least one species
+    if (isMultiCatch && multiCatchSpecies.length === 0) {
+      setFormError('Please add at least one species for multi-catch.')
+      toast.error('Please add at least one species.')
+      return
+    }
+
     setFormError(null)
 
     let photoUrl: string | null = initialCatch?.photo_url ?? null
@@ -360,7 +367,6 @@ export function CatchForm({
             locationName: values.location_name,
             caughtAt: caughtAtIso,
           })
-          console.log('CatchForm - Auto-created/found session:', sessionId)
         } catch (err) {
           console.error('Failed to auto-create session:', err)
           // Continue without session if auto-creation fails
@@ -401,6 +407,111 @@ export function CatchForm({
       }
     }
 
+    // Detect country from coordinates (shared by all catches)
+    let countryCode: string | null = null
+    if (latitudeNumber != null && longitudeNumber != null) {
+      try {
+        countryCode = await getCountryFromCoords(latitudeNumber, longitudeNumber)
+      } catch (err) {
+        console.warn('Failed to detect country:', err)
+      }
+    }
+
+    const isEdit = mode === 'edit' && catchId
+
+    // ========================================
+    // MULTI-CATCH MODE: Create multiple records
+    // ========================================
+    if (isMultiCatch && multiCatchSpecies.length > 0 && !isEdit) {
+      // Generate a shared group ID for all catches in this multi-catch
+      const multiCatchGroupId = crypto.randomUUID()
+      
+      // Build payloads for each species
+      const payloads = multiCatchSpecies.map((species) => ({
+        user_id: user.id,
+        species,
+        caught_at: caughtAtIso,
+        location_name: values.location_name,
+        latitude: latitudeNumber,
+        longitude: longitudeNumber,
+        weight_kg: null, // No weight in multi-catch mode
+        length_cm: null, // No length in multi-catch mode
+        bait: values.bait?.trim() ? values.bait.trim() : null,
+        rig: values.rig?.trim() ? values.rig.trim() : null,
+        fishing_style: values.fishing_style?.trim() ? values.fishing_style.trim() : null,
+        photo_url: photoUrl,
+        notes: values.notes?.trim() ? values.notes.trim() : null,
+        session_id: sessionId,
+        mark_id: markId,
+        is_public: isPublic,
+        hide_exact_location: hideExactLocation,
+        weather_temp: weatherTemp,
+        weather_condition: weatherCondition,
+        wind_speed: windSpeed,
+        moon_phase: getMoonPhase().phase,
+        species_id: SPECIES.find((s) => s.displayName === species)?.id ?? null,
+        region: REGION_FOR_RULES,
+        returned: false,
+        photo_exif_latitude: photoMetadata?.latitude ?? null,
+        photo_exif_longitude: photoMetadata?.longitude ?? null,
+        photo_exif_timestamp: photoMetadata?.timestamp ?? null,
+        photo_camera_make: photoMetadata?.cameraMake ?? null,
+        photo_camera_model: photoMetadata?.cameraModel ?? null,
+        country_code: countryCode,
+        multi_catch_group_id: multiCatchGroupId,
+      }))
+
+
+      const { data: insertedCatches, error } = await supabase
+        .from('catches')
+        .insert(payloads)
+        .select()
+
+      if (error) {
+        setFormError(error.message)
+        toast.error(error.message)
+        return
+      }
+
+      // Award XP for each catch
+      if (insertedCatches && insertedCatches.length > 0) {
+        for (const catchData of insertedCatches) {
+          catchXP.mutateAsync({
+            catchId: catchData.id,
+            species: catchData.species,
+            weightKg: catchData.weight_kg,
+            weightLb: catchData.weight_kg ? catchData.weight_kg * 2.205 : null,
+            sessionId: catchData.session_id,
+            hasPhoto: !!catchData.photo_url,
+            caughtAt: catchData.caught_at,
+            latitude: catchData.latitude,
+            longitude: catchData.longitude,
+            weatherCondition: catchData.weather_condition,
+            windSpeed: catchData.wind_speed,
+            moonPhase: catchData.moon_phase,
+            countryCode,
+          }).then((result) => {
+            if (result.challengesCompleted.length > 0) {
+              celebrateChallenges(result.challengesCompleted, {
+                newLevel: result.newLevel,
+                leveledUp: result.leveledUp,
+              })
+            }
+          }).catch((err) => {
+            console.error('[CatchForm] XP mutation error:', err)
+          })
+        }
+
+        toast.success(`Logged ${insertedCatches.length} catches!`)
+      }
+
+      onSuccess()
+      return
+    }
+
+    // ========================================
+    // SINGLE CATCH MODE (existing logic)
+    // ========================================
     const payload = {
       user_id: user.id,
       species: values.species,
@@ -432,23 +543,9 @@ export function CatchForm({
       photo_exif_timestamp: photoMetadata?.timestamp ?? null,
       photo_camera_make: photoMetadata?.cameraMake ?? null,
       photo_camera_model: photoMetadata?.cameraModel ?? null,
-      // Country code for geographic challenges (will be set below)
-      country_code: null as string | null,
+      country_code: countryCode,
     }
 
-    // Detect country from coordinates
-    if (latitudeNumber != null && longitudeNumber != null) {
-      try {
-        payload.country_code = await getCountryFromCoords(latitudeNumber, longitudeNumber)
-      } catch (err) {
-        console.warn('Failed to detect country:', err)
-      }
-    }
-
-    console.log('CatchForm - Submitting payload with session_id:', payload.session_id)
-    console.log('CatchForm - Full payload:', payload)
-
-    const isEdit = mode === 'edit' && catchId
 
     const { data, error } = isEdit
       ? await supabase.from('catches').update(payload).eq('id', catchId).select().single()
@@ -477,9 +574,7 @@ export function CatchForm({
         moonPhase: data.moon_phase,
         countryCode: payload.country_code,
       }).then((result) => {
-        console.log('[CatchForm] XP mutation success:', result)
         if (result.challengesCompleted.length > 0) {
-          console.log('[CatchForm] Celebrating challenges:', result.challengesCompleted)
           celebrateChallenges(result.challengesCompleted, {
             newLevel: result.newLevel,
             leveledUp: result.leveledUp,
@@ -509,7 +604,6 @@ export function CatchForm({
               photo_url: data.photo_url,
               is_public: true,
             })
-            console.log('Auto-posted catch to feed')
           }
         } catch (postErr) {
           // Don't fail the catch creation if auto-post fails
@@ -555,23 +649,19 @@ export function CatchForm({
               }
             }}
             onSpeciesIdentified={(result: FishIdentificationResult) => {
-              console.log('[CatchForm] AI Result received:', result)
               const speciesValue = mapAiResultToDisplayName(result) || ''
-              console.log('[CatchForm] Mapped to display name:', speciesValue)
               
               setValue('species', speciesValue, { shouldValidate: true })
               
               // Also set speciesId for legal size checks
               const species = SPECIES.find((s) => s.displayName === speciesValue)
               setSpeciesId(species?.id ?? null)
-              console.log('[CatchForm] Found species ID:', species?.id)
               
               if (speciesValue) {
                 toast.success(`Species set to ${speciesValue}`)
               }
             }}
             onMetadataExtracted={(metadata: PhotoMetadata) => {
-              console.log('[CatchForm] EXIF metadata extracted:', metadata)
               setPhotoMetadata(metadata)
               
               // Auto-fill GPS location if available
@@ -590,46 +680,168 @@ export function CatchForm({
             }}
           />
         </div>
+        {/* Multi-catch toggle - only show in create mode */}
+        {mode === 'create' && (
+          <div className="sm:col-span-2">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={isMultiCatch}
+                  onChange={(e) => {
+                    setIsMultiCatch(e.target.checked)
+                    if (!e.target.checked) {
+                      setMultiCatchSpecies([])
+                      setSelectedSpeciesForMulti('')
+                    }
+                  }}
+                  className="peer sr-only"
+                />
+                <div className="h-5 w-5 rounded-md border-2 border-border bg-background transition-colors peer-checked:border-navy-800 peer-checked:bg-navy-800 peer-focus:ring-2 peer-focus:ring-navy-800/30" />
+                <svg
+                  className="absolute left-0.5 top-0.5 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-medium text-foreground">Multi-catch</span>
+                <span className="text-xs text-muted-foreground">(feathers, multi-hook rig)</span>
+              </div>
+            </label>
+          </div>
+        )}
+
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="species">
-            Species
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            {isMultiCatch ? 'Species caught' : 'Species'}
           </label>
-          <select
-            id="species"
-            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            {...register('species')}
-          >
-            <option value="">Select species</option>
-            <optgroup label="Saltwater">
-              {speciesCategories.saltwater.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </optgroup>
-            {speciesCategories.coarse.length > 0 && (
-              <optgroup label="Coarse">
-                {speciesCategories.coarse.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            {speciesCategories.game.length > 0 && (
-              <optgroup label="Game">
-                {speciesCategories.game.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            <option value="Other">Other / not listed</option>
-          </select>
-          {errors.species ? (
-            <p className="mt-1 text-[11px] text-red-600">{errors.species.message}</p>
-          ) : null}
+          
+          {isMultiCatch ? (
+            <>
+              {/* Multi-catch species list builder */}
+              <div className="flex gap-2 mb-2">
+                <select
+                  value={selectedSpeciesForMulti}
+                  onChange={(e) => setSelectedSpeciesForMulti(e.target.value)}
+                  className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="">Add a fish...</option>
+                  <optgroup label="Saltwater">
+                    {speciesCategories.saltwater.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </optgroup>
+                  {speciesCategories.coarse.length > 0 && (
+                    <optgroup label="Coarse">
+                      {speciesCategories.coarse.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {speciesCategories.game.length > 0 && (
+                    <optgroup label="Game">
+                      {speciesCategories.game.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </optgroup>
+                  )}
+                  <option value="Other">Other / not listed</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedSpeciesForMulti) {
+                      setMultiCatchSpecies([...multiCatchSpecies, selectedSpeciesForMulti])
+                      setSelectedSpeciesForMulti('')
+                    }
+                  }}
+                  disabled={!selectedSpeciesForMulti}
+                  className="flex items-center gap-1 rounded-md bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900 disabled:bg-navy-400 disabled:cursor-not-allowed"
+                >
+                  <Plus size={14} />
+                  Add
+                </button>
+              </div>
+              
+              {/* Species chips */}
+              {multiCatchSpecies.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {multiCatchSpecies.map((species, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                    >
+                      {species}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...multiCatchSpecies]
+                          updated.splice(index, 1)
+                          setMultiCatchSpecies(updated)
+                        }}
+                        className="ml-0.5 rounded-full p-0.5 hover:bg-primary/20"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-muted-foreground mb-2">
+                  Add each fish you caught. You can add the same species multiple times.
+                </p>
+              )}
+              
+              {multiCatchSpecies.length === 0 && (
+                <p className="text-[11px] text-red-600">Add at least one species</p>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Single species dropdown */}
+              <select
+                id="species"
+                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                {...register('species')}
+              >
+                <option value="">Select species</option>
+                <optgroup label="Saltwater">
+                  {speciesCategories.saltwater.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </optgroup>
+                {speciesCategories.coarse.length > 0 && (
+                  <optgroup label="Coarse">
+                    {speciesCategories.coarse.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {speciesCategories.game.length > 0 && (
+                  <optgroup label="Game">
+                    {speciesCategories.game.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                <option value="Other">Other / not listed</option>
+              </select>
+              {errors.species ? (
+                <p className="mt-1 text-[11px] text-red-600">{errors.species.message}</p>
+              ) : null}
+            </>
+          )}
         </div>
 
         <div>
@@ -739,61 +951,66 @@ export function CatchForm({
           ) : null}
         </div>
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="weight_kg">
-            Weight (kg)
-          </label>
-          <input
-            id="weight_kg"
-            type="number"
-            inputMode="decimal"
-            step="0.01"
-            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            {...register('weight_kg')}
-          />
-          {errors.weight_kg ? (
-            <p className="mt-1 text-[11px] text-red-600">{errors.weight_kg.message as string}</p>
-          ) : null}
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="length_cm">
-            Length (cm)
-          </label>
-          <input
-            id="length_cm"
-            type="number"
-            inputMode="decimal"
-            step="0.1"
-            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            {...register('length_cm')}
-          />
-          {errors.length_cm ? (
-            <p className="mt-1 text-[11px] text-red-600">{errors.length_cm.message as string}</p>
-          ) : null}
-          
-          {/* Legal size status */}
-          {legalStatus.status === 'undersized' && legalStatus.rule?.minLengthCm ? (
-            <div className="mt-2 space-y-2">
-              <p className="text-[11px] text-red-600 font-medium">
-                ⚠️ Undersized for this region (minimum {legalStatus.rule.minLengthCm} cm). Please return this fish.
-              </p>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={returned}
-                  onChange={(e) => setReturned(e.target.checked)}
-                  className="h-4 w-4 rounded border-border bg-background text-navy-800 focus:ring-navy-800"
-                />
-                <span className="text-xs text-muted-foreground">I returned this fish to the water</span>
+        {/* Weight/Length - hidden in multi-catch mode (can be added later per fish) */}
+        {!isMultiCatch && (
+          <>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="weight_kg">
+                Weight (kg)
               </label>
+              <input
+                id="weight_kg"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                {...register('weight_kg')}
+              />
+              {errors.weight_kg ? (
+                <p className="mt-1 text-[11px] text-red-600">{errors.weight_kg.message as string}</p>
+              ) : null}
             </div>
-          ) : legalStatus.status === 'legal' ? (
-            <p className="mt-1 text-[11px] text-emerald-600">
-              ✓ Meets suggested minimum size for this region
-            </p>
-          ) : null}
-        </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="length_cm">
+                Length (cm)
+              </label>
+              <input
+                id="length_cm"
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                {...register('length_cm')}
+              />
+              {errors.length_cm ? (
+                <p className="mt-1 text-[11px] text-red-600">{errors.length_cm.message as string}</p>
+              ) : null}
+              
+              {/* Legal size status */}
+              {legalStatus.status === 'undersized' && legalStatus.rule?.minLengthCm ? (
+                <div className="mt-2 space-y-2">
+                  <p className="text-[11px] text-red-600 font-medium">
+                    ⚠️ Undersized for this region (minimum {legalStatus.rule.minLengthCm} cm). Please return this fish.
+                  </p>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={returned}
+                      onChange={(e) => setReturned(e.target.checked)}
+                      className="h-4 w-4 rounded border-border bg-background text-navy-800 focus:ring-navy-800"
+                    />
+                    <span className="text-xs text-muted-foreground">I returned this fish to the water</span>
+                  </label>
+                </div>
+              ) : legalStatus.status === 'legal' ? (
+                <p className="mt-1 text-[11px] text-emerald-600">
+                  ✓ Meets suggested minimum size for this region
+                </p>
+              ) : null}
+            </div>
+          </>
+        )}
 
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="bait">

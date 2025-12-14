@@ -22,7 +22,6 @@ export async function ensureProfile({
   }
 
   if (existing) {
-    console.log('[ensureProfile] Profile already exists for user:', userId)
     return
   }
 
@@ -36,7 +35,6 @@ export async function ensureProfile({
   if (insertError) {
     // If it's a duplicate key error, the profile was created by the trigger - that's fine
     if (insertError.code === '23505') {
-      console.log('[ensureProfile] Profile already exists (created by trigger):', userId)
       return
     }
     
@@ -44,5 +42,4 @@ export async function ensureProfile({
     throw insertError
   }
   
-  console.log('[ensureProfile] Profile created successfully for user:', userId)
 }

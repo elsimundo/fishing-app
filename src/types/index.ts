@@ -143,6 +143,9 @@ export type Catch = {
   mark_id?: string | null
   mark?: SavedMark
 
+  // Multi-catch grouping (for feathers, multi-hook rigs)
+  multi_catch_group_id?: string | null
+
   // Optional relation for attribution
   logged_by?: Profile
 }

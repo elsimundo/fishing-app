@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Fish, Calendar, Trophy, Swords } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Fish, Calendar, Trophy, Swords, Pencil } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
@@ -14,6 +14,7 @@ import { useUserXP } from '../hooks/useGamification'
 import { useUserChallenges, useFeaturedChallenge } from '../hooks/useGamification'
 import { FeedPostCard } from '../components/feed/FeedPostCard'
 import { CatchCard } from '../components/catches/CatchCard'
+import { MultiCatchCard } from '../components/catches/MultiCatchCard'
 import { ProfileHero } from '../components/profile/ProfileHero'
 import { ProfileStatsGrid } from '../components/profile/ProfileStatsGrid'
 import { BadgesSummaryCard } from '../components/profile/BadgesSummaryCard'
@@ -30,7 +31,7 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const { data: profile, isLoading: profileLoading } = useProfile()
+  const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile()
   const { data: xpData, isLoading: xpLoading } = useUserXP()
   const { data: userChallenges = [] } = useUserChallenges()
   const { data: featuredChallenge } = useFeaturedChallenge()
@@ -50,12 +51,6 @@ export default function ProfilePage() {
   const { data: sessions } = useMySessions()
   const { data: myCompetitions } = useMyEnteredCompetitions()
   const { data: competitionPlacements = [] } = useMyCompetitionPlacements()
-
-  const preferenceLabels: Record<string, string> = {
-    sea: 'Sea Fishing',
-    freshwater: 'Freshwater Fishing',
-    both: 'All Fishing',
-  }
 
   // If navigated via /logbook#settings, automatically open the settings (edit profile) modal
   useEffect(() => {
@@ -128,7 +123,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border bg-card px-5 pt-4 pb-3">
+      <div className="hidden md:flex items-center justify-between border-b border-border bg-card px-5 pt-4 pb-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Profile</p>
           <p className="text-lg font-bold text-foreground">@{profile.username || profile.full_name || 'angler'}</p>
@@ -239,16 +234,18 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setShowEditModal(true)}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-primary/60"
+            className="flex-1 inline-flex items-center justify-center rounded-xl bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400"
           >
-            ✏️ Edit profile
+            <Pencil size={16} className="mr-1.5" />
+            Edit profile
           </button>
           <button
             type="button"
             onClick={() => navigate('/catches/new')}
             className="flex-1 inline-flex items-center justify-center rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
           >
-            🎣 Log catch
+            <Fish size={16} className="mr-1.5" />
+            Log catch
           </button>
         </div>
       </div>
@@ -485,7 +482,7 @@ export default function ProfilePage() {
                                 className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
                               />
                             ) : (
-                              <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${
+                              <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${
                                 isLive ? 'bg-amber-900/30' : isUpcoming ? 'bg-blue-900/30' : 'bg-muted'
                               }`}>
                                 <Swords size={20} className={
@@ -550,9 +547,49 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {catches.map((c) => (
-                  <CatchCard key={c.id} item={c} showDelete />
-                ))}
+                {(() => {
+                  // Group catches by multi_catch_group_id
+                  const grouped = new Map<string, typeof catches>()
+                  const singles: typeof catches = []
+
+                  for (const c of catches) {
+                    if (c.multi_catch_group_id) {
+                      if (!grouped.has(c.multi_catch_group_id)) {
+                        grouped.set(c.multi_catch_group_id, [])
+                      }
+                      grouped.get(c.multi_catch_group_id)!.push(c)
+                    } else {
+                      singles.push(c)
+                    }
+                  }
+
+                  // Build display items sorted by date (use first catch date for groups)
+                  type DisplayItem = 
+                    | { type: 'single'; catch: typeof catches[0]; date: Date }
+                    | { type: 'multi'; catches: typeof catches; groupId: string; date: Date }
+
+                  const items: DisplayItem[] = [
+                    ...singles.map(c => ({ 
+                      type: 'single' as const, 
+                      catch: c, 
+                      date: new Date(c.caught_at) 
+                    })),
+                    ...Array.from(grouped.entries()).map(([groupId, groupCatches]) => ({
+                      type: 'multi' as const,
+                      catches: groupCatches,
+                      groupId,
+                      date: new Date(groupCatches[0].caught_at),
+                    })),
+                  ].sort((a, b) => b.date.getTime() - a.date.getTime())
+
+                  return items.map((item) => {
+                    if (item.type === 'single') {
+                      return <CatchCard key={item.catch.id} item={item.catch} showDelete />
+                    } else {
+                      return <MultiCatchCard key={item.groupId} catches={item.catches} showDelete />
+                    }
+                  })
+                })()}
               </div>
             )}
           </div>
@@ -694,8 +731,8 @@ export default function ProfilePage() {
           profile={profile}
           onClose={() => setShowEditModal(false)}
           onSuccess={() => {
+            refetchProfile()
             setShowEditModal(false)
-            window.location.reload()
           }}
         />
       )}

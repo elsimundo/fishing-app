@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Plus, Trash2, Navigation, Loader2, X, Share2, MapPin, Crosshair } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Trash2, Navigation, Loader2, X, Share2, MapPin, Crosshair, Waves, TreePine, Droplets, Ship, Flower2, Building2 } from 'lucide-react'
 import { useSavedMarks, useSharedMarks } from '../../hooks/useSavedMarks'
 import type { CreateMarkInput } from '../../hooks/useSavedMarks'
 import type { SavedMark, SavedMarkWaterType, MarkPrivacyLevel } from '../../types'
@@ -17,15 +17,15 @@ const WATER_TYPE_LABELS: Record<SavedMarkWaterType, string> = {
   other: 'Other',
 }
 
-const WATER_TYPE_ICONS: Record<SavedMarkWaterType, string> = {
-  sea: '🌊',
-  coastal: '🏖️',
-  river: '🏞️',
-  lake: '💧',
-  canal: '🚣',
-  pond: '🪷',
-  reservoir: '🏗️',
-  other: '📍',
+const WATER_TYPE_ICONS: Record<SavedMarkWaterType, React.ReactNode> = {
+  sea: <Waves size={14} className="text-blue-400" />,
+  coastal: <Waves size={14} className="text-cyan-400" />,
+  river: <TreePine size={14} className="text-emerald-400" />,
+  lake: <Droplets size={14} className="text-sky-400" />,
+  canal: <Ship size={14} className="text-slate-400" />,
+  pond: <Flower2 size={14} className="text-green-400" />,
+  reservoir: <Building2 size={14} className="text-gray-400" />,
+  other: <MapPin size={14} className="text-muted-foreground" />,
 }
 
 interface MyMarksCardProps {
@@ -54,7 +54,7 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
         className="flex w-full items-center justify-between p-4 transition-colors hover:bg-muted"
       >
         <div className="flex items-center gap-3">
-          <span className="text-xl">📍</span>
+          <MapPin size={20} className="text-red-400" />
           <div className="text-left">
             <span className="text-sm font-medium text-foreground">My Marks</span>
             <p className="text-xs text-muted-foreground">

@@ -280,9 +280,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       moonPhase: created.moon_phase,
       countryCode,
     }).then((result) => {
-      console.log('[QuickLogForm] XP mutation success:', result)
       if (result.challengesCompleted.length > 0) {
-        console.log('[QuickLogForm] Celebrating challenges:', result.challengesCompleted)
         celebrateChallenges(result.challengesCompleted, {
           newLevel: result.newLevel,
           leveledUp: result.leveledUp,

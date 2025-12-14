@@ -26,7 +26,7 @@ export function JoinCompetitionButton({ competitionId }: JoinCompetitionButtonPr
       type="button"
       onClick={handleJoin}
       disabled={joining}
-      className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
+      className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-4 text-sm font-semibold text-white transition-colors hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
     >
       {joining ? 'Joining…' : 'Join competition'}
     </button>

@@ -131,11 +131,11 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
       ) : null}
 
       {coverImage && (
-        <div className="my-3 cursor-pointer" onClick={handleCardClick}>
+        <div className="-mx-5 my-3 cursor-pointer" onClick={handleCardClick}>
           <img
             src={coverImage}
             alt="Post cover"
-            className="aspect-[4/3] w-full rounded-xl object-cover"
+            className="aspect-[4/3] w-full object-cover"
           />
         </div>
       )}

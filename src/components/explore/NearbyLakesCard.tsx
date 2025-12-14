@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee, BadgeCheck, Crown, Heart, EyeOff, UserPlus, X, Search } from 'lucide-react'
+import { ChevronDown, ChevronUp, Loader2, MapPin, Fish, Car, Coffee, BadgeCheck, Crown, Heart, EyeOff, UserPlus, X, Search, Trees } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useLakes, useToggleLakeVisibility } from '../../hooks/useLakes'
 import { useAuth } from '../../hooks/useAuth'
@@ -45,7 +45,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
     return (
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center gap-3 text-muted-foreground">
-          <span className="text-xl">🏞️</span>
+          <Trees size={20} className="text-sky-400" />
           <span className="text-sm font-medium text-foreground">Fishing Lakes</span>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Search a location to see nearby lakes</p>
@@ -73,7 +73,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
     return (
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center gap-3 text-muted-foreground">
-          <span className="text-xl">🏞️</span>
+          <Trees size={20} className="text-sky-400" />
           <span className="text-sm font-medium text-foreground">Fishing Lakes</span>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Unable to load nearby lakes</p>
@@ -92,7 +92,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/30">
-            <span className="text-xl">🏞️</span>
+            <Trees size={20} className="text-sky-400" />
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">Fishing Lakes</p>
@@ -128,7 +128,7 @@ export function NearbyLakesCard({ lat, lng, bounds, onSelectLake }: NearbyLakesC
         <div className="border-t border-border px-4 pb-4">
           {!hasLakes ? (
             <div className="mt-3 rounded-lg bg-muted p-4 text-center">
-              <span className="text-3xl">🏞️</span>
+              <Trees size={32} className="mx-auto text-sky-400" />
               <p className="mt-2 text-sm font-medium text-foreground">No lakes found nearby</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Try searching a different area

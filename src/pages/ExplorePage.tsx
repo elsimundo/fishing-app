@@ -24,7 +24,7 @@ import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { useFishingZones } from '../hooks/useFishingZones'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
-import { MapPin, Navigation, Store, X, UserPlus, Loader2, Search } from 'lucide-react'
+import { MapPin, Navigation, Store, X, UserPlus, Loader2, Search, Layers, Maximize2, Minimize2 } from 'lucide-react'
 // import { ExploreSearch } from '../components/explore/ExploreSearch' // Parked for now
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
@@ -88,6 +88,29 @@ export default function ExplorePage() {
   const [hasDefaultArea, setHasDefaultArea] = useState(false)
   const [showDefaultConfirm, setShowDefaultConfirm] = useState(false)
   const [isSavingDefault, setIsSavingDefault] = useState(false)
+
+  const [mapStyle, setMapStyle] = useState<'standard' | 'satellite'>(() => {
+    if (typeof window === 'undefined') return 'satellite'
+    const v = localStorage.getItem('explore-map-style')
+    return v === 'standard' ? 'standard' : 'satellite'
+  })
+
+  const [isMapExpanded, setIsMapExpanded] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem('explore-map-expanded') === 'true'
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('explore-map-style', mapStyle)
+    } catch {}
+  }, [mapStyle])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('explore-map-expanded', String(isMapExpanded))
+    } catch {}
+  }, [isMapExpanded])
 
   // One-time hint for dropping marks on the map
   const [showMarkHint, setShowMarkHint] = useState(() => {
@@ -581,7 +604,29 @@ export default function ExplorePage() {
         </header>
 
         {/* Compact Map */}
-        <section id="explore-map" className="relative h-[35vh] min-h-[200px] bg-card">
+        <section
+          id="explore-map"
+          className={`relative bg-card ${isMapExpanded ? 'h-[65vh] min-h-[420px]' : 'h-[35vh] min-h-[200px]'}`}
+        >
+          <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMapStyle((prev) => (prev === 'standard' ? 'satellite' : 'standard'))}
+              className="inline-flex items-center gap-1.5 rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-medium text-foreground shadow-md hover:bg-muted border border-border backdrop-blur"
+            >
+              <Layers size={14} />
+              {mapStyle === 'standard' ? 'Satellite' : 'Standard'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsMapExpanded((v) => !v)}
+              className="inline-flex items-center justify-center rounded-full bg-card/90 p-2 text-foreground shadow-md hover:bg-muted border border-border backdrop-blur"
+              aria-label={isMapExpanded ? 'Collapse map' : 'Expand map'}
+            >
+              {isMapExpanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            </button>
+          </div>
+
           {pillVisible && (
             <button
               type="button"
@@ -763,6 +808,7 @@ export default function ExplorePage() {
             initialBounds={appliedBounds ?? undefined}
             userLocation={userLocation ?? undefined}
             focusPoint={focusPoint}
+            mapStyle={mapStyle}
             onBoundsChange={setLiveBounds}
             onMarkerClick={handleMarkerClick}
             onMapClick={({ lat, lng }) => {

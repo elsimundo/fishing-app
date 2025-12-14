@@ -16,7 +16,6 @@ export interface PhotoMetadata {
  */
 export async function extractPhotoMetadata(file: File): Promise<PhotoMetadata> {
   try {
-    console.log('[EXIF] Parsing file:', file.name, 'size:', file.size, 'type:', file.type)
     
     const exif = await parse(file, {
       gps: true,
@@ -31,10 +30,8 @@ export async function extractPhotoMetadata(file: File): Promise<PhotoMetadata> {
       ],
     })
 
-    console.log('[EXIF] Raw EXIF data:', exif)
 
     if (!exif) {
-      console.log('[EXIF] No EXIF data found in image')
       return { hasGPS: false, hasTimestamp: false }
     }
 

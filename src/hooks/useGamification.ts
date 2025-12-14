@@ -645,7 +645,6 @@ export function useRemoveCatchFromChallenge() {
     }) => {
       if (!user) throw new Error('Not authenticated')
       
-      console.log('[RemoveCatchFromChallenge] Removing catch:', challengeCatchId, 'from challenge:', userChallengeId)
       
       // Delete the challenge_catch record
       const { error: deleteError } = await supabase
@@ -654,7 +653,6 @@ export function useRemoveCatchFromChallenge() {
         .eq('id', challengeCatchId)
       
       if (deleteError) {
-        console.log('[RemoveCatchFromChallenge] Delete error:', deleteError)
         throw deleteError
       }
       
@@ -664,7 +662,6 @@ export function useRemoveCatchFromChallenge() {
         .select('*', { count: 'exact', head: true })
         .eq('user_challenge_id', userChallengeId)
       
-      console.log('[RemoveCatchFromChallenge] Remaining catches:', count)
       
       // Get the user_challenge to check target
       const { data: userChallenge } = await supabase
@@ -679,9 +676,6 @@ export function useRemoveCatchFromChallenge() {
       const wasCompleted = !!userChallenge.completed_at
       const isNowComplete = newProgress >= userChallenge.target
       
-      console.log('[RemoveCatchFromChallenge] Progress:', newProgress, '/', userChallenge.target)
-      console.log('[RemoveCatchFromChallenge] wasCompleted:', wasCompleted, 'isNowComplete:', isNowComplete)
-      console.log('[RemoveCatchFromChallenge] xp_awarded:', userChallenge.xp_awarded)
       
       // Update progress (and potentially revoke completion)
       const { error: updateError } = await supabase
@@ -694,13 +688,11 @@ export function useRemoveCatchFromChallenge() {
         .eq('id', userChallengeId)
       
       if (updateError) {
-        console.log('[RemoveCatchFromChallenge] Update error:', updateError)
         throw updateError
       }
       
       // If challenge was completed but is now incomplete, revoke XP
       if (wasCompleted && !isNowComplete && userChallenge.xp_awarded > 0) {
-        console.log('[RemoveCatchFromChallenge] Revoking XP:', userChallenge.xp_awarded)
         const { error: xpError } = await supabase.rpc('award_xp', {
           p_user_id: user.id,
           p_amount: -userChallenge.xp_awarded,
@@ -709,9 +701,7 @@ export function useRemoveCatchFromChallenge() {
           p_reference_id: userChallenge.challenge_id,
         })
         if (xpError) {
-          console.log('[RemoveCatchFromChallenge] XP revoke error:', xpError)
         } else {
-          console.log('[RemoveCatchFromChallenge] XP revoked successfully')
         }
       }
       

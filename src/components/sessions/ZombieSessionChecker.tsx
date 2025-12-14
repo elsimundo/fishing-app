@@ -105,7 +105,6 @@ export function ZombieSessionChecker() {
           try {
             await updateSession({ id: session.id, ended_at: endTime })
             markAsAutoEnded(session.id)
-            console.log(`Auto-ended stale session: ${session.id}`)
           } catch (error) {
             console.error('Failed to auto-end session:', session.id, error)
           }

@@ -702,7 +702,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={handleNext}
           disabled={!hasLocation}
-          className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-primary/60 disabled:cursor-not-allowed"
+          className="mt-2 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -834,7 +834,7 @@ export default function StartSessionPage() {
           type="button"
           onClick={handleNext}
           disabled={!selected}
-          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-primary/60 disabled:cursor-not-allowed"
+          className="mt-4 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -905,7 +905,7 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={handleNext}
-          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
+          className="mt-4 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
         >
           Continue
         </button>
@@ -938,7 +938,7 @@ export default function StartSessionPage() {
       <button
         type="button"
         onClick={handleNext}
-        className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
+        className="mt-2 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
       >
         Start Session
       </button>
@@ -972,7 +972,7 @@ export default function StartSessionPage() {
         <button
           type="button"
           onClick={() => navigate(`/sessions/${createdSessionId}`)}
-          className="mt-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
+          className="mt-2 rounded-xl bg-navy-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
         >
           View Active Session
         </button>
@@ -1078,7 +1078,7 @@ export default function StartSessionPage() {
                   type="button"
                   onClick={handleSaveAsMark}
                   disabled={!newMarkName.trim() || isSavingMark}
-                  className="flex-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:bg-primary/60"
+                  className="flex-1 rounded-lg bg-navy-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
                 >
                   {isSavingMark ? 'Saving...' : 'Save Mark'}
                 </button>
@@ -1090,7 +1090,7 @@ export default function StartSessionPage() {
             type="button"
             disabled={!canConfirm}
             onClick={handleConfirmLocation}
-            className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
+            className="mt-3 w-full rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-navy-400"
           >
             Use this spot
           </button>

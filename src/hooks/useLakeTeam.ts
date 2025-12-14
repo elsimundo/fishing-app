@@ -14,9 +14,9 @@ export interface LakeTeamMember {
   profile?: {
     id: string
     username: string | null
-    display_name: string | null
+    full_name: string | null
     avatar_url: string | null
-  }
+  } | null
 }
 
 /**
@@ -65,49 +65,53 @@ export function useLakeTeam(lakeId: string | undefined) {
     queryFn: async () => {
       if (!lakeId) return { owner: null, team: [] }
 
-      // Get lake owner
+      // Get lake claimed_by
       const { data: lake } = await supabase
         .from('lakes')
-        .select(`
-          claimed_by,
-          owner:profiles!lakes_claimed_by_fkey(
-            id,
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('claimed_by')
         .eq('id', lakeId)
         .single()
 
       // Get team members
       const { data: team } = await supabase
         .from('lake_team')
-        .select(`
-          id,
-          lake_id,
-          user_id,
-          role,
-          invited_by,
-          created_at,
-          profile:profiles!lake_team_user_id_fkey(
-            id,
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('id, lake_id, user_id, role, invited_by, created_at')
         .eq('lake_id', lakeId)
         .order('created_at', { ascending: true })
 
-      // Transform team data - Supabase returns profile as object, not array for single FK
+      // Collect all user IDs we need to fetch (owner + team members)
+      const userIds: string[] = []
+      if (lake?.claimed_by) userIds.push(lake.claimed_by)
+      ;(team || []).forEach(t => {
+        if (!userIds.includes(t.user_id)) userIds.push(t.user_id)
+      })
+
+      // Fetch all profiles in one query
+      let profiles: Record<string, { id: string; username: string | null; full_name: string | null; avatar_url: string | null }> = {}
+      
+      if (userIds.length > 0) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id, username, full_name, avatar_url')
+          .in('id', userIds)
+        
+        profiles = (profileData || []).reduce((acc, p) => {
+          acc[p.id] = p
+          return acc
+        }, {} as typeof profiles)
+      }
+
+      // Transform team data with profiles
       const transformedTeam = (team || []).map((member) => ({
         ...member,
-        profile: Array.isArray(member.profile) ? member.profile[0] : member.profile,
+        profile: profiles[member.user_id] || null,
       }))
 
+      // Get owner profile
+      const ownerProfile = lake?.claimed_by ? profiles[lake.claimed_by] || null : null
+
       return {
-        owner: Array.isArray(lake?.owner) ? lake.owner[0] : lake?.owner || null,
+        owner: ownerProfile,
         team: transformedTeam as LakeTeamMember[],
       }
     },

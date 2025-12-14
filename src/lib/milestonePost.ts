@@ -45,7 +45,6 @@ export async function createMilestonePost(
     // Check if auto-share is enabled (default to true if column doesn't exist yet)
     const autoShare = profile?.auto_share_achievements ?? true
     if (!autoShare) {
-      console.log('[createMilestonePost] Auto-share disabled for user')
       return false
     }
 
@@ -76,7 +75,6 @@ export async function createMilestonePost(
       return false
     }
 
-    console.log('[createMilestonePost] Created milestone post:', data.type, data.title)
     return true
   } catch (err) {
     console.warn('[createMilestonePost] Unexpected error:', err)

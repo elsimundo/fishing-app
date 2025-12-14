@@ -39,35 +39,29 @@ export function CatchCard({ item, showDelete = false }: CatchCardProps) {
     <div className="relative">
       <Link to={`/catches/${item.id}`} className="block">
         <article className="w-full rounded-xl border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40">
-          {/* Top row: badge + date */}
-          <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 font-medium text-muted-foreground">
-              🐟 Catch
-            </span>
-            <span className={showDelete ? 'pr-6' : ''}>
-              {new Date(item.caught_at).toLocaleDateString(undefined, {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-            </span>
-          </div>
-
           {/* Content row: thumbnail + details */}
           <div className="flex gap-3">
             {item.photo_url && (
               <img
                 src={item.photo_url}
                 alt={item.species}
-                className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                className="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
                 loading="lazy"
               />
             )}
             <div className="min-w-0 flex-1">
-              {/* Title: species + stats */}
-              <p className="text-sm font-semibold text-foreground">
-                {item.species}{statsSuffix}
-              </p>
+              <div className="flex items-start justify-between gap-2">
+                <p className="min-w-0 text-sm font-semibold text-foreground">
+                  {item.species}{statsSuffix}
+                </p>
+                <span className={`flex-shrink-0 text-[11px] text-muted-foreground ${showDelete ? 'pr-6' : ''}`}>
+                  {new Date(item.caught_at).toLocaleDateString(undefined, {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
 
               {/* Location */}
               <p className="mt-0.5 text-xs text-muted-foreground">

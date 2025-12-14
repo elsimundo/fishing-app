@@ -13,9 +13,7 @@ export function useCelebrateChallenges() {
     challengeSlugs: string[],
     levelUp?: { newLevel: number; leveledUp: boolean } | null
   ) => {
-    console.log('[Celebration] celebrateChallenges called with:', challengeSlugs, levelUp)
     if (challengeSlugs.length === 0) {
-      console.log('[Celebration] No challenges to celebrate')
       return
     }
 
@@ -25,10 +23,8 @@ export function useCelebrateChallenges() {
       .select('id, title, description, icon, difficulty, xp_reward, category, rarity')
       .in('slug', challengeSlugs)
 
-    console.log('[Celebration] Fetched challenges:', challenges, 'error:', error)
 
     if (!challenges || challenges.length === 0) {
-      console.log('[Celebration] No challenges found in database for slugs:', challengeSlugs)
       return
     }
 
@@ -51,12 +47,9 @@ export function useCelebrateChallenges() {
     } : null
 
     // Trigger celebration(s)
-    console.log('[Celebration] Triggering celebration for', achievements.length, 'achievements')
     if (achievements.length === 1) {
-      console.log('[Celebration] Calling celebrate() with:', achievements[0])
       celebrate(achievements[0], levelUpData)
     } else {
-      console.log('[Celebration] Calling celebrateMultiple() with:', achievements)
       celebrateMultiple(achievements, levelUpData)
     }
   }, [celebrate, celebrateMultiple])

@@ -18,16 +18,23 @@ import {
   Shield,
   Trash2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Megaphone,
+  Pin,
+  X
 } from 'lucide-react'
 import { UpgradeToPremiumCard } from '../components/lakes/UpgradeToPremiumCard'
 import { useLakeRole, useLakeTeam, useAddLakeTeamMember, useRemoveLakeTeamMember, useUpdateLakeTeamRole } from '../hooks/useLakeTeam'
+import { useLakeAnnouncements, useCreateLakeAnnouncement, useDeleteLakeAnnouncement } from '../hooks/useLakeAnnouncements'
+import { EditLakeModal } from '../components/lakes/EditLakeModal'
 import { toast } from 'react-hot-toast'
 
 export default function LakeOwnerDashboard() {
   const { lakeId } = useParams<{ lakeId: string }>()
   const navigate = useNavigate()
   const [showTeamSection, setShowTeamSection] = useState(false)
+  const [showAnnouncementsSection, setShowAnnouncementsSection] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   // Fetch lake details
   const { data: lake, isLoading: lakeLoading } = useQuery({
@@ -50,6 +57,9 @@ export default function LakeOwnerDashboard() {
   
   // Get team members
   const { data: teamData } = useLakeTeam(lakeId)
+  
+  // Get announcements
+  const { data: announcements } = useLakeAnnouncements(lakeId)
 
   // Check permissions based on role
   const hasAccess = userRole === 'owner' || userRole === 'manager' || userRole === 'bailiff'
@@ -181,18 +191,26 @@ export default function LakeOwnerDashboard() {
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{lake.name}</p>
                 </div>
-                {isPremium ? (
-                  <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-                    <Crown size={14} /> Premium
-                  </span>
-                ) : (
-                  <Link
-                    to="/premium" // TODO: link to upgrade page
-                    className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-white hover:bg-primary/90"
-                  >
-                    <Crown size={14} /> Upgrade to Premium
-                  </Link>
-                )}
+                <div className="flex items-center gap-2">
+                  {canEdit && (
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(true)}
+                      className="rounded-lg bg-navy-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-navy-900"
+                    >
+                      Edit Details
+                    </button>
+                  )}
+                  {isPremium ? (
+                    <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+                      <Crown size={14} /> Premium
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                      <Crown size={14} /> Premium Coming Soon
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -373,6 +391,51 @@ export default function LakeOwnerDashboard() {
               </div>
             )}
 
+            {/* Announcements Management - Owner & Manager only */}
+            {canEdit && (
+              <div className="rounded-2xl bg-card shadow-sm overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowAnnouncementsSection(!showAnnouncementsSection)}
+                  className="w-full flex items-center justify-between p-5 text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                      <Megaphone size={20} />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-semibold text-foreground">Announcements</h2>
+                      <p className="text-xs text-muted-foreground">
+                        {announcements?.length || 0} active update{(announcements?.length || 0) !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                  {showAnnouncementsSection ? <ChevronUp size={20} className="text-muted-foreground" /> : <ChevronDown size={20} className="text-muted-foreground" />}
+                </button>
+
+                {showAnnouncementsSection && (
+                  <div className="border-t border-border p-5 space-y-4">
+                    {/* Create new announcement */}
+                    <CreateAnnouncementForm lakeId={lakeId!} />
+
+                    {/* Existing announcements */}
+                    {announcements && announcements.length > 0 && (
+                      <div className="space-y-2 pt-4 border-t border-border">
+                        <p className="text-xs font-semibold text-foreground mb-3">Active Announcements</p>
+                        {announcements.map((announcement) => (
+                          <AnnouncementRow
+                            key={announcement.id}
+                            announcement={announcement}
+                            lakeId={lakeId!}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Upgrade to Premium Card */}
             <UpgradeToPremiumCard
               lakeId={lake.id}
@@ -381,6 +444,11 @@ export default function LakeOwnerDashboard() {
               premiumExpiresAt={(lake as { premium_expires_at?: string }).premium_expires_at}
             />
           </div>
+        )}
+
+        {/* Edit Lake Modal */}
+        {showEditModal && lake && (
+          <EditLakeModal lake={lake} onClose={() => setShowEditModal(false)} />
         )}
       </main>
     </Layout>
@@ -578,5 +646,140 @@ function AddTeamMemberForm({ lakeId }: { lakeId: string }) {
         <strong>Bailiff:</strong> View-only dashboard access.
       </p>
     </form>
+  )
+}
+
+// Create announcement form
+function CreateAnnouncementForm({ lakeId }: { lakeId: string }) {
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [isPinned, setIsPinned] = useState(false)
+  const { mutate: createAnnouncement, isPending } = useCreateLakeAnnouncement()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!title.trim() || !content.trim()) {
+      toast.error('Please fill in both title and content')
+      return
+    }
+
+    createAnnouncement(
+      { lakeId, title: title.trim(), content: content.trim(), isPinned },
+      {
+        onSuccess: () => {
+          toast.success('Announcement posted!')
+          setTitle('')
+          setContent('')
+          setIsPinned(false)
+        },
+        onError: () => {
+          toast.error('Failed to post announcement')
+        },
+      }
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <p className="text-xs font-semibold text-foreground flex items-center gap-1">
+        <Megaphone size={14} /> Post New Update
+      </p>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Title (e.g., 'Lake Closed for Restocking')"
+        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800"
+        maxLength={100}
+      />
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Details about the update..."
+        rows={3}
+        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-navy-800 focus:outline-none focus:ring-1 focus:ring-navy-800 resize-none"
+        maxLength={500}
+      />
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isPinned}
+            onChange={(e) => setIsPinned(e.target.checked)}
+            className="rounded border-border"
+          />
+          <Pin size={12} />
+          Pin to top
+        </label>
+        <button
+          type="submit"
+          disabled={isPending || !title.trim() || !content.trim()}
+          className="rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-900 disabled:bg-navy-400"
+        >
+          {isPending ? 'Posting...' : 'Post Update'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+// Announcement row component
+function AnnouncementRow({
+  announcement,
+  lakeId,
+}: {
+  announcement: {
+    id: string
+    title: string
+    content: string
+    is_pinned: boolean
+    created_at: string
+    author?: {
+      username: string | null
+      full_name: string | null
+    }
+  }
+  lakeId: string
+}) {
+  const { mutate: deleteAnnouncement, isPending } = useDeleteLakeAnnouncement()
+
+  const handleDelete = () => {
+    if (!confirm('Delete this announcement?')) return
+    deleteAnnouncement(
+      { id: announcement.id, lakeId },
+      {
+        onSuccess: () => toast.success('Announcement deleted'),
+        onError: () => toast.error('Failed to delete'),
+      }
+    )
+  }
+
+  return (
+    <div className={`flex items-start gap-3 p-3 rounded-lg ${announcement.is_pinned ? 'bg-amber-50' : 'bg-muted'}`}>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-foreground flex items-center gap-2">
+          {announcement.is_pinned && <Pin size={12} className="text-amber-600" />}
+          {announcement.title}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{announcement.content}</p>
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          {new Date(announcement.created_at).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          })}
+          {' · '}
+          {announcement.author?.full_name || announcement.author?.username || 'Staff'}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={isPending}
+        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+      >
+        <X size={16} />
+      </button>
+    </div>
   )
 }

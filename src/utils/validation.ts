@@ -21,7 +21,7 @@ export function validateUsername(username: string): { valid: boolean; error?: st
     return { valid: false, error: 'Username cannot start with underscore' }
   }
 
-  const reserved = ['admin', 'moderator', 'theswim', 'support', 'help', 'api', 'www']
+  const reserved = ['admin', 'moderator', 'catchi', 'support', 'help', 'api', 'www']
   if (reserved.includes(trimmed.toLowerCase())) {
     return { valid: false, error: 'This username is reserved' }
   }

@@ -42,7 +42,6 @@ export async function getTideData(
   // ALWAYS supplement with WorldTides predictions for future tide times
   // UK-EA only provides historical readings, not future predictions
   if (isUKWaters(lat, lng)) {
-    console.log('[Tides] Trying UK Environment Agency (UK waters)...')
     try {
       const gaugeData = await getUKTideGaugeData(lat, lng)
       if (gaugeData) {
@@ -51,7 +50,6 @@ export async function getTideData(
           // UK-EA only has real-time readings, NOT future predictions
           // Always get WorldTides predictions for tide times
           if (isWorldTidesConfigured()) {
-            console.log('[Tides] Getting WorldTides predictions for future tide times...')
             try {
               const predictions = await getWorldTidesPredictions(lat, lng, 3) // 3 days
               if (predictions.length > 0) {
@@ -66,19 +64,14 @@ export async function getTideData(
                     nextLow: futurePredictions.find(p => p.type === 'low') || null,
                   },
                 }
-                console.log(`[Tides] WorldTides: ${futurePredictions.length} future tide times added ✓`)
               }
             } catch (e) {
-              console.log('[Tides] WorldTides supplement failed, using UK-EA only (no future predictions)')
             }
           } else {
-            console.log('[Tides] WorldTides not configured - no future tide times available')
           }
-          console.log('[Tides] UK-EA data found ✓')
           return tideData
         }
       }
-      console.log('[Tides] No nearby UK-EA station, trying WorldTides...')
     } catch (error) {
       console.warn('[Tides] UK-EA failed:', error)
     }
@@ -86,14 +79,11 @@ export async function getTideData(
 
   // Try NOAA for US waters (free, no API key needed)
   if (isUSWaters(lat, lng)) {
-    console.log('[Tides] Trying NOAA (US waters)...')
     try {
       const noaaData = await getNOAATideData(lat, lng)
       if (noaaData) {
-        console.log('[Tides] NOAA data found ✓')
         return noaaData
       }
-      console.log('[Tides] No nearby NOAA station, trying WorldTides...')
     } catch (error) {
       console.warn('[Tides] NOAA failed:', error)
     }
@@ -101,21 +91,17 @@ export async function getTideData(
 
   // Fallback to WorldTides for global coverage
   if (isWorldTidesConfigured()) {
-    console.log('[Tides] Trying WorldTides (global)...')
     try {
       const worldTidesData = await getWorldTidesData(lat, lng)
       if (worldTidesData) {
-        console.log('[Tides] WorldTides data found ✓')
         return worldTidesData
       }
     } catch (error) {
       console.warn('[Tides] WorldTides failed:', error)
     }
   } else {
-    console.log('[Tides] WorldTides API key not configured')
   }
 
-  console.log('[Tides] No tide data available for this location')
   return null
 }
 
@@ -130,23 +116,19 @@ export async function getTideDataForDate(
 ): Promise<TideData | null> {
   // For future dates, we only use WorldTides predictions (no live data)
   if (!isWorldTidesConfigured()) {
-    console.log('[Tides] WorldTides not configured - cannot fetch future tide data')
     return null
   }
 
-  console.log(`[Tides] Fetching tides for ${startDate.toISOString().split('T')[0]} (${days} days)...`)
   
   try {
     const predictions = await getWorldTidesPredictionsForDate(lat, lng, startDate, days)
     if (predictions.length === 0) {
-      console.log('[Tides] No predictions returned for date range')
       return null
     }
 
     // Find station info
     const station = await findNearestWorldTidesStation(lat, lng)
     if (!station) {
-      console.log('[Tides] No station found')
       return null
     }
 

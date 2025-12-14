@@ -5,6 +5,7 @@ import type { Catch, WaterType } from '../types'
 
 export type CatchWithWaterType = Catch & {
   water_type?: WaterType | null
+  multi_catch_group_id?: string | null
 }
 
 async function fetchCatches(userId: string, sessionId?: string): Promise<CatchWithWaterType[]> {

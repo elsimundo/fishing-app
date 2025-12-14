@@ -127,6 +127,7 @@ export default function CreateCompetitionPage() {
       case 2: // Awards
         return formData.awards.length > 0
       case 3: // Rules
+        return formData.allowed_species.length > 0
       case 4: // Privacy
         return true
       default:

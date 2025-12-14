@@ -41,6 +41,7 @@ import CatchesPage from './pages/CatchesPage'
 import { FishIdentifierPage } from './pages/FishIdentifierPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
@@ -93,7 +94,7 @@ function App() {
         <Route path="/admin/challenges" element={<AdminChallengesPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

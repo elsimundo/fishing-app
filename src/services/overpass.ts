@@ -105,7 +105,6 @@ function parseOverpassResponse(data: {
       if (excludeKeywords.some(keyword => name.includes(keyword))) {
         const isClearlyFishing = name.includes('fishing') || name.includes('angler')
         if (!isClearlyFishing) {
-          console.log(`[OSM] Filtered out (keyword): ${tags.name}`)
           continue
         }
       }
@@ -129,7 +128,6 @@ function parseOverpassResponse(data: {
         name.includes('cruise')
 
       if (!isBoatContext) {
-        console.log(`[OSM] Filtered out (context): ${tags.name}`)
         continue
       }
     }
@@ -187,7 +185,6 @@ export async function getTackleShopsInBounds(bounds: {
     const data = await response.json()
     const shops = parseOverpassResponse(data, 'shops')
 
-    console.log(`[OSM] Found ${shops.length} tackle shops in area`)
 
     return {
       shops,
@@ -255,7 +252,6 @@ export async function getClubsInBounds(bounds: {
     const data = await response.json()
     const shops = parseOverpassResponse(data, 'clubs')
 
-    console.log(`[OSM] Found ${shops.length} fishing clubs in area`)
 
     return {
       shops,
@@ -322,7 +318,6 @@ export async function getChartersInBounds(bounds: {
     const data = await response.json()
     const shops = parseOverpassResponse(data, 'charters')
 
-    console.log(`[OSM] Found ${shops.length} charter boats in area`)
 
     return {
       shops,

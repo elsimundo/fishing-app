@@ -87,7 +87,6 @@ export function useCatchXP() {
       // If rate limited, award no XP but don't error
       if ((hourlyCount || 0) > RATE_LIMITS.MAX_CATCHES_PER_HOUR || 
           (dailyCount || 0) > RATE_LIMITS.MAX_CATCHES_PER_DAY) {
-        console.log('Rate limited - no XP awarded')
         return {
           xpAwarded: 0,
           breakdown: { base: 0, speciesBonus: 0, weightBonus: 0, photoBonus: 0, weeklySpeciesBonus: 0, total: 0 },
@@ -180,7 +179,6 @@ export function useCatchXP() {
       if (input.hasPhoto) {
         await checkChallenges(user.id, input, challengesCompleted)
       } else {
-        console.log('No photo - challenges not processed (add photo within 1 hour to earn challenge progress)')
       }
       
       const result = xpResult?.[0] || { new_xp: 0, new_level: 1, leveled_up: false }
@@ -196,7 +194,6 @@ export function useCatchXP() {
       }
     },
     onSuccess: (data) => {
-      console.log('[useCatchXP] onSuccess - challengesCompleted:', data.challengesCompleted)
       queryClient.invalidateQueries({ queryKey: ['user-xp'] })
       queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
       queryClient.invalidateQueries({ queryKey: ['user-weekly-stats'] })
@@ -220,7 +217,6 @@ export function useCatchXP() {
       
       // Challenge completion - toast is now secondary to the celebration modal
       if (data.challengesCompleted.length > 0) {
-        console.log('[useCatchXP] Challenges completed:', data.challengesCompleted)
       }
     },
     onError: (error) => {
@@ -240,7 +236,6 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
   
-  console.log('[Challenges] Total catch count for user:', totalCatches)
   
   // Get unique species count
   const { data: speciesData } = await supabase
@@ -250,7 +245,6 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   
   const speciesCount = new Set(speciesData?.map(c => c.species.toLowerCase())).size
   
-  console.log('[Challenges] Unique species count:', speciesCount)
   
   // ============================================
   // 1. MILESTONE CHALLENGES (catch count, species count)
@@ -268,7 +262,6 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   
   for (const m of milestones) {
     const current = m.type === 'catch' ? (totalCatches || 0) : speciesCount
-    console.log(`[Challenges] Checking ${m.slug}: current=${current}, need=${m.value}, will award=${current >= m.value}`)
     if (current >= m.value) {
       await completeChallenge(userId, m.slug, current, m.value, completed, input.catchId)
     }
@@ -455,7 +448,6 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
         }
       }
     } else {
-      console.log(`Location challenge skipped: session duration ${sessionDurationMins.toFixed(1)} mins < ${MIN_SESSION_DURATION_MINS} mins required`)
     }
   }
   
@@ -794,7 +786,6 @@ async function completeChallenge(
     .maybeSingle()
   
   if (!challenge) {
-    console.log(`[completeChallenge] Challenge not found: ${slug}`)
     return
   }
   
@@ -807,7 +798,6 @@ async function completeChallenge(
     .limit(1)
   
   const existing = existingRows?.[0]
-  console.log(`[completeChallenge] ${slug}: existing=${JSON.stringify(existing)}, already_completed=${!!existing?.completed_at}`)
   if (existing?.completed_at) return
   
   // Complete the challenge
@@ -1023,7 +1013,6 @@ export function usePhotoAddedXP() {
       const hourInMs = 60 * 60 * 1000
       
       if (now - caughtTime > hourInMs) {
-        console.log('Photo added after 1-hour grace period - no bonus XP')
         return { xpAwarded: 0, challengesProcessed: false }
       }
       
@@ -1038,7 +1027,6 @@ export function usePhotoAddedXP() {
       
       // If already got 10+ XP, they had a photo originally
       if (existingTransaction && existingTransaction.amount >= XP_VALUES.BASE_CATCH) {
-        console.log('Full XP already awarded for this catch')
         return { xpAwarded: 0, challengesProcessed: false }
       }
       

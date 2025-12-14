@@ -162,7 +162,6 @@ export async function fetchLakesFromOSM(bounds: Bounds): Promise<Partial<Lake>[]
     const data = await response.json()
     const lakes = parseOverpassResponse(data)
     
-    console.log(`[OSM Lakes] Found ${lakes.length} lakes in bounds`)
     return lakes
   } catch (error) {
     console.error('[OSM Lakes] Fetch error:', error)

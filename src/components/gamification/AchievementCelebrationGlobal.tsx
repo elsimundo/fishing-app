@@ -21,7 +21,6 @@ export function AchievementCelebrationGlobal() {
   const { data: profile } = useProfile()
   const username = profile?.username || 'angler'
 
-  console.log('[AchievementCelebrationGlobal] Rendering - current:', current, 'isOpen:', isOpen)
 
   if (!current) return null
 

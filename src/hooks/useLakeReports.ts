@@ -3,13 +3,21 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export type LakeReportReason =
+  // Listing issues
   | 'not_a_fishing_lake'
   | 'incorrect_info'
   | 'duplicate'
   | 'closed_permanently'
+  | 'inappropriate_content'
+  // Venue issues (for anglers to report on-site problems)
+  | 'littering'
+  | 'broken_facilities'
+  | 'fish_health'
+  | 'overcrowding'
+  | 'rule_violations'
   | 'safety_issue'
   | 'access_problem'
-  | 'inappropriate_content'
+  | 'antisocial_behaviour'
   | 'other'
 
 export type LakeReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed'
@@ -40,14 +48,34 @@ export interface LakeReport {
 }
 
 export const REPORT_REASON_LABELS: Record<LakeReportReason, string> = {
+  // Listing issues
   not_a_fishing_lake: 'Not a fishing lake',
   incorrect_info: 'Incorrect information',
   duplicate: 'Duplicate listing',
   closed_permanently: 'Venue closed permanently',
+  inappropriate_content: 'Inappropriate content',
+  // Venue issues
+  littering: 'Littering / rubbish',
+  broken_facilities: 'Broken facilities (toilets, swims, etc.)',
+  fish_health: 'Sick or dead fish',
+  overcrowding: 'Overcrowding',
+  rule_violations: 'Rule violations by other anglers',
   safety_issue: 'Safety concern',
   access_problem: 'Access problem',
-  inappropriate_content: 'Inappropriate content',
+  antisocial_behaviour: 'Antisocial behaviour',
   other: 'Other issue',
+}
+
+// Group reasons by category for UI
+export const REPORT_REASON_CATEGORIES = {
+  listing: {
+    label: 'Listing Issues',
+    reasons: ['not_a_fishing_lake', 'incorrect_info', 'duplicate', 'closed_permanently', 'inappropriate_content'] as LakeReportReason[],
+  },
+  venue: {
+    label: 'Venue Issues',
+    reasons: ['littering', 'broken_facilities', 'fish_health', 'overcrowding', 'rule_violations', 'safety_issue', 'access_problem', 'antisocial_behaviour', 'other'] as LakeReportReason[],
+  },
 }
 
 /**

@@ -25,6 +25,8 @@ export interface ExploreMarker {
   topSpecies?: string
 }
 
+type ExploreMapStyle = 'standard' | 'satellite'
+
 interface ExploreMapProps {
   markers: ExploreMarker[]
   center?: { lat: number; lng: number }
@@ -32,9 +34,15 @@ interface ExploreMapProps {
   zoom?: number
   userLocation?: { lat: number; lng: number }
   focusPoint?: { lat: number; lng: number; zoom?: number } | null // Fly to this point when set
+  mapStyle?: ExploreMapStyle
   onMarkerClick?: (marker: ExploreMarker) => void
   onBoundsChange?: (bounds: { north: number; south: number; east: number; west: number }) => void
   onMapClick?: (coords: { lat: number; lng: number }) => void
+}
+
+const MAP_STYLES: Record<ExploreMapStyle, string> = {
+  standard: 'mapbox://styles/mapbox/outdoors-v12',
+  satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
 }
 
 const typeColors: Record<ExploreMarkerType, string> = {
@@ -49,7 +57,7 @@ const typeColors: Record<ExploreMarkerType, string> = {
   zone: '#2563eb', // Blue for fishing zones - matches catches filter pill
 }
 
-export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, focusPoint, onMarkerClick, onBoundsChange, onMapClick }: ExploreMapProps) {
+export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, focusPoint, mapStyle = 'satellite', onMarkerClick, onBoundsChange, onMapClick }: ExploreMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMapType | null>(null)
   const markersRef = useRef<Marker[]>([])
@@ -77,7 +85,7 @@ export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, foc
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/outdoors-v12',
+      style: MAP_STYLES[mapStyle],
       center: [defaultCenter.lng, defaultCenter.lat],
       zoom,
       bearing: 0,
@@ -121,6 +129,27 @@ export function ExploreMap({ markers, initialBounds, zoom = 9, userLocation, foc
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Empty deps - only init once
+
+  // Resize map when container size changes (e.g. expanded view)
+  useEffect(() => {
+    const map = mapRef.current
+    const container = mapContainerRef.current
+    if (!map || !container || typeof ResizeObserver === 'undefined') return
+
+    const observer = new ResizeObserver(() => {
+      map.resize()
+    })
+
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  // Switch map style without re-initializing the map
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    map.setStyle(MAP_STYLES[mapStyle])
+  }, [mapStyle])
 
   // Respond to initialBounds changes (e.g., when loaded from localStorage)
   const initialBoundsApplied = useRef(false)

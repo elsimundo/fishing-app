@@ -5,7 +5,6 @@ const WORLDTIDES_BASE_URL = 'https://www.worldtides.info/api/v3'
 function getApiKey(): string | null {
   const key = import.meta.env.VITE_WORLDTIDES_API_KEY || null
   if (!key) {
-    console.log('[WorldTides] API key not found in environment')
   }
   return key
 }
@@ -60,14 +59,11 @@ export async function findNearestWorldTidesStation(
   }
 
   // Log all available stations for debugging
-  console.log('[WorldTides] Available stations:')
   data.stations.slice(0, 5).forEach((s: WorldTidesStation, i: number) => {
-    console.log(`  ${i + 1}. ${s.name}`)
   })
 
   // API returns stations sorted by distance
   const nearest = data.stations[0] as WorldTidesStation
-  console.log(`[WorldTides] Selected: ${nearest.name}`)
 
   return {
     id: nearest.id,
@@ -92,7 +88,6 @@ export async function getWorldTidesPredictions(
     throw new Error('WorldTides API key not configured')
   }
 
-  console.log(`[WorldTides] Fetching predictions for ${lat}, ${lng} (${days} days)...`)
 
   // Format today's date as YYYY-MM-DD
   const today = new Date().toISOString().split('T')[0]
@@ -123,11 +118,9 @@ export async function getWorldTidesPredictions(
   }
 
   if (!data.extremes || data.extremes.length === 0) {
-    console.log('[WorldTides] No extremes data returned')
     return []
   }
 
-  console.log(`[WorldTides] Got ${data.extremes.length} tide predictions`)
 
   return data.extremes.map((extreme: WorldTidesExtreme) => ({
     time: new Date(extreme.dt * 1000).toISOString(),
@@ -152,7 +145,6 @@ export async function getWorldTidesPredictionsForDate(
   }
 
   const dateStr = startDate.toISOString().split('T')[0]
-  console.log(`[WorldTides] Fetching predictions for ${dateStr} (${days} days)...`)
 
   const params = new URLSearchParams({
     lat: lat.toString(),
@@ -179,11 +171,9 @@ export async function getWorldTidesPredictionsForDate(
   }
 
   if (!data.extremes || data.extremes.length === 0) {
-    console.log('[WorldTides] No extremes data returned for date range')
     return []
   }
 
-  console.log(`[WorldTides] Got ${data.extremes.length} tide predictions for ${dateStr}`)
 
   return data.extremes.map((extreme: WorldTidesExtreme) => ({
     time: new Date(extreme.dt * 1000).toISOString(),

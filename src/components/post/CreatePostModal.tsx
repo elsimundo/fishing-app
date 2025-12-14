@@ -50,6 +50,17 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       },
     },
     {
+      id: 'compete',
+      icon: '🏆',
+      title: 'Compete',
+      subtitle: 'Join competitions and see leaderboards',
+      color: 'bg-rose-100 dark:bg-rose-900/30',
+      onClick: () => {
+        onClose()
+        navigate('/compete')
+      },
+    },
+    {
       id: 'share-update',
       icon: '✏️',
       title: 'Share Update',

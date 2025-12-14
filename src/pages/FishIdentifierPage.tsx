@@ -46,7 +46,6 @@ export function FishIdentifierPage() {
 
     const [extractedMetadata] = await Promise.all([metadataPromise, aiPromise])
     
-    console.log('[FishIdentifier] EXIF metadata extracted:', extractedMetadata)
     setMetadata(extractedMetadata)
   }
 

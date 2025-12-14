@@ -314,8 +314,6 @@ export function useDeleteCatch() {
           .eq('reference_id', id)
           .maybeSingle()
         
-        console.log('[DeleteCatch] Looking for XP transaction for catch:', id)
-        console.log('[DeleteCatch] Transaction found:', transaction, 'error:', txError)
         
         if (transaction && transaction.amount > 0) {
           // Get current XP and subtract
@@ -325,18 +323,15 @@ export function useDeleteCatch() {
             .eq('id', user.id)
             .single()
           
-          console.log('[DeleteCatch] Current profile XP:', profile?.xp)
           
           const newXP = Math.max(0, (profile?.xp || 0) - transaction.amount)
           
-          console.log('[DeleteCatch] Reversing', transaction.amount, 'XP, new XP will be:', newXP)
           
           const { error: updateError } = await supabase
             .from('profiles')
             .update({ xp: newXP, level: calculateLevel(newXP) })
             .eq('id', user.id)
           
-          console.log('[DeleteCatch] Profile update error:', updateError)
           
           // Mark transaction as reversed
           await supabase
@@ -346,7 +341,6 @@ export function useDeleteCatch() {
           
           xpReversed = transaction.amount
         } else {
-          console.log('[DeleteCatch] No XP transaction found to reverse')
         }
         
         // Delete the catch first
@@ -372,7 +366,6 @@ export function useDeleteCatch() {
       return { xpReversed, challengesLost }
     },
     onSuccess: (data) => {
-      console.log('[DeleteCatch] Invalidating all catch-related queries')
       // Invalidate ALL catches queries using predicate to match any query starting with these keys
       void queryClient.invalidateQueries({ 
         predicate: (query) => {

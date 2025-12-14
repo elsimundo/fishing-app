@@ -43,14 +43,11 @@ export function AchievementCelebrationProvider({ children }: { children: ReactNo
   const [isShareOpen, setIsShareOpen] = useState(false)
 
   const celebrate = useCallback((achievement: AchievementData, levelUpData: LevelUpData | null = null) => {
-    console.log('[CelebrationProvider] celebrate() called with:', achievement, 'current:', current)
     if (!current) {
-      console.log('[CelebrationProvider] Setting current achievement and opening modal')
       setCurrent(achievement)
       setLevelUp(levelUpData)
       setIsOpen(true)
     } else {
-      console.log('[CelebrationProvider] Adding to queue, current already set')
       setQueue(prev => [...prev, achievement])
     }
   }, [current])

@@ -56,7 +56,6 @@ export function SmartCatchPhoto({
 
     const [extractedMetadata] = await Promise.all([metadataPromise, aiPromise])
     
-    console.log('[SmartCatchPhoto] EXIF metadata extracted:', extractedMetadata)
     setMetadata(extractedMetadata)
     if (onMetadataExtracted) {
       onMetadataExtracted(extractedMetadata)
