@@ -284,9 +284,9 @@ export function FishIdentifierPage() {
 
               {/* Loading State */}
               {loading ? (
-                <div className="flex items-center justify-center gap-3 rounded-lg bg-[#1BA9A0]/20 border border-[#1BA9A0]/40 py-6">
-                  <Loader2 size={20} className="animate-spin text-[#1BA9A0]" />
-                  <p className="text-sm font-medium text-[#1BA9A0]">Identifying fish...</p>
+                <div className="flex items-center justify-center gap-3 rounded-lg bg-primary/10 border border-primary/30 py-6">
+                  <Loader2 size={20} className="animate-spin text-primary" />
+                  <p className="text-sm font-medium text-primary">Identifying fish...</p>
                 </div>
               ) : null}
 

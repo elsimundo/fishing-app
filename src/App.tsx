@@ -43,10 +43,28 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import NotFoundPage from './pages/NotFoundPage'
 
+function RootRedirect() {
+  const search = window.location.search ?? ''
+  const hash = window.location.hash ?? ''
+  const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
+  const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search)
+
+  const type = hashParams.get('type') ?? searchParams.get('type')
+  const accessToken = hashParams.get('access_token') ?? searchParams.get('access_token')
+  const code = hashParams.get('code') ?? searchParams.get('code')
+  const isRecovery = type === 'recovery' && Boolean(accessToken || code)
+
+  if (isRecovery) {
+    return <Navigate to={`/reset-password${search}${hash}`} replace />
+  }
+
+  return <Navigate to="/logbook" replace />
+}
+
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/logbook" replace />} />
+      <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

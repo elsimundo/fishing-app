@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Fish, Loader2, MapPin, Trophy } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { format } from 'date-fns'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface ZoneCatch {
   id: string
@@ -30,6 +31,7 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
   const [catches, setCatches] = useState<ZoneCatch[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { formatWeight } = useWeightFormatter()
 
   useEffect(() => {
     async function fetchZoneCatches() {
@@ -107,7 +109,7 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
           Zones are ~1km hotspots. Exact marks stay private.
         </p>
         {topSpecies && (
-          <p className="mt-1 text-xs font-medium text-[#1BA9A0]">
+          <p className="mt-1 text-xs font-medium text-primary">
             Top species: {topSpecies}
           </p>
         )}
@@ -216,12 +218,12 @@ export function ZoneCatchesPanel({ zoneId, totalCatches, topSpecies, onClose }: 
                   </p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     {c.profiles?.username && (
-                      <span className="text-[#1BA9A0]">@{c.profiles.username}</span>
+                      <span className="text-primary">@{c.profiles.username}</span>
                     )}
                     <span>{format(new Date(c.caught_at), 'MMM d, yyyy')}</span>
                     {c.weight_kg && (
                       <span className="text-emerald-400 font-medium">
-                        {c.weight_kg}kg
+                        {formatWeight(c.weight_kg, { precision: 1 })}
                       </span>
                     )}
                   </div>

@@ -118,13 +118,13 @@ export function CompetitionInviteModal({ competitionId, competitionTitle, onClos
                 {selectedUsers.map(selectedUser => (
                   <div
                     key={selectedUser.id}
-                    className="flex items-center gap-2 rounded-full bg-[#1BA9A0]/20 border border-[#1BA9A0]/40 px-3 py-1 text-sm"
+                    className="flex items-center gap-2 rounded-full bg-primary/10 border border-primary/30 px-3 py-1 text-sm"
                   >
-                    <span className="font-medium text-[#1BA9A0]">{selectedUser.username}</span>
+                    <span className="font-medium text-primary">{selectedUser.username}</span>
                     <button
                       type="button"
                       onClick={() => toggleUserSelection(selectedUser)}
-                      className="text-[#1BA9A0] hover:text-white"
+                      className="text-primary hover:text-primary/80"
                     >
                       <X size={14} />
                     </button>

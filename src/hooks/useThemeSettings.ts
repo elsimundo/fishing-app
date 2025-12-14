@@ -52,6 +52,12 @@ export function useUpdateThemeSetting() {
 export function applyThemeSettings(settings: ThemeSetting[]) {
   const root = document.documentElement
 
+  root.style.removeProperty('--background')
+  root.style.removeProperty('--card')
+  root.style.removeProperty('--popover')
+  root.style.removeProperty('--sidebar')
+  root.style.removeProperty('--sidebar-accent')
+
   settings.forEach((setting) => {
     switch (setting.key) {
       case 'primary':
@@ -79,30 +85,21 @@ export function applyThemeSettings(settings: ThemeSetting[]) {
         root.style.setProperty('--color-teal-500', setting.value)
         break
       case 'background_dark':
-        // Only apply in dark mode
-        if (root.classList.contains('dark') || !root.classList.contains('light')) {
-          root.style.setProperty('--background', setting.value)
-          root.style.setProperty('--sidebar', setting.value)
-        }
+        root.style.setProperty('--background-dark', setting.value)
+        root.style.setProperty('--sidebar-dark', setting.value)
         break
       case 'card_dark':
-        if (root.classList.contains('dark') || !root.classList.contains('light')) {
-          root.style.setProperty('--card', setting.value)
-          root.style.setProperty('--popover', setting.value)
-          root.style.setProperty('--sidebar-accent', setting.value)
-        }
+        root.style.setProperty('--card-dark', setting.value)
+        root.style.setProperty('--popover-dark', setting.value)
+        root.style.setProperty('--sidebar-accent-dark', setting.value)
         break
       case 'background_light':
-        if (root.classList.contains('light')) {
-          root.style.setProperty('--background', setting.value)
-          root.style.setProperty('--sidebar', setting.value)
-        }
+        root.style.setProperty('--background-light', setting.value)
+        root.style.setProperty('--sidebar-light', setting.value)
         break
       case 'card_light':
-        if (root.classList.contains('light')) {
-          root.style.setProperty('--card', setting.value)
-          root.style.setProperty('--popover', setting.value)
-        }
+        root.style.setProperty('--card-light', setting.value)
+        root.style.setProperty('--popover-light', setting.value)
         break
     }
   })

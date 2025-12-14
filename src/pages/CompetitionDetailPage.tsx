@@ -28,6 +28,7 @@ import {
   ArrowLeft, Share2, MoreHorizontal, Clock, Trophy, UserPlus, Edit2, Trash2, Fish,
   MapPin, Gift, Plus, MessageSquare, X as XIcon
 } from 'lucide-react'
+import { useWeightFormatter } from '../hooks/useWeightFormatter'
 
 const typeConfig: Record<string, { label: string; icon: string }> = {
   heaviest_fish: { label: 'Heaviest Fish', icon: '⚖️' },
@@ -70,6 +71,7 @@ export default function CompetitionDetailPage() {
   const [activeTab, setActiveTab] = useState<'leaderboard' | 'my-catches' | 'catches' | 'timeline' | 'pending'>(
     'leaderboard'
   )
+  const { formatWeight } = useWeightFormatter()
 
   // Fetch the linked session for catches/map data
   const { data: linkedSession } = useSession(competition?.session_id ?? undefined)
@@ -532,7 +534,7 @@ export default function CompetitionDetailPage() {
                                 <div className="flex items-center justify-between">
                                   <p className="text-sm font-semibold text-foreground">
                                     {c.species}
-                                    {c.weight_kg != null && ` • ${c.weight_kg.toFixed(1)}kg`}
+                                    {c.weight_kg != null && ` • ${formatWeight(c.weight_kg, { precision: 1 })}`}
                                   </p>
                                   <span className="ml-2 text-[11px] text-muted-foreground">
                                     {format(new Date(c.caught_at), 'HH:mm')}

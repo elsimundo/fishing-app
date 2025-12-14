@@ -99,12 +99,12 @@ export default function MessagesPage() {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1BA9A0] font-bold text-white">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                       {otherUser.username?.[0]?.toUpperCase() || '?'}
                     </div>
                   )}
                   <div className="text-left">
-                    <p className="font-semibold text-white">
+                    <p className="font-semibold text-foreground">
                       {otherUser.full_name || otherUser.username}
                     </p>
                     <p className="text-xs text-muted-foreground">@{otherUser.username}</p>
@@ -127,7 +127,7 @@ export default function MessagesPage() {
             <div className="flex-1 overflow-y-auto">
             {loadingConversations ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : !conversations?.length ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -148,7 +148,7 @@ export default function MessagesPage() {
                       key={conv.id}
                       onClick={() => navigate(`/messages/${conv.id}`)}
                       className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-background ${
-                        conv.id === conversationId ? 'bg-[#0D4B4E]' : ''
+                        conv.id === conversationId ? 'bg-muted' : ''
                       }`}
                     >
                       {other.avatar_url ? (
@@ -158,7 +158,7 @@ export default function MessagesPage() {
                           className="h-12 w-12 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1BA9A0] font-bold text-white">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                           {other.username?.[0]?.toUpperCase() || '?'}
                         </div>
                       )}
@@ -178,7 +178,7 @@ export default function MessagesPage() {
                             {conv.last_message?.content || 'No messages yet'}
                           </p>
                           {conv.unread_count > 0 && (
-                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#1BA9A0] px-1.5 text-[10px] font-bold text-white">
+                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
                               {conv.unread_count}
                             </span>
                           )}
@@ -217,12 +217,12 @@ export default function MessagesPage() {
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1BA9A0] font-bold text-white">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                           {otherUser.username?.[0]?.toUpperCase() || '?'}
                         </div>
                       )}
                       <div className="text-left">
-                        <p className="font-semibold text-white">
+                        <p className="font-semibold text-foreground">
                           {otherUser.full_name || otherUser.username}
                         </p>
                         <p className="text-xs text-muted-foreground">@{otherUser.username}</p>
@@ -234,7 +234,7 @@ export default function MessagesPage() {
                 <div className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4">
                   {loadingMessages ? (
                     <div className="flex justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-[#1BA9A0]" />
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </div>
                   ) : !messages?.length ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -253,8 +253,8 @@ export default function MessagesPage() {
                             <div
                               className={`max-w-[75%] rounded-2xl px-4 py-2 ${
                                 isMe
-                                  ? 'bg-[#1BA9A0] text-white'
-                                  : 'bg-[#243B4A] text-white shadow-sm'
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-card text-foreground shadow-sm border border-border'
                               }`}
                             >
                               <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
@@ -290,7 +290,7 @@ export default function MessagesPage() {
               <button
                 onClick={handleSend}
                 disabled={!messageText.trim() || isSending}
-                className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy-800 text-white transition-colors hover:bg-navy-900 disabled:bg-navy-400"
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:bg-primary/60"
               >
                 {isSending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />

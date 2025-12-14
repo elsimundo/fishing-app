@@ -10,6 +10,7 @@ import { ErrorState } from '../components/ui/ErrorState'
 import { useSavedMarks } from '../hooks/useSavedMarks'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
+import { useWeightFormatter } from '../hooks/useWeightFormatter'
 
 export function CatchDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -22,6 +23,7 @@ export function CatchDetailPage() {
   const [catchItem, setCatchItem] = useState<Catch | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const { formatWeight } = useWeightFormatter()
 
   useEffect(() => {
     if (data) setCatchItem(data)
@@ -66,8 +68,7 @@ export function CatchDetailPage() {
     )
   }
 
-  const weightLabel =
-    catchItem.weight_kg != null ? `${catchItem.weight_kg.toFixed(1)} kg` : '—'
+  const weightLabel = formatWeight(catchItem.weight_kg, { precision: 1 })
   const lengthLabel =
     catchItem.length_cm != null ? `${catchItem.length_cm.toFixed(1)} cm` : '—'
   const timeLabel = catchItem.caught_at

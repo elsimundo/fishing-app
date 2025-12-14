@@ -11,8 +11,10 @@ import { Camera, X, Globe, Lock, Info, MapPin, ChevronDown } from 'lucide-react'
 import { useCatchXP } from '../../hooks/useCatchXP'
 import { useSavedMarks } from '../../hooks/useSavedMarks'
 import { useCelebrateChallenges } from '../../hooks/useCelebrateChallenges'
-import { compressPhoto } from '../../utils/imageCompression'
+import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 import { getCountryFromCoords } from '../../utils/reverseGeocode'
+import { lbsOzToKg } from '../../utils/weight'
+import { useWeightUnit } from '../../hooks/useWeightUnit'
 
 const quickLogSchema = z.object({
   species: z.string().min(1, 'Species is required'),
@@ -54,9 +56,30 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const { marks = [] } = useSavedMarks()
   const { celebrateChallenges } = useCelebrateChallenges()
   const freshwaterEnabled = useFreshwaterEnabled()
+  const { unit: weightUnit } = useWeightUnit()
+  const [imperialWeight, setImperialWeight] = useState<{ pounds: string; ounces: string }>({
+    pounds: '',
+    ounces: '',
+  })
   
   // Get species categories based on freshwater feature flag
-  const speciesCategories = getSpeciesByCategory(freshwaterEnabled)
+  const allSpeciesCategories = getSpeciesByCategory(freshwaterEnabled)
+
+  // Filter species based on session water type
+  // Freshwater types: Lake/Reservoir, River, Canal, Pond (also handle legacy 'freshwater' value)
+  // Saltwater types: Sea/Coastal (also handle legacy 'saltwater' value)
+  const sessionWaterType = session.water_type
+  const isLakeSession = Boolean(session.lake_id)
+  const isFreshwaterSession =
+    isLakeSession ||
+    (sessionWaterType && ['Lake/Reservoir', 'River', 'Canal', 'Pond', 'freshwater'].includes(sessionWaterType as string))
+  const isSaltwaterSession = sessionWaterType && ['Sea/Coastal', 'saltwater'].includes(sessionWaterType as string)
+
+  const speciesCategories = {
+    saltwater: isFreshwaterSession ? [] : allSpeciesCategories.saltwater,
+    coarse: isSaltwaterSession ? [] : allSpeciesCategories.coarse,
+    game: isSaltwaterSession ? [] : allSpeciesCategories.game,
+  }
 
   // Location state
   const hasSessionLocation = !!(session.latitude && session.longitude)
@@ -132,8 +155,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       return
     }
 
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error('Image must be less than 50MB')
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('Image must be less than 20MB')
       return
     }
 
@@ -154,20 +177,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
 
     setIsUploading(true)
     try {
-      // Compress the image before upload (max 2MB, 1920px)
-      const compressedFile = await compressPhoto(photoFile)
-      
-      const fileName = `${userId}-${Date.now()}.jpg`
-      const filePath = `catches/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('catches')
-        .upload(filePath, compressedFile)
-
-      if (uploadError) throw uploadError
-
-      const { data } = supabase.storage.from('catches').getPublicUrl(filePath)
-      return data.publicUrl
+      const { url } = await uploadCatchPhoto({ file: photoFile, userId })
+      return url
     } catch (error) {
       console.error('Error uploading photo:', error)
       throw error
@@ -179,6 +190,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<QuickLogValues>({
     resolver: zodResolver(quickLogSchema),
@@ -186,6 +198,14 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       caught_at: defaultNow,
     },
   })
+
+  useEffect(() => {
+    if (weightUnit !== 'imperial') return
+    const pounds = Number(imperialWeight.pounds) || 0
+    const ounces = Number(imperialWeight.ounces) || 0
+    const hasWeight = pounds > 0 || ounces > 0
+    setValue('weight_kg', hasWeight ? lbsOzToKg(pounds, ounces).toFixed(3) : '', { shouldValidate: false })
+  }, [imperialWeight, setValue, weightUnit])
 
   const onSubmit = async (values: QuickLogValues) => {
     setFormError(null)
@@ -204,8 +224,9 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     if (photoFile) {
       try {
         photoUrl = await uploadPhoto(userData.user.id)
-      } catch {
-        toast.error('Failed to upload photo')
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to upload photo'
+        toast.error(message)
         return
       }
     }
@@ -214,7 +235,18 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     const catchLat = activeLocation?.lat || session.latitude || null
     const catchLng = activeLocation?.lng || session.longitude || null
 
-    const weightKgNumber = values.weight_kg ? Number(values.weight_kg) : null
+    const weightKgNumber =
+      weightUnit === 'imperial'
+        ? (() => {
+            const pounds = Number(imperialWeight.pounds) || 0
+            const ounces = Number(imperialWeight.ounces) || 0
+            const hasWeight = pounds > 0 || ounces > 0
+            if (!hasWeight) return null
+            return Number(lbsOzToKg(pounds, ounces).toFixed(3))
+          })()
+        : values.weight_kg
+            ? Number(values.weight_kg)
+            : null
     const lengthCmNumber = values.length_cm ? Number(values.length_cm) : null
 
     // Detect country from coordinates (don't block on this)
@@ -311,13 +343,15 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
             {...register('species')}
           >
             <option value="">Select species</option>
-            <optgroup label="Saltwater">
-              {speciesCategories.saltwater.map((s: string) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </optgroup>
+            {speciesCategories.saltwater.length > 0 && (
+              <optgroup label="Saltwater">
+                {speciesCategories.saltwater.map((s: string) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </optgroup>
+            )}
             {speciesCategories.coarse.length > 0 && (
               <optgroup label="Coarse">
                 {speciesCategories.coarse.map((s: string) => (
@@ -452,19 +486,64 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
 
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="weight_kg">
-            Weight (kg)
+            Weight ({weightUnit === 'imperial' ? 'lb + oz' : 'kg'})
           </label>
-          <input
-            id="weight_kg"
-            type="number"
-            inputMode="decimal"
-            step="0.01"
-            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            {...register('weight_kg')}
-          />
-          {errors.weight_kg ? (
-            <p className="mt-1 text-[11px] text-red-400">{errors.weight_kg.message as string}</p>
-          ) : null}
+          {weightUnit === 'imperial' ? (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  id="weight_lbs"
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="1"
+                  value={imperialWeight.pounds}
+                  onChange={(e) =>
+                    setImperialWeight((prev) => ({
+                      ...prev,
+                      pounds: e.target.value,
+                    }))
+                  }
+                  placeholder="lb"
+                  className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+                <input
+                  id="weight_oz"
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="0.1"
+                  value={imperialWeight.ounces}
+                  onChange={(e) =>
+                    setImperialWeight((prev) => ({
+                      ...prev,
+                      ounces: e.target.value,
+                    }))
+                  }
+                  placeholder="oz"
+                  className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <input type="hidden" {...register('weight_kg')} />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Stored in kg, shown in your preferred unit.
+              </p>
+            </>
+          ) : (
+            <>
+              <input
+                id="weight_kg"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                {...register('weight_kg')}
+              />
+              {errors.weight_kg ? (
+                <p className="mt-1 text-[11px] text-red-400">{errors.weight_kg.message as string}</p>
+              ) : null}
+            </>
+          )}
         </div>
 
         <div>

@@ -57,7 +57,7 @@ export function MobileHeader() {
       {showMenu && (
         <div className="fixed inset-0 z-30 bg-black/40" onClick={() => setShowMenu(false)}>
           <div 
-            className="absolute right-4 top-16 w-48 rounded-xl bg-[#243B4A] shadow-lg ring-1 ring-[#334155]"
+            className="absolute right-4 top-16 w-48 rounded-xl bg-card shadow-lg ring-1 ring-border"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-2">
@@ -67,7 +67,7 @@ export function MobileHeader() {
                   navigate('/logbook')
                   setShowMenu(false)
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#1A2D3D] rounded-lg"
+                className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted rounded-lg"
               >
                 Logbook
               </button>

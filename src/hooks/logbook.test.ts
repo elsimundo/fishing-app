@@ -3,6 +3,8 @@
  * Run with: npx tsx src/hooks/logbook.test.ts
  */
 
+import { formatWeight } from '../utils/weight'
+
 // Types
 interface Catch {
   id: string
@@ -51,7 +53,8 @@ function findPersonalBest(sessions: Session[]): Catch | null {
 function formatPersonalBest(catch_: Catch | null): string {
   if (!catch_ || catch_.weight_kg == null) return '—'
   const lengthPart = catch_.length_cm != null ? ` · ${catch_.length_cm.toFixed(0)} cm` : ''
-  return `${catch_.weight_kg.toFixed(1)} kg · ${catch_.species}${lengthPart}`
+  const weightLabel = formatWeight(catch_.weight_kg, { precision: 1 })
+  return `${weightLabel} · ${catch_.species}${lengthPart}`
 }
 
 // Calculate top species across sessions
@@ -220,12 +223,12 @@ test('Empty sessions returns null', () => {
 
 test('Formats personal best with length', () => {
   const catch_ = { id: '1', species: 'Bass', weight_kg: 2.5, length_cm: 35 }
-  expect(formatPersonalBest(catch_)).toBe('2.5 kg · Bass · 35 cm')
+  expect(formatPersonalBest(catch_)).toBe('5 lb 8.2 oz · Bass · 35 cm')
 })
 
 test('Formats personal best without length', () => {
   const catch_ = { id: '1', species: 'Bass', weight_kg: 2.5, length_cm: null }
-  expect(formatPersonalBest(catch_)).toBe('2.5 kg · Bass')
+  expect(formatPersonalBest(catch_)).toBe('5 lb 8.2 oz · Bass')
 })
 
 test('Null catch returns dash', () => {

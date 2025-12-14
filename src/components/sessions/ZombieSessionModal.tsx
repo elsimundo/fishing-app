@@ -99,8 +99,8 @@ export function ZombieSessionModal({ session, onClose, onDismiss }: ZombieSessio
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-900/30">
-              <AlertTriangle className="h-5 w-5 text-amber-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+              <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
               <h2 className="font-semibold text-foreground">Session Still Running</h2>
@@ -118,14 +118,14 @@ export function ZombieSessionModal({ session, onClose, onDismiss }: ZombieSessio
 
         {/* Content */}
         <div className="p-4">
-          <div className="mb-4 rounded-lg bg-amber-900/30 border border-amber-500/40 p-3">
-            <div className="flex items-center gap-2 text-amber-400">
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/40 dark:bg-amber-900/30">
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
               <Clock size={16} />
               <span className="text-sm font-medium">
                 No activity for {timeSinceActivity}
               </span>
             </div>
-            <p className="mt-1 text-xs text-amber-300">
+            <p className="mt-1 text-xs text-amber-700/80 dark:text-amber-200">
               This session has been running without any logged catches. Did you forget to end it?
             </p>
           </div>
@@ -139,8 +139,8 @@ export function ZombieSessionModal({ session, onClose, onDismiss }: ZombieSessio
                 disabled={isPending}
                 className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-3 text-left transition-colors hover:bg-muted"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-900/30">
-                  <Play size={18} className="text-emerald-400" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                  <Play size={18} />
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Continue Session</p>
@@ -155,8 +155,8 @@ export function ZombieSessionModal({ session, onClose, onDismiss }: ZombieSessio
                 disabled={isPending}
                 className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-3 text-left transition-colors hover:bg-muted"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-900/30">
-                  <Square size={18} className="text-red-400" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+                  <Square size={18} />
                 </div>
                 <div>
                   <p className="font-medium text-foreground">End Session Now</p>
@@ -171,8 +171,8 @@ export function ZombieSessionModal({ session, onClose, onDismiss }: ZombieSessio
                 disabled={isPending}
                 className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-3 text-left transition-colors hover:bg-muted"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-900/30">
-                  <Calendar size={18} className="text-blue-400" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                  <Calendar size={18} />
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Enter End Time</p>

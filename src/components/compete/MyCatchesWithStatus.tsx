@@ -1,6 +1,7 @@
 import { useMyCompetitionCatches } from '../../hooks/useCompetitionLeaderboard'
 import { Clock, Check, X, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface MyCatchesWithStatusProps {
   competitionId: string
@@ -8,6 +9,7 @@ interface MyCatchesWithStatusProps {
 
 export function MyCatchesWithStatus({ competitionId }: MyCatchesWithStatusProps) {
   const { data: myCatches, isLoading } = useMyCompetitionCatches(competitionId)
+  const { formatWeight } = useWeightFormatter()
 
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Loading your catches...</div>
@@ -82,7 +84,7 @@ export function MyCatchesWithStatus({ competitionId }: MyCatchesWithStatusProps)
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="font-semibold text-foreground">
-                    {catch_.species} - {catch_.weight_kg}kg
+                    {catch_.species} - {formatWeight(catch_.weight_kg, { precision: 1 })}
                   </h4>
                   <div
                     className={`px-2 py-1 ${status.bgColor} ${status.textColor} rounded-full text-xs font-semibold flex items-center gap-1`}

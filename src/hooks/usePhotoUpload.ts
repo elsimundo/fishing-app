@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { compressPhoto } from '../utils/imageCompression'
 
-const MAX_FILE_SIZE_BEFORE_COMPRESSION = 50 * 1024 * 1024 // 50MB - modern phone photos can be large, we'll compress
+const MAX_FILE_SIZE_BEFORE_COMPRESSION = 20 * 1024 * 1024 // 20MB max before compression
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 
 export type PhotoUploadResult = {

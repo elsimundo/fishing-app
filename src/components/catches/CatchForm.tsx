@@ -27,6 +27,8 @@ import type { RegionCode } from '../../types/species'
 import type { PhotoMetadata } from '../../utils/exifExtractor'
 import { getCountryFromCoords } from '../../utils/reverseGeocode'
 import { useSavedMarks } from '../../hooks/useSavedMarks'
+import { kgToLbsOz, lbsOzToKg } from '../../utils/weight'
+import { useWeightUnit } from '../../hooks/useWeightUnit'
 
 const fishingStyles = [
   'Shore fishing',
@@ -168,9 +170,29 @@ export function CatchForm({
   const catchXP = useCatchXP()
   const { celebrateChallenges } = useCelebrateChallenges()
   const freshwaterEnabled = useFreshwaterEnabled()
+  const { unit: weightUnit } = useWeightUnit()
   
   // Get species categories based on freshwater feature flag
-  const speciesCategories = getSpeciesByCategory(freshwaterEnabled)
+  const allSpeciesCategories = getSpeciesByCategory(freshwaterEnabled)
+  
+  // Filter species based on session water type
+  // Freshwater types: Lake/Reservoir, River, Canal, Pond (also handle legacy 'freshwater' value)
+  // Saltwater types: Sea/Coastal (also handle legacy 'saltwater' value)
+  const sessionWaterType = activeSession?.water_type
+  const isLakeSession = Boolean(activeSession?.lake_id)
+  const isFreshwaterSession =
+    isLakeSession ||
+    (sessionWaterType && ['Lake/Reservoir', 'River', 'Canal', 'Pond', 'freshwater'].includes(sessionWaterType as string))
+  const isSaltwaterSession = sessionWaterType && ['Sea/Coastal', 'saltwater'].includes(sessionWaterType as string)
+  
+  // For freshwater sessions, only show coarse and game fish
+  // For saltwater sessions, only show saltwater fish
+  // If no session or unknown water type, show all
+  const speciesCategories = {
+    saltwater: isFreshwaterSession ? [] : allSpeciesCategories.saltwater,
+    coarse: isSaltwaterSession ? [] : allSpeciesCategories.coarse,
+    game: isSaltwaterSession ? [] : allSpeciesCategories.game,
+  }
   
   // Check if a specific session is requested via URL parameter
   const searchParams = new URLSearchParams(window.location.search)
@@ -195,6 +217,10 @@ export function CatchForm({
   const [isMultiCatch, setIsMultiCatch] = useState(false)
   const [multiCatchSpecies, setMultiCatchSpecies] = useState<string[]>([])
   const [selectedSpeciesForMulti, setSelectedSpeciesForMulti] = useState('')
+  const [imperialWeight, setImperialWeight] = useState<{ pounds: string; ounces: string }>({
+    pounds: '',
+    ounces: '',
+  })
   
   // Legal size tracking
   const [speciesId, setSpeciesId] = useState<string | null>(null)
@@ -263,6 +289,16 @@ export function CatchForm({
     defaultValues,
   })
 
+  useEffect(() => {
+    if (initialCatch?.weight_kg != null) {
+      const { pounds, ounces } = kgToLbsOz(initialCatch.weight_kg)
+      setImperialWeight({
+        pounds: pounds ? pounds.toString() : '',
+        ounces: ounces ? ounces.toString() : '',
+      })
+    }
+  }, [initialCatch?.weight_kg])
+
   const watchedLat = watch('latitude')
   const watchedLng = watch('longitude')
   const watchedSpecies = watch('species')
@@ -282,6 +318,14 @@ export function CatchForm({
     lat: Number.isNaN(latNumber ?? NaN) ? null : latNumber,
     lng: Number.isNaN(lngNumber ?? NaN) ? null : lngNumber,
   }
+
+  useEffect(() => {
+    if (weightUnit !== 'imperial') return
+    const pounds = Number(imperialWeight.pounds) || 0
+    const ounces = Number(imperialWeight.ounces) || 0
+    const hasWeight = pounds > 0 || ounces > 0
+    setValue('weight_kg', hasWeight ? lbsOzToKg(pounds, ounces).toFixed(3) : '', { shouldValidate: false })
+  }, [imperialWeight, setValue, weightUnit])
 
   // Track species changes to update speciesId
   useEffect(() => {
@@ -357,7 +401,18 @@ export function CatchForm({
     const latitudeNumber = values.latitude ? Number(values.latitude) : null
     const longitudeNumber = values.longitude ? Number(values.longitude) : null
 
-    const weightKgNumber = values.weight_kg ? Number(values.weight_kg) : null
+    const weightKgNumber =
+      weightUnit === 'imperial'
+        ? (() => {
+            const pounds = Number(imperialWeight.pounds) || 0
+            const ounces = Number(imperialWeight.ounces) || 0
+            const hasWeight = pounds > 0 || ounces > 0
+            if (!hasWeight) return null
+            return Number(lbsOzToKg(pounds, ounces).toFixed(3))
+          })()
+        : values.weight_kg
+            ? Number(values.weight_kg)
+            : null
     const lengthCmNumber = values.length_cm ? Number(values.length_cm) : null
     
     // Determine session_id - use existing or auto-create one
@@ -638,13 +693,13 @@ export function CatchForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {formError ? (
-        <div className="rounded-md bg-red-900/30 border border-red-500/40 px-3 py-2 text-xs text-red-400">
+        <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 dark:bg-red-900/30 dark:border-red-500/40 dark:text-red-400">
           {formError}
         </div>
       ) : null}
 
       {mode === 'create' && activeSession ? (
-        <div className="rounded-md bg-emerald-900/30 border border-emerald-500/40 px-3 py-2 text-[11px] text-emerald-400">
+        <div className="rounded-md bg-emerald-50 border border-emerald-200 px-3 py-2 text-[11px] text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-500/40 dark:text-emerald-400">
           This catch will be added to your active session:{' '}
           <span className="font-semibold">{activeSession.title || activeSession.location_name}</span>.
           {participantSpot?.spot_name && (
@@ -974,19 +1029,64 @@ export function CatchForm({
           <>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="weight_kg">
-                Weight (kg)
+                Weight ({weightUnit === 'imperial' ? 'lb + oz' : 'kg'})
               </label>
-              <input
-                id="weight_kg"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                {...register('weight_kg')}
-              />
-              {errors.weight_kg ? (
-                <p className="mt-1 text-[11px] text-red-600">{errors.weight_kg.message as string}</p>
-              ) : null}
+              {weightUnit === 'imperial' ? (
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      id="weight_lbs"
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="1"
+                      value={imperialWeight.pounds}
+                      onChange={(e) =>
+                        setImperialWeight((prev) => ({
+                          ...prev,
+                          pounds: e.target.value,
+                        }))
+                      }
+                      placeholder="lb"
+                      className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                    <input
+                      id="weight_oz"
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.1"
+                      value={imperialWeight.ounces}
+                      onChange={(e) =>
+                        setImperialWeight((prev) => ({
+                          ...prev,
+                          ounces: e.target.value,
+                        }))
+                      }
+                      placeholder="oz"
+                      className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <input type="hidden" {...register('weight_kg')} />
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    We store weights in kg but show your preference. Change units in Settings.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <input
+                    id="weight_kg"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    {...register('weight_kg')}
+                  />
+                  {errors.weight_kg ? (
+                    <p className="mt-1 text-[11px] text-red-600">{errors.weight_kg.message as string}</p>
+                  ) : null}
+                </>
+              )}
             </div>
 
             <div>

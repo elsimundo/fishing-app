@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Clock, Fish, MapPin, ChevronRight, Trophy } from 'lucide-react'
 import type { SessionWithCatches } from '../../types'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 type SessionCardProps = {
   session: SessionWithCatches
@@ -29,6 +30,7 @@ function getWaterTypeEmoji(type: string | null): string {
 }
 
 export function SessionCard({ session }: SessionCardProps) {
+  const { formatWeight } = useWeightFormatter()
   const title = session.title || session.location_name
   const dateLabel = format(new Date(session.started_at), 'd MMM yyyy')
   const durationLabel = formatDurationHours(session.stats.duration_hours)
@@ -119,7 +121,7 @@ export function SessionCard({ session }: SessionCardProps) {
                   <span>🏆 Best:</span>
                   <span className="font-semibold text-foreground">{biggest.species}</span>
                   {biggest.weight_kg != null && (
-                    <span className="text-emerald-400 font-medium">· {biggest.weight_kg.toFixed(1)} kg</span>
+                    <span className="text-emerald-400 font-medium">· {formatWeight(biggest.weight_kg, { precision: 1 })}</span>
                   )}
                 </div>
               )}

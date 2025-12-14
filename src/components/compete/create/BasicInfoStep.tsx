@@ -25,7 +25,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
             onChange={(e) => onChange({ title: e.target.value })}
             maxLength={100}
             placeholder="e.g. Weekend Bass Challenge"
-            className="w-full rounded-xl border-2 border-border px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+            className="w-full rounded-xl border-2 border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
           <p className="mt-1 text-right text-xs text-muted-foreground">{data.title.length}/100</p>
         </div>
@@ -38,7 +38,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
             maxLength={500}
             rows={4}
             placeholder="What makes this competition special?"
-            className="w-full resize-none rounded-xl border-2 border-border px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+            className="w-full resize-none rounded-xl border-2 border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
           <p className="mt-1 text-right text-xs text-muted-foreground">{data.description.length}/500</p>
         </div>
@@ -51,7 +51,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
             type="datetime-local"
             value={data.starts_at}
             onChange={(e) => onChange({ starts_at: e.target.value })}
-            className="w-full rounded-xl border-2 border-border px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+            className="w-full rounded-xl border-2 border-border bg-background px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
         </div>
 
@@ -64,7 +64,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
             value={data.ends_at}
             min={data.starts_at}
             onChange={(e) => onChange({ ends_at: e.target.value })}
-            className="w-full rounded-xl border-2 border-border px-4 py-3 text-sm focus:border-navy-800 focus:outline-none"
+            className="w-full rounded-xl border-2 border-border bg-background px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
           <p className="mt-1 text-xs text-muted-foreground">
             Prizes can be set per award category in the next step.

@@ -30,7 +30,7 @@ interface LeaderboardEntry {
 function getScoringUnit(type: CompetitionType): string {
   switch (type) {
     case 'heaviest_fish':
-      return 'kg'
+      return 'lb + oz'
     case 'most_catches':
       return 'fish'
     case 'species_diversity':
@@ -148,8 +148,8 @@ console.log('='.repeat(50))
 // Scoring Unit Tests
 console.log('\n📏 Scoring Unit Tests:\n')
 
-test('Heaviest fish uses kg', () => {
-  expect(getScoringUnit('heaviest_fish')).toBe('kg')
+test('Heaviest fish uses lb + oz by default', () => {
+  expect(getScoringUnit('heaviest_fish')).toBe('lb + oz')
 })
 
 test('Most catches uses fish', () => {

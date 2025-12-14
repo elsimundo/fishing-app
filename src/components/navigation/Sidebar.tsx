@@ -32,10 +32,10 @@ export function Sidebar() {
             type="button"
             onClick={() => navigate('/feed')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/feed') ? 'bg-card text-[#1BA9A0] font-bold' : 'text-foreground font-medium hover:bg-card'
+              isActive('/feed') ? 'bg-card text-primary font-bold' : 'text-foreground font-medium hover:bg-card'
             }`}
           >
-            <Home size={28} className={isActive('/feed') ? 'text-[#1BA9A0]' : 'text-foreground'} />
+            <Home size={28} className={isActive('/feed') ? 'text-primary' : 'text-foreground'} />
             <span className="text-base">Feed</span>
           </button>
 
@@ -44,10 +44,10 @@ export function Sidebar() {
             type="button"
             onClick={() => navigate('/explore')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/explore') ? 'bg-card text-[#1BA9A0] font-bold' : 'text-foreground font-medium hover:bg-card'
+              isActive('/explore') ? 'bg-card text-primary font-bold' : 'text-foreground font-medium hover:bg-card'
             }`}
           >
-            <Map size={28} className={isActive('/explore') ? 'text-[#1BA9A0]' : 'text-foreground'} />
+            <Map size={28} className={isActive('/explore') ? 'text-primary' : 'text-foreground'} />
             <span className="text-base">Explore</span>
           </button>
 
@@ -56,10 +56,10 @@ export function Sidebar() {
             type="button"
             onClick={() => navigate('/challenges')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/challenges') ? 'bg-card text-[#1BA9A0] font-bold' : 'text-foreground font-medium hover:bg-card'
+              isActive('/challenges') ? 'bg-card text-primary font-bold' : 'text-foreground font-medium hover:bg-card'
             }`}
           >
-            <Trophy size={28} className={isActive('/challenges') ? 'text-[#1BA9A0]' : 'text-foreground'} />
+            <Trophy size={28} className={isActive('/challenges') ? 'text-primary' : 'text-foreground'} />
             <span className="text-base">Challenges</span>
           </button>
 
@@ -67,10 +67,10 @@ export function Sidebar() {
             type="button"
             onClick={() => navigate('/logbook')}
             className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all ${
-              isActive('/logbook') ? 'bg-card text-[#1BA9A0] font-bold' : 'text-foreground font-medium hover:bg-card'
+              isActive('/logbook') ? 'bg-card text-primary font-bold' : 'text-foreground font-medium hover:bg-card'
             }`}
           >
-            <User size={28} className={isActive('/logbook') ? 'text-[#1BA9A0]' : 'text-foreground'} />
+            <User size={28} className={isActive('/logbook') ? 'text-primary' : 'text-foreground'} />
             <div className="flex flex-col items-start">
               <span>Logbook</span>
             </div>
@@ -80,7 +80,7 @@ export function Sidebar() {
           <button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#0D9488]"
+            className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:bg-primary/60"
           >
             <Plus size={20} strokeWidth={3} />
             <span>Cast</span>
@@ -95,7 +95,7 @@ export function Sidebar() {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-card"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#1BA9A0] to-[#14B8A6] text-sm font-semibold text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-primary-foreground">
                 {profile?.username?.[0]?.toUpperCase() || profile?.full_name?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="flex-1 text-left">

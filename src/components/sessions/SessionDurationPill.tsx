@@ -47,14 +47,14 @@ export function SessionDurationPill() {
   return (
     <Link
       to={`/sessions/${longRunningSession.id}`}
-      className="fixed bottom-20 left-1/2 z-40 -translate-x-1/2 transform animate-bounce"
+      className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 transform"
     >
-      <div className="flex items-center gap-2 rounded-full border border-amber-500/50 bg-amber-900/90 px-4 py-2 shadow-lg backdrop-blur-sm">
-        <Clock size={14} className="text-amber-400" />
-        <span className="text-xs font-medium text-amber-200">
-          {title} · {duration}
+      <div className="flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-2.5 shadow-lg dark:border-amber-500/50 dark:bg-amber-900/90">
+        <Clock size={14} className="text-amber-600 dark:text-amber-400" />
+        <span className="text-xs font-medium text-amber-800 dark:text-amber-200">
+          {title} - {new Date(longRunningSession.started_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · {duration}
         </span>
-        <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-amber-950">
+        <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white dark:text-amber-950">
           Still running
         </span>
       </div>

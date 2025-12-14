@@ -5,6 +5,7 @@ import type { Catch } from '../../types'
 import { useDeleteCatch } from '../../hooks/useDeleteCatch'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { toast } from 'react-hot-toast'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 type MultiCatchCardProps = {
   catches: Catch[]
@@ -15,6 +16,7 @@ export function MultiCatchCard({ catches, showDelete = false }: MultiCatchCardPr
   const [isExpanded, setIsExpanded] = useState(false)
   const [deletingCatchId, setDeletingCatchId] = useState<string | null>(null)
   const { mutateAsync: deleteCatch, isPending: isDeleting } = useDeleteCatch()
+  const { formatWeight } = useWeightFormatter()
 
   if (catches.length === 0) return null
 
@@ -103,7 +105,7 @@ export function MultiCatchCard({ catches, showDelete = false }: MultiCatchCardPr
               {catches.map((c) => {
                 const stats: string[] = []
                 if (c.weight_kg != null && c.weight_kg > 0) {
-                  stats.push(`${c.weight_kg.toFixed(1)} kg`)
+                  stats.push(formatWeight(c.weight_kg, { precision: 1 }))
                 }
                 if (c.length_cm != null && c.length_cm > 0) {
                   stats.push(`${c.length_cm.toFixed(0)} cm`)

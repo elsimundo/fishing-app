@@ -7,11 +7,13 @@ import { SessionCardSkeleton } from '../components/skeletons/SessionCardSkeleton
 import { ActiveSessionBanner } from '../components/sessions/ActiveSessionBanner'
 import { ActiveCompetitionBanner } from '../components/compete/ActiveCompetitionBanner'
 import { SessionCard } from '../components/sessions/SessionCard'
+import { useWeightFormatter } from '../hooks/useWeightFormatter'
 
 export function Dashboard() {
   const navigate = useNavigate()
   const { catches } = useCatches()
   const { data: sessions } = useMySessions()
+  const { formatWeight } = useWeightFormatter()
 
   const completedSessions = sessions ?? []
   const totalSessions = completedSessions.length
@@ -32,7 +34,7 @@ export function Dashboard() {
 
     if (heaviest && heaviest.weight_kg != null) {
       const lengthPart = heaviest.length_cm != null ? ` · ${heaviest.length_cm.toFixed(0)} cm` : ''
-      personalBestLabel = `${heaviest.weight_kg.toFixed(1)} kg · ${heaviest.species}${lengthPart}`
+      personalBestLabel = `${formatWeight(heaviest.weight_kg, { precision: 1 })} · ${heaviest.species}${lengthPart}`
     }
 
     // Top species by total count across sessions
@@ -87,7 +89,7 @@ export function Dashboard() {
             </div>
             <div className="rounded-xl bg-white/5 px-2 py-2">
               <p className="text-[10px] text-slate-300">Total weight</p>
-              <p className="text-base font-semibold text-white">{totalWeight.toFixed(1)} kg</p>
+              <p className="text-base font-semibold text-white">{formatWeight(totalWeight, { precision: 1 })}</p>
             </div>
           </div>
 

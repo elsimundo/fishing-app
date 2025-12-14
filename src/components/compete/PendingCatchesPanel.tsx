@@ -3,6 +3,7 @@ import { Clock, Check, X } from 'lucide-react'
 import { useCompetitionPendingCatches } from '../../hooks/useCompetitionPendingCatches'
 import { useApproveCatch, useRejectCatch } from '../../hooks/useCatchValidation'
 import { formatDistanceToNow } from 'date-fns'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface PendingCatchesPanelProps {
   competitionId: string
@@ -12,6 +13,7 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
   const { data: pendingCatches, isLoading } = useCompetitionPendingCatches(competitionId)
   const approveCatch = useApproveCatch()
   const rejectCatch = useRejectCatch()
+  const { formatWeight } = useWeightFormatter()
 
   const [rejectingCatchId, setRejectingCatchId] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
@@ -63,7 +65,7 @@ export function PendingCatchesPanel({ competitionId }: PendingCatchesPanelProps)
             {/* Catch Info */}
             <div className="flex-1 min-w-0">
               <h4 className="font-semibold text-foreground">
-                {catch_.species} - {catch_.weight_kg}kg
+                {catch_.species} - {formatWeight(catch_.weight_kg, { precision: 1 })}
                 {catch_.length_cm && (
                   <span className="text-muted-foreground text-sm ml-2">({catch_.length_cm}cm)</span>
                 )}

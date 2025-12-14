@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Fish, ChevronRight, Trophy, Scale, Ruler } from 'lucide-react'
 import type { Catch } from '../../types'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface SpeciesStats {
   species: string
@@ -17,6 +18,7 @@ interface SpeciesCollectionTabProps {
 export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
   const navigate = useNavigate()
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null)
+  const { formatWeight } = useWeightFormatter()
 
   // Calculate species stats
   const speciesMap = new Map<string, { catches: Catch[]; totalWeight: number }>()
@@ -96,7 +98,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
             <div>
               <h3 className="text-xl font-bold">{selectedSpecies}</h3>
               <p className="text-sm text-cyan-100">
-                {stats.count} {stats.count === 1 ? 'catch' : 'catches'} · {stats.totalWeight.toFixed(1)} kg total
+                {stats.count} {stats.count === 1 ? 'catch' : 'catches'} · {formatWeight(stats.totalWeight, { precision: 1 })} total
               </p>
             </div>
           </div>
@@ -117,7 +119,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
               <div>
                 {stats.bestCatch.weight_kg && (
                   <p className="text-lg font-bold text-white">
-                    {stats.bestCatch.weight_kg.toFixed(2)} kg
+                    {formatWeight(stats.bestCatch.weight_kg, { precision: 2 })}
                   </p>
                 )}
                 {stats.bestCatch.length_cm && (
@@ -173,7 +175,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
                     </span>
                   )}
                   <span className="text-sm font-medium text-white">
-                    {c.weight_kg ? `${c.weight_kg.toFixed(2)} kg` : 'No weight'}
+                    {c.weight_kg ? formatWeight(c.weight_kg, { precision: 2 }) : 'No weight'}
                     {c.length_cm ? ` · ${c.length_cm} cm` : ''}
                   </span>
                 </div>
@@ -240,7 +242,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
               {stats.bestCatch.weight_kg && (
                 <span className="flex items-center gap-0.5">
                   <Scale size={10} />
-                  {stats.bestCatch.weight_kg.toFixed(1)} kg
+                  {formatWeight(stats.bestCatch.weight_kg, { precision: 1 })}
                 </span>
               )}
               {stats.bestCatch.length_cm && (

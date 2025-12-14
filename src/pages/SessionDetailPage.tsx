@@ -9,9 +9,9 @@ import { Map } from '../components/map'
 import { CatchCard } from '../components/catches/CatchCard'
 import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
-import { getLocationPrivacyLabel, type ViewerRole } from '../lib/privacy'
+import type { ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Plus, Share2, Users, MapPin, Fish, Clock, Scale, MoreHorizontal, Trash2, Pencil, LogOut, Bookmark, MessageSquare, X as XIcon } from 'lucide-react'
+import { ArrowLeft, Share2, Fish, MapPin, MessageSquare, Plus, MoreHorizontal, Pencil, Bookmark, Trash2, LogOut, X, Square } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 import { EditSessionModal } from '../components/session/EditSessionModal'
 import { ParticipantsList } from '../components/session/ParticipantsList'
@@ -25,6 +25,7 @@ import { useSessionXP } from '../hooks/useCatchXP'
 import { useCelebrateChallenges } from '../hooks/useCelebrateChallenges'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
+import { useWeightFormatter } from '../hooks/useWeightFormatter'
 
 export function SessionDetailPage() {
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false)
@@ -82,6 +83,7 @@ export function SessionDetailPage() {
   const { mutateAsync: deleteSession, isPending: isDeleting } = useDeleteSession()
   const sessionXP = useSessionXP()
   const { celebrateChallenges } = useCelebrateChallenges()
+  const { formatWeight } = useWeightFormatter()
 
   if (isLoading) {
     return (
@@ -119,7 +121,6 @@ export function SessionDetailPage() {
   }
 
   const title = session.title || session.location_name || 'Fishing Session'
-  const privacyLabel = getLocationPrivacyLabel(session)
   const isOwner = currentUserId != null && currentUserId === session.user_id
   const viewerRole: ViewerRole = isOwner ? 'owner' : 'guest'
   const canSeeExactLocation = viewerRole === 'owner' || session.location_privacy === 'exact'
@@ -411,9 +412,9 @@ export function SessionDetailPage() {
             <div className="flex-1 rounded-xl bg-card/95 px-3 py-2 text-center text-xs backdrop-blur">
               <p className="text-base font-bold text-foreground">
                 {session.stats.biggest_catch?.weight_kg != null
-                  ? `${session.stats.biggest_catch.weight_kg.toFixed(1)}kg`
+                  ? formatWeight(session.stats.biggest_catch.weight_kg, { precision: 1 })
                   : session.stats.total_weight_kg > 0
-                    ? `${session.stats.total_weight_kg.toFixed(1)}kg`
+                    ? formatWeight(session.stats.total_weight_kg, { precision: 1 })
                     : '—'}
               </p>
               <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Biggest</p>
@@ -531,6 +532,19 @@ export function SessionDetailPage() {
               )}
             </div>
 
+            {/* Prominent End Session button for owner */}
+            {isOwner && (
+              <button
+                type="button"
+                onClick={() => setShowEndConfirm(true)}
+                disabled={isEnding}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-red-500 bg-red-50 py-3 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-100 dark:border-red-500/50 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 disabled:opacity-50"
+              >
+                <Square size={16} />
+                {isEnding ? 'Ending session…' : 'End Session'}
+              </button>
+            )}
+
             {/* Quick stats */}
             <div className="mt-4 grid grid-cols-3 gap-2">
               <div className="rounded-xl border border-border bg-card px-3 py-3 text-center text-xs">
@@ -542,7 +556,7 @@ export function SessionDetailPage() {
                 <div className="mb-1 text-lg">⚖️</div>
                 <p className="text-base font-bold text-foreground">
                   {session.stats.biggest_catch?.weight_kg != null
-                    ? `${session.stats.biggest_catch.weight_kg.toFixed(1)}kg`
+                    ? formatWeight(session.stats.biggest_catch.weight_kg, { precision: 1 })
                     : '—'}
                 </p>
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Biggest</p>
@@ -561,7 +575,7 @@ export function SessionDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsQuickLogOpen(true)}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1BA9A0] py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
               >
                 <Plus size={18} />
                 Log new catch
@@ -623,7 +637,7 @@ export function SessionDetailPage() {
                                 <div className="flex items-center justify-between">
                                   <p className="text-sm font-semibold text-foreground">
                                     {c.species}
-                                    {c.weight_kg != null && ` • ${c.weight_kg.toFixed(1)}kg`}
+                                    {c.weight_kg != null && ` • ${formatWeight(c.weight_kg, { precision: 1 })}`}
                                   </p>
                                   <span className="ml-2 text-[11px] text-muted-foreground">
                                     {format(new Date(c.caught_at), 'HH:mm')}
@@ -677,7 +691,7 @@ export function SessionDetailPage() {
                                         }}
                                         className="opacity-0 group-hover:opacity-100 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-red-600 transition-opacity"
                                       >
-                                        <XIcon size={14} />
+                                        <X size={14} />
                                       </button>
                                     )}
                                   </div>
@@ -702,7 +716,7 @@ export function SessionDetailPage() {
           <button
             type="button"
             onClick={() => setIsQuickLogOpen(true)}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 py-3 font-semibold text-white shadow-sm hover:bg-navy-900"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             <Plus size={20} />
             Log a Catch
@@ -718,7 +732,7 @@ export function SessionDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(true)}
-                  className="text-xs font-medium text-navy-800 hover:underline"
+                  className="text-xs font-medium text-primary hover:underline"
                 >
                   + Invite
                 </button>
@@ -765,7 +779,7 @@ export function SessionDetailPage() {
                 <button
                   type="button"
                   onClick={() => setIsQuickLogOpen(true)}
-                  className="mt-3 text-sm font-medium text-[#1BA9A0] hover:underline"
+                  className="mt-3 text-sm font-medium text-primary hover:underline"
                 >
                   Log your first catch
                 </button>

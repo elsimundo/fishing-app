@@ -6,6 +6,7 @@ import { useAppRecord, useSpeciesCatchCount, useSpeciesAnglerCount } from '../..
 import { useFishBaseData, formatFishBaseDescription, getFishBaseMaxSize, getFishBaseWaterType } from '../../hooks/useFishBase'
 import { useWikidataImage } from '../../hooks/useWikidataImage'
 import type { RegionCode } from '../../types/species'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface SpeciesInfoCardProps {
   speciesName: string
@@ -37,6 +38,7 @@ export function SpeciesInfoCard({
   const { data: fishBaseData, isLoading: fishBaseLoading } = useFishBaseData(
     !speciesInfo ? speciesName : null
   )
+  const { formatWeight } = useWeightFormatter()
 
   // If no local data and FishBase is loading
   if (!speciesInfo && fishBaseLoading) {
@@ -103,7 +105,9 @@ export function SpeciesInfoCard({
             <div className="rounded-lg bg-background p-3 text-center">
               <Scale className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">Max Weight</p>
-              <p className="text-sm font-semibold text-foreground">{maxSize.weightKg.toFixed(1)} kg</p>
+              <p className="text-sm font-semibold text-foreground">
+                {formatWeight(maxSize.weightKg, { precision: 1 })}
+              </p>
             </div>
           )}
         </div>
@@ -118,11 +122,11 @@ export function SpeciesInfoCard({
 
         {/* Depth Range */}
         {fishBaseData.species.DepthRangeShallow != null && fishBaseData.species.DepthRangeDeep != null && (
-          <div className="flex items-start gap-2 rounded-lg bg-[#1BA9A0]/20 border border-[#1BA9A0]/40 p-3">
-            <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#1BA9A0]" />
+          <div className="flex items-start gap-2 rounded-lg bg-primary/10 border border-primary/30 p-3">
+            <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
             <div>
-              <p className="text-xs font-medium text-[#1BA9A0]">Depth Range</p>
-              <p className="text-sm text-[#14B8A6]">
+              <p className="text-xs font-medium text-primary">Depth Range</p>
+              <p className="text-sm text-primary">
                 {fishBaseData.species.DepthRangeShallow} - {fishBaseData.species.DepthRangeDeep} meters
               </p>
             </div>
@@ -161,7 +165,7 @@ export function SpeciesInfoCard({
           <button
             type="button"
             onClick={onLogCatch}
-            className="w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
+            className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:bg-primary/60"
           >
             Log a {fishBaseData.commonName || speciesName} Catch
           </button>
@@ -183,7 +187,7 @@ export function SpeciesInfoCard({
           <button
             type="button"
             onClick={onLogCatch}
-            className="mt-4 w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
+            className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:bg-primary/60"
           >
             Log a {speciesName} Catch
           </button>
@@ -356,22 +360,22 @@ export function SpeciesInfoCard({
           )}
           
           {/* App Record */}
-          <div className="rounded-lg border border-[#1BA9A0]/40 bg-[#1BA9A0]/20 p-3">
-            <p className="text-xs font-medium text-[#1BA9A0]">📱 App Record</p>
+          <div className="rounded-lg border border-primary/30 bg-primary/10 p-3">
+            <p className="text-xs font-medium text-primary">📱 App Record</p>
             {appRecord ? (
               <>
-                <p className="text-lg font-bold text-[#14B8A6]">{appRecord.weightKg.toFixed(2)} kg</p>
+                <p className="text-lg font-bold text-primary">{appRecord.weightKg.toFixed(2)} kg</p>
                 <Link 
                   to={`/${appRecord.username}`}
-                  className="text-xs text-[#1BA9A0] hover:underline"
+                  className="text-xs text-primary hover:underline"
                 >
                   by @{appRecord.username || 'angler'}
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-lg font-bold text-[#14B8A6]">—</p>
-                <p className="text-xs text-[#1BA9A0]">Be the first!</p>
+                <p className="text-lg font-bold text-primary">—</p>
+                <p className="text-xs text-primary">Be the first!</p>
               </>
             )}
           </div>
@@ -405,7 +409,7 @@ export function SpeciesInfoCard({
         <button
           type="button"
           onClick={onLogCatch}
-          className="w-full rounded-xl bg-[#1BA9A0] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0D9488]"
+          className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:bg-primary/60"
         >
           Log a {speciesInfo.commonName} Catch
         </button>

@@ -28,6 +28,7 @@ interface FormState {
   notes?: string
   lakeId?: string | null
   markId?: string | null
+  isPublic?: boolean
 }
 
 export default function StartSessionPage() {
@@ -55,6 +56,7 @@ export default function StartSessionPage() {
     longitude: null,
     lakeId: null,
     markId: null,
+    isPublic: true,
   })
 
   // Fetch user's saved marks and shared marks for saltwater sessions
@@ -233,12 +235,12 @@ export default function StartSessionPage() {
         user_id: user.id,
         title,
         location_name: decodeURIComponent(urlLakeName || 'Lake'),
-        water_type: 'freshwater',
+        water_type: 'Lake/Reservoir',
         location_privacy: 'general',
         latitude: lat,
         longitude: lng,
         started_at: now.toISOString(),
-        is_public: true,
+        is_public: formData.isPublic ?? true,
         lake_id: urlLakeId,
         weather_temp: weatherTemp,
         weather_condition: weatherCondition,
@@ -257,7 +259,7 @@ export default function StartSessionPage() {
         latitude: preSelectedMark.latitude,
         longitude: preSelectedMark.longitude,
         started_at: now.toISOString(),
-        is_public: true,
+        is_public: formData.isPublic ?? true,
         mark_id: preSelectedMark.id,
         weather_temp: weatherTemp,
         weather_condition: weatherCondition,
@@ -276,7 +278,7 @@ export default function StartSessionPage() {
         latitude: 0,
         longitude: 0,
         started_at: now.toISOString(),
-        is_public: true,
+        is_public: formData.isPublic ?? true,
         weather_temp: null,
         weather_condition: null,
         wind_speed: null,
@@ -308,7 +310,7 @@ export default function StartSessionPage() {
         markId: preSelectedMark?.id ?? null,
         latitude: lat,
         longitude: lng,
-        waterType: hasLake ? 'freshwater' : (preSelectedMark?.water_type ?? 'saltwater'),
+        waterType: hasLake ? 'Lake/Reservoir' : (preSelectedMark?.water_type ?? 'saltwater'),
         locationPrivacy: 'general',
       })
     } catch (e) {
@@ -448,7 +450,7 @@ export default function StartSessionPage() {
         latitude: lat,
         longitude: lng,
         started_at: now.toISOString(),
-        is_public: true,
+        is_public: formData.isPublic ?? true,
         session_notes: formData.notes ?? null,
         lake_id: formData.lakeId ?? null,
         mark_id: formData.markId ?? null,
@@ -704,6 +706,33 @@ export default function StartSessionPage() {
           <ChevronRight size={18} className="text-muted-foreground" />
         </button>
       </div>
+
+      {/* Session visibility toggle - show for lake sessions */}
+      {hasLake && (
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-card p-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Show on lake page</p>
+            <p className="text-xs text-muted-foreground">
+              {formData.isPublic 
+                ? 'Other anglers can see you\'re fishing here' 
+                : 'Your session will be private'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFormData(prev => ({ ...prev, isPublic: !prev.isPublic }))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              formData.isPublic ? 'bg-primary' : 'bg-muted'
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                formData.isPublic ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground">
         {hasLake 

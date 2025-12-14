@@ -585,7 +585,7 @@ export default function ExplorePage() {
             <button
               type="button"
               onClick={handleUseMyLocation}
-              className="flex items-center gap-1.5 rounded-full bg-[#1BA9A0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#0D9488]"
+              className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:bg-primary/60"
             >
               <Navigation size={14} />
               {isLocating ? 'Locating…' : 'My Location'}
@@ -631,7 +631,7 @@ export default function ExplorePage() {
             <button
               type="button"
               onClick={applyBounds}
-              className="absolute left-1/2 top-3 z-[5] -translate-x-1/2 rounded-full bg-[#1BA9A0] px-4 py-1.5 text-xs font-medium text-white shadow-lg hover:bg-[#0D9488]"
+              className="absolute left-1/2 top-3 z-[5] -translate-x-1/2 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-lg hover:bg-primary/90 disabled:bg-primary/60"
             >
               Search this area
               {visibleMarkersCount > 0 && (
@@ -685,7 +685,7 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={handleViewDetails}
-                  className="w-full rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D9488]"
+                  className="w-full rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:bg-primary/60"
                 >
                   {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
                 </button>
@@ -707,7 +707,7 @@ export default function ExplorePage() {
                         const lakeId = selectedMarker.id.replace('lake-', '')
                         navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
                       }}
-                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D9488]"
+                      className="flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:bg-primary/60"
                     >
                       🎣 Log Session
                     </button>
@@ -762,7 +762,7 @@ export default function ExplorePage() {
                         const markId = selectedMarker.id.replace('mark-', '').replace('shared-mark-', '')
                         navigate('/sessions/new', { state: { markId, markName: selectedMarker.title } })
                       }}
-                      className="flex-1 rounded-lg bg-[#1BA9A0] px-3 py-2 text-xs font-medium text-white hover:bg-[#0D9488]"
+                      className="flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:bg-primary/60"
                     >
                       🎣 Log Session
                     </button>
@@ -851,7 +851,7 @@ export default function ExplorePage() {
                   type="button"
                   onClick={() => hasDefaultArea ? setShowDefaultConfirm(true) : saveAsDefaultArea()}
                   disabled={isSavingDefault}
-                  className="rounded-full bg-[#1BA9A0] px-3 py-1 text-[11px] font-medium text-white hover:bg-[#0D9488] disabled:bg-[#0D4B4E]"
+                  className="rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground hover:bg-primary/90 disabled:bg-primary/60"
                 >
                   {isSavingDefault ? '...' : '⭐ Set as default'}
                 </button>
@@ -910,16 +910,16 @@ export default function ExplorePage() {
           {/* List Your Business Banner */}
           <Link
             to="/businesses/submit"
-            className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[#1BA9A0] to-[#0D4B4E] p-4 shadow-sm transition-transform hover:scale-[1.02]"
+            className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-sm transition-transform hover:scale-[1.02] border border-border dark:bg-gradient-to-r dark:from-primary dark:to-secondary"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-              <Store size={20} className="text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 dark:bg-white/20">
+              <Store size={20} className="text-primary dark:text-white" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-white">Own a fishing business?</p>
-              <p className="text-xs text-white/80">List your shop, charter, or club for free</p>
+              <p className="text-sm font-bold text-foreground dark:text-white">Own a fishing business?</p>
+              <p className="text-xs text-muted-foreground dark:text-white/80">List your shop, charter, or club for free</p>
             </div>
-            <span className="text-lg text-white">→</span>
+            <span className="text-lg text-primary dark:text-white">→</span>
           </Link>
 
           {/* Sessions & Catches Card */}

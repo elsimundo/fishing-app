@@ -90,7 +90,7 @@ export default function MarkDetailPage() {
       <Layout>
         <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-6">
           <p className="text-sm text-muted-foreground">Mark not found</p>
-          <Link to="/explore" className="mt-4 text-sm text-[#1BA9A0] hover:underline">
+          <Link to="/explore" className="mt-4 text-sm text-primary hover:underline">
             Back to Explore
           </Link>
         </main>

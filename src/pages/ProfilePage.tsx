@@ -25,7 +25,7 @@ import { FollowersModal } from '../components/profile/FollowersModal'
 import { DeleteAccountModal } from '../components/profile/DeleteAccountModal'
 import { FishingPreferenceModal } from '../components/onboarding/FishingPreferenceModal'
 import { SpeciesCollectionTab } from '../components/profile/SpeciesCollectionTab'
-import { StreakDisplay } from '../components/gamification/StreakDisplay'
+import { useWeightFormatter } from '../hooks/useWeightFormatter'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
@@ -35,6 +35,7 @@ export default function ProfilePage() {
   const { data: xpData, isLoading: xpLoading } = useUserXP()
   const { data: userChallenges = [] } = useUserChallenges()
   const { data: featuredChallenge } = useFeaturedChallenge()
+  const { formatWeight } = useWeightFormatter()
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
@@ -94,7 +95,7 @@ export default function ProfilePage() {
 
     if (heaviest && heaviest.weight_kg != null) {
       const lengthPart = heaviest.length_cm != null ? ` · ${heaviest.length_cm.toFixed(0)} cm` : ''
-      personalBestLabel = `${heaviest.weight_kg.toFixed(1)} kg · ${heaviest.species}${lengthPart}`
+      personalBestLabel = `${formatWeight(heaviest.weight_kg, { precision: 1 })} · ${heaviest.species}${lengthPart}`
     }
 
     // Top species by total count across sessions
@@ -174,18 +175,7 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Streak & Badges row */}
-        <div className="mt-4 flex gap-3">
-          {/* Streak */}
-          <StreakDisplay
-            currentStreak={profile?.current_streak ?? 0}
-            longestStreak={profile?.longest_streak ?? 0}
-            size="md"
-            showDetails
-          />
-        </div>
-
-        {/* Badges summary */}
+        {/* Badges/Achievements Card - full width */}
         <div className="mt-4">
           <BadgesSummaryCard
             completedChallenges={completedChallenges}
@@ -393,9 +383,9 @@ export default function ProfilePage() {
                           onClick={() => navigate(`/sessions/${session.id}`)}
                           className={`w-full rounded-xl border p-3 text-left shadow-sm transition-colors ${
                             isActive
-                              ? 'border-emerald-500/40 bg-emerald-900/20 hover:border-emerald-400'
+                              ? 'border-emerald-200 bg-emerald-50 hover:border-emerald-300 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:hover:border-emerald-400'
                               : isCompetition
-                              ? 'border-amber-500/40 bg-amber-900/20 hover:border-amber-400'
+                              ? 'border-amber-200 bg-amber-50 hover:border-amber-300 dark:border-amber-500/40 dark:bg-amber-900/20 dark:hover:border-amber-400'
                               : 'border-border bg-card hover:border-primary/40'
                           }`}
                         >
@@ -412,7 +402,7 @@ export default function ProfilePage() {
                               <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
                                 <div className="flex items-center gap-1.5">
                                   {isCompetition && (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 px-2 py-0.5 font-medium text-amber-400">
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                                       <Swords size={10} />
                                       Competition
                                     </span>
@@ -431,8 +421,8 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {isActive && (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/30 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
-                                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500 dark:bg-emerald-400" />
                                       Live
                                     </span>
                                   )}
@@ -763,6 +753,8 @@ export default function ProfilePage() {
           completedChallenges={completedChallenges}
           onClose={() => setShowBadgesModal(false)}
           isOwnProfile
+          currentStreak={profile?.current_streak ?? 0}
+          longestStreak={profile?.longest_streak ?? 0}
         />
       )}
     </div>

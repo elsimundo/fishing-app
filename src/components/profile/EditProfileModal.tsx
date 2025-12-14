@@ -200,14 +200,14 @@ export function EditProfileModal({ profile, onClose, onSuccess }: EditProfileMod
                   className="h-24 w-24 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#1BA9A0] to-[#14B8A6] text-3xl font-bold text-white">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-3xl font-bold text-primary-foreground">
                   {profile.username?.[0]?.toUpperCase() ?? 'U'}
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#1BA9A0] text-white shadow-lg hover:bg-[#0D9488]"
+                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 disabled:bg-primary/60"
               >
                 <Camera size={16} />
               </button>

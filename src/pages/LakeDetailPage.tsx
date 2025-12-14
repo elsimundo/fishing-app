@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import type { Lake, Catch } from '../types'
 import { Layout } from '../components/layout/Layout'
-import { MapPin, ArrowLeft, Globe, Phone, Car, Coffee, Crown, BadgeCheck, Fish, Navigation, Loader2, BarChart3, Heart, Play, Users, Shield, Flag, X } from 'lucide-react'
+import { MapPin, ArrowLeft, Globe, Phone, Car, Coffee, Crown, BadgeCheck, Fish, Navigation, Loader2, BarChart3, Heart, Play, Users, Shield, Flag, X, Clock, Calendar } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ClaimLakeModal } from '../components/lakes/ClaimLakeModal'
 import { toast } from 'react-hot-toast'
@@ -14,6 +14,7 @@ import { useLakeTeam, useLakeRole } from '../hooks/useLakeTeam'
 import { useSubmitLakeReport, REPORT_REASON_LABELS, REPORT_REASON_CATEGORIES, type LakeReportReason } from '../hooks/useLakeReports'
 import { useLakeAnnouncements } from '../hooks/useLakeAnnouncements'
 import { useLakeStats } from '../hooks/useLakeStats'
+import { useWeightFormatter } from '../hooks/useWeightFormatter'
 
 export default function LakeDetailPage() {
   const { slugOrId } = useParams<{ slugOrId: string }>()
@@ -37,6 +38,47 @@ export default function LakeDetailPage() {
   
   // Lake stats (records, top anglers, etc.)
   const { data: lakeStats } = useLakeStats(lake?.id)
+  const { formatWeight } = useWeightFormatter()
+  
+  // Lake sessions (active and recent)
+  const { data: lakeSessions } = useQuery({
+    queryKey: ['lake-sessions', lake?.id],
+    queryFn: async () => {
+      if (!lake?.id) return { active: [], recent: [] }
+      
+      // Get active sessions (no ended_at)
+      const { data: activeSessions } = await supabase
+        .from('sessions')
+        .select(`
+          id, title, location_name, started_at, ended_at, is_public,
+          user:profiles!sessions_user_id_fkey(id, username, full_name, avatar_url)
+        `)
+        .eq('lake_id', lake.id)
+        .is('ended_at', null)
+        .eq('is_public', true)
+        .order('started_at', { ascending: false })
+        .limit(10)
+      
+      // Get recent completed sessions
+      const { data: recentSessions } = await supabase
+        .from('sessions')
+        .select(`
+          id, title, location_name, started_at, ended_at, is_public,
+          user:profiles!sessions_user_id_fkey(id, username, full_name, avatar_url)
+        `)
+        .eq('lake_id', lake.id)
+        .not('ended_at', 'is', null)
+        .eq('is_public', true)
+        .order('ended_at', { ascending: false })
+        .limit(10)
+      
+      return {
+        active: activeSessions || [],
+        recent: recentSessions || [],
+      }
+    },
+    enabled: !!lake?.id,
+  })
   
   const canAccessDashboard = userRole === 'owner' || userRole === 'manager' || userRole === 'bailiff'
 
@@ -322,11 +364,11 @@ export default function LakeDetailPage() {
                   {teamData.team && teamData.team.length > 0 && teamData.team.map((member) => (
                     <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted">
                       <div className="h-8 w-8 rounded-full bg-card flex items-center justify-center text-muted-foreground font-bold text-xs">
-                        {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
+                        {member.profile?.full_name?.[0] || member.profile?.username?.[0] || '?'}
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-foreground">
-                          {member.profile?.display_name || member.profile?.username || 'Team Member'}
+                          {member.profile?.full_name || member.profile?.username || 'Team Member'}
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Shield size={10} />
@@ -428,7 +470,7 @@ export default function LakeDetailPage() {
                   )}
                   <div className="flex-1">
                     <p className="text-lg font-bold text-foreground">
-                      {lakeStats.biggestCatch.weight_kg?.toFixed(2)} kg
+                      {formatWeight(lakeStats.biggestCatch.weight_kg, { precision: 2 })}
                     </p>
                     <p className="text-sm text-muted-foreground">{lakeStats.biggestCatch.species}</p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -520,6 +562,85 @@ export default function LakeDetailPage() {
                     </span>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Sessions at this Lake */}
+            {((lakeSessions?.active?.length ?? 0) > 0 || (lakeSessions?.recent?.length ?? 0) > 0) && (
+              <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
+                <h2 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Calendar size={16} className="text-muted-foreground" />
+                  Sessions
+                </h2>
+
+                {/* Active Sessions */}
+                {(lakeSessions?.active?.length ?? 0) > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-green-500 mb-2 flex items-center gap-1">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                      Fishing Now
+                    </p>
+                    <div className="space-y-2">
+                      {(lakeSessions?.active ?? []).map((session: any) => (
+                        <Link
+                          key={session.id}
+                          to={`/sessions/${session.id}`}
+                          className="flex items-center gap-3 p-3 rounded-lg bg-green-900/20 border border-green-500/30 hover:bg-green-900/30 transition-colors"
+                        >
+                          <div className="h-8 w-8 rounded-full bg-green-900/50 flex items-center justify-center text-green-400 font-bold text-xs">
+                            {session.user?.full_name?.[0] || session.user?.username?.[0] || '?'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {session.user?.full_name || session.user?.username || 'Anonymous'}
+                            </p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock size={10} />
+                              Started {new Date(session.started_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                          <span className="text-xs text-green-400 font-medium">Live</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recent Sessions */}
+                {(lakeSessions?.recent?.length ?? 0) > 0 && (
+                  <div>
+                    {(lakeSessions?.active?.length ?? 0) > 0 && (
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Recent Sessions</p>
+                    )}
+                    <div className="space-y-2">
+                      {(lakeSessions?.recent ?? []).slice(0, 5).map((session: any) => (
+                        <Link
+                          key={session.id}
+                          to={`/sessions/${session.id}`}
+                          className="flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                        >
+                          <div className="h-8 w-8 rounded-full bg-card flex items-center justify-center text-muted-foreground font-bold text-xs">
+                            {session.user?.full_name?.[0] || session.user?.username?.[0] || '?'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {session.user?.full_name || session.user?.username || 'Anonymous'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(session.ended_at).toLocaleDateString('en-GB', { 
+                                day: 'numeric', 
+                                month: 'short' 
+                              })}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -816,7 +937,7 @@ function RecentCatches({ lakeId, isPremium }: { lakeId: string; isPremium?: bool
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">{c.species}</p>
               <div className="flex gap-2 text-xs text-muted-foreground">
-                {c.weight_kg && <span>{c.weight_kg}kg</span>}
+                {c.weight_kg && <span>{formatWeight(c.weight_kg, { precision: 1 })}</span>}
                 {c.length_cm && <span>{c.length_cm}cm</span>}
                 <span>·</span>
                 <span>{new Date(c.caught_at).toLocaleDateString()}</span>

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import type { Competition, CompetitionLeaderboardEntry } from '../../types'
 import { useAuth } from '../../hooks/useAuth'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface CompetitionLeaderboardProps {
   competition: Competition
@@ -44,6 +45,7 @@ export function CompetitionLeaderboard({
 }: CompetitionLeaderboardProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { formatWeight, unit: weightUnit } = useWeightFormatter()
   const unit = getUnit(competition.type)
 
   if (isLoading) {
@@ -116,9 +118,19 @@ export function CompetitionLeaderboard({
 
               <div className="text-right text-sm">
                 <p className="text-base font-bold text-foreground">
-                  {entry.score != null ? entry.score.toFixed(2) : '0.00'}
+                  {competition.type === 'heaviest_fish'
+                    ? formatWeight(entry.score, { precision: 2 })
+                    : entry.score != null
+                      ? entry.score.toFixed(2)
+                      : '0.00'}
                 </p>
-                <p className="text-xs text-muted-foreground">{unit}</p>
+                <p className="text-xs text-muted-foreground">
+                  {competition.type === 'heaviest_fish'
+                    ? weightUnit === 'metric'
+                      ? 'kg'
+                      : 'lb + oz'
+                    : unit}
+                </p>
               </div>
             </button>
           )

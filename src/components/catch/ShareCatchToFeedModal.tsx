@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Loader2, Share2, X } from 'lucide-react'
 import { useCreatePost } from '../../hooks/usePosts'
 import type { Catch } from '../../types'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface ShareCatchToFeedModalProps {
   catchItem: Catch
@@ -12,6 +13,7 @@ interface ShareCatchToFeedModalProps {
 export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess }: ShareCatchToFeedModalProps) {
   const [caption, setCaption] = useState('')
   const { mutate: createPost, isPending } = useCreatePost()
+  const { formatWeight } = useWeightFormatter()
 
   const handleShare = () => {
     if (isPending) return
@@ -68,7 +70,7 @@ export function ShareCatchToFeedModal({ catchItem, onClose, onSuccess }: ShareCa
             <div className="flex-1">
               <p className="font-semibold text-foreground">{catchItem.species}</p>
               <p className="text-sm text-muted-foreground">
-                {catchItem.weight_kg != null ? `${catchItem.weight_kg.toFixed(1)} kg` : 'Catch logged'} ·{' '}
+                {catchItem.weight_kg != null ? formatWeight(catchItem.weight_kg, { precision: 1 }) : 'Catch logged'} ·{' '}
                 {catchItem.location_name || 'Unknown location'}
               </p>
             </div>

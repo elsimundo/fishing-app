@@ -130,7 +130,7 @@ export default function ChallengeBoardPage() {
     <Layout>
       <div className="min-h-screen bg-background pb-24">
         {/* Header */}
-        <div className="bg-card text-foreground px-4 pt-6 pb-4 dark:bg-gradient-to-br dark:from-[#0D4B4E] dark:to-[#1A2D3D] dark:text-white">
+        <div className="bg-card text-foreground px-4 pt-6 pb-4 dark:bg-gradient-to-br dark:from-secondary dark:to-background dark:text-foreground">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-2xl font-bold">Challenges</h1>
             <div className="text-right">
@@ -171,7 +171,7 @@ export default function ChallengeBoardPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
                     isActive
-                      ? 'border-[#1BA9A0] text-[#1BA9A0]'
+                      ? 'border-primary text-primary'
                       : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -195,7 +195,7 @@ export default function ChallengeBoardPage() {
                     onClick={() => setWaterType('freshwater')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
                       waterType === 'freshwater'
-                        ? 'bg-background text-[#1BA9A0] shadow-sm'
+                        ? 'bg-background text-primary shadow-sm'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -206,7 +206,7 @@ export default function ChallengeBoardPage() {
                     onClick={() => setWaterType('saltwater')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
                       waterType === 'saltwater'
-                        ? 'bg-background text-[#1BA9A0] shadow-sm'
+                        ? 'bg-background text-primary shadow-sm'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -222,8 +222,8 @@ export default function ChallengeBoardPage() {
                   onClick={() => { setScopeTab('all'); setSelectedCountry(null) }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     scopeTab === 'all'
-                      ? 'bg-[#1BA9A0] text-white'
-                      : 'bg-card text-muted-foreground border border-border hover:border-[#1BA9A0]'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card text-muted-foreground border border-border hover:border-primary/40'
                   }`}
                 >
                   <Trophy size={14} />
@@ -233,8 +233,8 @@ export default function ChallengeBoardPage() {
                   onClick={() => { setScopeTab('global'); setSelectedCountry(null) }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     scopeTab === 'global'
-                      ? 'bg-[#1BA9A0] text-white'
-                      : 'bg-card text-muted-foreground border border-border hover:border-[#1BA9A0]'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card text-muted-foreground border border-border hover:border-primary/40'
                   }`}
                 >
                   <Globe size={14} />
@@ -250,8 +250,8 @@ export default function ChallengeBoardPage() {
                         onClick={() => { setScopeTab('countries'); setSelectedCountry(code) }}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                           scopeTab === 'countries' && selectedCountry === code
-                            ? 'bg-[#1BA9A0] text-white'
-                            : 'bg-card text-muted-foreground border border-border hover:border-[#1BA9A0]'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-card text-muted-foreground border border-border hover:border-primary/40'
                         }`}
                       >
                         <span>{getCountryFlag(code)}</span>
@@ -268,8 +268,8 @@ export default function ChallengeBoardPage() {
                     onClick={() => { setScopeTab('countries'); setSelectedCountry(null) }}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                       scopeTab === 'countries' && !selectedCountry
-                        ? 'bg-[#1BA9A0] text-white'
-                        : 'bg-card text-muted-foreground border border-border hover:border-[#1BA9A0]'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-card text-muted-foreground border border-border hover:border-primary/40'
                     }`}
                   >
                     <Flag size={14} />
@@ -281,8 +281,8 @@ export default function ChallengeBoardPage() {
                   onClick={() => { setScopeTab('events'); setSelectedCountry(null) }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     scopeTab === 'events'
-                      ? 'bg-[#1BA9A0] text-white'
-                      : 'bg-card text-muted-foreground border border-border hover:border-[#1BA9A0]'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card text-muted-foreground border border-border hover:border-primary/40'
                   }`}
                 >
                   🌍
@@ -318,8 +318,8 @@ export default function ChallengeBoardPage() {
                       onClick={() => setSelectedCategory(cat.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                         isActive 
-                          ? 'bg-[#1BA9A0] text-white' 
-                          : 'bg-card text-muted-foreground border border-border hover:border-[#1BA9A0]'
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-card text-muted-foreground border border-border hover:border-primary/40'
                       }`}
                     >
                       <Icon size={14} />
@@ -339,7 +339,7 @@ export default function ChallengeBoardPage() {
                     type="checkbox"
                     checked={showCompleted}
                     onChange={(e) => setShowCompleted(e.target.checked)}
-                    className="rounded border-border bg-background text-[#1BA9A0] focus:ring-[#1BA9A0]"
+                    className="rounded border-border bg-background text-primary focus:ring-primary"
                   />
                   Show completed
                 </label>
@@ -359,7 +359,7 @@ export default function ChallengeBoardPage() {
                   {!showCompleted && (
                     <button
                       onClick={() => setShowCompleted(true)}
-                      className="mt-2 text-sm text-[#1BA9A0] font-medium"
+                      className="mt-2 text-sm text-primary font-medium"
                     >
                       Show completed challenges
                     </button>
@@ -445,7 +445,7 @@ export default function ChallengeBoardPage() {
 
                 {leaderboardLoading ? (
                   <div className="rounded-2xl border border-border bg-card p-8 text-center">
-                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-border border-t-[#1BA9A0]" />
+                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
                     <p className="mt-2 text-xs text-muted-foreground">Loading leaderboard...</p>
                   </div>
                 ) : !weeklyLeaderboard || weeklyLeaderboard.length === 0 ? (
@@ -466,7 +466,7 @@ export default function ChallengeBoardPage() {
                               entry.rank === 1
                                 ? 'bg-amber-50 dark:bg-amber-900/20'
                                 : isYou
-                                  ? 'bg-[#1BA9A0]/10'
+                                  ? 'bg-primary/10'
                                   : ''
                             }`}
                           >
@@ -498,7 +498,7 @@ export default function ChallengeBoardPage() {
                                     {entry.display_name || entry.username}
                                   </p>
                                   {isYou && (
-                                    <span className="rounded-full bg-[#1BA9A0]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#1BA9A0]">
+                                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                                       You
                                     </span>
                                   )}
@@ -568,7 +568,7 @@ export default function ChallengeBoardPage() {
                                       {entry.display_name || entry.username}
                                     </p>
                                     {isYou && (
-                                      <span className="rounded-full bg-[#1BA9A0]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#1BA9A0]">
+                                      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                                         You
                                       </span>
                                     )}

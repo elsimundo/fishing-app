@@ -7,6 +7,7 @@ import { useDeletePost } from '../../hooks/usePosts'
 import { useAuth } from '../../hooks/useAuth'
 import { Trash2, MoreHorizontal } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface FeedPostCardProps {
   post: PostWithUser
@@ -19,6 +20,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
   const { user } = useAuth()
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost()
   const [showMenu, setShowMenu] = useState(false)
+  const { formatWeight } = useWeightFormatter()
 
   const isOwnPost = user?.id === post.user_id
 
@@ -149,7 +151,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
           <div className="rounded-xl bg-background px-2 py-2">
             <p className="text-[10px] text-muted-foreground">Weight</p>
             <p className="text-sm font-semibold text-foreground">
-              {post.catch.weight_kg != null ? `${post.catch.weight_kg.toFixed(1)} kg` : '—'}
+              {post.catch.weight_kg != null ? formatWeight(post.catch.weight_kg, { precision: 1 }) : '—'}
             </p>
           </div>
           <div className="rounded-xl bg-background px-2 py-2">
@@ -199,7 +201,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
               <p className="text-sm font-semibold text-foreground">{post.catch.species}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {post.catch.weight_kg != null
-                  ? `${post.catch.weight_kg.toFixed(1)} kg`
+                  ? formatWeight(post.catch.weight_kg, { precision: 1 })
                   : 'Catch logged'}{' '}
                 · {post.catch.location_name || 'Unknown location'}
               </p>

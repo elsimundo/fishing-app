@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { Catch, Session } from '../types'
 import type { UserChallenge } from './useGamification'
+import { formatWeight } from '../utils/weight'
 
 interface SessionWithCatches extends Session {
   catches: Catch[]
@@ -76,7 +77,7 @@ export function calculateLifetimeStats(sessions: SessionWithCatches[]) {
   if (heaviest && heaviest.weight_kg != null) {
     const lengthPart =
       heaviest.length_cm != null ? ` · ${heaviest.length_cm.toFixed(0)} cm` : ''
-    personalBestLabel = `${heaviest.weight_kg.toFixed(1)} kg · ${heaviest.species}${lengthPart}`
+    personalBestLabel = `${formatWeight(heaviest.weight_kg, { precision: 1 })} · ${heaviest.species}${lengthPart}`
   }
 
   // Top species by count

@@ -8,6 +8,7 @@ import { LOCATION_PRIVACY_OPTIONS } from '../lib/constants'
 import { useFreshwaterEnabled } from '../hooks/useFeatureFlags'
 import { useTheme } from '../hooks/useTheme'
 import { Switch } from '../components/ui/switch'
+import { useWeightUnit } from '../hooks/useWeightUnit'
 
 export default function SettingsPage() {
   const { user } = useAuth()
@@ -16,6 +17,7 @@ export default function SettingsPage() {
   const [isSavingPrivacy, setIsSavingPrivacy] = useState(false)
   const freshwaterEnabled = useFreshwaterEnabled()
   const { theme, setTheme } = useTheme()
+  const { unit: weightUnit, setUnit: setWeightUnit } = useWeightUnit()
 
   type IdlePrefs = {
     // All values are in HOURS in the UI/storage
@@ -131,11 +133,47 @@ export default function SettingsPage() {
               <p className="mt-1 text-xs text-muted-foreground">Toggle between dark mode and a light mode.</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Light</span>
+              <span className="text-xs text-muted-foreground">{theme === 'light' ? 'Light' : 'Dark'}</span>
               <Switch
                 checked={theme === 'light'}
                 onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
               />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Weight units</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Choose how weights are shown when logging catches and viewing stats. We store everything in kg but show
+                your preferred unit.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className={`rounded-md border px-3 py-1 text-xs font-semibold transition-colors ${
+                  weightUnit === 'imperial'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-background text-muted-foreground hover:border-primary/40'
+                }`}
+                onClick={() => setWeightUnit('imperial')}
+              >
+                Lb + oz
+              </button>
+              <button
+                type="button"
+                className={`rounded-md border px-3 py-1 text-xs font-semibold transition-colors ${
+                  weightUnit === 'metric'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-background text-muted-foreground hover:border-primary/40'
+                }`}
+                onClick={() => setWeightUnit('metric')}
+              >
+                Kilograms
+              </button>
             </div>
           </div>
         </section>
@@ -165,24 +203,22 @@ export default function SettingsPage() {
                   <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Warn after (hours)</label>
                   <input
                     type="number"
-                    min={1}
-                    max={12}
+                    min={0}
                     step={0.5}
                     value={idlePrefs.seaWarn}
                     onChange={(e) => updateIdlePref('seaWarn', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                    className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Auto-end after (hours)</label>
                   <input
                     type="number"
-                    min={2}
-                    max={24}
+                    min={0}
                     step={0.5}
                     value={idlePrefs.seaEnd}
                     onChange={(e) => updateIdlePref('seaEnd', Number(e.target.value) || 0)}
-                    className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                    className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -198,24 +234,22 @@ export default function SettingsPage() {
                     <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Warn after (hours)</label>
                     <input
                       type="number"
-                      min={0.5}
-                      max={12}
+                      min={0}
                       step={0.5}
                       value={idlePrefs.lakeWarn}
                       onChange={(e) => updateIdlePref('lakeWarn', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   <div>
                     <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Auto-end after (hours)</label>
                     <input
                       type="number"
-                      min={1}
-                      max={24}
+                      min={0}
                       step={0.5}
                       value={idlePrefs.lakeEnd}
                       onChange={(e) => updateIdlePref('lakeEnd', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -232,24 +266,22 @@ export default function SettingsPage() {
                     <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Warn after (hours)</label>
                     <input
                       type="number"
-                      min={0.25}
-                      max={12}
+                      min={0}
                       step={0.25}
                       value={idlePrefs.riverWarn}
                       onChange={(e) => updateIdlePref('riverWarn', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   <div>
                     <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Auto-end after (hours)</label>
                     <input
                       type="number"
-                      min={0.5}
-                      max={24}
+                      min={0}
                       step={0.25}
                       value={idlePrefs.riverEnd}
                       onChange={(e) => updateIdlePref('riverEnd', Number(e.target.value) || 0)}
-                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-[#1BA9A0] focus:outline-none focus:ring-1 focus:ring-[#1BA9A0]"
+                      className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -273,7 +305,7 @@ export default function SettingsPage() {
                   Tell us what kind of fishing you do most so we can tune sessions, challenges, and recommendations.
                 </p>
                 {profile.fishing_preference && (
-                  <p className="mt-2 inline-flex rounded-full bg-[#1BA9A0]/20 px-3 py-1 text-xs font-medium text-[#1BA9A0]">
+                  <p className="mt-2 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                     Current: {profile.fishing_preference === 'sea' ? 'Sea fishing' : profile.fishing_preference === 'freshwater' ? 'Freshwater' : 'All fishing'}
                   </p>
                 )}
@@ -281,7 +313,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowFishingPrefs(true)}
-                className="rounded-lg bg-[#1BA9A0] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0D9488]"
+                className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:bg-primary/60"
               >
                 Choose style
               </button>
@@ -310,7 +342,7 @@ export default function SettingsPage() {
                   <div className="flex h-5 items-center">
                     <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-border">
                       {option.value === 'general' && (
-                        <div className="h-2 w-2 rounded-full bg-[#1BA9A0]" />
+                        <div className="h-2 w-2 rounded-full bg-primary" />
                       )}
                     </div>
                   </div>
@@ -321,7 +353,7 @@ export default function SettingsPage() {
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-[11px] text-[#1BA9A0] bg-[#1BA9A0]/10 rounded-lg p-2">
+            <p className="mt-3 text-[11px] text-primary bg-primary/10 rounded-lg p-2 border border-primary/30 dark:text-primary dark:bg-primary/15 dark:border-primary/40">
               💡 <strong>Recommended:</strong> General area protects your secret spots while still contributing to community insights.
             </p>
           </div>
@@ -334,18 +366,18 @@ export default function SettingsPage() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   Help other anglers by contributing anonymized data to Local Intel and fishing insights. Your exact locations are never shared - only aggregated stats like species caught, baits used, and best times.
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  <strong>What's shared:</strong> Species, baits, catch times, weather conditions (all anonymized)
-                  <br />
-                  <strong>What's NOT shared:</strong> Your exact locations, personal info, or session details
-                </p>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              <strong>What's shared:</strong> Species, baits, catch times, weather conditions (all anonymized)
+              <br />
+              <strong>What's NOT shared:</strong> Your exact locations, personal info, or session details
+            </p>
               </div>
               <button
                 type="button"
                 onClick={() => updateDataSharing(!(profile?.share_data_for_insights ?? true))}
                 disabled={isSavingPrivacy}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#1BA9A0] focus:ring-offset-2 ${
-                  profile?.share_data_for_insights ?? true ? 'bg-[#1BA9A0]' : 'bg-[#334155]'
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                  profile?.share_data_for_insights ?? true ? 'bg-primary' : 'bg-muted'
                 } ${isSavingPrivacy ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <span
@@ -355,7 +387,7 @@ export default function SettingsPage() {
                 />
               </button>
             </div>
-            <p className="mt-3 text-[11px] text-emerald-400 bg-emerald-900/20 rounded-lg p-2">
+            <p className="mt-3 text-[11px] rounded-lg border border-primary/30 bg-primary/10 p-2 text-primary">
               ✅ <strong>Currently {profile?.share_data_for_insights ?? true ? 'enabled' : 'disabled'}:</strong> {profile?.share_data_for_insights ?? true ? 'Your anonymized data helps the community' : 'Your data is completely private'}
             </p>
           </div>

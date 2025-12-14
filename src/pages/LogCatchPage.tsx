@@ -35,14 +35,14 @@ export default function LogCatchPage() {
 
         <div className="mx-auto max-w-2xl px-4 py-4">
           {/* Hero */}
-          <div className="mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-600 p-5 text-white">
+          <div className="mb-4 rounded-2xl bg-primary/10 p-5 text-foreground border border-primary/20 dark:border-border dark:bg-gradient-to-br dark:from-emerald-500 dark:to-cyan-600 dark:text-white">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 dark:bg-white/20">
                 <Fish size={24} />
               </div>
               <div>
                 <h2 className="text-lg font-bold">Record Your Catch</h2>
-                <p className="text-sm text-white/80">Add species, weight, photo and location</p>
+                <p className="text-sm text-muted-foreground dark:text-white/80">Add species, weight, photo and location</p>
               </div>
             </div>
           </div>

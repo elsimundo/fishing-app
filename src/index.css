@@ -135,8 +135,8 @@ button {
   bottom: 5rem; /* 80px - height of mobile bottom nav */
   left: 0;
   right: 0;
-  border-top: 1px solid #334155;
-  background-color: #243B4A;
+  border-top: 1px solid var(--border);
+  background-color: var(--card);
   padding: 1.25rem;
   z-index: 40;
 }
@@ -199,14 +199,20 @@ button {
   /* Background - Deep Ocean */
   --background: #1A2D3D;
   --foreground: #FFFFFF;
+  --background-dark: #1A2D3D;
+  --background-light: #F8FAFC;
   
   /* Cards - Lighter Navy */
   --card: #243B4A;
   --card-foreground: #FFFFFF;
+  --card-dark: #243B4A;
+  --card-light: #FFFFFF;
   
   /* Popover - Same as card */
   --popover: #243B4A;
   --popover-foreground: #FFFFFF;
+  --popover-dark: #243B4A;
+  --popover-light: #FFFFFF;
   
   /* Secondary - Dark Teal */
   --secondary: #0D4B4E;
@@ -245,17 +251,21 @@ button {
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #334155;
   --sidebar-ring: #1BA9A0;
+  --sidebar-dark: #1A2D3D;
+  --sidebar-light: #FFFFFF;
+  --sidebar-accent-dark: #243B4A;
+  --sidebar-accent-light: #F1F5F9;
 }
 
 /* Dark class for compatibility - same as root since always dark */
 .dark {
   --primary: #1BA9A0;
   --primary-foreground: #FFFFFF;
-  --background: #1A2D3D;
+  --background: var(--background-dark, #1A2D3D);
   --foreground: #FFFFFF;
-  --card: #243B4A;
+  --card: var(--card-dark, #243B4A);
   --card-foreground: #FFFFFF;
-  --popover: #243B4A;
+  --popover: var(--popover-dark, #243B4A);
   --popover-foreground: #FFFFFF;
   --secondary: #0D4B4E;
   --secondary-foreground: #FFFFFF;
@@ -268,16 +278,18 @@ button {
   --border: #334155;
   --input: #334155;
   --ring: #1BA9A0;
+  --sidebar: var(--sidebar-dark, #1A2D3D);
+  --sidebar-accent: var(--sidebar-accent-dark, #243B4A);
 }
 
 .light {
   --primary: #1BA9A0;
   --primary-foreground: #FFFFFF;
-  --background: #F8FAFC;
+  --background: var(--background-light, #F8FAFC);
   --foreground: #0F172A;
-  --card: #FFFFFF;
+  --card: var(--card-light, #FFFFFF);
   --card-foreground: #0F172A;
-  --popover: #FFFFFF;
+  --popover: var(--popover-light, #FFFFFF);
   --popover-foreground: #0F172A;
   --secondary: #E2E8F0;
   --secondary-foreground: #0F172A;
@@ -290,11 +302,11 @@ button {
   --border: #E2E8F0;
   --input: #E2E8F0;
   --ring: #1BA9A0;
-  --sidebar: #FFFFFF;
+  --sidebar: var(--sidebar-light, #FFFFFF);
   --sidebar-foreground: #0F172A;
   --sidebar-primary: #1BA9A0;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F1F5F9;
+  --sidebar-accent: var(--sidebar-accent-light, #F1F5F9);
   --sidebar-accent-foreground: #0F172A;
   --sidebar-border: #E2E8F0;
   --sidebar-ring: #1BA9A0;

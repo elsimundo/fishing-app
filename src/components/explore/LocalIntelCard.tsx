@@ -3,6 +3,7 @@ import { Fish, ChevronDown, ChevronUp, Loader2, Trophy, Clock, Users, Activity, 
 import { useLocalIntel } from '../../hooks/useLocalIntel'
 import { formatDistanceToNow } from 'date-fns'
 import type { FishingPreference } from '../../types'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 interface LocalIntelCardProps {
   lat: number | null
@@ -13,6 +14,7 @@ interface LocalIntelCardProps {
 
 export function LocalIntelCard({ lat, lng, bounds, waterPreference }: LocalIntelCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const { formatWeight } = useWeightFormatter()
   const { data: intel, isLoading, error } = useLocalIntel(lat, lng, bounds, 30, lat !== null && lng !== null, waterPreference)
 
   if (!lat || !lng) {
@@ -178,7 +180,7 @@ export function LocalIntelCard({ lat, lng, bounds, waterPreference }: LocalIntel
                           <span className="text-sm font-semibold text-emerald-400">{s.count}</span>
                           {s.avgWeight && (
                             <span className="ml-2 text-xs text-muted-foreground">
-                              avg {s.avgWeight.toFixed(1)}kg
+                              avg {formatWeight(s.avgWeight, { precision: 1 })}
                             </span>
                           )}
                         </div>
@@ -324,7 +326,7 @@ export function LocalIntelCard({ lat, lng, bounds, waterPreference }: LocalIntel
                   </div>
                   <div className="mt-1 flex items-baseline gap-2">
                     <span className="text-lg font-bold text-amber-400">
-                      {intel.biggestCatch.weight.toFixed(2)}kg
+                      {formatWeight(intel.biggestCatch.weight, { precision: 1 })}
                     </span>
                     <span className="text-sm text-amber-500">{intel.biggestCatch.species}</span>
                   </div>

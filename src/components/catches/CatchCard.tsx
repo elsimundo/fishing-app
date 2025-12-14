@@ -5,6 +5,7 @@ import type { Catch } from '../../types'
 import { useDeleteCatch } from '../../hooks/useDeleteCatch'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { toast } from 'react-hot-toast'
+import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
 type CatchCardProps = {
   item: Catch
@@ -14,11 +15,12 @@ type CatchCardProps = {
 export function CatchCard({ item, showDelete = false }: CatchCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { mutateAsync: deleteCatch, isPending: isDeleting } = useDeleteCatch()
+  const { formatWeight } = useWeightFormatter()
 
   // Build stats suffix
   const stats: string[] = []
   if (item.weight_kg != null && item.weight_kg > 0) {
-    stats.push(`${item.weight_kg.toFixed(1)} kg`)
+    stats.push(formatWeight(item.weight_kg, { precision: 1 }))
   }
   if (item.length_cm != null && item.length_cm > 0) {
     stats.push(`${item.length_cm.toFixed(0)} cm`)

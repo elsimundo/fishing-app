@@ -35,5 +35,5 @@ test('renders species, location and formatted weight', () => {
 
   expect(screen.getByText('Bass')).toBeInTheDocument()
   expect(screen.getByText('Southend Pier')).toBeInTheDocument()
-  expect(screen.getByText('2.5 kg')).toBeInTheDocument()
+  expect(screen.getByText('5 lb 8.2 oz')).toBeInTheDocument()
 })

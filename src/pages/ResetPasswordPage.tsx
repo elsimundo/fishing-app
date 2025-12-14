@@ -64,7 +64,7 @@ export default function ResetPasswordPage() {
 
   if (!isValidSession) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="flex min-h-[100dvh] items-start justify-center bg-background px-4 py-10 pb-28 overflow-y-auto sm:items-center sm:py-0 sm:pb-0">
         <div className="w-full max-w-md">
           <div className="rounded-xl bg-surface p-6 shadow-lg text-center">
             <h1 className="mb-2 text-xl font-semibold text-foreground">Invalid or expired link</h1>
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-[100dvh] items-start justify-center bg-background px-4 py-10 pb-28 overflow-y-auto sm:items-center sm:py-0 sm:pb-0">
       <div className="w-full max-w-md">
         <div className="rounded-xl bg-surface p-6 shadow-lg">
           <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>

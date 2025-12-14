@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { Catch } from '../../types'
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../../lib/constants'
+import { formatWeight } from '../../utils/weight'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string
 
@@ -83,7 +84,7 @@ export function Map({ catches, variant = 'full', center, showCenterMarker = fals
         .setPopup(
           new mapboxgl.Popup({ offset: 12 }).setHTML(
             `<div style="font-size:12px;">${photoHtml}<strong>${catchItem.species}</strong><br/>${
-              catchItem.weight_kg ? `${catchItem.weight_kg.toFixed(1)} kg<br/>` : ''
+              catchItem.weight_kg ? `${formatWeight(catchItem.weight_kg, { precision: 1 })}<br/>` : ''
             }${catchItem.location_name}</div>`,
           ),
         )

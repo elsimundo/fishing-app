@@ -257,8 +257,9 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
               e.stopPropagation()
               onShare()
             }}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-400"
+            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
             title="Share with friends"
+            style={{ color: '#374151' }}
           >
             <Share2 size={14} />
           </button>
@@ -270,8 +271,9 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
               e.stopPropagation()
               onShowOnMap(mark)
             }}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-400"
+            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
             title="Show on map"
+            style={{ color: '#374151' }}
           >
             <Crosshair size={14} />
           </button>
@@ -281,8 +283,9 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
           title="Get directions"
+          style={{ color: '#374151' }}
         >
           <Navigation size={14} />
         </a>
@@ -294,7 +297,8 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
               onDelete()
             }}
             disabled={isDeleting}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-400 disabled:opacity-50"
+            className="rounded-lg p-2 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800 dark:hover:text-red-400 disabled:opacity-50"
+            style={{ color: '#374151' }}
           >
             <Trash2 size={14} />
           </button>

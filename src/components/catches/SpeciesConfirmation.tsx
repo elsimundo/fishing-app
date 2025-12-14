@@ -115,7 +115,7 @@ export function SpeciesConfirmation({ result, onConfirm }: SpeciesConfirmationPr
           <button
             type="button"
             onClick={() => setShowFullList(true)}
-            className="mt-2 w-full text-center text-[11px] font-medium text-[#1BA9A0] hover:text-[#14B8A6]"
+            className="mt-2 w-full text-center text-[11px] font-medium text-primary hover:text-primary/80"
           >
             Show all species →
           </button>

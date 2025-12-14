@@ -125,7 +125,7 @@ export function FollowersModal({ userId, initialTab, onClose }: FollowersModalPr
                           className="h-12 w-12 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1BA9A0] font-bold text-white">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                           {user.username?.[0]?.toUpperCase() || '?'}
                         </div>
                       )}

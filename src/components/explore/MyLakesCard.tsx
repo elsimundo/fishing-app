@@ -82,26 +82,26 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                   {managedLakes.map(({ lake, role }) => (
                     <div
                       key={lake.id}
-                      className="flex items-center justify-between rounded-lg bg-background p-3 border-l-2 border-amber-500"
+                      className="flex items-center justify-between rounded-lg bg-background p-3 border border-border transition-colors hover:border-primary/40"
                     >
                       <button
                         type="button"
                         onClick={() => onSelectLake?.(lake)}
                         className="flex-1 text-left"
                       >
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-900/20">
-                            <Crown size={14} className="text-amber-500" />
+                          <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                            <Crown size={14} />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground">{lake.name}</p>
                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                               <span className={`rounded px-1 py-0.5 ${
                                 role === 'owner' 
-                                  ? 'bg-amber-900/30 text-amber-500' 
+                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' 
                                   : role === 'manager'
-                                  ? 'bg-blue-900/30 text-blue-400'
-                                  : 'bg-gray-900/30 text-gray-400'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                  : 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
                               }`}>
                                 {role === 'owner' ? 'Owner' : role === 'manager' ? 'Manager' : 'Bailiff'}
                               </span>
@@ -113,17 +113,19 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                       <div className="flex items-center gap-1">
                         <Link
                           to={`/lakes/${lake.slug || lake.id}`}
-                          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                           onClick={(e) => e.stopPropagation()}
                           title="View as angler"
+                          style={{ color: '#374151' }}
                         >
                           <MapPin size={14} />
                         </Link>
                         <Link
                           to={`/lakes/${lake.id}/dashboard`}
-                          className="rounded-lg p-2 text-amber-500 hover:bg-amber-900/20"
+                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                           onClick={(e) => e.stopPropagation()}
                           title="Dashboard"
+                          style={{ color: '#374151' }}
                         >
                           <Shield size={14} />
                         </Link>
@@ -133,8 +135,9 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                             e.stopPropagation()
                             onSelectLake?.(lake)
                           }}
-                          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                           title="Show on map"
+                          style={{ color: '#374151' }}
                         >
                           <Navigation size={14} />
                         </button>
@@ -157,7 +160,7 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                     return (
                       <div
                         key={saved.id}
-                        className="flex items-center justify-between rounded-lg bg-background p-3"
+                        className="flex items-center justify-between rounded-lg bg-background p-3 border border-border transition-colors hover:border-primary/40"
                       >
                         <button
                           type="button"
@@ -165,14 +168,14 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                           className="flex-1 text-left"
                         >
                           <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-900/20">
-                              <Trees size={14} className="text-sky-400" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-300">
+                              <Trees size={14} />
                             </div>
                             <div>
                               <p className="text-sm font-medium text-foreground">{lake.name}</p>
                               <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                                 {lake.is_verified && (
-                                  <span className="rounded bg-green-900/30 px-1 py-0.5 text-green-400">
+                                  <span className="rounded bg-green-100 px-1 py-0.5 text-green-700 dark:bg-green-900/30 dark:text-green-300">
                                     Verified
                                   </span>
                                 )}
@@ -187,8 +190,9 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                         <div className="flex items-center gap-1">
                           <Link
                             to={`/lakes/${lake.id}`}
-                            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                             onClick={(e) => e.stopPropagation()}
+                            style={{ color: '#374151' }}
                           >
                             <MapPin size={14} />
                           </Link>
@@ -197,7 +201,8 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            style={{ color: '#374151' }}
                           >
                             <Navigation size={14} />
                           </a>
@@ -208,7 +213,7 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                               unsaveLake.mutate(lake.id)
                             }}
                             disabled={isPending}
-                            className="rounded-lg p-2 text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/30 hover:text-pink-300 disabled:opacity-50"
+                            className="rounded-lg p-2 text-pink-500 hover:bg-muted disabled:opacity-50"
                           >
                             <Heart size={14} fill="currentColor" />
                           </button>

@@ -93,7 +93,7 @@ export function SmartCatchPhoto({
             <Camera size={14} className="text-muted-foreground" />
             <span>Tap to take a photo or choose from gallery</span>
           </div>
-          <span className="text-[10px] text-muted-foreground">JPG/PNG/WebP up to 5MB</span>
+          <span className="text-[10px] text-muted-foreground">JPG/PNG/WebP up to 20MB</span>
         </label>
         <input
           id="smart-photo"
@@ -121,7 +121,7 @@ export function SmartCatchPhoto({
         ) : null}
 
         {error ? (
-          <div className="flex items-start gap-2 rounded-lg bg-red-900/30 border border-red-500/40 px-3 py-2 text-[11px] text-red-400">
+          <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-[11px] text-red-700 dark:bg-red-900/30 dark:border-red-500/40 dark:text-red-400">
             <AlertCircle size={14} className="mt-0.5" />
             <div>
               <p className="font-medium">Could not identify fish</p>
@@ -134,9 +134,9 @@ export function SmartCatchPhoto({
 
         {metadata ? (
           metadata.hasGPS || metadata.hasTimestamp ? (
-            <div className="rounded-lg bg-emerald-900/30 border border-emerald-500/40 px-3 py-2 text-[11px] text-emerald-400">
+            <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-[11px] text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-500/40 dark:text-emerald-400">
               <p className="font-medium mb-1">📸 Photo metadata detected:</p>
-              <div className="space-y-0.5 text-emerald-400">
+              <div className="space-y-0.5 text-emerald-700 dark:text-emerald-400">
                 {metadata.hasGPS ? (
                   <div className="flex items-center gap-1">
                     <MapPin size={12} />
@@ -152,9 +152,9 @@ export function SmartCatchPhoto({
               </div>
             </div>
           ) : (
-            <div className="rounded-lg bg-amber-900/30 border border-amber-500/40 px-3 py-2 text-[11px] text-amber-400">
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-700 dark:bg-amber-900/30 dark:border-amber-500/40 dark:text-amber-400">
               <p className="font-medium mb-1">📍 No location data in photo</p>
-              <p className="text-amber-400">
+              <p className="text-amber-700 dark:text-amber-400">
                 Mobile browsers remove location data for privacy. Use the "Use my current location" button or map picker below to set your location.
               </p>
             </div>

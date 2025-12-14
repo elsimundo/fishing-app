@@ -136,7 +136,7 @@ export function TackleShopsCard({ shops }: TackleShopsCardProps) {
                       e.stopPropagation()
                       setClaimBusiness(shop)
                     }}
-                    className="mt-2 text-[11px] font-medium text-[#1BA9A0] hover:underline"
+                    className="mt-2 text-[11px] font-medium text-primary hover:underline"
                   >
                     Are you the owner? Claim this business
                   </button>
