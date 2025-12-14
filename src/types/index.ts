@@ -146,6 +146,17 @@ export type Catch = {
   // Multi-catch grouping (for feathers, multi-hook rigs)
   multi_catch_group_id?: string | null
 
+  // Peg/swim for lake sessions
+  peg_swim?: string | null
+
+  // Fish health reporting (for lake sessions)
+  fish_health_issue?: boolean
+  fish_health_type?: 'ulcer' | 'fin_damage' | 'parasite' | 'fungus' | 'mouth_damage' | 'scale_loss' | 'lesion' | 'other' | null
+  fish_health_notes?: string | null
+  fish_health_photo_url?: string | null
+  treatment_applied?: boolean
+  treatment_notes?: string | null
+
   // Optional relation for attribution
   logged_by?: Profile
 }

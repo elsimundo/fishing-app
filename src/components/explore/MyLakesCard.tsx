@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Heart, Navigation, Loader2, MapPin, Trees, Crown, Shield } from 'lucide-react'
 import { useSavedLakes } from '../../hooks/useSavedLakes'
@@ -10,9 +10,16 @@ interface MyLakesCardProps {
 }
 
 export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
-  const [expanded, setExpanded] = useState(false)
   const { savedLakes, isLoading: savedLoading, unsaveLake, isPending } = useSavedLakes()
   const { data: managedLakes = [], isLoading: managedLoading } = useMyManagedLakes()
+  const [expanded, setExpanded] = useState(false)
+  
+  // Auto-expand if user has managed lakes (they're a venue owner/staff)
+  useEffect(() => {
+    if (managedLakes.length > 0) {
+      setExpanded(true)
+    }
+  }, [managedLakes.length])
 
   const isLoading = savedLoading || managedLoading
   
@@ -105,6 +112,14 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
 
                       <div className="flex items-center gap-1">
                         <Link
+                          to={`/lakes/${lake.slug || lake.id}`}
+                          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          onClick={(e) => e.stopPropagation()}
+                          title="View as angler"
+                        >
+                          <MapPin size={14} />
+                        </Link>
+                        <Link
                           to={`/lakes/${lake.id}/dashboard`}
                           className="rounded-lg p-2 text-amber-500 hover:bg-amber-900/20"
                           onClick={(e) => e.stopPropagation()}
@@ -112,15 +127,17 @@ export function MyLakesCard({ onSelectLake }: MyLakesCardProps) {
                         >
                           <Shield size={14} />
                         </Link>
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${lake.latitude},${lake.longitude}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onSelectLake?.(lake)
+                          }}
                           className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          title="Show on map"
                         >
                           <Navigation size={14} />
-                        </a>
+                        </button>
                       </div>
                     </div>
                   ))}

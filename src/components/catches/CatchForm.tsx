@@ -66,6 +66,7 @@ const catchFormSchema = z.object({
   rig: z.string().optional(),
   fishing_style: z.string().optional(),
   notes: z.string().max(500, 'Notes must be 500 characters or less').optional(),
+  peg_swim: z.string().optional(),
 })
 
 type CatchFormValues = z.infer<typeof catchFormSchema>
@@ -203,6 +204,13 @@ export function CatchForm({
   // EXIF metadata from photo
   const [photoMetadata, setPhotoMetadata] = useState<PhotoMetadata | null>(prefilledMetadata || null)
 
+  // Fish health reporting (for lake sessions)
+  const [fishHealthIssue, setFishHealthIssue] = useState(initialCatch?.fish_health_issue ?? false)
+  const [fishHealthType, setFishHealthType] = useState<string>(initialCatch?.fish_health_type ?? '')
+  const [fishHealthNotes, setFishHealthNotes] = useState(initialCatch?.fish_health_notes ?? '')
+  const [treatmentApplied, setTreatmentApplied] = useState(initialCatch?.treatment_applied ?? false)
+  const [treatmentNotes, setTreatmentNotes] = useState(initialCatch?.treatment_notes ?? '')
+
   const defaultNow = new Date().toISOString().slice(0, 16)
 
   const defaultValues: Partial<CatchFormValues> = initialCatch
@@ -224,6 +232,7 @@ export function CatchForm({
         rig: initialCatch.rig ?? undefined,
         fishing_style: initialCatch.fishing_style ?? undefined,
         notes: initialCatch.notes ?? undefined,
+        peg_swim: initialCatch.peg_swim ?? undefined,
       }
     : {
         caught_at: defaultNow,
@@ -459,6 +468,7 @@ export function CatchForm({
         photo_camera_model: photoMetadata?.cameraModel ?? null,
         country_code: countryCode,
         multi_catch_group_id: multiCatchGroupId,
+        peg_swim: values.peg_swim?.trim() ? values.peg_swim.trim() : null,
       }))
 
 
@@ -544,6 +554,14 @@ export function CatchForm({
       photo_camera_make: photoMetadata?.cameraMake ?? null,
       photo_camera_model: photoMetadata?.cameraModel ?? null,
       country_code: countryCode,
+      peg_swim: values.peg_swim?.trim() ? values.peg_swim.trim() : null,
+      // Fish health reporting
+      fish_health_issue: fishHealthIssue,
+      fish_health_type: fishHealthIssue && fishHealthType ? fishHealthType : null,
+      fish_health_notes: fishHealthIssue && fishHealthNotes.trim() ? fishHealthNotes.trim() : null,
+      fish_health_photo_url: null, // Will be uploaded separately if needed
+      treatment_applied: fishHealthIssue ? treatmentApplied : false,
+      treatment_notes: fishHealthIssue && treatmentApplied && treatmentNotes.trim() ? treatmentNotes.trim() : null,
     }
 
 
@@ -1064,6 +1082,130 @@ export function CatchForm({
             <p className="mt-1 text-[11px] text-red-600">{errors.fishing_style.message}</p>
           ) : null}
         </div>
+
+        {/* Peg/Swim - only show for lake sessions */}
+        {activeSession?.lake_id && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="peg_swim">
+              Peg / Swim
+            </label>
+            <input
+              type="text"
+              id="peg_swim"
+              className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="e.g., Peg 12, Swim 3"
+              {...register('peg_swim')}
+            />
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              Where on the lake were you fishing?
+            </p>
+          </div>
+        )}
+
+        {/* Fish Health Reporting - only show for lake sessions */}
+        {activeSession?.lake_id && (
+          <div className="sm:col-span-2 rounded-lg border border-border p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-base">🩺</span>
+                <div>
+                  <p className="text-xs font-medium text-foreground">Fish Health Report</p>
+                  <p className="text-[10px] text-muted-foreground">Report any issues with this fish</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFishHealthIssue(!fishHealthIssue)}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                  fishHealthIssue ? 'bg-amber-500' : 'bg-muted'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+                    fishHealthIssue ? 'translate-x-4' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {fishHealthIssue && (
+              <div className="space-y-3 pt-2 border-t border-border">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    Type of Issue
+                  </label>
+                  <select
+                    value={fishHealthType}
+                    onChange={(e) => setFishHealthType(e.target.value)}
+                    className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="">Select issue type</option>
+                    <option value="ulcer">Ulcer / Sore</option>
+                    <option value="fin_damage">Fin Damage</option>
+                    <option value="mouth_damage">Mouth Damage</option>
+                    <option value="scale_loss">Scale Loss</option>
+                    <option value="parasite">Parasite</option>
+                    <option value="fungus">Fungus</option>
+                    <option value="lesion">Lesion / Wound</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    Description
+                  </label>
+                  <textarea
+                    value={fishHealthNotes}
+                    onChange={(e) => setFishHealthNotes(e.target.value)}
+                    rows={2}
+                    className="block w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Describe what you observed..."
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">Treatment Applied?</p>
+                    <p className="text-[10px] text-muted-foreground">Did you apply any treatment?</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentApplied(!treatmentApplied)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      treatmentApplied ? 'bg-green-500' : 'bg-muted'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+                        treatmentApplied ? 'translate-x-4' : 'translate-x-0.5'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {treatmentApplied && (
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Treatment Details
+                    </label>
+                    <input
+                      type="text"
+                      value={treatmentNotes}
+                      onChange={(e) => setTreatmentNotes(e.target.value)}
+                      className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      placeholder="e.g., Applied antiseptic, used Klinik"
+                    />
+                  </div>
+                )}
+
+                <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                  ⚠️ This report will be visible to the lake owner to help monitor fish health.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="sm:col-span-2">
           <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="notes">

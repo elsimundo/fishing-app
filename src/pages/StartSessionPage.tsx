@@ -73,7 +73,7 @@ export default function StartSessionPage() {
     enabled: formData.waterType === 'freshwater' && formData.latitude !== null,
   })
 
-  // Pre-select lake or mark if navigated from Explore page
+  // Pre-select lake or mark if navigated from Explore page or via URL params
   useEffect(() => {
     const state = location.state as { 
       lakeId?: string
@@ -82,12 +82,31 @@ export default function StartSessionPage() {
       markName?: string 
     } | null
     
-    if (state?.lakeId) {
+    // Also check URL params (used when navigating from lake detail page)
+    const urlParams = new URLSearchParams(location.search)
+    const urlLakeId = urlParams.get('lakeId')
+    const urlLakeName = urlParams.get('lakeName')
+    const urlLat = urlParams.get('lat')
+    const urlLng = urlParams.get('lng')
+    
+    // Use URL params or state - URL params take priority
+    const lakeId = urlLakeId || state?.lakeId
+    const lakeName = urlLakeName || state?.lakeName
+    const lat = urlLat ? parseFloat(urlLat) : null
+    const lng = urlLng ? parseFloat(urlLng) : null
+    
+    if (lakeId) {
       setFormData(prev => ({ 
         ...prev, 
-        lakeId: state.lakeId,
+        lakeId,
+        locationName: lakeName ? decodeURIComponent(lakeName) : undefined,
+        latitude: lat,
+        longitude: lng,
         waterType: 'freshwater',
       }))
+      if (lat && lng) {
+        setLocationCoords({ lat, lng })
+      }
     }
     
     // If navigating with a mark, find it and pre-fill location
@@ -106,7 +125,7 @@ export default function StartSessionPage() {
         setLocationCoords({ lat: mark.latitude, lng: mark.longitude })
       }
     }
-  }, [location.state, savedMarks])
+  }, [location.state, location.search, savedMarks])
 
   const handleQuickStart = async () => {
     if (!user) {
@@ -117,6 +136,16 @@ export default function StartSessionPage() {
     setStep(0)
     setShowSuccess(false)
     setLoading(true)
+    
+    // Check URL params for lake info
+    const urlParams = new URLSearchParams(location.search)
+    const urlLakeId = urlParams.get('lakeId')
+    const urlLakeName = urlParams.get('lakeName')
+    const urlLat = urlParams.get('lat')
+    const urlLng = urlParams.get('lng')
+    
+    // Check if we have a pre-selected lake from URL params
+    const hasLake = urlLakeId && urlLat && urlLng
     
     // Check if we have a pre-selected mark from navigation
     const navState = location.state as { markId?: string; markName?: string } | null
@@ -135,26 +164,33 @@ export default function StartSessionPage() {
       }
     }
     
-    if (preSelectedMark) {
+    // Set loading message based on what we have
+    if (hasLake) {
+      setLoadingMessage(`Setting up at ${decodeURIComponent(urlLakeName || 'the lake')}...`)
+    } else if (preSelectedMark) {
       setLoadingMessage(`Setting up at ${preSelectedMark.name}...`)
     } else {
       setLoadingMessage('Getting your location...')
     }
 
-    await new Promise((r) => setTimeout(r, 600))
+    await new Promise((r) => setTimeout(r, 400))
     setLoadingMessage('Setting up your session...')
-    await new Promise((r) => setTimeout(r, 600))
+    await new Promise((r) => setTimeout(r, 400))
 
     const now = new Date()
-    const title = `Fishing Session - ${now.toLocaleDateString('en-GB', {
+    
+    // Generate title based on location
+    const locationName = hasLake 
+      ? decodeURIComponent(urlLakeName || 'Lake') 
+      : preSelectedMark?.name || 'Fishing'
+    const title = `${locationName} - ${now.toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric',
     })}`
 
-    // Get coordinates for weather/tide fetch
-    const lat = preSelectedMark?.latitude ?? 0
-    const lng = preSelectedMark?.longitude ?? 0
+    // Get coordinates for weather fetch - prioritize lake, then mark
+    const lat = hasLake ? parseFloat(urlLat!) : (preSelectedMark?.latitude ?? 0)
+    const lng = hasLake ? parseFloat(urlLng!) : (preSelectedMark?.longitude ?? 0)
 
     // Fetch weather and tide snapshot
     let weatherTemp: number | null = null
@@ -188,38 +224,65 @@ export default function StartSessionPage() {
 
     setLoadingMessage('Creating your session...')
 
-    // Use mark data if available, otherwise use defaults
-    const sessionData = preSelectedMark ? {
-      user_id: user.id,
-      title,
-      location_name: preSelectedMark.name,
-      water_type: preSelectedMark.water_type || 'saltwater',
-      location_privacy: 'general',
-      latitude: preSelectedMark.latitude,
-      longitude: preSelectedMark.longitude,
-      started_at: now.toISOString(),
-      is_public: true,
-      mark_id: preSelectedMark.id,
-      weather_temp: weatherTemp,
-      weather_condition: weatherCondition,
-      wind_speed: windSpeed,
-      tide_state: tideState,
-      moon_phase: getMoonPhase().phase,
-    } as const : {
-      user_id: user.id,
-      title,
-      location_name: 'Current Location',
-      water_type: 'saltwater',
-      location_privacy: 'general',
-      latitude: 0,
-      longitude: 0,
-      started_at: now.toISOString(),
-      is_public: true,
-      weather_temp: null,
-      weather_condition: null,
-      wind_speed: null,
-      tide_state: null,
-      moon_phase: getMoonPhase().phase,
+    // Build session data based on what we have (lake, mark, or nothing)
+    let sessionData: Record<string, unknown>
+    
+    if (hasLake) {
+      // Lake session - use lake info from URL params
+      sessionData = {
+        user_id: user.id,
+        title,
+        location_name: decodeURIComponent(urlLakeName || 'Lake'),
+        water_type: 'freshwater',
+        location_privacy: 'general',
+        latitude: lat,
+        longitude: lng,
+        started_at: now.toISOString(),
+        is_public: true,
+        lake_id: urlLakeId,
+        weather_temp: weatherTemp,
+        weather_condition: weatherCondition,
+        wind_speed: windSpeed,
+        tide_state: null, // No tides for freshwater
+        moon_phase: getMoonPhase().phase,
+      }
+    } else if (preSelectedMark) {
+      // Mark session - use mark data
+      sessionData = {
+        user_id: user.id,
+        title,
+        location_name: preSelectedMark.name,
+        water_type: preSelectedMark.water_type || 'saltwater',
+        location_privacy: 'general',
+        latitude: preSelectedMark.latitude,
+        longitude: preSelectedMark.longitude,
+        started_at: now.toISOString(),
+        is_public: true,
+        mark_id: preSelectedMark.id,
+        weather_temp: weatherTemp,
+        weather_condition: weatherCondition,
+        wind_speed: windSpeed,
+        tide_state: tideState,
+        moon_phase: getMoonPhase().phase,
+      }
+    } else {
+      // Default - no specific location
+      sessionData = {
+        user_id: user.id,
+        title,
+        location_name: 'Current Location',
+        water_type: 'saltwater',
+        location_privacy: 'general',
+        latitude: 0,
+        longitude: 0,
+        started_at: now.toISOString(),
+        is_public: true,
+        weather_temp: null,
+        weather_condition: null,
+        wind_speed: null,
+        tide_state: null,
+        moon_phase: getMoonPhase().phase,
+      }
     }
 
     const { data, error } = await supabase
@@ -239,11 +302,13 @@ export default function StartSessionPage() {
     try {
       await upsertParticipant({
         sessionId: data.id,
-        spotName: preSelectedMark?.name ?? 'Current Location',
+        spotName: hasLake 
+          ? decodeURIComponent(urlLakeName || 'Lake')
+          : (preSelectedMark?.name ?? 'Current Location'),
         markId: preSelectedMark?.id ?? null,
         latitude: lat,
         longitude: lng,
-        waterType: preSelectedMark?.water_type ?? 'saltwater',
+        waterType: hasLake ? 'freshwater' : (preSelectedMark?.water_type ?? 'saltwater'),
         locationPrivacy: 'general',
       })
     } catch (e) {
@@ -262,13 +327,37 @@ export default function StartSessionPage() {
   const handleFullSetup = () => {
     setShowSuccess(false)
     setLoading(false)
-    setStep(1)
+    
+    // Check if we have a lake pre-selected - skip location step
+    const urlParams = new URLSearchParams(location.search)
+    const hasLake = urlParams.get('lakeId') && urlParams.get('lat') && urlParams.get('lng')
+    
+    if (hasLake) {
+      // Skip to step 2 (water type is already set to freshwater)
+      setStep(2)
+    } else {
+      setStep(1)
+    }
   }
 
   const handleBack = () => {
     if (loading) return
-    if (step > 1) {
+    
+    // Check if we have a lake pre-selected
+    const urlParams = new URLSearchParams(location.search)
+    const hasLake = urlParams.get('lakeId') && urlParams.get('lat') && urlParams.get('lng')
+    
+    if (step > 2) {
       setStep((s) => s - 1)
+      return
+    }
+    if (step === 2 && hasLake) {
+      // Go back to choice screen, skip step 1
+      setStep(0)
+      return
+    }
+    if (step === 2) {
+      setStep(1)
       return
     }
     if (step === 1) {
@@ -478,12 +567,22 @@ export default function StartSessionPage() {
 
   const renderProgress = () => {
     if (step < 1 || step > 4) return null
-    const progress = (step / 4) * 100
+    
+    // Check if we have a lake pre-selected (skip step 1)
+    const urlParams = new URLSearchParams(location.search)
+    const hasLake = urlParams.get('lakeId') && urlParams.get('lat') && urlParams.get('lng')
+    
+    // For lake sessions: 3 steps (2,3,4 become 1,2,3)
+    // For regular sessions: 4 steps
+    const totalSteps = hasLake ? 3 : 4
+    const currentStep = hasLake ? step - 1 : step
+    const progress = (currentStep / totalSteps) * 100
+    
     return (
       <div className="mb-4">
         <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
           <span>
-            Step {step} of 4
+            Step {currentStep} of {totalSteps}
           </span>
         </div>
         <div className="h-1 rounded-full bg-muted">
@@ -530,17 +629,43 @@ export default function StartSessionPage() {
     )
   }
 
-  const renderChoiceStep = () => {
-    // Check if we have a pre-selected mark from navigation
+  const renderStep0 = () => {
+    // Check if we have a pre-selected mark or lake
     const navState = location.state as { markId?: string; markName?: string } | null
     const preSelectedMark = navState?.markId ? allMarks.find(m => m.id === navState.markId) : null
     
+    // Check URL params for lake
+    const urlParams = new URLSearchParams(location.search)
+    const urlLakeName = urlParams.get('lakeName')
+    const hasLake = urlParams.get('lakeId') && urlParams.get('lat') && urlParams.get('lng')
+    const lakeName = urlLakeName ? decodeURIComponent(urlLakeName) : null
+    
+    // Determine what location we have
+    const locationDisplay = hasLake ? lakeName : (preSelectedMark?.name || null)
+    
     return (
     <>
-      <h2 className="mb-1 text-lg font-bold text-foreground">Start your session</h2>
+      {/* Lake header banner */}
+      {hasLake && lakeName && (
+        <div className="mb-4 rounded-xl bg-gradient-to-r from-emerald-900/30 to-teal-900/20 border border-emerald-500/30 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white">
+              🏞️
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">{lakeName}</p>
+              <p className="text-xs text-emerald-400">Ready to start your session</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <h2 className="mb-1 text-lg font-bold text-foreground">
+        {hasLake ? 'Start fishing!' : 'Start your session'}
+      </h2>
       <p className="mb-4 text-sm text-muted-foreground">
-        {preSelectedMark 
-          ? `Starting at ${preSelectedMark.name}` 
+        {locationDisplay 
+          ? `Tap Quick Start to begin at ${locationDisplay}` 
           : 'Choose how you\'d like to begin your fishing session.'}
       </p>
 
@@ -556,7 +681,7 @@ export default function StartSessionPage() {
           <div className="flex-1">
             <p className="text-sm font-semibold text-foreground">Quick Start</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {preSelectedMark ? `Start at ${preSelectedMark.name}` : 'Use current location & smart defaults'}
+              {locationDisplay ? `Start at ${locationDisplay}` : 'Use current location & smart defaults'}
             </p>
           </div>
           <ChevronRight size={18} className="text-primary" />
@@ -572,16 +697,20 @@ export default function StartSessionPage() {
           </div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-foreground">Full Setup</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">Customize location, privacy, and details</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {hasLake ? 'Add notes or change privacy' : 'Customize location, privacy, and details'}
+            </p>
           </div>
           <ChevronRight size={18} className="text-muted-foreground" />
         </button>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {preSelectedMark 
-          ? `💡 Quick Start will use your saved mark "${preSelectedMark.name}" as the location.`
-          : '💡 Quick Start defaults: Uses your current GPS location, general area privacy, and auto-detects water type. You can edit everything later.'}
+        {hasLake 
+          ? `💡 Quick Start will create your session at ${lakeName} with weather data and smart defaults.`
+          : preSelectedMark 
+            ? `💡 Quick Start will use your saved mark "${preSelectedMark.name}" as the location.`
+            : '💡 Quick Start defaults: Uses your current GPS location, general area privacy, and auto-detects water type. You can edit everything later.'}
       </p>
     </>
   )}
@@ -1106,7 +1235,7 @@ export default function StartSessionPage() {
   } else if (showSuccess) {
     content = renderSuccess()
   } else if (step === 0) {
-    content = renderChoiceStep()
+    content = renderStep0()
   } else if (step === 1) {
     content = renderStep1()
   } else if (step === 2) {

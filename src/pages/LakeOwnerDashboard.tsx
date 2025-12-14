@@ -21,7 +21,9 @@ import {
   ChevronUp,
   Megaphone,
   Pin,
-  X
+  X,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react'
 import { UpgradeToPremiumCard } from '../components/lakes/UpgradeToPremiumCard'
 import { useLakeRole, useLakeTeam, useAddLakeTeamMember, useRemoveLakeTeamMember, useUpdateLakeTeamRole } from '../hooks/useLakeTeam'
@@ -124,6 +126,19 @@ export default function LakeOwnerDashboard() {
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
       const bestDay = Object.entries(dayCount).sort((a, b) => b[1] - a[1])[0]
 
+      // Get fish health reports
+      let healthReports: Catch[] = []
+      if (sessionIds.length > 0) {
+        const { data: healthData } = await supabase
+          .from('catches')
+          .select('id, species, weight_kg, caught_at, fish_health_issue, fish_health_type, fish_health_notes, treatment_applied, treatment_notes, peg_swim')
+          .in('session_id', sessionIds)
+          .eq('fish_health_issue', true)
+          .order('caught_at', { ascending: false })
+          .limit(20)
+        healthReports = (healthData || []) as Catch[]
+      }
+
       return {
         totalSessions: sessions?.length || 0,
         totalCatches: catches.length,
@@ -132,6 +147,8 @@ export default function LakeOwnerDashboard() {
         monthlyData,
         bestDay: bestDay ? { name: dayNames[parseInt(bestDay[0])], count: bestDay[1] } : null,
         avgCatchesPerSession: sessions?.length ? (catches.length / sessions.length).toFixed(1) : '0',
+        healthReports,
+        healthReportCount: healthReports.length,
       }
     },
     enabled: !!lakeId && hasAccess,
@@ -351,15 +368,15 @@ export default function LakeOwnerDashboard() {
                   <div className="border-t border-border p-5 space-y-4">
                     {/* Owner */}
                     {teamData?.owner && (
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50">
-                        <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 font-bold text-sm">
-                          {teamData.owner.display_name?.[0] || teamData.owner.username?.[0] || '?'}
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                        <div className="h-10 w-10 rounded-full bg-amber-200 dark:bg-amber-800 flex items-center justify-center text-amber-700 dark:text-amber-300 font-bold text-sm">
+                          {teamData.owner.full_name?.[0] || teamData.owner.username?.[0] || '?'}
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-foreground">
-                            {teamData.owner.display_name || teamData.owner.username || 'Unknown'}
+                            {teamData.owner.full_name || teamData.owner.username || 'Unknown'}
                           </p>
-                          <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                          <p className="text-xs text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1">
                             <Crown size={12} /> Owner
                           </p>
                         </div>
@@ -436,6 +453,70 @@ export default function LakeOwnerDashboard() {
               </div>
             )}
 
+            {/* Fish Health Reports */}
+            {analytics?.healthReports && analytics.healthReports.length > 0 && (
+              <div className="rounded-2xl bg-card shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">
+                      <AlertTriangle size={20} />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-semibold text-foreground">Fish Health Reports</h2>
+                      <p className="text-xs text-muted-foreground">
+                        {analytics.healthReportCount} issue{analytics.healthReportCount !== 1 ? 's' : ''} reported by anglers
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5 space-y-3">
+                  {analytics.healthReports.map((report) => (
+                    <div key={report.id} className="p-3 rounded-lg bg-muted space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{report.species}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(report.caught_at).toLocaleDateString('en-GB', { 
+                              day: 'numeric', 
+                              month: 'short', 
+                              year: 'numeric' 
+                            })}
+                            {report.peg_swim && ` • ${report.peg_swim}`}
+                          </p>
+                        </div>
+                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                          report.treatment_applied 
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+                            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                        }`}>
+                          {report.treatment_applied ? (
+                            <span className="flex items-center gap-1"><CheckCircle size={10} /> Treated</span>
+                          ) : (
+                            'Untreated'
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {report.fish_health_type && (
+                          <span className="text-xs px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                            {report.fish_health_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                        )}
+                      </div>
+                      {report.fish_health_notes && (
+                        <p className="text-xs text-muted-foreground">{report.fish_health_notes}</p>
+                      )}
+                      {report.treatment_applied && report.treatment_notes && (
+                        <p className="text-xs text-green-600 dark:text-green-400">
+                          💊 {report.treatment_notes}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Upgrade to Premium Card */}
             <UpgradeToPremiumCard
               lakeId={lake.id}
@@ -492,9 +573,9 @@ function TeamMemberRow({
     id: string
     role: 'manager' | 'bailiff'
     profile?: {
-      display_name: string | null
+      full_name: string | null
       username: string | null
-    }
+    } | null
   }
   lakeId: string
   isOwner: boolean
@@ -531,11 +612,11 @@ function TeamMemberRow({
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
       <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground font-bold text-sm">
-        {member.profile?.display_name?.[0] || member.profile?.username?.[0] || '?'}
+        {member.profile?.full_name?.[0] || member.profile?.username?.[0] || '?'}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground truncate">
-          {member.profile?.display_name || member.profile?.username || 'Unknown'}
+          {member.profile?.full_name || member.profile?.username || 'Unknown'}
         </p>
         {isOwner ? (
           <select
