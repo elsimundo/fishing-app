@@ -864,6 +864,8 @@ function ReportProblemModal({
 
 // Recent catches component for claimed lakes
 function RecentCatches({ lakeId, isPremium }: { lakeId: string; isPremium?: boolean }) {
+  const { formatWeight } = useWeightFormatter()
+
   const { data: catches, isLoading } = useQuery({
     queryKey: ['lake-catches', lakeId],
     queryFn: async () => {
