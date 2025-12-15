@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { useChallenges, useUserChallenges, useFeaturedChallenge, useUserCountries, useWeeklyCatchLeaderboard } from '../hooks/useGamification'
 import { useActiveCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
@@ -27,8 +27,17 @@ type WaterType = 'saltwater' | 'freshwater'
 type ScopeTab = 'all' | 'global' | 'countries' | 'events'
 type LeaderboardPeriod = 'weekly' | 'all_time'
 
+function isValidMainTab(tab: string | null): tab is MainTab {
+  return tab === 'challenges' || tab === 'leaderboards' || tab === 'compete'
+}
+
+function isValidLeaderboardPeriod(period: string | null): period is LeaderboardPeriod {
+  return period === 'weekly' || period === 'all_time'
+}
+
 export default function ChallengeBoardPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { data: profile } = useProfile()
   
   // Determine default water type from user's fishing preference
@@ -38,14 +47,64 @@ export default function ChallengeBoardPage() {
     return 'saltwater' // Default to saltwater for 'both' or undefined
   }
   
-  const [activeTab, setActiveTab] = useState<MainTab>('challenges')
+  const [activeTab, setActiveTab] = useState<MainTab>(() => {
+    const params = new URLSearchParams(location.search)
+    const tab = params.get('tab')
+    return isValidMainTab(tab) ? tab : 'challenges'
+  })
   const [waterType, setWaterType] = useState<WaterType>(getDefaultWaterType())
-  const [leaderboardPeriod, setLeaderboardPeriod] = useState<LeaderboardPeriod>('weekly')
+  const [leaderboardPeriod, setLeaderboardPeriod] = useState<LeaderboardPeriod>(() => {
+    const params = new URLSearchParams(location.search)
+    const period = params.get('period')
+    return isValidLeaderboardPeriod(period) ? period : 'weekly'
+  })
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(true)
   const [scopeTab, setScopeTab] = useState<ScopeTab>('all')
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   const [hasSetInitialWaterType, setHasSetInitialWaterType] = useState(false)
+
+  const setMainTab = (tab: MainTab) => {
+    setActiveTab(tab)
+    const params = new URLSearchParams(location.search)
+    params.set('tab', tab)
+    navigate(
+      {
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+        hash: location.hash,
+      },
+      { replace: true }
+    )
+  }
+
+  const setPeriod = (period: LeaderboardPeriod) => {
+    setLeaderboardPeriod(period)
+    const params = new URLSearchParams(location.search)
+    params.set('period', period)
+    navigate(
+      {
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+        hash: location.hash,
+      },
+      { replace: true }
+    )
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const tab = params.get('tab')
+    const period = params.get('period')
+
+    if (isValidMainTab(tab) && tab !== activeTab) {
+      setActiveTab(tab)
+    }
+
+    if (isValidLeaderboardPeriod(period) && period !== leaderboardPeriod) {
+      setLeaderboardPeriod(period)
+    }
+  }, [location.search, activeTab, leaderboardPeriod])
   
   // Set water type from profile preference once loaded
   useEffect(() => {
@@ -171,7 +230,7 @@ export default function ChallengeBoardPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => setMainTab(tab.id)}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
                     isActive
                       ? 'border-primary text-primary'
@@ -445,7 +504,7 @@ export default function ChallengeBoardPage() {
                   <div className="flex shrink-0 rounded-lg bg-white/60 p-1 dark:bg-white/10">
                     <button
                       type="button"
-                      onClick={() => setLeaderboardPeriod('weekly')}
+                      onClick={() => setPeriod('weekly')}
                       className={
                         leaderboardPeriod === 'weekly'
                           ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'
@@ -456,7 +515,7 @@ export default function ChallengeBoardPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setLeaderboardPeriod('all_time')}
+                      onClick={() => setPeriod('all_time')}
                       className={
                         leaderboardPeriod === 'all_time'
                           ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'

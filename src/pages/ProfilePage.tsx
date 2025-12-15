@@ -27,6 +27,12 @@ import { FishingPreferenceModal } from '../components/onboarding/FishingPreferen
 import { SpeciesCollectionTab } from '../components/profile/SpeciesCollectionTab'
 import { useWeightFormatter } from '../hooks/useWeightFormatter'
 
+type LogbookTab = 'posts' | 'sessions' | 'catches' | 'species' | 'achievements'
+
+function isValidLogbookTab(tab: string | null): tab is LogbookTab {
+  return tab === 'posts' || tab === 'sessions' || tab === 'catches' || tab === 'species' || tab === 'achievements'
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -41,8 +47,31 @@ export default function ProfilePage() {
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following' | null>(null)
   const [showBadgesModal, setShowBadgesModal] = useState(false)
-  const [activeTab, setActiveTab] = useState<'posts' | 'sessions' | 'catches' | 'species' | 'achievements'>('sessions')
+  const [activeTab, setActiveTab] = useState<LogbookTab>(() => {
+    const params = new URLSearchParams(location.search)
+    const tab = params.get('tab')
+    return isValidLogbookTab(tab) ? tab : 'sessions'
+  })
   const unreadCount = useUnreadCount()
+
+  const setTab = (tab: LogbookTab) => {
+    setActiveTab(tab)
+    const params = new URLSearchParams(location.search)
+    if (tab === 'sessions') {
+      params.delete('tab')
+    } else {
+      params.set('tab', tab)
+    }
+
+    navigate(
+      {
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+        hash: location.hash,
+      },
+      { replace: true }
+    )
+  }
 
   const userId = user?.id ?? ''
   const { data: followCounts } = useFollowCounts(userId)
@@ -59,6 +88,22 @@ export default function ProfilePage() {
       setShowEditModal(true)
     }
   }, [location.hash])
+
+  // Keep tab state in sync with URL (supports browser back/forward)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const tab = params.get('tab')
+
+    if (isValidLogbookTab(tab)) {
+      setActiveTab(tab)
+      return
+    }
+
+    // No/invalid tab param => default to sessions
+    if (!tab) {
+      setActiveTab('sessions')
+    }
+  }, [location.search])
 
   if (!user || profileLoading || !profile || xpLoading) {
     return (
@@ -245,7 +290,7 @@ export default function ProfilePage() {
         <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-muted-foreground md:justify-center">
           <button
             type="button"
-            onClick={() => setActiveTab('posts')}
+            onClick={() => setTab('posts')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
               activeTab === 'posts' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
@@ -257,7 +302,7 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('sessions')}
+            onClick={() => setTab('sessions')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
               activeTab === 'sessions' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
@@ -269,7 +314,7 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('catches')}
+            onClick={() => setTab('catches')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
               activeTab === 'catches' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
@@ -281,7 +326,7 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('species')}
+            onClick={() => setTab('species')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
               activeTab === 'species' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
@@ -293,7 +338,7 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('achievements')}
+            onClick={() => setTab('achievements')}
             className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-center ${
               activeTab === 'achievements' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground/70'
             }`}
