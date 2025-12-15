@@ -14,6 +14,7 @@ import { supabase } from '../lib/supabase'
 import { ArrowLeft, Share2, Fish, MapPin, MessageSquare, Plus, MoreHorizontal, Pencil, Bookmark, Trash2, LogOut, X, Square } from 'lucide-react'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 import { EditSessionModal } from '../components/session/EditSessionModal'
+import { CompletedSessionSummary } from '../components/session/CompletedSessionSummary'
 import { ParticipantsList } from '../components/session/ParticipantsList'
 import { InviteToSessionModal } from '../components/session/InviteToSessionModal'
 import { AddSessionPostModal } from '../components/session/AddSessionPostModal'
@@ -479,6 +480,15 @@ export function SessionDetailPage() {
           )}
         </div>
 
+        {/* Completed Session Summary - above weather */}
+        {!isActive && (
+          <CompletedSessionSummary
+            session={session}
+            isOwner={isOwner}
+            onRefetch={async () => { await refetch() }}
+          />
+        )}
+
         {/* Environmental conditions card */}
         {(session.weather_temp != null || session.wind_speed != null || session.tide_state || session.moon_phase) && (
           <div className="mt-4 rounded-2xl bg-gradient-to-br from-navy-900 to-blue-700 p-4 text-xs text-white">
@@ -720,18 +730,6 @@ export function SessionDetailPage() {
               )}
             </div>
           </>
-        )}
-
-        {/* Quick Log Button (completed sessions or fallback) */}
-        {!isActive && canLogCatches && (
-          <button
-            type="button"
-            onClick={() => setIsQuickLogOpen(true)}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
-          >
-            <Plus size={20} />
-            Log a Catch
-          </button>
         )}
 
         {/* Participants */}
