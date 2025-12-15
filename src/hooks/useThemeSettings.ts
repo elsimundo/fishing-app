@@ -68,11 +68,9 @@ export function applyThemeSettings(settings: ThemeSetting[]) {
         root.style.setProperty('--sidebar-ring', setting.value)
         // Also update the teal-600 and navy-800 aliases
         root.style.setProperty('--color-teal-600', setting.value)
-        root.style.setProperty('--color-navy-800', setting.value)
         break
       case 'primary_hover':
         root.style.setProperty('--color-teal-700', setting.value)
-        root.style.setProperty('--color-navy-900', setting.value)
         break
       case 'secondary':
         root.style.setProperty('--secondary', setting.value)

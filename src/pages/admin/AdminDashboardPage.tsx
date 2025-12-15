@@ -99,10 +99,10 @@ function StatCard({
   loading?: boolean
 }) {
   const colors = {
-    blue: 'bg-blue-100 text-blue-600',
-    green: 'bg-green-100 text-green-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
-    purple: 'bg-purple-100 text-purple-600',
+    blue: 'bg-[#DBEAFE] text-[#2563EB]',
+    green: 'bg-[#DCFCE7] text-[#16A34A]',
+    yellow: 'bg-[#FEF9C3] text-[#CA8A04]',
+    purple: 'bg-[#F3E8FF] text-[#7C3AED]',
   }
 
   return (
@@ -330,10 +330,10 @@ function QuickActionButton({
   color: 'blue' | 'green' | 'yellow' | 'purple'
 }) {
   const colors = {
-    blue: 'bg-blue-50 text-blue-700 hover:bg-blue-100',
-    green: 'bg-green-50 text-green-700 hover:bg-green-100',
-    yellow: 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100',
-    purple: 'bg-purple-50 text-purple-700 hover:bg-purple-100',
+    blue: 'bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]',
+    green: 'bg-[#F0FDF4] text-[#15803D] hover:bg-[#DCFCE7]',
+    yellow: 'bg-[#FFFBEB] text-[#B45309] hover:bg-[#FEF3C7]',
+    purple: 'bg-[#FAF5FF] text-[#6D28D9] hover:bg-[#F3E8FF]',
   }
 
   return (
