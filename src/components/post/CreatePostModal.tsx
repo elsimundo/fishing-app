@@ -50,6 +50,17 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       },
     },
     {
+      id: 'backlog-catch',
+      icon: '📜',
+      title: 'Add Backlog Catch',
+      subtitle: 'Log an old catch (no XP or badges)',
+      color: 'bg-slate-100 dark:bg-slate-800/50',
+      onClick: () => {
+        onClose()
+        navigate('/catches/new', { state: { backlog: true } })
+      },
+    },
+    {
       id: 'compete',
       icon: '🏆',
       title: 'Compete',

@@ -82,6 +82,8 @@ type CatchFormProps = {
   prefilledAiResult?: FishIdentificationResult
   prefilledPhotoFile?: File
   prefilledMetadata?: PhotoMetadata
+  // Backlog mode - for logging old catches (no XP/badges)
+  isBacklog?: boolean
 }
 
 function normaliseSpeciesName(name: string): string {
@@ -164,6 +166,7 @@ export function CatchForm({
   prefilledAiResult,
   prefilledPhotoFile,
   prefilledMetadata,
+  isBacklog = false,
 }: CatchFormProps) {
   const { user } = useAuth()
   const { data: activeSession } = useActiveSession()
@@ -210,7 +213,8 @@ export function CatchForm({
   // Debug logging
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(prefilledPhotoFile || null)
-  const [isPublic, setIsPublic] = useState(true)
+  // Backlog catches default to private (no auto-post to feed)
+  const [isPublic, setIsPublic] = useState(!isBacklog)
   const [hideExactLocation, setHideExactLocation] = useState(false)
   
   // Multi-catch mode (for feathers, multi-hook rigs)
@@ -524,6 +528,7 @@ export function CatchForm({
         country_code: countryCode,
         multi_catch_group_id: multiCatchGroupId,
         peg_swim: values.peg_swim?.trim() ? values.peg_swim.trim() : null,
+        is_backlog: isBacklog,
       }))
 
 
@@ -538,8 +543,8 @@ export function CatchForm({
         return
       }
 
-      // Award XP for each catch
-      if (insertedCatches && insertedCatches.length > 0) {
+      // Award XP for each catch (skip for backlog catches)
+      if (insertedCatches && insertedCatches.length > 0 && !isBacklog) {
         for (const catchData of insertedCatches) {
           catchXP.mutateAsync({
             catchId: catchData.id,
@@ -627,6 +632,7 @@ export function CatchForm({
       photo_camera_model: photoMetadata?.cameraModel ?? null,
       country_code: countryCode,
       peg_swim: values.peg_swim?.trim() ? values.peg_swim.trim() : null,
+      is_backlog: isBacklog,
       // Fish health reporting
       fish_health_issue: fishHealthIssue,
       fish_health_type: fishHealthIssue && fishHealthType ? fishHealthType : null,
@@ -647,8 +653,8 @@ export function CatchForm({
       return
     }
 
-    // Award XP for new catches (not edits)
-    if (!isEdit && data) {
+    // Award XP for new catches (not edits, not backlog)
+    if (!isEdit && data && !isBacklog) {
       catchXP.mutateAsync({
         catchId: data.id,
         species: data.species,

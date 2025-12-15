@@ -65,7 +65,7 @@ export function useLakeStats(lakeId: string | undefined) {
         }
       }
 
-      // Get all catches from those sessions
+      // Get all catches from those sessions (exclude backlog catches from stats)
       const { data: catches } = await supabase
         .from('catches')
         .select(`
@@ -84,6 +84,7 @@ export function useLakeStats(lakeId: string | undefined) {
           )
         `)
         .in('session_id', sessionIds)
+        .or('is_backlog.is.null,is_backlog.eq.false')
         .order('caught_at', { ascending: false })
 
       const allCatches = (catches || []).map((c) => ({

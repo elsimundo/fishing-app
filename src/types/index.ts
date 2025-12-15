@@ -159,6 +159,10 @@ export type Catch = {
 
   // Optional relation for attribution
   logged_by?: Profile
+
+  // Backlog catches (logged retroactively, no XP/badges)
+  is_backlog?: boolean
+  backlog_note?: string | null
 }
 
 export type SessionStats = {

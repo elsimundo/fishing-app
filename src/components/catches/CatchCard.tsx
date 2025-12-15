@@ -69,6 +69,13 @@ export function CatchCard({ item, showDelete = false }: CatchCardProps) {
               <p className="mt-0.5 text-xs text-muted-foreground">
                 📍 {item.location_name || 'Unknown location'}
               </p>
+
+              {/* Backlog badge */}
+              {item.is_backlog && (
+                <span className="mt-1 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                  📜 Backlog
+                </span>
+              )}
             </div>
           </div>
         </article>

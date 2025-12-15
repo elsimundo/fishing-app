@@ -121,11 +121,21 @@ export function CatchDetailPage() {
                   <h1 className="text-lg font-bold text-foreground">
                     {catchItem.species}
                   </h1>
+                  {catchItem.is_backlog && (
+                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                      📜 Backlog
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   📍 {locationLabel}
                   {dateLabel && ` • ${dateLabel}`}
                 </p>
+                {catchItem.is_backlog && (
+                  <p className="mt-2 rounded-lg bg-amber-50 border border-amber-200 px-2 py-1.5 text-[10px] text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300">
+                    Backlog catch — doesn't count toward XP, badges, or leaderboards.
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
