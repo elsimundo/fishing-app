@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Settings, X, MessageCircle } from 'lucide-react'
+import { Settings, X, MessageCircle, Search } from 'lucide-react'
 import { NotificationBell } from '../notifications/NotificationBell'
 import { useAuth } from '../../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { useUnreadCount } from '../../hooks/useMessages'
+import SearchModal from '../search/SearchModal'
 
 export function MobileHeader() {
   const [showMenu, setShowMenu] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
   const { signOut } = useAuth()
   const navigate = useNavigate()
   const unreadCount = useUnreadCount()
@@ -24,6 +26,15 @@ export function MobileHeader() {
             <img src="/catchi-logo.svg" alt="Catchi" className="h-7 w-auto" />
           </div>
           <div className="flex items-center gap-1">
+            {/* Search button */}
+            <button
+              type="button"
+              onClick={() => setShowSearch(true)}
+              className="rounded-full p-2 text-foreground hover:bg-muted transition-colors"
+              aria-label="Search"
+            >
+              <Search size={22} />
+            </button>
             {/* Messages button */}
             <button
               type="button"
@@ -82,6 +93,9 @@ export function MobileHeader() {
           </div>
         </div>
       )}
+
+      {/* Search Modal */}
+      <SearchModal isOpen={showSearch} onClose={() => setShowSearch(false)} />
     </>
   )
 }

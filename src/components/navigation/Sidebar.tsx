@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Map, Plus, Trophy, User, Settings, LogOut, MoreHorizontal } from 'lucide-react'
+import { Home, Map, Plus, Trophy, User, Settings, LogOut, MoreHorizontal, Search } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useProfile } from '../../hooks/useProfile'
 import { CreatePostModal } from '../post/CreatePostModal'
 import { NotificationBell } from '../notifications/NotificationBell'
+import SearchModal from '../search/SearchModal'
 
 export function Sidebar() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const { user, signOut } = useAuth()
@@ -27,6 +29,16 @@ export function Sidebar() {
 
         {/* Navigation Items - match bottom nav structure */}
         <nav className="flex flex-1 flex-col gap-1">
+          {/* Search */}
+          <button
+            type="button"
+            onClick={() => setShowSearch(true)}
+            className="flex items-center gap-4 rounded-xl px-4 py-3 transition-all text-foreground font-medium hover:bg-card"
+          >
+            <Search size={28} className="text-foreground" />
+            <span className="text-base">Search</span>
+          </button>
+
           {/* Feed */}
           <button
             type="button"
@@ -146,6 +158,7 @@ export function Sidebar() {
         )}
       </aside>
       {showCreateModal ? <CreatePostModal onClose={() => setShowCreateModal(false)} /> : null}
+      <SearchModal isOpen={showSearch} onClose={() => setShowSearch(false)} />
     </>
   )
 }

@@ -21,6 +21,7 @@ import CreatePostPage from './pages/CreatePostPage'
 import LakeDetailPage from './pages/LakeDetailPage'
 import LakeOwnerDashboard from './pages/LakeOwnerDashboard'
 import MarkDetailPage from './pages/MarkDetailPage'
+import SpeciesDetailPage from './pages/SpeciesDetailPage'
 import SettingsPage from './pages/SettingsPage'
 import PartnerApplicationPage from './pages/PartnerApplicationPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
@@ -92,6 +93,7 @@ function App() {
         <Route path="/lakes/:slugOrId" element={<LakeDetailPage />} />
         <Route path="/lakes/:lakeId/dashboard" element={<LakeOwnerDashboard />} />
         <Route path="/marks/:markId" element={<MarkDetailPage />} />
+        <Route path="/species/:speciesId" element={<SpeciesDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/partner/apply" element={<PartnerApplicationPage />} />
         <Route path="/logbook" element={<ProfilePage />} />

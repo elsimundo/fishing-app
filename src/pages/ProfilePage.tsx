@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Fish, Calendar, Trophy, Swords, Pencil } from 'lucide-react'
+import { Loader2, Settings, Share2, MessageCircle, Fish, Calendar, Trophy, Swords, Pencil, BookOpen } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
@@ -287,7 +287,7 @@ export default function ProfilePage() {
             }`}
           >
             <span className="inline-flex items-center justify-center gap-1.5">
-              <Fish size={14} />
+              <BookOpen size={14} />
               <span>Species</span>
             </span>
           </button>

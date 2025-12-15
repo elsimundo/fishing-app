@@ -3,10 +3,13 @@
 -- ============================================================================
 -- Admins should be able to manage lake teams for any lake
 
--- Drop existing policies
+-- Drop existing policies (both old and new names for idempotency)
 DROP POLICY IF EXISTS "Owners and managers can add team members" ON lake_team;
 DROP POLICY IF EXISTS "Owners and managers can remove team members" ON lake_team;
 DROP POLICY IF EXISTS "Owners and managers can update team roles" ON lake_team;
+DROP POLICY IF EXISTS "Owners managers and admins can add team members" ON lake_team;
+DROP POLICY IF EXISTS "Owners managers and admins can remove team members" ON lake_team;
+DROP POLICY IF EXISTS "Owners managers and admins can update team roles" ON lake_team;
 
 -- Recreate INSERT policy with admin bypass
 CREATE POLICY "Owners managers and admins can add team members"

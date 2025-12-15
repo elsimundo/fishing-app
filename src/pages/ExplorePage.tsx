@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import { Layout } from '../components/layout/Layout'
 import { usePublicSessions } from '../hooks/useSessions'
@@ -46,9 +46,14 @@ const TYPE_META: Record<ExploreMarkerType, { label: string; icon: string; classN
 
 export default function ExplorePage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuth()
   const { data: profile, refetch: refetchProfile } = useProfile()
   const { isAdmin } = useAdminAuth()
+  
+  // URL params for deep-linking from search (business/charter)
+  const deepLinkBusinessId = searchParams.get('business')
+  const deepLinkCharterId = searchParams.get('charter')
   
   // Quick assign owner modal state (admin only)
   const [assignOwnerLakeId, setAssignOwnerLakeId] = useState<string | null>(null)
@@ -415,6 +420,23 @@ export default function ExplorePage() {
       distance: calculateDistance(userLocation.lat, userLocation.lng, marker.lat, marker.lng),
     }))
   }, [markers, userLocation])
+
+  // Auto-select business/charter from URL params (deep-link from search)
+  useEffect(() => {
+    if (!markersWithDistance.length) return
+    
+    const targetId = deepLinkBusinessId || deepLinkCharterId
+    if (!targetId) return
+    
+    // Find the marker matching the deep-link ID
+    const targetMarker = markersWithDistance.find((m) => m.id === targetId)
+    if (targetMarker) {
+      setSelectedMarker(targetMarker)
+      setFocusPoint({ lat: targetMarker.lat, lng: targetMarker.lng, zoom: 14 })
+      // Clear the URL params after selecting
+      setSearchParams({}, { replace: true })
+    }
+  }, [deepLinkBusinessId, deepLinkCharterId, markersWithDistance, setSearchParams])
 
   const toggleFilter = (key: ExploreFilterKey) => {
     setFilters((prev) => ({ ...prev, [key]: !prev[key] }))

@@ -351,16 +351,25 @@ export function useUserWeeklyStats() {
   })
 }
 
-// Fetch weekly leaderboard
+// Helper to get current week start (Monday)
+function getWeekStartDate(): string {
+  const now = new Date()
+  const dayOfWeek = now.getDay()
+  const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
+  const weekStart = new Date(now.getFullYear(), now.getMonth(), diff)
+  weekStart.setHours(0, 0, 0, 0)
+  return weekStart.toISOString()
+}
+
+// Fetch weekly leaderboard (legacy - from user_weekly_stats)
 export function useWeeklyLeaderboard(limit = 20) {
   return useQuery({
     queryKey: ['weekly-leaderboard', limit],
     queryFn: async () => {
-      // Get current week start
       const now = new Date()
       const dayOfWeek = now.getDay()
       const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
-      const weekStart = new Date(now.setDate(diff))
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), diff)
       weekStart.setHours(0, 0, 0, 0)
       const weekStartStr = weekStart.toISOString().split('T')[0]
       
@@ -389,6 +398,91 @@ export function useWeeklyLeaderboard(limit = 20) {
         catches_count: entry.catches_count,
         rank: index + 1,
       })) as LeaderboardEntry[]
+    },
+    staleTime: 60 * 1000, // 1 minute
+  })
+}
+
+export interface CatchLeaderboardEntry {
+  user_id: string
+  username: string
+  display_name: string
+  avatar_url: string | null
+  xp: number
+  level: number
+  catches_count: number
+  rank: number
+}
+
+// Fetch weekly leaderboard by water type (queries catches directly)
+// waterType: 'saltwater' | 'freshwater' | 'all'
+export function useWeeklyCatchLeaderboard(
+  waterType: 'saltwater' | 'freshwater' | 'all' = 'all',
+  limit = 10,
+  period: 'weekly' | 'all_time' = 'weekly'
+) {
+  return useQuery({
+    queryKey: ['weekly-catch-leaderboard', period, waterType, limit],
+    queryFn: async () => {
+      const weekStartIso = getWeekStartDate()
+
+      const { data: leaderboardRows, error } =
+        period === 'all_time'
+          ? await supabase.rpc('get_all_time_catch_leaderboard', {
+              p_water: waterType,
+              p_limit: limit,
+            })
+          : await supabase.rpc('get_weekly_catch_leaderboard', {
+              p_week_start: weekStartIso,
+              p_water: waterType,
+              p_limit: limit,
+            })
+ 
+      if (error) throw error
+ 
+      const userCounts: Record<string, number> = {}
+      const topUserIds = (leaderboardRows || []).map((r: any) => {
+        userCounts[r.user_id] = r.catches_count
+        return r.user_id as string
+      })
+      
+      if (topUserIds.length === 0) return []
+      
+      // Fetch profile info for these users
+      // Use filter instead of .in() to avoid URL encoding issues with single UUID
+      let profileQuery = supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url, xp, level')
+      
+      if (topUserIds.length === 1) {
+        profileQuery = profileQuery.eq('id', topUserIds[0])
+      } else {
+        profileQuery = profileQuery.in('id', topUserIds)
+      }
+      
+      const { data: profiles, error: profilesError } = await profileQuery
+      
+      if (profilesError) {
+        console.error('[useWeeklyCatchLeaderboard] Profile query error:', profilesError)
+        throw profilesError
+      }
+      
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || [])
+      
+      // Build leaderboard entries
+      return topUserIds.map((userId: string, index: number) => {
+        const profile = profileMap.get(userId)
+        return {
+          user_id: userId,
+          username: profile?.username || 'Unknown',
+          display_name: profile?.full_name || profile?.username || 'Unknown',
+          avatar_url: profile?.avatar_url || null,
+          xp: profile?.xp || 0,
+          level: profile?.level || 1,
+          catches_count: userCounts[userId] || 0,
+          rank: index + 1,
+        }
+      }) as CatchLeaderboardEntry[]
     },
     staleTime: 60 * 1000, // 1 minute
   })

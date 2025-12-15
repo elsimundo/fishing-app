@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Fish, ChevronRight, Trophy, Scale, Ruler } from 'lucide-react'
+import { ChevronRight, Trophy, Scale, Ruler, BookOpen } from 'lucide-react'
 import type { Catch } from '../../types'
 import { useWeightFormatter } from '../../hooks/useWeightFormatter'
 
@@ -66,7 +66,7 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
   if (catches.length === 0) {
     return (
       <div className="py-10 text-center text-sm text-muted-foreground">
-        <Fish className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
+        <BookOpen className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
         <p className="mb-1 font-medium text-foreground">No species caught yet</p>
         <p className="text-xs text-muted-foreground">Log your first catch to start building your collection.</p>
       </div>

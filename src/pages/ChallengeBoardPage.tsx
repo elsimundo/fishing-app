@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
-import { useChallenges, useUserChallenges, useFeaturedChallenge, useWeeklyLeaderboard, useUserCountries } from '../hooks/useGamification'
+import { useChallenges, useUserChallenges, useFeaturedChallenge, useUserCountries, useWeeklyCatchLeaderboard } from '../hooks/useGamification'
 import { useActiveCompetitions, useMyEnteredCompetitions } from '../hooks/useCompetitions'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -25,6 +25,7 @@ const CATEGORIES = [
 type MainTab = 'challenges' | 'leaderboards' | 'compete'
 type WaterType = 'saltwater' | 'freshwater'
 type ScopeTab = 'all' | 'global' | 'countries' | 'events'
+type LeaderboardPeriod = 'weekly' | 'all_time'
 
 export default function ChallengeBoardPage() {
   const navigate = useNavigate()
@@ -39,6 +40,7 @@ export default function ChallengeBoardPage() {
   
   const [activeTab, setActiveTab] = useState<MainTab>('challenges')
   const [waterType, setWaterType] = useState<WaterType>(getDefaultWaterType())
+  const [leaderboardPeriod, setLeaderboardPeriod] = useState<LeaderboardPeriod>('weekly')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(true)
   const [scopeTab, setScopeTab] = useState<ScopeTab>('all')
@@ -63,6 +65,11 @@ export default function ChallengeBoardPage() {
   const { data: userChallenges, isLoading: userChallengesLoading } = useUserChallenges()
   const { data: featuredChallenge } = useFeaturedChallenge()
   const { data: userCountries } = useUserCountries()
+  const { user } = useAuth()
+
+  const { data: seaLeaderboard, isLoading: seaLoading } = useWeeklyCatchLeaderboard('saltwater', 10, leaderboardPeriod)
+  const { data: freshwaterLeaderboard, isLoading: freshwaterLoading } = useWeeklyCatchLeaderboard('freshwater', 10, leaderboardPeriod)
+  const { data: overallLeaderboard, isLoading: overallLoading } = useWeeklyCatchLeaderboard('all', 10, leaderboardPeriod)
   const {
     data: allActiveCompetitions,
     isLoading: activeCompetitionsLoading,
@@ -121,10 +128,6 @@ export default function ChallengeBoardPage() {
     { id: 'leaderboards' as MainTab, label: 'Leaderboards', icon: ClipboardList },
     { id: 'compete' as MainTab, label: 'Compete', icon: Swords },
   ]
-
-  // Leaderboard data from Supabase
-  const { data: weeklyLeaderboard, isLoading: leaderboardLoading } = useWeeklyLeaderboard(20)
-  const { user } = useAuth()
   
   return (
     <Layout>
@@ -430,90 +433,91 @@ export default function ChallengeBoardPage() {
             <div className="space-y-4">
               {/* Info banner */}
               <div className="rounded-lg bg-blue-50 dark:bg-blue-900/30 px-3 py-2 text-xs text-blue-600 dark:text-blue-400">
-                <p className="font-medium">📊 Global leaderboard</p>
-                <p className="mt-0.5 text-blue-500">Showing top anglers by XP earned this week. Resets every Monday.</p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">📊 {leaderboardPeriod === 'weekly' ? 'Weekly' : 'All-Time'} Leaderboards</p>
+                    <p className="mt-0.5 text-blue-500">
+                      {leaderboardPeriod === 'weekly'
+                        ? 'Top anglers by catches logged this week. Resets every Monday.'
+                        : 'Top anglers by total catches logged.'}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 rounded-lg bg-white/60 p-1 dark:bg-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setLeaderboardPeriod('weekly')}
+                      className={
+                        leaderboardPeriod === 'weekly'
+                          ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'
+                          : 'px-2 py-1 text-[11px] font-semibold text-blue-600 dark:text-blue-300 hover:bg-white/70 dark:hover:bg-white/10 rounded-md'
+                      }
+                    >
+                      Weekly
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLeaderboardPeriod('all_time')}
+                      className={
+                        leaderboardPeriod === 'all_time'
+                          ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'
+                          : 'px-2 py-1 text-[11px] font-semibold text-blue-600 dark:text-blue-300 hover:bg-white/70 dark:hover:bg-white/10 rounded-md'
+                      }
+                    >
+                      All-Time
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              {/* XP Leaderboard */}
+              {/* Sea Fishing Leaderboard */}
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                    <Trophy size={14} className="text-emerald-400" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-900/30">
+                    <Waves size={14} className="text-cyan-500" />
                   </div>
-                  <h3 className="text-sm font-bold text-foreground dark:text-white">Top anglers this week</h3>
+                  <h3 className="text-sm font-bold text-foreground dark:text-white">Sea Fishing</h3>
                 </div>
 
-                {leaderboardLoading ? (
-                  <div className="rounded-2xl border border-border bg-card p-8 text-center">
-                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
-                    <p className="mt-2 text-xs text-muted-foreground">Loading leaderboard...</p>
+                {seaLoading ? (
+                  <div className="rounded-2xl border border-border bg-card p-6 text-center">
+                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-4 border-border border-t-cyan-500" />
                   </div>
-                ) : !weeklyLeaderboard || weeklyLeaderboard.length === 0 ? (
-                  <div className="rounded-2xl border border-border bg-card p-8 text-center">
-                    <Trophy size={32} className="mx-auto text-muted-foreground" />
-                    <p className="mt-2 text-sm font-medium text-foreground dark:text-white">No data yet</p>
-                    <p className="text-xs text-muted-foreground">Start fishing to appear on the leaderboard!</p>
+                ) : !seaLeaderboard || seaLeaderboard.length === 0 ? (
+                  <div className="rounded-2xl border border-border bg-card p-6 text-center">
+                    <Waves size={24} className="mx-auto text-muted-foreground" />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {leaderboardPeriod === 'weekly' ? 'No sea catches this week' : 'No sea catches yet'}
+                    </p>
                   </div>
                 ) : (
                   <div className="rounded-2xl border border-border bg-card">
                     <ul className="divide-y divide-border">
-                      {weeklyLeaderboard.map((entry) => {
+                      {seaLeaderboard.map((entry) => {
                         const isYou = user?.id === entry.user_id
                         return (
                           <li
                             key={entry.user_id}
-                            className={`flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm ${
-                              entry.rank === 1
-                                ? 'bg-amber-50 dark:bg-amber-900/20'
-                                : isYou
-                                  ? 'bg-primary/10'
-                                  : ''
+                            className={`flex items-center gap-3 px-3 py-2 text-xs ${
+                              entry.rank === 1 ? 'bg-cyan-50 dark:bg-cyan-900/20' : isYou ? 'bg-primary/10' : ''
                             }`}
                           >
-                            <div className="flex w-8 justify-center">
-                              <span
-                                className={`inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full text-[11px] font-semibold ${
-                                  entry.rank === 1
-                                    ? 'bg-amber-500 text-white'
-                                    : entry.rank === 2
-                                      ? 'bg-slate-500 text-white'
-                                      : entry.rank === 3
-                                        ? 'bg-orange-600 text-white'
-                                        : 'bg-muted text-muted-foreground'
-                                }`}
-                              >
-                                #{entry.rank}
-                              </span>
+                            <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                              entry.rank === 1 ? 'bg-cyan-500 text-white' :
+                              entry.rank === 2 ? 'bg-slate-400 text-white' :
+                              entry.rank === 3 ? 'bg-orange-400 text-white' : 'bg-muted text-muted-foreground'
+                            }`}>
+                              {entry.rank}
+                            </span>
+                            <img
+                              src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
+                              alt={entry.display_name}
+                              className="h-7 w-7 rounded-full bg-muted object-cover"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="truncate font-medium text-foreground">{entry.display_name || entry.username}</p>
                             </div>
-
-                            <div className="flex flex-1 items-center gap-2">
-                              <img
-                                src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
-                                alt={entry.display_name || entry.username}
-                                className="h-8 w-8 rounded-full bg-muted object-cover"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1">
-                                  <p className="truncate text-xs font-semibold text-foreground dark:text-white sm:text-sm">
-                                    {entry.display_name || entry.username}
-                                  </p>
-                                  {isYou && (
-                                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                                      You
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="truncate text-[11px] text-muted-foreground">
-                                  Level {entry.level}
-                                </p>
-                              </div>
-
-                              <div className="text-right text-[11px] sm:text-xs">
-                                <p className="font-semibold text-emerald-400">
-                                  {entry.xp.toLocaleString()} XP
-                                </p>
-                                <p className="text-[11px] text-muted-foreground">{entry.species_points} species pts</p>
-                              </div>
+                            <div className="text-right">
+                              <p className="font-bold text-cyan-500">{entry.catches_count} catches</p>
                             </div>
                           </li>
                         )
@@ -523,66 +527,125 @@ export default function ChallengeBoardPage() {
                 )}
               </section>
 
-              {/* Top species hunters */}
+              {/* Freshwater Fishing Leaderboard */}
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                    <Star size={14} className="text-amber-400" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                    <Trees size={14} className="text-green-500" />
                   </div>
-                  <h3 className="text-sm font-bold text-foreground dark:text-white">Top species hunters</h3>
+                  <h3 className="text-sm font-bold text-foreground dark:text-white">Freshwater Fishing</h3>
                 </div>
 
-                {leaderboardLoading ? (
+                {freshwaterLoading ? (
                   <div className="rounded-2xl border border-border bg-card p-6 text-center">
-                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-4 border-border border-t-amber-500" />
+                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-4 border-border border-t-green-500" />
                   </div>
-                ) : !weeklyLeaderboard || weeklyLeaderboard.length === 0 ? (
+                ) : !freshwaterLeaderboard || freshwaterLeaderboard.length === 0 ? (
                   <div className="rounded-2xl border border-border bg-card p-6 text-center">
-                    <Star size={24} className="mx-auto text-muted-foreground" />
-                    <p className="mt-1 text-xs text-muted-foreground">No data yet</p>
+                    <Trees size={24} className="mx-auto text-muted-foreground" />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {leaderboardPeriod === 'weekly' ? 'No freshwater catches this week' : 'No freshwater catches yet'}
+                    </p>
                   </div>
                 ) : (
                   <div className="rounded-2xl border border-border bg-card">
                     <ul className="divide-y divide-border">
-                      {[...weeklyLeaderboard]
-                        .sort((a, b) => b.species_points - a.species_points)
-                        .slice(0, 5)
-                        .map((entry, index) => {
-                          const isYou = user?.id === entry.user_id
-                          return (
-                            <li key={entry.user_id} className="flex items-center gap-3 px-3 py-2.5 text-xs sm:text-sm">
-                              <div className="flex w-8 justify-center">
-                                <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                                  #{index + 1}
-                                </span>
+                      {freshwaterLeaderboard.map((entry) => {
+                        const isYou = user?.id === entry.user_id
+                        return (
+                          <li
+                            key={entry.user_id}
+                            className={`flex items-center gap-3 px-3 py-2 text-xs ${
+                              entry.rank === 1 ? 'bg-green-50 dark:bg-green-900/20' : isYou ? 'bg-primary/10' : ''
+                            }`}
+                          >
+                            <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                              entry.rank === 1 ? 'bg-green-500 text-white' :
+                              entry.rank === 2 ? 'bg-slate-400 text-white' :
+                              entry.rank === 3 ? 'bg-orange-400 text-white' : 'bg-muted text-muted-foreground'
+                            }`}>
+                              {entry.rank}
+                            </span>
+                            <img
+                              src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
+                              alt={entry.display_name}
+                              className="h-7 w-7 rounded-full bg-muted object-cover"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="truncate font-medium text-foreground">{entry.display_name || entry.username}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-green-500">{entry.catches_count} catches</p>
+                            </div>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </section>
+
+              {/* Overall Leaderboard */}
+              <section className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+                    <Trophy size={14} className="text-amber-500" />
+                  </div>
+                  <h3 className="text-sm font-bold text-foreground dark:text-white">Overall Top Anglers</h3>
+                </div>
+
+                {overallLoading ? (
+                  <div className="rounded-2xl border border-border bg-card p-6 text-center">
+                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-4 border-border border-t-amber-500" />
+                  </div>
+                ) : !overallLeaderboard || overallLeaderboard.length === 0 ? (
+                  <div className="rounded-2xl border border-border bg-card p-8 text-center">
+                    <Trophy size={32} className="mx-auto text-muted-foreground" />
+                    <p className="mt-2 text-sm font-medium text-foreground dark:text-white">
+                      {leaderboardPeriod === 'weekly' ? 'No catches this week' : 'No catches yet'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Start fishing to appear on the leaderboard!</p>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-border bg-card">
+                    <ul className="divide-y divide-border">
+                      {overallLeaderboard.map((entry) => {
+                        const isYou = user?.id === entry.user_id
+                        return (
+                          <li
+                            key={entry.user_id}
+                            className={`flex items-center gap-3 px-3 py-2.5 text-xs ${
+                              entry.rank === 1 ? 'bg-amber-50 dark:bg-amber-900/20' : isYou ? 'bg-primary/10' : ''
+                            }`}
+                          >
+                            <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${
+                              entry.rank === 1 ? 'bg-amber-500 text-white' :
+                              entry.rank === 2 ? 'bg-slate-400 text-white' :
+                              entry.rank === 3 ? 'bg-orange-500 text-white' : 'bg-muted text-muted-foreground'
+                            }`}>
+                              {entry.rank}
+                            </span>
+                            <img
+                              src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
+                              alt={entry.display_name}
+                              className="h-8 w-8 rounded-full bg-muted object-cover"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1">
+                                <p className="truncate font-semibold text-foreground">{entry.display_name || entry.username}</p>
+                                {isYou && (
+                                  <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">You</span>
+                                )}
                               </div>
-                              <div className="flex flex-1 items-center gap-2">
-                                <img
-                                  src={entry.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${entry.username}`}
-                                  alt={entry.display_name || entry.username}
-                                  className="h-8 w-8 rounded-full bg-muted object-cover"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1">
-                                    <p className="truncate text-xs font-semibold text-foreground dark:text-white sm:text-sm">
-                                      {entry.display_name || entry.username}
-                                    </p>
-                                    {isYou && (
-                                      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                                        You
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="truncate text-[11px] text-muted-foreground">Level {entry.level}</p>
-                                </div>
-                                <div className="text-right text-[11px] sm:text-xs">
-                                  <p className="font-semibold text-amber-400">{entry.species_points} pts</p>
-                                  <p className="text-[11px] text-muted-foreground">{entry.xp.toLocaleString()} XP</p>
-                                </div>
-                              </div>
-                            </li>
-                          )
-                        })}
+                              <p className="text-[11px] text-muted-foreground">Level {entry.level}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-amber-500">{entry.catches_count} catches</p>
+                              <p className="text-[10px] text-muted-foreground">{entry.xp.toLocaleString()} XP</p>
+                            </div>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 )}

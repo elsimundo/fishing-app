@@ -12,6 +12,11 @@ CREATE TABLE IF NOT EXISTS theme_settings (
 -- Enable RLS
 ALTER TABLE theme_settings ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Anyone can read theme settings" ON theme_settings;
+DROP POLICY IF EXISTS "Admins can update theme settings" ON theme_settings;
+DROP POLICY IF EXISTS "Admins can insert theme settings" ON theme_settings;
+
 -- Anyone can read theme settings (needed for app theming)
 CREATE POLICY "Anyone can read theme settings"
   ON theme_settings FOR SELECT
@@ -60,6 +65,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS theme_settings_updated_at ON theme_settings;
 CREATE TRIGGER theme_settings_updated_at
   BEFORE UPDATE ON theme_settings
   FOR EACH ROW

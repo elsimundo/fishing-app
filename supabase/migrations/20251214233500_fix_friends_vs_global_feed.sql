@@ -2,6 +2,10 @@
 
 -- Friends feed: include own posts + posts from users you follow.
 -- Visibility is further constrained by existing RLS (can_view_user_posts), so private accounts only show to followers.
+
+-- Drop existing function first (return type may have changed)
+DROP FUNCTION IF EXISTS get_user_feed(uuid, integer, integer);
+
 CREATE OR REPLACE FUNCTION get_user_feed(
   for_user_id uuid,
   page_limit integer DEFAULT 20,
