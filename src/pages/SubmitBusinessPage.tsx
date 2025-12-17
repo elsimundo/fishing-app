@@ -4,6 +4,7 @@ import { Layout } from '../components/layout/Layout'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
+import { Callout, CalloutDescription } from '../components/ui/callout'
 import {
   ArrowLeft,
   Store,
@@ -14,6 +15,7 @@ import {
   FileText,
   Loader2,
   CheckCircle,
+  Info,
 } from 'lucide-react'
 
 type BusinessType = 'tackle_shop' | 'charter' | 'club' | 'guide'
@@ -335,13 +337,16 @@ export default function SubmitBusinessPage() {
           </div>
 
           {/* Info Box */}
-          <div className="mb-6 rounded-xl bg-blue-50 p-4">
-            <p className="text-sm text-blue-800">
-              <strong>What happens next?</strong>
-              <br />
-              Our team will review your submission within 2-3 business days. Once approved, your
-              business will appear on the Explore map for local anglers to discover.
-            </p>
+          <div className="mb-6">
+            <Callout variant="info">
+              <Info />
+              <CalloutDescription className="text-blue-800 dark:text-blue-200">
+                <strong>What happens next?</strong>
+                <br />
+                Our team will review your submission within 2-3 business days. Once approved, your
+                business will appear on the Explore map for local anglers to discover.
+              </CalloutDescription>
+            </Callout>
           </div>
 
           {/* Submit Button */}

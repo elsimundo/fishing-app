@@ -10,9 +10,10 @@ import { XPBar } from '../components/gamification/XPBar'
 import { WeeklySpeciesBadge } from '../components/gamification/WeeklySpeciesCard'
 import { CompetitionCard } from '../components/compete/CompetitionCard'
 import { CompetitionCardSkeleton } from '../components/skeletons/CompetitionCardSkeleton'
-import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees, HelpCircle, Globe, Flag, ChevronDown, ChevronUp } from 'lucide-react'
+import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees, HelpCircle, Globe, Flag, ChevronDown, ChevronUp, Info } from 'lucide-react'
 import type { Challenge, UserChallenge } from '../hooks/useGamification'
 import { getCountryFlag, getCountryName } from '../utils/reverseGeocode'
+import { Callout, CalloutDescription, CalloutTitle } from '../components/ui/callout'
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: Trophy },
@@ -491,42 +492,47 @@ export default function ChallengeBoardPage() {
           {activeTab === 'leaderboards' && (
             <div className="space-y-4">
               {/* Info banner */}
-              <div className="rounded-lg bg-blue-50 dark:bg-blue-900/30 px-3 py-2 text-xs text-blue-600 dark:text-blue-400">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium">📊 {leaderboardPeriod === 'weekly' ? 'Weekly' : 'All-Time'} Leaderboards</p>
-                    <p className="mt-0.5 text-blue-500">
-                      {leaderboardPeriod === 'weekly'
-                        ? 'Top anglers by catches logged this week. Resets every Monday.'
-                        : 'Top anglers by total catches logged.'}
-                    </p>
+              <Callout variant="info">
+                <Info />
+                <CalloutTitle>
+                  📊 {leaderboardPeriod === 'weekly' ? 'Weekly' : 'All-Time'} Leaderboards
+                </CalloutTitle>
+                <CalloutDescription>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="mt-0.5 opacity-90">
+                        {leaderboardPeriod === 'weekly'
+                          ? 'Top anglers by catches logged this week. Resets every Monday.'
+                          : 'Top anglers by total catches logged.'}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 rounded-lg bg-white/60 p-1 dark:bg-white/10">
+                      <button
+                        type="button"
+                        onClick={() => setPeriod('weekly')}
+                        className={
+                          leaderboardPeriod === 'weekly'
+                            ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'
+                            : 'px-2 py-1 text-[11px] font-semibold text-blue-900 dark:text-blue-100 hover:bg-white/70 dark:hover:bg-white/10 rounded-md'
+                        }
+                      >
+                        Weekly
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPeriod('all_time')}
+                        className={
+                          leaderboardPeriod === 'all_time'
+                            ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'
+                            : 'px-2 py-1 text-[11px] font-semibold text-blue-900 dark:text-blue-100 hover:bg-white/70 dark:hover:bg-white/10 rounded-md'
+                        }
+                      >
+                        All-Time
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex shrink-0 rounded-lg bg-white/60 p-1 dark:bg-white/10">
-                    <button
-                      type="button"
-                      onClick={() => setPeriod('weekly')}
-                      className={
-                        leaderboardPeriod === 'weekly'
-                          ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'
-                          : 'px-2 py-1 text-[11px] font-semibold text-blue-600 dark:text-blue-300 hover:bg-white/70 dark:hover:bg-white/10 rounded-md'
-                      }
-                    >
-                      Weekly
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPeriod('all_time')}
-                      className={
-                        leaderboardPeriod === 'all_time'
-                          ? 'px-2 py-1 text-[11px] font-semibold bg-primary text-white hover:bg-primary/90 disabled:bg-primary/60 rounded-md'
-                          : 'px-2 py-1 text-[11px] font-semibold text-blue-600 dark:text-blue-300 hover:bg-white/70 dark:hover:bg-white/10 rounded-md'
-                      }
-                    >
-                      All-Time
-                    </button>
-                  </div>
-                </div>
-              </div>
+                </CalloutDescription>
+              </Callout>
 
               {/* Sea Fishing Leaderboard */}
               <section className="space-y-3">

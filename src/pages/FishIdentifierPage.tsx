@@ -8,6 +8,7 @@ import { getAllSpecies } from '../lib/constants'
 import { useFreshwaterEnabled } from '../hooks/useFeatureFlags'
 import type { FishIdentificationResult } from '../types/fish'
 import { extractPhotoMetadata, type PhotoMetadata } from '../utils/exifExtractor'
+import { Callout, CalloutDescription, CalloutTitle } from '../components/ui/callout'
 
 type Mode = 'choose' | 'photo' | 'search'
 
@@ -251,14 +252,17 @@ export function FishIdentifierPage() {
                 </label>
               </label>
 
-              <div className="rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 p-4">
-                <p className="text-xs font-medium text-blue-700 dark:text-blue-300">💡 Tips for best results:</p>
-                <ul className="mt-2 space-y-1 text-xs text-blue-600 dark:text-blue-400">
-                  <li>• Clear, well-lit photo of the fish</li>
-                  <li>• Show the whole fish if possible</li>
-                  <li>• Avoid blurry or dark images</li>
-                </ul>
-              </div>
+              <Callout variant="info">
+                <Camera />
+                <CalloutTitle>Tips for best results</CalloutTitle>
+                <CalloutDescription>
+                  <ul className="mt-1 space-y-1">
+                    <li>• Clear, well-lit photo of the fish</li>
+                    <li>• Show the whole fish if possible</li>
+                    <li>• Avoid blurry or dark images</li>
+                  </ul>
+                </CalloutDescription>
+              </Callout>
 
               <button
                 type="button"
@@ -292,13 +296,11 @@ export function FishIdentifierPage() {
 
               {/* Error State */}
               {error ? (
-                <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/40 px-3 py-2 text-xs text-red-600 dark:text-red-400">
-                  <AlertCircle size={14} className="mt-0.5" />
-                  <div>
-                    <p className="font-medium">Could not identify fish</p>
-                    <p className="text-xs">{error.message}</p>
-                  </div>
-                </div>
+                <Callout variant="danger">
+                  <AlertCircle />
+                  <CalloutTitle>Could not identify fish</CalloutTitle>
+                  <CalloutDescription>{error.message}</CalloutDescription>
+                </Callout>
               ) : null}
 
               {/* Species Confirmation */}
@@ -318,13 +320,16 @@ export function FishIdentifierPage() {
 
                   {/* EXIF Metadata Info */}
                   {metadata && (metadata.hasGPS || metadata.hasTimestamp) ? (
-                    <div className="rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 px-3 py-2 text-xs text-blue-600 dark:text-blue-300">
-                      <p className="font-medium mb-1">📸 Photo metadata detected:</p>
-                      <div className="space-y-0.5 text-blue-400">
-                        {metadata.hasGPS ? <p>• GPS location found</p> : null}
-                        {metadata.hasTimestamp ? <p>• Photo timestamp found</p> : null}
-                      </div>
-                    </div>
+                    <Callout variant="info">
+                      <Camera />
+                      <CalloutTitle>Photo metadata detected</CalloutTitle>
+                      <CalloutDescription>
+                        <div className="space-y-0.5">
+                          {metadata.hasGPS ? <p>• GPS location found</p> : null}
+                          {metadata.hasTimestamp ? <p>• Photo timestamp found</p> : null}
+                        </div>
+                      </CalloutDescription>
+                    </Callout>
                   ) : null}
 
                   {/* Action Buttons */}

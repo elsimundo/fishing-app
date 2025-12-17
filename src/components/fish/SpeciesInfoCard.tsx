@@ -7,6 +7,7 @@ import { useFishBaseData, formatFishBaseDescription, getFishBaseMaxSize, getFish
 import { useWikidataImage } from '../../hooks/useWikidataImage'
 import type { RegionCode } from '../../types/species'
 import { useWeightFormatter } from '../../hooks/useWeightFormatter'
+import { Callout, CalloutDescription, CalloutTitle } from '../ui/callout'
 
 interface SpeciesInfoCardProps {
   speciesName: string
@@ -114,23 +115,23 @@ export function SpeciesInfoCard({
 
         {/* Water Type */}
         {waterType && (
-          <div className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 py-2 text-sm text-blue-600 dark:text-blue-400">
-            <Fish size={16} />
-            <span className="capitalize">{waterType === 'both' ? 'Freshwater & Saltwater' : waterType}</span>
-          </div>
+          <Callout variant="info" className="py-2">
+            <Fish />
+            <CalloutDescription className="capitalize">
+              {waterType === 'both' ? 'Freshwater & Saltwater' : waterType}
+            </CalloutDescription>
+          </Callout>
         )}
 
         {/* Depth Range */}
         {fishBaseData.species.DepthRangeShallow != null && fishBaseData.species.DepthRangeDeep != null && (
-          <div className="flex items-start gap-2 rounded-lg bg-primary/10 border border-primary/30 p-3">
-            <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-            <div>
-              <p className="text-xs font-medium text-primary">Depth Range</p>
-              <p className="text-sm text-primary">
-                {fishBaseData.species.DepthRangeShallow} - {fishBaseData.species.DepthRangeDeep} meters
-              </p>
-            </div>
-          </div>
+          <Callout variant="neutral" className="border-primary/30 bg-primary/10">
+            <MapPin className="text-primary" />
+            <CalloutTitle className="text-primary">Depth Range</CalloutTitle>
+            <CalloutDescription className="text-primary">
+              {fishBaseData.species.DepthRangeShallow} - {fishBaseData.species.DepthRangeDeep} meters
+            </CalloutDescription>
+          </Callout>
         )}
 
         {/* App Stats */}
@@ -247,52 +248,44 @@ export function SpeciesInfoCard({
 
       {/* Legal Size Warning */}
       {legalSize?.minLengthCm && (
-        <div className="flex items-start gap-3 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/40 p-3">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
-            <Ruler className="h-4 w-4 text-red-500 dark:text-red-400" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-red-700 dark:text-red-300">Minimum Legal Size</p>
-            <p className="text-lg font-bold text-red-800 dark:text-red-200">{legalSize.minLengthCm} cm</p>
+        <Callout variant="danger">
+          <Ruler />
+          <CalloutTitle>Minimum Legal Size</CalloutTitle>
+          <CalloutDescription>
+            <p className="text-lg font-bold">{legalSize.minLengthCm} cm</p>
             {legalSize.bagLimitPerDay && (
-              <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">Bag limit: {legalSize.bagLimitPerDay} per day</p>
+              <p className="mt-0.5 text-xs">Bag limit: {legalSize.bagLimitPerDay} per day</p>
             )}
             {legalSize.notes && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{legalSize.notes}</p>
+              <p className="mt-1 text-xs">{legalSize.notes}</p>
             )}
-          </div>
-        </div>
+          </CalloutDescription>
+        </Callout>
       )}
 
       {/* Habitat & Timing */}
       <div className="space-y-2">
-        <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 p-3">
-          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" />
-          <div>
-            <p className="text-xs font-medium text-blue-700 dark:text-blue-300">Habitat</p>
-            <p className="text-sm text-blue-600 dark:text-blue-400">{speciesInfo.habitat}</p>
-          </div>
-        </div>
+        <Callout variant="info">
+          <MapPin />
+          <CalloutTitle>Habitat</CalloutTitle>
+          <CalloutDescription>{speciesInfo.habitat}</CalloutDescription>
+        </Callout>
         
         {(speciesInfo.bestSeason || speciesInfo.bestTime) && (
           <div className="grid grid-cols-2 gap-2">
             {speciesInfo.bestSeason && (
-              <div className="flex items-start gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-500/40 p-3">
-                <Calendar className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400" />
-                <div>
-                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Best Season</p>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">{speciesInfo.bestSeason}</p>
-                </div>
-              </div>
+              <Callout variant="success" className="py-3">
+                <Calendar />
+                <CalloutTitle>Best Season</CalloutTitle>
+                <CalloutDescription>{speciesInfo.bestSeason}</CalloutDescription>
+              </Callout>
             )}
             {speciesInfo.bestTime && (
-              <div className="flex items-start gap-2 rounded-lg bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-500/40 p-3">
-                <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500 dark:text-purple-400" />
-                <div>
-                  <p className="text-xs font-medium text-purple-700 dark:text-purple-300">Best Time</p>
-                  <p className="text-xs text-purple-600 dark:text-purple-400">{speciesInfo.bestTime}</p>
-                </div>
-              </div>
+              <Callout variant="info" className="py-3">
+                <Clock />
+                <CalloutTitle>Best Time</CalloutTitle>
+                <CalloutDescription>{speciesInfo.bestTime}</CalloutDescription>
+              </Callout>
             )}
           </div>
         )}

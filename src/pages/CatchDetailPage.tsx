@@ -68,17 +68,35 @@ export function CatchDetailPage() {
     )
   }
 
-  const weightLabel = formatWeight(catchItem.weight_kg, { precision: 1 })
-  const lengthLabel =
-    catchItem.length_cm != null ? `${catchItem.length_cm.toFixed(1)} cm` : '—'
+  const hasWeight = catchItem.weight_kg != null
+  const hasLength = catchItem.length_cm != null
+  const weightLabel = hasWeight ? formatWeight(catchItem.weight_kg, { precision: 1 }) : null
+  const lengthLabel = hasLength ? `${catchItem.length_cm!.toFixed(1)} cm` : null
   const timeLabel = catchItem.caught_at
     ? format(new Date(catchItem.caught_at), 'HH:mm')
-    : '—'
+    : null
   const dateLabel = catchItem.caught_at
     ? format(new Date(catchItem.caught_at), 'd MMM yyyy')
-    : ''
+    : null
 
   const locationLabel = catchItem.location_name || 'Unknown location'
+  
+  // Build stats array - only include stats that have values
+  type StatItem = { label: string; value: string; icon: string }
+  const stats: StatItem[] = [
+    hasWeight ? { label: 'Weight', value: weightLabel!, icon: '⚖️' } : null,
+    hasLength ? { label: 'Length', value: lengthLabel!, icon: '📏' } : null,
+    timeLabel ? { label: 'Time', value: timeLabel, icon: '🕐' } : null,
+  ].filter((s): s is StatItem => s !== null)
+  
+  // Method items - only show if they have values
+  const hasBait = catchItem.bait && catchItem.bait !== '0'
+  const hasRig = !!catchItem.rig
+  const hasStyle = !!catchItem.fishing_style
+  const hasMethod = hasBait || hasRig || hasStyle
+  
+  // Conditions - only show section if any exist
+  const hasConditions = catchItem.weather_temp != null || catchItem.weather_condition || catchItem.wind_speed != null
 
   return (
     <main className="min-h-screen bg-background px-4 py-4">
@@ -95,217 +113,227 @@ export function CatchDetailPage() {
           </button>
         </div>
 
-        {/* Catch hero card */}
-        <section className="overflow-hidden rounded-2xl bg-card border border-border shadow-sm">
-          {/* Photo */}
-          {catchItem.photo_url ? (
-            <div className="relative h-64 w-full overflow-hidden bg-background">
-              <img
-                src={catchItem.photo_url}
-                alt={catchItem.species}
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/60" />
-            </div>
-          ) : (
-            <div className="flex h-40 items-center justify-center bg-gradient-to-br from-cyan-600 to-emerald-500 text-4xl">
-              🐟
-            </div>
-          )}
+        {/* Photo hero */}
+        {catchItem.photo_url ? (
+          <div className="relative -mx-4 -mt-4 aspect-[4/3] w-[calc(100%+2rem)] overflow-hidden sm:mx-0 sm:mt-0 sm:w-full sm:rounded-2xl">
+            <img
+              src={catchItem.photo_url}
+              alt={catchItem.species}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-emerald-500 text-6xl">
+            🐟
+          </div>
+        )}
 
-          <div className="p-4 text-xs text-muted-foreground">
-            {/* Header row: species + actions */}
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-foreground">
-                    {catchItem.species}
-                  </h1>
-                  {catchItem.is_backlog && (
-                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                      📜 Backlog
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  📍 {locationLabel}
-                  {dateLabel && ` • ${dateLabel}`}
-                </p>
+        {/* Species header card */}
+        <section className="rounded-2xl bg-card border border-border p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-bold text-foreground">
+                  {catchItem.species}
+                </h1>
+                {catchItem.released && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/30 border border-emerald-500/40 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400">
+                    ✓ Released
+                  </span>
+                )}
                 {catchItem.is_backlog && (
-                  <p className="mt-2 rounded-lg bg-amber-50 border border-amber-200 px-2 py-1.5 text-[10px] text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300">
-                    Backlog catch — doesn't count toward XP, badges, or leaderboards.
-                  </p>
+                  <span className="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-[11px] font-medium text-slate-400">
+                    📜 Backlog
+                  </span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowShareModal(true)}
-                  className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-border bg-background px-3 text-[11px] font-medium text-muted-foreground hover:bg-muted"
-                >
-                  <Share2 size={14} />
-                  Share
-                </button>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                📍 {locationLabel}
+                {dateLabel && <span className="ml-2">📅 {dateLabel}</span>}
+              </p>
+              {catchItem.is_backlog && (
+                <p className="mt-3 rounded-lg bg-amber-900/20 border border-amber-800 px-3 py-2 text-xs text-amber-300">
+                  Backlog catch — doesn't count toward XP, badges, or leaderboards.
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowShareModal(true)}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-3 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+              >
+                <Share2 size={14} />
+                Share
+              </button>
 
-                {/* More Menu - show for owner */}
-                {user && catchItem.user_id && user.id === catchItem.user_id && (
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowMenu(!showMenu)}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground hover:bg-muted"
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
+              {/* More Menu - show for owner */}
+              {user && catchItem.user_id && user.id === catchItem.user_id && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    <MoreHorizontal size={16} />
+                  </button>
 
-                    {showMenu && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                        <div className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-border bg-card py-1 shadow-xl">
+                  {showMenu && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                      <div className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-border bg-card py-1 shadow-xl">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowMenu(false)
+                            navigate(`/catches/${catchItem.id}/edit`)
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
+                        >
+                          <Pencil size={14} />
+                          <span>Edit Catch</span>
+                        </button>
+                        {catchItem.latitude != null && catchItem.longitude != null && !savedMarks.some(m =>
+                          Math.abs(m.latitude - (catchItem.latitude || 0)) < 0.001 &&
+                          Math.abs(m.longitude - (catchItem.longitude || 0)) < 0.001
+                        ) && (
                           <button
                             type="button"
                             onClick={() => {
+                              createMark.mutate({
+                                name: catchItem.location_name || catchItem.species || 'Fishing spot',
+                                latitude: catchItem.latitude!,
+                                longitude: catchItem.longitude!,
+                                water_type: 'sea',
+                                privacy_level: 'private',
+                              })
                               setShowMenu(false)
-                              navigate(`/catches/${catchItem.id}/edit`)
                             }}
                             className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
                           >
-                            <Pencil size={14} />
-                            <span>Edit Catch</span>
+                            <Bookmark size={14} />
+                            <span>Save as Mark</span>
                           </button>
-                          {catchItem.latitude != null && catchItem.longitude != null && !savedMarks.some(m =>
-                            Math.abs(m.latitude - (catchItem.latitude || 0)) < 0.001 &&
-                            Math.abs(m.longitude - (catchItem.longitude || 0)) < 0.001
-                          ) && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                createMark.mutate({
-                                  name: catchItem.location_name || catchItem.species || 'Fishing spot',
-                                  latitude: catchItem.latitude!,
-                                  longitude: catchItem.longitude!,
-                                  water_type: 'sea', // Default to sea for catches
-                                  privacy_level: 'private',
-                                })
-                                setShowMenu(false)
-                              }}
-                              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
-                            >
-                              <Bookmark size={14} />
-                              <span>Save as Mark</span>
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (!confirm('Delete this catch? This cannot be undone.')) return
-                              try {
-                                await deleteCatch(catchItem.id)
-                                toast.success('Catch deleted')
-                                navigate('/logbook')
-                              } catch {
-                                toast.error('Failed to delete catch')
-                              }
-                            }}
-                            disabled={isDeleting}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/30 disabled:opacity-50"
-                          >
-                            <Trash2 size={14} />
-                            <span>{isDeleting ? 'Deleting...' : 'Delete Catch'}</span>
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-3 gap-2 text-[11px] sm:text-xs">
-              <div className="rounded-xl bg-background px-3 py-2 text-center">
-                <p className="text-[10px] text-muted-foreground">Weight</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{weightLabel}</p>
-              </div>
-              <div className="rounded-xl bg-background px-3 py-2 text-center">
-                <p className="text-[10px] text-muted-foreground">Length</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{lengthLabel}</p>
-              </div>
-              <div className="rounded-xl bg-background px-3 py-2 text-center">
-                <p className="text-[10px] text-muted-foreground">Time</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{timeLabel}</p>
-              </div>
-            </div>
-
-            {/* Released badge */}
-            {catchItem.released && (
-              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-900/30 border border-emerald-500/40 px-3 py-1 text-[11px] font-semibold text-emerald-400">
-                ✓ Released safely
-              </div>
-            )}
-
-            <div className="mt-4 h-px bg-border" />
-
-            {/* Location */}
-            <div className="mt-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Location</p>
-              <p className="mt-1 text-sm text-foreground">📍 {locationLabel}</p>
-            </div>
-
-            {/* Method */}
-            <div className="mt-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Method</p>
-              <div className="mt-1 space-y-1 text-sm text-foreground">
-                <p>
-                  🎣 <span className="font-semibold">Bait:</span>{' '}
-                  {catchItem.bait && catchItem.bait !== '0' ? catchItem.bait : '—'}
-                </p>
-                <p>
-                  🪝 <span className="font-semibold">Rig:</span> {catchItem.rig || '—'}
-                </p>
-                {catchItem.fishing_style && (
-                  <p>
-                    🎯 <span className="font-semibold">Style:</span> {catchItem.fishing_style}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Conditions */}
-            {(catchItem.weather_temp != null || catchItem.weather_condition || catchItem.wind_speed != null) && (
-              <div className="mt-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Conditions</p>
-                <div className="mt-1 space-y-1 text-sm text-foreground">
-                  {catchItem.weather_temp != null && (
-                    <p>
-                      🌡️ <span className="font-semibold">Temp:</span>{' '}
-                      {catchItem.weather_temp.toFixed(1)}°C
-                    </p>
-                  )}
-                  {catchItem.weather_condition && (
-                    <p>
-                      ☁️ <span className="font-semibold">Weather:</span> {catchItem.weather_condition}
-                    </p>
-                  )}
-                  {catchItem.wind_speed != null && (
-                    <p>
-                      💨 <span className="font-semibold">Wind:</span>{' '}
-                      {catchItem.wind_speed.toFixed(1)} mph
-                    </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!confirm('Delete this catch? This cannot be undone.')) return
+                            try {
+                              await deleteCatch(catchItem.id)
+                              toast.success('Catch deleted')
+                              navigate('/logbook')
+                            } catch {
+                              toast.error('Failed to delete catch')
+                            }
+                          }}
+                          disabled={isDeleting}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/30 disabled:opacity-50"
+                        >
+                          <Trash2 size={14} />
+                          <span>{isDeleting ? 'Deleting...' : 'Delete Catch'}</span>
+                        </button>
+                      </div>
+                    </>
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Notes */}
-            {catchItem.notes && (
-              <div className="mt-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
-                <p className="mt-1 text-sm text-foreground">{catchItem.notes}</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </section>
+
+        {/* Stats row - only show stats that exist */}
+        {stats.length > 0 && (
+          <section className="grid gap-3" style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}>
+            {stats.map((stat) => (
+              <div key={stat.label} className="rounded-2xl bg-card border border-border p-4 text-center">
+                <p className="text-2xl mb-1">{stat.icon}</p>
+                <p className="text-lg font-bold text-foreground">{stat.value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {/* Method card - only show if any method info exists */}
+        {hasMethod && (
+          <section className="rounded-2xl bg-card border border-border p-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Method</h2>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {hasBait && (
+                <div className="flex items-center gap-3 rounded-xl bg-background p-3">
+                  <span className="text-xl">🎣</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Bait</p>
+                    <p className="text-sm font-medium text-foreground">{catchItem.bait}</p>
+                  </div>
+                </div>
+              )}
+              {hasRig && (
+                <div className="flex items-center gap-3 rounded-xl bg-background p-3">
+                  <span className="text-xl">🪝</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Rig</p>
+                    <p className="text-sm font-medium text-foreground">{catchItem.rig}</p>
+                  </div>
+                </div>
+              )}
+              {hasStyle && (
+                <div className="flex items-center gap-3 rounded-xl bg-background p-3">
+                  <span className="text-xl">🎯</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Style</p>
+                    <p className="text-sm font-medium text-foreground">{catchItem.fishing_style}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Conditions card - only show if any conditions exist */}
+        {hasConditions && (
+          <section className="rounded-2xl bg-card border border-border p-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Conditions</h2>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {catchItem.weather_temp != null && (
+                <div className="flex items-center gap-3 rounded-xl bg-background p-3">
+                  <span className="text-xl">🌡️</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Temperature</p>
+                    <p className="text-sm font-medium text-foreground">{catchItem.weather_temp.toFixed(1)}°C</p>
+                  </div>
+                </div>
+              )}
+              {catchItem.weather_condition && (
+                <div className="flex items-center gap-3 rounded-xl bg-background p-3">
+                  <span className="text-xl">☁️</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Weather</p>
+                    <p className="text-sm font-medium text-foreground">{catchItem.weather_condition}</p>
+                  </div>
+                </div>
+              )}
+              {catchItem.wind_speed != null && (
+                <div className="flex items-center gap-3 rounded-xl bg-background p-3">
+                  <span className="text-xl">💨</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Wind</p>
+                    <p className="text-sm font-medium text-foreground">{catchItem.wind_speed.toFixed(1)} mph</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Notes card - only show if notes exist */}
+        {catchItem.notes && (
+          <section className="rounded-2xl bg-card border border-border p-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Notes</h2>
+            <p className="text-sm text-foreground leading-relaxed">{catchItem.notes}</p>
+          </section>
+        )}
 
         {showShareModal && catchItem ? (
           <ShareCatchToFeedModal

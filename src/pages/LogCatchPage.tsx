@@ -1,9 +1,10 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout } from '../components/layout/Layout'
 import { CatchForm } from '../components/catches/CatchForm'
-import { ArrowLeft, Fish, Clock } from 'lucide-react'
+import { ArrowLeft, Fish, Clock, Camera } from 'lucide-react'
 import type { FishIdentificationResult } from '../types/fish'
 import type { PhotoMetadata } from '../utils/exifExtractor'
+import { Callout, CalloutDescription } from '../components/ui/callout'
 
 export default function LogCatchPage() {
   const navigate = useNavigate()
@@ -51,10 +52,13 @@ export default function LogCatchPage() {
                   <p className="text-sm text-slate-600 dark:text-slate-300">Log an old catch from before you joined</p>
                 </div>
               </div>
-              <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 dark:bg-amber-900/20 dark:border-amber-800">
-                <p className="text-xs text-amber-800 dark:text-amber-200">
-                  <strong>Note:</strong> Backlog catches are for bragging rights only. They won't earn XP, badges, or count toward leaderboards.
-                </p>
+              <div className="mt-3">
+                <Callout variant="warning">
+                  <Clock />
+                  <CalloutDescription>
+                    <strong>Note:</strong> Backlog catches are for bragging rights only. They won't earn XP, badges, or count toward leaderboards.
+                  </CalloutDescription>
+                </Callout>
               </div>
             </div>
           ) : (
@@ -67,6 +71,17 @@ export default function LogCatchPage() {
                   <h2 className="text-lg font-bold">Record Your Catch</h2>
                   <p className="text-sm text-muted-foreground dark:text-white/80">Add species, weight, photo and location</p>
                 </div>
+              </div>
+              <div className="mt-3">
+                <Callout
+                  variant="info"
+                  className="border-white/30 bg-white/20 text-white dark:border-white/20 dark:bg-white/10"
+                >
+                  <Camera className="text-white" />
+                  <CalloutDescription className="text-white/90">
+                    <strong>Tip:</strong> Catches without a photo won't earn XP or count toward challenges.
+                  </CalloutDescription>
+                </Callout>
               </div>
             </div>
           )}

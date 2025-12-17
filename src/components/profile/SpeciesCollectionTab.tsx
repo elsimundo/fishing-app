@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Trophy, Scale, Ruler, BookOpen } from 'lucide-react'
 import type { Catch } from '../../types'
 import { useWeightFormatter } from '../../hooks/useWeightFormatter'
+import { Callout, CalloutDescription, CalloutTitle } from '../ui/callout'
 
 interface SpeciesStats {
   species: string
@@ -105,45 +106,45 @@ export function SpeciesCollectionTab({ catches }: SpeciesCollectionTabProps) {
         </div>
 
         {/* Personal best highlight */}
-        <div className="mb-4 rounded-xl border border-amber-200 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-900/30 p-3">
-          <div className="mb-2 flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-amber-400" />
-            <span className="text-xs font-semibold text-amber-300">Personal Best</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate(`/catches/${stats.bestCatch.id}`)}
-            className="w-full text-left"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                {stats.bestCatch.weight_kg && (
-                  <p className="text-lg font-bold text-white">
-                    {formatWeight(stats.bestCatch.weight_kg, { precision: 2 })}
-                  </p>
-                )}
-                {stats.bestCatch.length_cm && (
-                  <p className="text-sm text-amber-300">
-                    {stats.bestCatch.length_cm} cm
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-amber-400">
-                  {new Date(stats.bestCatch.caught_at).toLocaleDateString(undefined, {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
-              {stats.bestCatch.photo_url && (
-                <img
-                  src={stats.bestCatch.photo_url}
-                  alt={selectedSpecies}
-                  className="h-16 w-16 rounded-lg object-cover"
-                />
-              )}
-            </div>
-          </button>
+        <div className="mb-4">
+          <Callout variant="warning">
+            <Trophy />
+            <CalloutTitle>Personal Best</CalloutTitle>
+            <CalloutDescription>
+              <button
+                type="button"
+                onClick={() => navigate(`/catches/${stats.bestCatch.id}`)}
+                className="w-full text-left"
+              >
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <div>
+                    {stats.bestCatch.weight_kg && (
+                      <p className="text-lg font-bold">
+                        {formatWeight(stats.bestCatch.weight_kg, { precision: 2 })}
+                      </p>
+                    )}
+                    {stats.bestCatch.length_cm && (
+                      <p className="text-sm opacity-90">{stats.bestCatch.length_cm} cm</p>
+                    )}
+                    <p className="mt-1 text-xs opacity-80">
+                      {new Date(stats.bestCatch.caught_at).toLocaleDateString(undefined, {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                  {stats.bestCatch.photo_url && (
+                    <img
+                      src={stats.bestCatch.photo_url}
+                      alt={selectedSpecies}
+                      className="h-16 w-16 rounded-lg object-cover"
+                    />
+                  )}
+                </div>
+              </button>
+            </CalloutDescription>
+          </Callout>
         </div>
 
         {/* All catches for this species */}

@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast'
 import { Link } from 'react-router-dom'
 import { ClaimLakeModal } from '../lakes/ClaimLakeModal'
 import type { Lake } from '../../types'
+import { Callout, CalloutDescription } from '../ui/callout'
 
 interface Bounds {
   north: number
@@ -591,10 +592,13 @@ function AssignOwnerModal({
 
         {/* Selected user confirmation */}
         {selectedUser && (
-          <div className="mb-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-500/40 p-3">
-            <p className="text-sm text-emerald-400">
-              <span className="font-medium">@{selectedUser.username}</span> will be assigned as owner of this lake.
-            </p>
+          <div className="mb-4">
+            <Callout variant="success">
+              <BadgeCheck className="text-emerald-500 dark:text-emerald-400" />
+              <CalloutDescription>
+                <span className="font-medium">@{selectedUser.username}</span> will be assigned as owner of this lake.
+              </CalloutDescription>
+            </Callout>
           </div>
         )}
 

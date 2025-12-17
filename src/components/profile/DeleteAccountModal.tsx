@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, AlertTriangle, X } from 'lucide-react'
+import { Loader2, AlertTriangle, X, Info } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { toast } from 'react-hot-toast'
+import { Callout, CalloutDescription, CalloutTitle } from '../ui/callout'
 
 interface DeleteAccountModalProps {
   onClose: () => void
@@ -63,21 +64,31 @@ export function DeleteAccountModal({ onClose }: DeleteAccountModalProps) {
 
         {/* Content */}
         <div className="px-5 py-4">
-          <div className="mb-4 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-500/40 p-4">
-            <h3 className="mb-2 font-semibold text-amber-300">What happens when you delete:</h3>
-            <ul className="space-y-1 text-sm text-amber-400">
-              <li>• Your profile will be hidden immediately</li>
-              <li>• All your followers will be removed</li>
-              <li>• Your posts will be hidden from others</li>
-              <li>• You have <strong>30 days</strong> to change your mind</li>
-              <li>• After 30 days, all data is permanently deleted</li>
-            </ul>
+          <div className="mb-4">
+            <Callout variant="warning">
+              <AlertTriangle />
+              <CalloutTitle>What happens when you delete</CalloutTitle>
+              <CalloutDescription>
+                <ul className="mt-1 space-y-1">
+                  <li>• Your profile will be hidden immediately</li>
+                  <li>• All your followers will be removed</li>
+                  <li>• Your posts will be hidden from others</li>
+                  <li>
+                    • You have <strong>30 days</strong> to change your mind
+                  </li>
+                  <li>• After 30 days, all data is permanently deleted</li>
+                </ul>
+              </CalloutDescription>
+            </Callout>
           </div>
 
-          <div className="mb-4 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 p-4">
-            <p className="text-sm text-blue-300">
-              <strong>Want to come back?</strong> Just log in within 30 days and your account will be restored.
-            </p>
+          <div className="mb-4">
+            <Callout variant="info">
+              <Info />
+              <CalloutDescription>
+                <strong>Want to come back?</strong> Just log in within 30 days and your account will be restored.
+              </CalloutDescription>
+            </Callout>
           </div>
 
           <div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, Trash2, Navigation, Loader2, X, Share2, MapPin, Crosshair, Waves, TreePine, Droplets, Ship, Flower2, Building2 } from 'lucide-react'
+import { Callout, CalloutDescription } from '../ui/callout'
 import { useSavedMarks, useSharedMarks } from '../../hooks/useSavedMarks'
 import type { CreateMarkInput } from '../../hooks/useSavedMarks'
 import type { SavedMark, SavedMarkWaterType, MarkPrivacyLevel } from '../../types'
@@ -379,21 +380,23 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
         <label className="mb-1 block text-xs font-medium text-muted-foreground">Location *</label>
         
         {coords.lat !== null && coords.lng !== null ? (
-          <div className="flex items-center justify-between rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-500/40 px-3 py-2">
-            <div className="flex items-center gap-2">
-              <MapPin size={14} className="text-emerald-400" />
-              <span className="text-xs text-emerald-400">
-                {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowMap(true)}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
-            >
-              Change
-            </button>
-          </div>
+          <Callout variant="success" className="py-2">
+            <MapPin />
+            <CalloutDescription>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs">
+                  {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowMap(true)}
+                  className="text-xs font-medium hover:underline"
+                >
+                  Change
+                </button>
+              </div>
+            </CalloutDescription>
+          </Callout>
         ) : (
           <div className="space-y-2">
             <button

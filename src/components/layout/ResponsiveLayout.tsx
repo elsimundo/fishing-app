@@ -15,6 +15,11 @@ export function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <MobileHeader />
+        {/* Spacer for fixed header + safe area */}
+        <div 
+          className="shrink-0" 
+          style={{ height: 'calc(56px + env(safe-area-inset-top))' }} 
+        />
         <main className="flex-1 overflow-auto pb-24">{children}</main>
         <BottomNav />
       </div>

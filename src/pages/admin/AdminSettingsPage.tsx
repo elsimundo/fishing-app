@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { Shield, Save, CreditCard, Eye, EyeOff, ToggleLeft, Fish, Store, Users, Swords, Camera, Loader2 } from 'lucide-react'
+import { Shield, Save, CreditCard, Eye, EyeOff, ToggleLeft, Fish, Store, Users, Swords, Camera, Loader2, Zap } from 'lucide-react'
 import { useFeatureFlags, useUpdateFeatureFlag } from '../../hooks/useFeatureFlags'
 import { ThemeSettingsSection } from '../../components/admin/ThemeSettingsSection'
+import { useAppSettings, useUpdateAppSetting, useSpeciesTiers, useUpdateSpeciesTier } from '../../hooks/useAppSettings'
+import { XP_SETTING_KEYS, XP_SETTING_LABELS, DEFAULT_XP_VALUES } from '../../types/appSettings'
+import type { SpeciesTier } from '../../types/appSettings'
 
 export default function AdminSettingsPage() {
   const [autoApprovePremium, setAutoApprovePremium] = useState(false)
@@ -20,6 +23,26 @@ export default function AdminSettingsPage() {
   const [stripeWebhookSecret, setStripeWebhookSecret] = useState('')
   const [showSecretKey, setShowSecretKey] = useState(false)
   const [showWebhookSecret, setShowWebhookSecret] = useState(false)
+
+  // XP Settings
+  const { data: appSettings, isLoading: settingsLoading } = useAppSettings()
+  const { mutate: updateSetting, isPending: isSettingUpdating } = useUpdateAppSetting()
+  const { data: speciesTiers, isLoading: tiersLoading } = useSpeciesTiers()
+  const { mutate: updateTier, isPending: isTierUpdating } = useUpdateSpeciesTier()
+  const [editingTier, setEditingTier] = useState<string | null>(null)
+
+  const getSettingValue = (key: string): string => {
+    const setting = appSettings?.find(s => s.key === key)
+    if (setting) {
+      return String(setting.value).replace(/"/g, '')
+    }
+    const defaultVal = DEFAULT_XP_VALUES[key]
+    return defaultVal !== undefined ? String(defaultVal) : ''
+  }
+
+  const handleSettingChange = (key: string, value: string | boolean) => {
+    updateSetting({ key, value })
+  }
 
   return (
     <AdminLayout>
@@ -148,6 +171,209 @@ export default function AdminSettingsPage() {
         {/* Theme Settings */}
         <div className="mt-8">
           <ThemeSettingsSection />
+        </div>
+
+        {/* XP & Gamification Settings */}
+        <div className="mt-8">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+              <Zap size={20} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">XP & Gamification</h2>
+              <p className="text-sm text-muted-foreground">Configure XP values, species tiers, and rewards</p>
+            </div>
+          </div>
+
+          {settingsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              {/* XP Tier Values */}
+              <div className="mb-6">
+                <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Species Tier XP Values</h3>
+                <div className="grid gap-4 lg:grid-cols-4">
+                  {[
+                    { key: XP_SETTING_KEYS.TIER_COMMON, color: 'bg-slate-100 text-slate-700' },
+                    { key: XP_SETTING_KEYS.TIER_STANDARD, color: 'bg-blue-100 text-blue-700' },
+                    { key: XP_SETTING_KEYS.TIER_TROPHY, color: 'bg-amber-100 text-amber-700' },
+                    { key: XP_SETTING_KEYS.TIER_RARE, color: 'bg-purple-100 text-purple-700' },
+                  ].map(({ key, color }) => (
+                    <div key={key} className="rounded-xl border border-border bg-card p-4">
+                      <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${color} mb-2`}>
+                        {XP_SETTING_LABELS[key].label.replace(' XP', '')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={getSettingValue(key)}
+                          onChange={(e) => handleSettingChange(key, e.target.value)}
+                          disabled={isSettingUpdating}
+                          className="w-20 rounded-lg border border-border bg-background px-3 py-2 text-lg font-bold text-foreground focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                        <span className="text-sm text-muted-foreground">XP</span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{XP_SETTING_LABELS[key].description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* XP Bonuses */}
+              <div className="mb-6">
+                <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">XP Bonuses</h3>
+                <div className="grid gap-4 lg:grid-cols-3">
+                  {[
+                    XP_SETTING_KEYS.FIRST_SPECIES,
+                    XP_SETTING_KEYS.RELEASED_BONUS,
+                    XP_SETTING_KEYS.FULL_DETAILS_BONUS,
+                    XP_SETTING_KEYS.START_SESSION,
+                    XP_SETTING_KEYS.REFERRAL_SIGNUP,
+                    XP_SETTING_KEYS.PB_MULTIPLIER,
+                  ].map((key) => (
+                    <div key={key} className="rounded-xl border border-border bg-card p-4">
+                      <p className="text-sm font-medium text-foreground">{XP_SETTING_LABELS[key].label}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={getSettingValue(key)}
+                          onChange={(e) => handleSettingChange(key, e.target.value)}
+                          disabled={isSettingUpdating}
+                          className="w-20 rounded-lg border border-border bg-background px-3 py-2 text-lg font-bold text-foreground focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {key === XP_SETTING_KEYS.PB_MULTIPLIER ? 'x multiplier' : 'XP'}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{XP_SETTING_LABELS[key].description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* XP Rules */}
+              <div className="mb-6">
+                <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">XP Rules</h3>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{XP_SETTING_LABELS[XP_SETTING_KEYS.REQUIRE_PHOTO].label}</p>
+                        <p className="text-xs text-muted-foreground">{XP_SETTING_LABELS[XP_SETTING_KEYS.REQUIRE_PHOTO].description}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSettingChange(XP_SETTING_KEYS.REQUIRE_PHOTO, getSettingValue(XP_SETTING_KEYS.REQUIRE_PHOTO) !== 'true')}
+                        disabled={isSettingUpdating}
+                        className={`relative h-6 w-11 rounded-full transition-colors ${
+                          getSettingValue(XP_SETTING_KEYS.REQUIRE_PHOTO) === 'true' ? 'bg-emerald-500' : 'bg-muted'
+                        }`}
+                      >
+                        <span className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                          getSettingValue(XP_SETTING_KEYS.REQUIRE_PHOTO) === 'true' ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{XP_SETTING_LABELS[XP_SETTING_KEYS.BACKLOG_EARNS].label}</p>
+                        <p className="text-xs text-muted-foreground">{XP_SETTING_LABELS[XP_SETTING_KEYS.BACKLOG_EARNS].description}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSettingChange(XP_SETTING_KEYS.BACKLOG_EARNS, getSettingValue(XP_SETTING_KEYS.BACKLOG_EARNS) !== 'true')}
+                        disabled={isSettingUpdating}
+                        className={`relative h-6 w-11 rounded-full transition-colors ${
+                          getSettingValue(XP_SETTING_KEYS.BACKLOG_EARNS) === 'true' ? 'bg-emerald-500' : 'bg-muted'
+                        }`}
+                      >
+                        <span className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                          getSettingValue(XP_SETTING_KEYS.BACKLOG_EARNS) === 'true' ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Species Tiers Management */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Species Tier Assignments</h3>
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  {tiersLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="max-h-80 overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left font-medium text-muted-foreground">Species</th>
+                            <th className="px-4 py-2 text-left font-medium text-muted-foreground">Tier</th>
+                            <th className="px-4 py-2 text-left font-medium text-muted-foreground">Base XP</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {speciesTiers?.map((tier) => (
+                            <tr key={tier.species} className="hover:bg-muted/50">
+                              <td className="px-4 py-2 font-medium text-foreground">{tier.species}</td>
+                              <td className="px-4 py-2">
+                                {editingTier === tier.species ? (
+                                  <select
+                                    value={tier.tier}
+                                    onChange={(e) => {
+                                      const newTier = e.target.value as SpeciesTier
+                                      const xpMap: Record<SpeciesTier, number> = {
+                                        common: Number(getSettingValue(XP_SETTING_KEYS.TIER_COMMON)) || 5,
+                                        standard: Number(getSettingValue(XP_SETTING_KEYS.TIER_STANDARD)) || 10,
+                                        trophy: Number(getSettingValue(XP_SETTING_KEYS.TIER_TROPHY)) || 15,
+                                        rare: Number(getSettingValue(XP_SETTING_KEYS.TIER_RARE)) || 20,
+                                      }
+                                      updateTier({ species: tier.species, tier: newTier, base_xp: xpMap[newTier] })
+                                      setEditingTier(null)
+                                    }}
+                                    disabled={isTierUpdating}
+                                    className="rounded border border-border bg-background px-2 py-1 text-foreground"
+                                  >
+                                    <option value="common">Common</option>
+                                    <option value="standard">Standard</option>
+                                    <option value="trophy">Trophy</option>
+                                    <option value="rare">Rare</option>
+                                  </select>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingTier(tier.species)}
+                                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                      tier.tier === 'common' ? 'bg-slate-100 text-slate-700' :
+                                      tier.tier === 'standard' ? 'bg-blue-100 text-blue-700' :
+                                      tier.tier === 'trophy' ? 'bg-amber-100 text-amber-700' :
+                                      'bg-purple-100 text-purple-700'
+                                    }`}
+                                  >
+                                    {tier.tier.charAt(0).toUpperCase() + tier.tier.slice(1)}
+                                  </button>
+                                )}
+                              </td>
+                              <td className="px-4 py-2 text-muted-foreground">{tier.base_xp} XP</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Click on a tier badge to change it. Changes are saved automatically.
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Stripe Integration */}

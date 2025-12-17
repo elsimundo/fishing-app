@@ -1,5 +1,6 @@
 import { useWeeklySpeciesPoints } from '../../hooks/useGamification'
 import { Flame, Clock } from 'lucide-react'
+import { Callout, CalloutDescription, CalloutTitle } from '../ui/callout'
 
 interface WeeklySpeciesCardProps {
   limit?: number
@@ -49,21 +50,17 @@ export function WeeklySpeciesCard({ limit = 5, showCountdown = true, waterType, 
       
       {/* Bonus species highlight */}
       {bonusSpecies && (
-        <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-500/40">
-          <div className="flex items-center gap-2">
-            <Flame size={16} className="text-orange-400" />
-            <span className="text-xs font-semibold text-orange-300">
-              {bonusSpecies.bonus_reason || 'Bonus Species!'}
-            </span>
-          </div>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-sm font-medium text-white capitalize">
-              {bonusSpecies.species}
-            </span>
-            <span className="text-sm font-bold text-orange-400">
-              {bonusSpecies.points} pts
-            </span>
-          </div>
+        <div className="mb-3">
+          <Callout variant="warning" className="py-2">
+            <Flame />
+            <CalloutTitle>{bonusSpecies.bonus_reason || 'Bonus Species!'}</CalloutTitle>
+            <CalloutDescription>
+              <div className="mt-1 flex items-center justify-between">
+                <span className="text-sm font-medium capitalize">{bonusSpecies.species}</span>
+                <span className="text-sm font-bold">{bonusSpecies.points} pts</span>
+              </div>
+            </CalloutDescription>
+          </Callout>
         </div>
       )}
       

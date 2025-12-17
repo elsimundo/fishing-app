@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Palette, Check, RotateCcw, Loader2 } from 'lucide-react'
+import { Palette, Check, RotateCcw, Loader2, Info } from 'lucide-react'
 import { useThemeSettings, useUpdateThemeSetting, applyThemeSettings, type ThemeSetting } from '../../hooks/useThemeSettings'
 import { toast } from 'sonner'
+import { Callout, CalloutDescription } from '../ui/callout'
 
 // Default theme colors for reset
 const DEFAULT_COLORS: Record<string, string> = {
@@ -282,13 +283,15 @@ export function ThemeSettingsSection() {
       </div>
 
       {/* Info */}
-      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/40 p-3">
-        <p className="text-xs text-blue-700 dark:text-blue-300">
-          <strong>Note:</strong> Changes are applied immediately for preview. Click "Save" to persist changes. 
-          Some components using hardcoded colors (like <code className="rounded bg-blue-100 dark:bg-blue-900/50 px-1">bg-[#1BA9A0]</code>) 
+      <Callout variant="info">
+        <Info />
+        <CalloutDescription>
+          <strong>Note:</strong> Changes are applied immediately for preview. Click "Save" to persist changes.
+          Some components using hardcoded colors (like{' '}
+          <code className="rounded bg-blue-100 dark:bg-blue-900/50 px-1">bg-[#1BA9A0]</code>)
           will need a page refresh to see updates.
-        </p>
-      </div>
+        </CalloutDescription>
+      </Callout>
     </div>
   )
 }

@@ -1,31 +1,29 @@
-import { ArrowLeft, Camera, MapPin, Clock, Trophy, Shield, Zap, Fish, Sun, Moon, Cloud, Wind } from 'lucide-react'
+import { ArrowLeft, Camera, MapPin, Clock, Trophy, Shield, Zap, Fish, Sun, Moon, Cloud, Wind, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useXPSettings } from '../hooks/useAppSettings'
 
 /**
  * Challenge Rules Page
  * 
- * IMPORTANT: Update this page whenever challenge rules or XP values change!
- * Last updated: December 2024
- * 
- * Related files to check when updating:
- * - src/hooks/useCatchXP.ts (XP values, anti-cheat rules)
- * - src/hooks/useGamification.ts (challenge definitions)
+ * Now uses dynamic settings from the database via useXPSettings hook.
+ * Values are configured in Admin > Settings > XP & Gamification.
  */
-
-// These values should match useCatchXP.ts
-const XP_VALUES = {
-  BASE_CATCH: 10,
-  BASE_CATCH_NO_PHOTO: 3,
-  PHOTO_BONUS: 5,
-  WEIGHT_BONUS_PER_5LB: 5,
-  NEW_SPECIES_BONUS: 25,
-}
 
 const MIN_SESSION_DURATION_MINS = 15
 const PHOTO_GRACE_PERIOD_HOURS = 1
 
 export function ChallengeRulesPage() {
   const navigate = useNavigate()
+  const xp = useXPSettings()
+  // Species tiers are now configured in admin settings
+
+  if (xp.isLoading) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-background pb-24">
@@ -59,8 +57,8 @@ export function ChallengeRulesPage() {
         {/* Photo Requirement */}
         <section className="rounded-2xl bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-              <Camera size={20} className="text-blue-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
+              <Camera size={20} className="text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Photo Requirement</h3>
@@ -69,33 +67,33 @@ export function ChallengeRulesPage() {
           </div>
           
           <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3 rounded-lg bg-green-50 p-3">
+            <div className="flex items-start gap-3 rounded-lg bg-green-50 dark:bg-green-900/20 p-3">
               <div className="mt-0.5 h-2 w-2 rounded-full bg-green-500" />
               <div>
-                <p className="font-medium text-green-900">With photo</p>
-                <p className="text-green-700">
-                  {XP_VALUES.BASE_CATCH} base XP + {XP_VALUES.PHOTO_BONUS} photo bonus = <strong>{XP_VALUES.BASE_CATCH + XP_VALUES.PHOTO_BONUS} XP</strong>
+                <p className="font-medium text-green-900 dark:text-green-200">With photo</p>
+                <p className="text-green-700 dark:text-green-300">
+                  Earn <strong>{xp.tierStandard} XP</strong> (standard species) + bonuses
                 </p>
-                <p className="text-green-700">✓ All challenges count</p>
+                <p className="text-green-700 dark:text-green-300">✓ All challenges count</p>
               </div>
             </div>
             
-            <div className="flex items-start gap-3 rounded-lg bg-amber-50 p-3">
+            <div className="flex items-start gap-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 p-3">
               <div className="mt-0.5 h-2 w-2 rounded-full bg-amber-500" />
               <div>
-                <p className="font-medium text-amber-900">Without photo</p>
-                <p className="text-amber-700">
-                  Only <strong>{XP_VALUES.BASE_CATCH_NO_PHOTO} XP</strong> (reduced)
+                <p className="font-medium text-amber-900 dark:text-amber-200">Without photo</p>
+                <p className="text-amber-700 dark:text-amber-300">
+                  <strong>0 XP</strong> — photos required for XP
                 </p>
-                <p className="text-amber-700">✗ No challenge progress</p>
+                <p className="text-amber-700 dark:text-amber-300">✗ No challenge progress</p>
               </div>
             </div>
             
-            <div className="flex items-start gap-3 rounded-lg bg-blue-50 p-3">
+            <div className="flex items-start gap-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 p-3">
               <div className="mt-0.5 h-2 w-2 rounded-full bg-blue-500" />
               <div>
-                <p className="font-medium text-blue-900">{PHOTO_GRACE_PERIOD_HOURS}-hour grace period</p>
-                <p className="text-blue-700">
+                <p className="font-medium text-blue-900 dark:text-blue-200">{PHOTO_GRACE_PERIOD_HOURS}-hour grace period</p>
+                <p className="text-blue-700 dark:text-blue-300">
                   Add a photo within {PHOTO_GRACE_PERIOD_HOURS} hour of logging to get full XP + challenge progress
                 </p>
               </div>
@@ -106,8 +104,8 @@ export function ChallengeRulesPage() {
         {/* Location Challenges */}
         <section className="rounded-2xl bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-              <MapPin size={20} className="text-emerald-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+              <MapPin size={20} className="text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Location Challenges</h3>
@@ -141,9 +139,9 @@ export function ChallengeRulesPage() {
               </li>
             </ul>
             
-            <div className="mt-3 rounded-lg bg-muted p-3">
-              <p className="text-xs text-muted-foreground">
-                <strong>Why?</strong> This ensures you actually fished at each location rather than just checking in briefly.
+            <div className="mt-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 p-3">
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                <strong className="text-blue-900 dark:text-blue-200">Why?</strong> This ensures you actually fished at each location rather than just checking in briefly.
               </p>
             </div>
           </div>
@@ -152,8 +150,8 @@ export function ChallengeRulesPage() {
         {/* XP Breakdown */}
         <section className="rounded-2xl bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
-              <Zap size={20} className="text-yellow-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/50">
+              <Zap size={20} className="text-yellow-600 dark:text-yellow-400" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">XP Breakdown</h3>
@@ -163,28 +161,36 @@ export function ChallengeRulesPage() {
           
           <div className="space-y-2 text-sm">
             <div className="flex justify-between py-2 border-b border-border">
-              <span className="text-muted-foreground">Base catch (with photo)</span>
-              <span className="font-semibold text-foreground">+{XP_VALUES.BASE_CATCH} XP</span>
+              <span className="text-muted-foreground">Common species</span>
+              <span className="font-semibold text-foreground">+{xp.tierCommon} XP</span>
             </div>
             <div className="flex justify-between py-2 border-b border-border">
-              <span className="text-muted-foreground">Base catch (no photo)</span>
-              <span className="font-semibold text-amber-600">+{XP_VALUES.BASE_CATCH_NO_PHOTO} XP</span>
+              <span className="text-muted-foreground">Standard species</span>
+              <span className="font-semibold text-foreground">+{xp.tierStandard} XP</span>
             </div>
             <div className="flex justify-between py-2 border-b border-border">
-              <span className="text-muted-foreground">Photo bonus</span>
-              <span className="font-semibold text-foreground">+{XP_VALUES.PHOTO_BONUS} XP</span>
+              <span className="text-muted-foreground">Trophy species</span>
+              <span className="font-semibold text-foreground">+{xp.tierTrophy} XP</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-border">
+              <span className="text-muted-foreground">Rare species</span>
+              <span className="font-semibold text-foreground">+{xp.tierRare} XP</span>
             </div>
             <div className="flex justify-between py-2 border-b border-border">
               <span className="text-muted-foreground">New species (first time)</span>
-              <span className="font-semibold text-foreground">+{XP_VALUES.NEW_SPECIES_BONUS} XP</span>
+              <span className="font-semibold text-foreground">+{xp.firstSpeciesBonus} XP</span>
             </div>
             <div className="flex justify-between py-2 border-b border-border">
-              <span className="text-muted-foreground">Weight bonus</span>
-              <span className="font-semibold text-foreground">+{XP_VALUES.WEIGHT_BONUS_PER_5LB} XP per 5lb</span>
+              <span className="text-muted-foreground">Personal best</span>
+              <span className="font-semibold text-foreground">{xp.pbMultiplier}x multiplier</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-border">
+              <span className="text-muted-foreground">Catch & release</span>
+              <span className="font-semibold text-foreground">+{xp.releasedBonus} XP</span>
             </div>
             <div className="flex justify-between py-2">
-              <span className="text-muted-foreground">Weekly species bonus</span>
-              <span className="font-semibold text-purple-600">Varies</span>
+              <span className="text-muted-foreground">Full details logged</span>
+              <span className="font-semibold text-foreground">+{xp.fullDetailsBonus} XP</span>
             </div>
           </div>
         </section>
@@ -192,8 +198,8 @@ export function ChallengeRulesPage() {
         {/* Challenge Types */}
         <section className="rounded-2xl bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-              <Trophy size={20} className="text-purple-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/50">
+              <Trophy size={20} className="text-purple-600 dark:text-purple-400" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Challenge Types</h3>
@@ -263,8 +269,8 @@ export function ChallengeRulesPage() {
         {/* Anti-Cheat */}
         <section className="rounded-2xl bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-              <Shield size={20} className="text-red-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+              <Shield size={20} className="text-red-600 dark:text-red-400" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Fair Play</h3>
@@ -301,27 +307,27 @@ export function ChallengeRulesPage() {
         </section>
 
         {/* Tips */}
-        <section className="rounded-2xl bg-gradient-to-br from-emerald-50 to-cyan-50 p-5">
-          <h3 className="font-semibold text-foreground mb-3">💡 Tips for Maximum XP</h3>
-          <ul className="space-y-2 text-sm text-foreground">
+        <section className="rounded-2xl bg-gradient-to-br from-emerald-50 to-cyan-50 dark:from-emerald-900/30 dark:to-cyan-900/30 p-5">
+          <h3 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-3">💡 Tips for Maximum XP</h3>
+          <ul className="space-y-2 text-sm text-emerald-800 dark:text-emerald-100">
             <li className="flex items-start gap-2">
-              <span className="text-emerald-500">✓</span>
+              <span className="text-emerald-600 dark:text-emerald-400">✓</span>
               <span>Always take a photo of your catch</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-emerald-500">✓</span>
+              <span className="text-emerald-600 dark:text-emerald-400">✓</span>
               <span>Weigh your fish for bonus XP</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-emerald-500">✓</span>
-              <span>Try new species for the +{XP_VALUES.NEW_SPECIES_BONUS} XP bonus</span>
+              <span className="text-emerald-600 dark:text-emerald-400">✓</span>
+              <span>Try new species for the +{xp.firstSpeciesBonus} XP bonus</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-emerald-500">✓</span>
+              <span className="text-emerald-600 dark:text-emerald-400">✓</span>
               <span>Fish at different locations to unlock Explorer challenges</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-emerald-500">✓</span>
+              <span className="text-emerald-600 dark:text-emerald-400">✓</span>
               <span>Check the weekly bonus species for extra XP</span>
             </li>
           </ul>

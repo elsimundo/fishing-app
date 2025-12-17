@@ -22,6 +22,38 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
   const [showMenu, setShowMenu] = useState(false)
   const { formatWeight } = useWeightFormatter()
 
+  type StatTile = { label: string; value: string }
+
+  const catchStatTiles: StatTile[] =
+    post.type === 'catch' && post.catch
+      ? [
+          post.catch.weight_kg != null
+            ? {
+                label: 'Weight',
+                value: formatWeight(post.catch.weight_kg, { precision: 1 }),
+              }
+            : null,
+          post.catch.length_cm != null
+            ? {
+                label: 'Length',
+                value: `${post.catch.length_cm.toFixed(1)} cm`,
+              }
+            : null,
+          post.catch.bait
+            ? {
+                label: 'Bait',
+                value: post.catch.bait,
+              }
+            : null,
+          post.catch.rig
+            ? {
+                label: 'Rig',
+                value: post.catch.rig,
+              }
+            : null,
+        ].filter((t): t is StatTile => Boolean(t))
+      : []
+
   const isOwnPost = user?.id === post.user_id
 
   const handleDelete = () => {
@@ -41,9 +73,8 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
   const getCoverImage = () => {
     if (post.photo_url) return post.photo_url
     if (post.session?.cover_photo_url) return post.session.cover_photo_url
-    if (post.session?.catches?.[0]?.photo_url) {
-      return post.session.catches[0].photo_url
-    }
+    const sessionFirstCatchPhotoUrl = (post.session as any)?.catches?.[0]?.photo_url as string | undefined
+    if (sessionFirstCatchPhotoUrl) return sessionFirstCatchPhotoUrl
     if (post.catch?.photo_url) return post.catch.photo_url
     return null
   }
@@ -146,30 +177,16 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
         <p className="text-[15px] leading-relaxed text-foreground">{post.caption}</p>
       )}
 
-      {post.type === 'catch' && post.catch && (
+      {post.type === 'catch' && post.catch && catchStatTiles.length > 0 ? (
         <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4 sm:text-xs">
-          <div className="rounded-xl bg-background px-2 py-2">
-            <p className="text-[10px] text-muted-foreground">Weight</p>
-            <p className="text-sm font-semibold text-foreground">
-              {post.catch.weight_kg != null ? formatWeight(post.catch.weight_kg, { precision: 1 }) : '—'}
-            </p>
-          </div>
-          <div className="rounded-xl bg-background px-2 py-2">
-            <p className="text-[10px] text-muted-foreground">Length</p>
-            <p className="text-sm font-semibold text-foreground">
-              {post.catch.length_cm != null ? `${post.catch.length_cm.toFixed(1)} cm` : '—'}
-            </p>
-          </div>
-          <div className="rounded-xl bg-background px-2 py-2">
-            <p className="text-[10px] text-muted-foreground">Bait</p>
-            <p className="text-sm font-semibold text-foreground truncate">{post.catch.bait || '—'}</p>
-          </div>
-          <div className="rounded-xl bg-background px-2 py-2">
-            <p className="text-[10px] text-muted-foreground">Rig</p>
-            <p className="text-sm font-semibold text-foreground truncate">{post.catch.rig || '—'}</p>
-          </div>
+          {catchStatTiles.map((tile) => (
+            <div key={tile.label} className="rounded-xl bg-background px-2 py-2">
+              <p className="text-[10px] text-muted-foreground">{tile.label}</p>
+              <p className="text-sm font-semibold text-foreground truncate">{tile.value}</p>
+            </div>
+          ))}
         </div>
-      )}
+      ) : null}
 
       {post.type === 'session' && post.session && (
         <div
@@ -182,7 +199,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
                 {post.session.title || 'Fishing Session'}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {post.session.catches?.length || 0} catches ·{' '}
+                {((post.session as any)?.catches?.length as number | undefined) || 0} catches ·{' '}
                 {post.session.location_name || 'Unknown location'}
               </p>
             </div>
