@@ -21,7 +21,28 @@ import { formatDistanceToNow } from 'date-fns'
 
 type BusinessType = 'tackle_shop' | 'charter' | 'club' | 'guide'
 type BusinessStatus = 'pending' | 'approved' | 'rejected' | 'suspended'
-type BusinessFilter = 'all' | 'pending' | 'approved' | 'premium' | 'featured'
+type BusinessFilter = 'all' | 'pending' | 'approved' | 'premium' | 'featured' | 'pending_claims'
+
+interface BusinessClaim {
+  id: string
+  business_id: string
+  user_id: string
+  relationship: string
+  proof_notes: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+  business?: {
+    id: string
+    name: string
+    type: string
+    address: string | null
+  }
+  user?: {
+    id: string
+    username: string | null
+    email: string | null
+  }
+}
 
 interface Business {
   id: string
@@ -43,6 +64,7 @@ interface Business {
   rejection_reason: string | null
   created_at: string
   source: string
+  claimed_by: string | null
 }
 
 export default function BusinessesPage() {
@@ -56,6 +78,9 @@ export default function BusinessesPage() {
   const { data: businesses, isLoading } = useQuery({
     queryKey: ['admin-businesses', filter, searchTerm],
     queryFn: async () => {
+      // Skip if on claims tab
+      if (filter === 'pending_claims') return []
+
       let query = supabase
         .from('businesses')
         .select('*')
@@ -76,14 +101,44 @@ export default function BusinessesPage() {
     },
   })
 
+  // Fetch pending business claims
+  const { data: pendingClaims, isLoading: claimsLoading } = useQuery({
+    queryKey: ['admin-business-claims'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('business_claims')
+        .select(`
+          *,
+          business:businesses(id, name, type, address),
+          user:profiles(id, username, email)
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return (data ?? []) as BusinessClaim[]
+    },
+  })
+
   // Approve business
   const approve = useMutation({
-    mutationFn: async (businessId: string) => {
+    mutationFn: async ({ businessId, businessName, ownerId }: { businessId: string; businessName: string; ownerId: string | null }) => {
       const { error } = await supabase.rpc('approve_business', {
         p_business_id: businessId,
         p_admin_id: user?.id,
       })
       if (error) throw error
+
+      // Send notification to owner if exists
+      if (ownerId) {
+        await supabase.from('notifications').insert({
+          user_id: ownerId,
+          type: 'business_approved',
+          title: 'Business Approved!',
+          message: `Your business "${businessName}" has been approved and is now visible to anglers.`,
+          action_url: `/explore`,
+        })
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-businesses'] })
@@ -97,13 +152,26 @@ export default function BusinessesPage() {
 
   // Reject business
   const reject = useMutation({
-    mutationFn: async ({ businessId, reason }: { businessId: string; reason: string }) => {
+    mutationFn: async ({ businessId, businessName, ownerId, reason }: { businessId: string; businessName: string; ownerId: string | null; reason: string }) => {
       const { error } = await supabase.rpc('reject_business', {
         p_business_id: businessId,
         p_admin_id: user?.id,
         p_reason: reason,
       })
       if (error) throw error
+
+      // Send notification to owner if exists
+      if (ownerId) {
+        await supabase.from('notifications').insert({
+          user_id: ownerId,
+          type: 'business_rejected',
+          title: 'Business Not Approved',
+          message: reason 
+            ? `Your business "${businessName}" was not approved: ${reason}`
+            : `Your business "${businessName}" was not approved. Please contact support for more information.`,
+          action_url: null,
+        })
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-businesses'] })
@@ -179,8 +247,70 @@ export default function BusinessesPage() {
     },
   })
 
+  // Approve business claim
+  const approveClaim = useMutation({
+    mutationFn: async ({ claimId, userId, businessName }: { claimId: string; userId: string; businessName: string }) => {
+      const { error } = await supabase.rpc('approve_business_claim', {
+        p_claim_id: claimId,
+        p_reviewer_id: user?.id,
+        p_action: 'approve',
+      })
+      if (error) throw error
+
+      // Send notification to user
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'business_claim_approved',
+        title: 'Claim Approved!',
+        message: `Your claim for "${businessName}" has been approved. You can now manage your business listing.`,
+        action_url: `/explore`,
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-claims'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-businesses'] })
+      toast.success('Claim approved')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+
+  // Reject business claim
+  const rejectClaim = useMutation({
+    mutationFn: async ({ claimId, userId, businessName, reason }: { claimId: string; userId: string; businessName: string; reason: string | null }) => {
+      const { error } = await supabase.rpc('approve_business_claim', {
+        p_claim_id: claimId,
+        p_reviewer_id: user?.id,
+        p_action: 'reject',
+      })
+      if (error) throw error
+
+      // Send notification to user
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'business_claim_rejected',
+        title: 'Claim Not Approved',
+        message: reason
+          ? `Your claim for "${businessName}" was not approved: ${reason}`
+          : `Your claim for "${businessName}" was not approved. Please contact support for more information.`,
+        action_url: null,
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-claims'] })
+      toast.success('Claim rejected')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+
+  const pendingClaimsCount = pendingClaims?.length ?? 0
+
   const filters: { value: BusinessFilter; label: string }[] = [
     { value: 'pending', label: 'Pending' },
+    { value: 'pending_claims', label: `Claims${pendingClaimsCount > 0 ? ` (${pendingClaimsCount})` : ''}` },
     { value: 'approved', label: 'Approved' },
     { value: 'premium', label: 'Premium' },
     { value: 'featured', label: 'Featured' },
@@ -237,37 +367,81 @@ export default function BusinessesPage() {
           </div>
         </div>
 
-        {/* Businesses Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
-            ))}
-          </div>
-        ) : businesses && businesses.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {businesses.map((business) => (
-              <BusinessCard
-                key={business.id}
-                business={business}
-                onApprove={() => approve.mutate(business.id)}
-                onReject={(reason) => reject.mutate({ businessId: business.id, reason })}
-                onSetPremium={(months, price) =>
-                  setPremium.mutate({ businessId: business.id, months, price })
-                }
-                onSetFeatured={(position, days) =>
-                  setFeatured.mutate({ businessId: business.id, position, days })
-                }
-                isApproving={approve.isPending}
-                isRejecting={reject.isPending}
-              />
-            ))}
-          </div>
+        {/* Pending Claims View */}
+        {filter === 'pending_claims' ? (
+          claimsLoading ? (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-32 animate-pulse rounded-xl bg-muted" />
+              ))}
+            </div>
+          ) : pendingClaims && pendingClaims.length > 0 ? (
+            <div className="space-y-4">
+              {pendingClaims.map((claim) => (
+                <ClaimCard
+                  key={claim.id}
+                  claim={claim}
+                  onApprove={() => {
+                    const business = Array.isArray(claim.business) ? claim.business[0] : claim.business
+                    approveClaim.mutate({
+                      claimId: claim.id,
+                      userId: claim.user_id,
+                      businessName: business?.name || 'Unknown Business',
+                    })
+                  }}
+                  onReject={(reason) => {
+                    const business = Array.isArray(claim.business) ? claim.business[0] : claim.business
+                    rejectClaim.mutate({
+                      claimId: claim.id,
+                      userId: claim.user_id,
+                      businessName: business?.name || 'Unknown Business',
+                      reason,
+                    })
+                  }}
+                  isApproving={approveClaim.isPending}
+                  isRejecting={rejectClaim.isPending}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl bg-muted p-6 text-muted-foreground">
+              <Check size={20} className="text-green-500" />
+              <span>No pending claims to review</span>
+            </div>
+          )
         ) : (
-          <div className="flex items-center gap-2 rounded-xl bg-muted p-6 text-muted-foreground">
-            <AlertCircle size={20} />
-            <span>No businesses found for this filter</span>
-          </div>
+          /* Businesses Grid */
+          isLoading ? (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
+              ))}
+            </div>
+          ) : businesses && businesses.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {businesses.map((business) => (
+                <BusinessCard
+                  key={business.id}
+                  business={business}
+                  onApprove={() => approve.mutate({ businessId: business.id, businessName: business.name, ownerId: business.claimed_by })}
+                  onReject={(reason) => reject.mutate({ businessId: business.id, businessName: business.name, ownerId: business.claimed_by, reason })}
+                  onSetPremium={(months, price) =>
+                    setPremium.mutate({ businessId: business.id, months, price })
+                  }
+                  onSetFeatured={(position, days) =>
+                    setFeatured.mutate({ businessId: business.id, position, days })
+                  }
+                  isApproving={approve.isPending}
+                  isRejecting={reject.isPending}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl bg-muted p-6 text-muted-foreground">
+              <AlertCircle size={20} />
+              <span>No businesses found for this filter</span>
+            </div>
+          )
         )}
 
         {/* Add Business Modal */}
@@ -538,10 +712,10 @@ function BusinessCard({
   }
 
   const statusColors: Record<BusinessStatus, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-    suspended: 'bg-muted text-muted-foreground',
+    pending: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+    approved: 'bg-green-500/20 text-green-400 border border-green-500/30',
+    rejected: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    suspended: 'bg-muted text-muted-foreground border border-border',
   }
 
   return (
@@ -552,13 +726,13 @@ function BusinessCard({
           <div className="mb-1 flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-bold text-foreground">{business.name}</h3>
             {business.is_premium && (
-              <span className="flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-800">
+              <span className="flex items-center gap-1 rounded-full bg-purple-500/20 border border-purple-500/30 px-2 py-0.5 text-xs font-semibold text-purple-400">
                 <Crown size={12} />
                 Premium
               </span>
             )}
             {business.is_featured && (
-              <span className="flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800">
+              <span className="flex items-center gap-1 rounded-full bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-400">
                 <Star size={12} />#{business.featured_position}
               </span>
             )}
@@ -606,9 +780,9 @@ function BusinessCard({
 
       {/* Rejection Reason */}
       {business.status === 'rejected' && business.rejection_reason && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3">
-          <p className="text-xs font-semibold text-red-800">Rejection Reason:</p>
-          <p className="text-sm text-red-700">{business.rejection_reason}</p>
+        <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+          <p className="text-xs font-semibold text-red-400">Rejection Reason:</p>
+          <p className="text-sm text-red-300">{business.rejection_reason}</p>
         </div>
       )}
 
@@ -686,6 +860,76 @@ function BusinessCard({
           <MapPin size={16} />
           <span>Map</span>
         </a>
+      </div>
+    </div>
+  )
+}
+
+function ClaimCard({
+  claim,
+  onApprove,
+  onReject,
+  isApproving,
+  isRejecting,
+}: {
+  claim: BusinessClaim
+  onApprove: () => void
+  onReject: (reason: string | null) => void
+  isApproving: boolean
+  isRejecting: boolean
+}) {
+  const business = Array.isArray(claim.business) ? claim.business[0] : claim.business
+  const user = Array.isArray(claim.user) ? claim.user[0] : claim.user
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <h3 className="font-semibold text-foreground">{business?.name || 'Unknown Business'}</h3>
+          <p className="text-sm text-muted-foreground">{business?.type || 'business'} • {business?.address || 'No address'}</p>
+          
+          <div className="mt-3 space-y-1 text-sm">
+            <p className="text-muted-foreground">
+              <strong className="text-foreground">Claimant:</strong>{' '}
+              {user?.username || user?.email || 'Unknown User'}
+            </p>
+            <p className="text-muted-foreground">
+              <strong className="text-foreground">Relationship:</strong>{' '}
+              {claim.relationship}
+            </p>
+            {claim.proof_notes && (
+              <p className="text-muted-foreground">
+                <strong className="text-foreground">Notes:</strong>{' '}
+                {claim.proof_notes}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Submitted {formatDistanceToNow(new Date(claim.created_at), { addSuffix: true })}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={onApprove}
+            disabled={isApproving || isRejecting}
+            className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+          >
+            <Check size={14} />
+            {isApproving ? 'Approving...' : 'Approve'}
+          </button>
+          <button
+            onClick={() => {
+              const reason = prompt('Reason for rejection (optional):')
+              onReject(reason)
+            }}
+            disabled={isApproving || isRejecting}
+            className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            <X size={14} />
+            {isRejecting ? 'Rejecting...' : 'Reject'}
+          </button>
+        </div>
       </div>
     </div>
   )

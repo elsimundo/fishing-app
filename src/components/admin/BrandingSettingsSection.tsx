@@ -16,12 +16,18 @@ const BRANDING_KEYS = {
   SPLASH_BG_COLOR1: 'branding_splash_bg_color1',
   SPLASH_BG_COLOR2: 'branding_splash_bg_color2',
   SPLASH_GRADIENT_DIRECTION: 'branding_splash_gradient_direction',
+  // Theme colors
+  BORDER_COLOR: 'theme_border_color',
 }
 
 const DEFAULT_SPLASH_COLORS = {
   color1: '#0f172a',
   color2: '#1e3a5f',
   direction: 'to-b', // top to bottom
+}
+
+const DEFAULT_THEME_COLORS = {
+  border: '#334155',
 }
 
 const GRADIENT_DIRECTIONS = [
@@ -381,6 +387,55 @@ export function BrandingSettingsSection() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Theme Colors */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <h3 className="mb-3 text-sm font-semibold text-foreground">Theme Colors</h3>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Customize CSS variables that affect the app's appearance
+        </p>
+        
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Border Color */}
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-3">
+            <input
+              type="color"
+              value={getSettingValue(BRANDING_KEYS.BORDER_COLOR, DEFAULT_THEME_COLORS.border)}
+              onChange={(e) => handleLocalChange(BRANDING_KEYS.BORDER_COLOR, e.target.value)}
+              className="h-10 w-10 cursor-pointer rounded-lg border-2 border-border bg-transparent"
+            />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">Border Color</p>
+              <p className="font-mono text-xs text-muted-foreground">
+                {getSettingValue(BRANDING_KEYS.BORDER_COLOR, DEFAULT_THEME_COLORS.border)}
+              </p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
+                Used for card borders, dividers, inputs
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSave(BRANDING_KEYS.BORDER_COLOR, getSettingValue(BRANDING_KEYS.BORDER_COLOR, DEFAULT_THEME_COLORS.border))}
+              disabled={isPending}
+              className="rounded-lg p-2 text-primary hover:bg-primary/10"
+            >
+              <Check size={14} />
+            </button>
+          </div>
+        </div>
+
+        {/* Reset to defaults */}
+        <button
+          type="button"
+          onClick={() => {
+            handleLocalChange(BRANDING_KEYS.BORDER_COLOR, DEFAULT_THEME_COLORS.border)
+            handleSave(BRANDING_KEYS.BORDER_COLOR, DEFAULT_THEME_COLORS.border)
+          }}
+          className="mt-4 text-xs text-muted-foreground hover:text-foreground"
+        >
+          Reset to defaults
+        </button>
       </div>
 
       {/* Info */}

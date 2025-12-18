@@ -109,9 +109,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Enable realtime for new tables
-ALTER PUBLICATION supabase_realtime ADD TABLE message_reactions;
-ALTER PUBLICATION supabase_realtime ADD TABLE typing_indicators;
+-- Enable realtime for new tables (only if not already added)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'message_reactions'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE message_reactions;
+  END IF;
+  
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'typing_indicators'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE typing_indicators;
+  END IF;
+END $$;
 
 COMMENT ON TABLE message_reactions IS 'Emoji reactions on messages';
 COMMENT ON TABLE typing_indicators IS 'Ephemeral typing status for conversations';

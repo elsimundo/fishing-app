@@ -12,6 +12,7 @@ import {
   X,
   Handshake,
   Trophy,
+  FileText,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -50,6 +51,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { to: '/admin/challenges', icon: Trophy, label: 'Challenges' },
     { to: '/admin/partners', icon: Handshake, label: 'Partners' },
     { to: '/admin/settings', icon: Settings, label: 'Settings' },
+    { to: '/admin/docs', icon: FileText, label: 'Documentation' },
   ]
 
   return (

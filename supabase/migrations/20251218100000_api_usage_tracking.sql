@@ -11,20 +11,22 @@ CREATE TABLE IF NOT EXISTS api_usage (
 );
 
 -- Index for efficient querying
-CREATE INDEX idx_api_usage_api_name ON api_usage(api_name);
-CREATE INDEX idx_api_usage_created_at ON api_usage(created_at DESC);
-CREATE INDEX idx_api_usage_api_name_date ON api_usage(api_name, created_at);
+CREATE INDEX IF NOT EXISTS idx_api_usage_api_name ON api_usage(api_name);
+CREATE INDEX IF NOT EXISTS idx_api_usage_created_at ON api_usage(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_api_usage_api_name_date ON api_usage(api_name, created_at);
 
 -- RLS: Only admins can read, system can insert
 ALTER TABLE api_usage ENABLE ROW LEVEL SECURITY;
 
 -- Allow authenticated users to insert (tracking happens client-side)
+DROP POLICY IF EXISTS "Anyone can log API usage" ON api_usage;
 CREATE POLICY "Anyone can log API usage"
   ON api_usage FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
 -- Only admins can read
+DROP POLICY IF EXISTS "Admins can read API usage" ON api_usage;
 CREATE POLICY "Admins can read API usage"
   ON api_usage FOR SELECT
   TO authenticated

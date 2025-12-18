@@ -8,7 +8,7 @@ import type { Lake } from '../../types'
 import { useLakeTeam, useAddLakeTeamMember, useRemoveLakeTeamMember, useUpdateLakeTeamRole } from '../../hooks/useLakeTeam'
 import { useAllLakeReports, useUpdateLakeReportStatus, REPORT_REASON_LABELS, type LakeReport } from '../../hooks/useLakeReports'
 
-type LakeFilter = 'all' | 'unverified' | 'verified' | 'premium' | 'claimed' | 'reports'
+type LakeFilter = 'all' | 'unverified' | 'verified' | 'premium' | 'claimed' | 'pending_claims' | 'reports'
 
 type AdminLakeOwner = {
   id: string
@@ -82,6 +82,7 @@ export default function LakesPage() {
       if (filter === 'verified') query = query.eq('is_verified', true)
       if (filter === 'premium') query = query.eq('is_premium', true)
       if (filter === 'claimed') query = query.not('claimed_by', 'is', null)
+      // Note: pending_claims filter is handled after fetching by filtering lakes with claims
 
       if (searchTerm) {
         query = query.ilike('name', `%${searchTerm}%`)
@@ -184,6 +185,11 @@ export default function LakesPage() {
         owner: lake.claimed_by ? ownersById[lake.claimed_by] ?? null : null,
         claims: claimsByLakeId[lake.id] ?? [],
       }))
+
+      // Filter for pending_claims tab - only show lakes that have pending claims
+      if (filter === 'pending_claims') {
+        return enriched.filter(lake => lake.claims && lake.claims.length > 0)
+      }
 
       return enriched
     },
@@ -317,10 +323,12 @@ export default function LakesPage() {
       claimId,
       lakeId,
       userId,
+      lakeName,
     }: {
       claimId: string
       lakeId: string
       userId: string
+      lakeName: string
     }) => {
       const now = new Date().toISOString()
 
@@ -335,6 +343,16 @@ export default function LakesPage() {
         .update({ status: 'approved', reviewed_at: now })
         .eq('id', claimId)
       if (claimError) throw claimError
+
+      // Send notification to user
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'lake_claim_approved',
+        title: 'Claim Approved!',
+        message: `Your claim for ${lakeName} has been approved. You can now manage your venue.`,
+        action_url: `/lakes/${lakeId}/dashboard`,
+        related_lake_id: lakeId,
+      })
     },
     onMutate: ({ claimId }) => {
       setClaimUpdatingId(claimId)
@@ -352,13 +370,34 @@ export default function LakesPage() {
   })
 
   const rejectClaim = useMutation({
-    mutationFn: async ({ claimId, reason }: { claimId: string; reason: string | null }) => {
+    mutationFn: async ({ 
+      claimId, 
+      reason, 
+      userId, 
+      lakeName 
+    }: { 
+      claimId: string
+      reason: string | null
+      userId: string
+      lakeName: string
+    }) => {
       const now = new Date().toISOString()
       const { error } = await supabase
         .from('lake_claims')
         .update({ status: 'rejected', decision_reason: reason, reviewed_at: now })
         .eq('id', claimId)
       if (error) throw error
+
+      // Send notification to user
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'lake_claim_rejected',
+        title: 'Claim Not Approved',
+        message: reason 
+          ? `Your claim for ${lakeName} was not approved: ${reason}`
+          : `Your claim for ${lakeName} was not approved. Please contact support for more information.`,
+        action_url: null,
+      })
     },
     onMutate: ({ claimId }) => {
       setClaimUpdatingId(claimId)
@@ -461,8 +500,12 @@ export default function LakesPage() {
     },
   })
 
+  // Count pending claims for badge
+  const pendingClaimsCount = lakes?.filter(l => l.claims && l.claims.length > 0).length ?? 0
+  
   const filters: { value: LakeFilter; label: string }[] = [
     { value: 'unverified', label: 'Unverified' },
+    { value: 'pending_claims', label: `Pending Claims${pendingClaimsCount > 0 ? ` (${pendingClaimsCount})` : ''}` },
     { value: 'verified', label: 'Verified' },
     { value: 'premium', label: 'Premium' },
     { value: 'claimed', label: 'Claimed' },
@@ -543,10 +586,10 @@ export default function LakesPage() {
                 }
                 claimUpdatingId={claimUpdatingId}
                 onApproveClaim={(claim) =>
-                  approveClaim.mutate({ claimId: claim.id, lakeId: lake.id, userId: claim.user_id })
+                  approveClaim.mutate({ claimId: claim.id, lakeId: lake.id, userId: claim.user_id, lakeName: lake.name })
                 }
                 onRejectClaim={(claim, reason) =>
-                  rejectClaim.mutate({ claimId: claim.id, reason: reason || null })
+                  rejectClaim.mutate({ claimId: claim.id, reason: reason || null, userId: claim.user_id, lakeName: lake.name })
                 }
                 onManageTeam={() => setTeamModalLakeId(lake.id)}
                 onDelete={() => {
@@ -1219,7 +1262,7 @@ function LakeCard({
         <button
           type="button"
           onClick={onManageTeam}
-          className="flex items-center justify-center gap-1 rounded-lg bg-indigo-100 px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-200"
+          className="flex items-center justify-center gap-1 rounded-lg bg-indigo-500/20 px-3 py-2 text-sm font-semibold text-indigo-400 hover:bg-indigo-500/30 border border-indigo-500/30"
         >
           <Users size={16} />
           <span>Team</span>
@@ -1230,7 +1273,7 @@ function LakeCard({
           type="button"
           onClick={onDelete}
           disabled={isDeleting}
-          className="flex items-center justify-center gap-1 rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200 disabled:opacity-60"
+          className="flex items-center justify-center gap-1 rounded-lg bg-red-500/20 px-3 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/30 border border-red-500/30 disabled:opacity-60"
         >
           <Trash2 size={16} />
           <span>{isDeleting ? '...' : 'Delete'}</span>

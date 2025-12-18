@@ -95,12 +95,17 @@ export function useFeed(userId: string, pageLimit = 20, pageOffset = 0) {
         page_offset: pageOffset,
       })
 
-      if (error) throw new Error(error.message)
+      if (error) {
+        console.error('[Feed] Error fetching feed:', error)
+        throw new Error(error.message)
+      }
       const basePosts = (data ?? []) as Post[]
 
       return enrichPosts(basePosts)
     },
     enabled: Boolean(userId),
+    retry: 2,
+    retryDelay: 1000,
   })
 }
 
@@ -117,12 +122,17 @@ export function useGlobalFeed(userId: string, pageLimit = 20, pageOffset = 0) {
         .order('created_at', { ascending: false })
         .range(pageOffset, pageOffset + pageLimit - 1)
 
-      if (error) throw new Error(error.message)
+      if (error) {
+        console.error('[Feed] Error fetching global feed:', error)
+        throw new Error(error.message)
+      }
       const basePosts = (data ?? []) as unknown as Post[]
 
       return enrichPosts(basePosts)
     },
     enabled: Boolean(userId),
+    retry: 2,
+    retryDelay: 1000,
   })
 }
 

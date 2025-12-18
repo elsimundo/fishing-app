@@ -1,4 +1,5 @@
 import type { Lake } from '../types'
+import { trackApiCall } from '../lib/apiTracker'
 
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter'
 
@@ -158,6 +159,9 @@ export async function fetchLakesFromOSM(bounds: Bounds): Promise<Partial<Lake>[]
       console.error('[OSM Lakes] API error:', response.status, response.statusText)
       return []
     }
+
+    // Track API call
+    trackApiCall({ apiName: 'overpass_osm', endpoint: 'lakes' })
 
     const data = await response.json()
     const lakes = parseOverpassResponse(data)

@@ -58,6 +58,9 @@ export const API_COST_ESTIMATES: Record<string, { perCall: number; unit: string;
   worldtides: { perCall: 0.001, unit: 'USD', notes: 'Varies by plan' },
   noaa_tides: { perCall: 0, unit: 'USD', notes: 'Free US government API' },
   environment_agency_tides: { perCall: 0, unit: 'USD', notes: 'Free UK government API' },
+  overpass_osm: { perCall: 0, unit: 'USD', notes: 'Free with fair use policy' },
+  nominatim_geocoding: { perCall: 0, unit: 'USD', notes: 'Free with 1 req/sec limit' },
+  fish_identifier_ai: { perCall: 0.003, unit: 'USD', notes: 'OpenAI Vision API ~$0.003/image' },
   openstreetmap: { perCall: 0, unit: 'USD', notes: 'Free with attribution' },
   other: { perCall: 0, unit: 'USD', notes: 'Unknown' },
 }

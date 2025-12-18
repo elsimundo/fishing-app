@@ -9,6 +9,9 @@ export type ApiName =
   | 'worldtides'
   | 'noaa_tides'
   | 'environment_agency_tides'
+  | 'overpass_osm'
+  | 'nominatim_geocoding'
+  | 'fish_identifier_ai'
   | 'openstreetmap'
   | 'other'
 

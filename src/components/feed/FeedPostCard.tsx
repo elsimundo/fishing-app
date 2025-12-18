@@ -139,11 +139,11 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
           user={post.user}
           createdAt={post.created_at}
           onUserClick={() => {
-          if (post.user.username) {
-            navigate(`/${post.user.username}`)
-          } else {
-            navigate(`/profile/${post.user.id}`)
-          }
+            if (post.user.username) {
+              navigate(`/${post.user.username}`)
+            } else {
+              navigate(`/profile/${post.user.id}`)
+            }
           }}
         />
       </div>

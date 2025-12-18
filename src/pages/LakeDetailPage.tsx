@@ -11,6 +11,7 @@ import { ClaimLakeModal } from '../components/lakes/ClaimLakeModal'
 import { toast } from 'react-hot-toast'
 import { useSavedLakes } from '../hooks/useSavedLakes'
 import { useLakeTeam, useLakeRole } from '../hooks/useLakeTeam'
+import { useHasPendingClaim } from '../hooks/useLakeClaims'
 import { useSubmitLakeReport, REPORT_REASON_LABELS, REPORT_REASON_CATEGORIES, type LakeReportReason } from '../hooks/useLakeReports'
 import { useLakeAnnouncements } from '../hooks/useLakeAnnouncements'
 import { useLakeStats } from '../hooks/useLakeStats'
@@ -32,6 +33,9 @@ export default function LakeDetailPage() {
   // Lake team/role (for showing owner/team section and dashboard access)
   const { data: userRole } = useLakeRole(lake?.id)
   const { data: teamData } = useLakeTeam(lake?.id)
+  
+  // Check if user has a pending claim for this lake
+  const { data: hasPendingClaim } = useHasPendingClaim(lake?.id)
   
   // Lake announcements
   const { data: announcements } = useLakeAnnouncements(lake?.id)
@@ -319,19 +323,28 @@ export default function LakeDetailPage() {
 
               {/* Claim CTA (unclaimed lakes) */}
               {!lake.claimed_by && user && (
-                <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-900/30 p-3">
-                  <p className="text-sm font-medium text-amber-400">Own or manage this venue?</p>
-                  <p className="mt-1 text-xs text-amber-300">
-                    Claim it to add your contact details, pricing, and more.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowClaimModal(true)}
-                    className="mt-2 rounded-lg bg-navy-800 px-4 py-2 text-xs font-semibold text-white hover:bg-navy-900"
-                  >
-                    Claim this venue
-                  </button>
-                </div>
+                hasPendingClaim ? (
+                  <div className="mt-4 rounded-lg border border-blue-500/40 bg-blue-900/30 p-3">
+                    <p className="text-sm font-medium text-blue-400">🕐 Claim Pending Review</p>
+                    <p className="mt-1 text-xs text-blue-300">
+                      Your claim for this venue is being reviewed. We'll notify you within 24-48 hours.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-900/30 p-3">
+                    <p className="text-sm font-medium text-amber-400">Own or manage this venue?</p>
+                    <p className="mt-1 text-xs text-amber-300">
+                      Claim it to add your contact details, pricing, and more.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowClaimModal(true)}
+                      className="mt-2 rounded-lg bg-navy-800 px-4 py-2 text-xs font-semibold text-white hover:bg-navy-900"
+                    >
+                      Claim this venue
+                    </button>
+                  </div>
+                )
               )}
             </div>
 

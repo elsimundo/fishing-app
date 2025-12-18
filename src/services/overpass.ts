@@ -1,4 +1,5 @@
 import type { TackleShop, TackleShopsResponse } from '../types/shops'
+import { trackApiCall } from '../lib/apiTracker'
 
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter'
 
@@ -182,9 +183,11 @@ export async function getTackleShopsInBounds(bounds: {
       throw new Error(`Overpass API error: ${response.status}`)
     }
 
+    // Track API call
+    trackApiCall({ apiName: 'overpass_osm', endpoint: 'tackle_shops' })
+
     const data = await response.json()
     const shops = parseOverpassResponse(data, 'shops')
-
 
     return {
       shops,
@@ -249,9 +252,11 @@ export async function getClubsInBounds(bounds: {
       throw new Error(`Overpass API error: ${response.status}`)
     }
 
+    // Track API call
+    trackApiCall({ apiName: 'overpass_osm', endpoint: 'clubs' })
+
     const data = await response.json()
     const shops = parseOverpassResponse(data, 'clubs')
-
 
     return {
       shops,
@@ -315,9 +320,11 @@ export async function getChartersInBounds(bounds: {
       throw new Error(`Overpass API error: ${response.status}`)
     }
 
+    // Track API call
+    trackApiCall({ apiName: 'overpass_osm', endpoint: 'charters' })
+
     const data = await response.json()
     const shops = parseOverpassResponse(data, 'charters')
-
 
     return {
       shops,

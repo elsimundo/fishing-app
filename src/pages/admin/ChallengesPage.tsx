@@ -173,15 +173,15 @@ export default function ChallengesPage() {
           
           {/* Stats */}
           <div className="flex gap-4 text-sm">
-            <div className="rounded-lg bg-blue-50 px-3 py-2">
-              <span className="font-semibold text-blue-700">{challenges?.length || 0}</span>
-              <span className="ml-1 text-blue-600">Total</span>
+            <div className="rounded-lg bg-blue-500/20 border border-blue-500/30 px-3 py-2">
+              <span className="font-semibold text-blue-400">{challenges?.length || 0}</span>
+              <span className="ml-1 text-blue-400">Total</span>
             </div>
-            <div className="rounded-lg bg-green-50 px-3 py-2">
-              <span className="font-semibold text-green-700">
+            <div className="rounded-lg bg-green-500/20 border border-green-500/30 px-3 py-2">
+              <span className="font-semibold text-green-400">
                 {challenges?.filter(c => c.is_active).length || 0}
               </span>
-              <span className="ml-1 text-green-600">Active</span>
+              <span className="ml-1 text-green-400">Active</span>
             </div>
           </div>
         </div>
@@ -347,7 +347,7 @@ function ChallengeRow({
               <h3 className="font-semibold text-foreground">{challenge.title}</h3>
               <p className="text-xs text-muted-foreground line-clamp-1">{challenge.description}</p>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px]">
-                <span className="rounded bg-purple-100 px-1.5 py-0.5 font-medium text-purple-700">
+                <span className="rounded bg-purple-500/20 border border-purple-500/30 px-1.5 py-0.5 font-medium text-purple-400">
                   {challenge.xp_reward} XP
                 </span>
                 <span className="rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
@@ -357,7 +357,7 @@ function ChallengeRow({
                   {challenge.category}
                 </span>
                 {challenge.water_type && (
-                  <span className="rounded bg-blue-100 px-1.5 py-0.5 text-blue-700">
+                  <span className="rounded bg-blue-500/20 border border-blue-500/30 px-1.5 py-0.5 text-blue-400">
                     {challenge.water_type}
                   </span>
                 )}
@@ -379,7 +379,7 @@ function ChallengeRow({
               <button
                 onClick={onSaveEdit}
                 disabled={isUpdating}
-                className="rounded-lg p-2 text-green-600 hover:bg-green-100"
+                className="rounded-lg p-2 text-green-400 hover:bg-green-500/20"
                 title="Save"
               >
                 <Save size={16} />
@@ -406,7 +406,7 @@ function ChallengeRow({
                 disabled={isUpdating}
                 className={`rounded-lg p-2 ${
                   challenge.is_active
-                    ? 'text-green-600 hover:bg-green-100'
+                    ? 'text-green-400 hover:bg-green-500/20'
                     : 'text-muted-foreground hover:bg-muted'
                 }`}
                 title={challenge.is_active ? 'Deactivate' : 'Activate'}

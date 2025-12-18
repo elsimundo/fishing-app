@@ -4,6 +4,7 @@ import { Layout } from '../components/layout/Layout'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
+import { trackApiCall } from '../lib/apiTracker'
 import { Callout, CalloutDescription } from '../components/ui/callout'
 import {
   ArrowLeft,
@@ -83,6 +84,10 @@ export default function SubmitBusinessPage() {
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`,
         { headers: { 'User-Agent': 'FishingApp/1.0' } }
       )
+      
+      // Track API call
+      trackApiCall({ apiName: 'nominatim_geocoding', endpoint: 'search' })
+      
       const geocodeData = await geocodeRes.json()
 
       let lat = 0

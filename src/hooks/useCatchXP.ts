@@ -294,6 +294,7 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     { slug: 'catch_50', type: 'catch', value: 50 },
     { slug: 'catch_100', type: 'catch', value: 100 },
     { slug: 'catch_500', type: 'catch', value: 500 },
+    { slug: 'catch_1000', type: 'catch', value: 1000 },
     { slug: 'species_5', type: 'species', value: 5 },
     { slug: 'species_10', type: 'species', value: 10 },
     { slug: 'species_25', type: 'species', value: 25 },
@@ -402,6 +403,11 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     if (hour >= 18 && hour < 20) {
       await incrementProgressChallenge(userId, 'golden_hour', 10, completed, input.catchId)
     }
+    
+    // Midnight Angler: Catch between midnight and 4am
+    if (hour >= 0 && hour < 4) {
+      await completeChallenge(userId, 'midnight_angler', 1, 1, completed, input.catchId)
+    }
   }
   
   // ============================================
@@ -415,9 +421,27 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
       await completeChallenge(userId, 'big_fish', 1, 1, completed, input.catchId)
     }
     
+    // Double Figures: Catch a fish over 10lb (4.5kg)
+    if (weightKg >= 4.5) {
+      await completeChallenge(userId, 'double_figures', 1, 1, completed, input.catchId)
+    }
+    
     // Monster Catch: Catch a fish over 10kg (22lb)
     if (weightKg >= 10) {
       await completeChallenge(userId, 'monster_catch', 1, 1, completed, input.catchId)
+    }
+    
+    // PB Hunter: Check if this is a personal best
+    const { data: heavierCatches } = await supabase
+      .from('catches')
+      .select('id')
+      .eq('user_id', userId)
+      .gt('weight_kg', weightKg)
+      .neq('id', input.catchId)
+      .limit(1)
+    
+    if (!heavierCatches || heavierCatches.length === 0) {
+      await completeChallenge(userId, 'pb_hunter', 1, 1, completed, input.catchId)
     }
     
     // Check for specimen weight (compare to species_info)
@@ -541,6 +565,9 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     if (input.moonPhase === 'New Moon') {
       await completeChallenge(userId, 'new_moon_catch', 1, 1, completed, input.catchId)
     }
+    
+    // Moon Master: Catch during 4 different moon phases
+    await checkMoonPhasesChallenge(userId, completed)
   }
 
   // ============================================
@@ -754,7 +781,7 @@ async function checkMoonPhasesChallenge(userId: string, completed: string[]) {
 async function checkCountryChallenges(
   userId: string,
   countryCode: string,
-  species: string,
+  _species: string,
   completed: string[],
   catchId?: string
 ) {
@@ -993,6 +1020,43 @@ export function useSessionXP() {
       }
       if (sessionCount && sessionCount >= 10) {
         await completeChallenge(user.id, 'session_10', sessionCount, 10, completed)
+      }
+      if (sessionCount && sessionCount >= 50) {
+        await completeChallenge(user.id, 'session_50', sessionCount, 50, completed)
+      }
+      
+      // Check session duration for marathon challenge
+      const { data: sessionData } = await supabase
+        .from('sessions')
+        .select('started_at, ended_at')
+        .eq('id', sessionId)
+        .single()
+      
+      if (sessionData?.started_at && sessionData?.ended_at) {
+        const durationHours = (new Date(sessionData.ended_at).getTime() - new Date(sessionData.started_at).getTime()) / (1000 * 60 * 60)
+        
+        // Marathon: 8+ hour session
+        if (durationHours >= 8) {
+          await completeChallenge(user.id, 'marathon_session', 1, 1, completed)
+        }
+        
+        // All Day Angler: 12+ hour session
+        if (durationHours >= 12) {
+          await completeChallenge(user.id, 'all_day_session', 1, 1, completed)
+        }
+      }
+      
+      // Check multi-species day challenge
+      const { data: sessionCatches } = await supabase
+        .from('catches')
+        .select('species')
+        .eq('session_id', sessionId)
+      
+      if (sessionCatches) {
+        const uniqueSpecies = new Set(sessionCatches.map(c => c.species.toLowerCase())).size
+        if (uniqueSpecies >= 3) {
+          await completeChallenge(user.id, 'multi_species_day', uniqueSpecies, 3, completed)
+        }
       }
       
       return {

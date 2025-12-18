@@ -200,16 +200,16 @@ function UserCard({
   const canModify = !isCurrentUser && profile.role !== 'owner'
 
   const roleColors: Record<UserRole, string> = {
-    owner: 'bg-purple-100 text-purple-800',
-    admin: 'bg-blue-100 text-blue-800',
-    moderator: 'bg-green-100 text-green-800',
-    user: 'bg-muted text-muted-foreground',
+    owner: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+    admin: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    moderator: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+    user: 'bg-muted text-muted-foreground border border-border',
   }
 
   const statusColors: Record<UserStatus, string> = {
-    active: 'bg-green-100 text-green-800',
-    suspended: 'bg-yellow-100 text-yellow-800',
-    banned: 'bg-red-100 text-red-800',
+    active: 'bg-green-500/20 text-green-400 border border-green-500/30',
+    suspended: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+    banned: 'bg-red-500/20 text-red-400 border border-red-500/30',
   }
 
   return (

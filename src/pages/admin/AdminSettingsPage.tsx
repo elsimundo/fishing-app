@@ -284,10 +284,10 @@ export default function AdminSettingsPage() {
                 <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Species Tier XP Values</h3>
                 <div className="grid gap-4 lg:grid-cols-4">
                   {[
-                    { key: XP_SETTING_KEYS.TIER_COMMON, color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200' },
-                    { key: XP_SETTING_KEYS.TIER_STANDARD, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200' },
-                    { key: XP_SETTING_KEYS.TIER_TROPHY, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200' },
-                    { key: XP_SETTING_KEYS.TIER_RARE, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200' },
+                    { key: XP_SETTING_KEYS.TIER_COMMON, color: 'bg-slate-500/20 text-slate-300 border border-slate-500/30' },
+                    { key: XP_SETTING_KEYS.TIER_STANDARD, color: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
+                    { key: XP_SETTING_KEYS.TIER_TROPHY, color: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+                    { key: XP_SETTING_KEYS.TIER_RARE, color: 'bg-purple-500/20 text-purple-400 border border-purple-500/30' },
                   ].map(({ key, color }) => (
                     <div key={key} className="rounded-xl border border-border bg-card p-4">
                       <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${color} mb-2`}>
@@ -438,10 +438,10 @@ export default function AdminSettingsPage() {
                                     type="button"
                                     onClick={() => setEditingTier(tier.species)}
                                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                      tier.tier === 'common' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200' :
-                                      tier.tier === 'standard' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200' :
-                                      tier.tier === 'trophy' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200' :
-                                      'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200'
+                                      tier.tier === 'common' ? 'bg-slate-500/20 text-slate-300 border border-slate-500/30' :
+                                      tier.tier === 'standard' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                                      tier.tier === 'trophy' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                                      'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                                     }`}
                                   >
                                     {tier.tier.charAt(0).toUpperCase() + tier.tier.slice(1)}

@@ -1,5 +1,6 @@
 import type { FishIdentificationResult, FishIdentificationError } from '../types/fish'
 import { supabase } from '../lib/supabase'
+import { trackApiCall } from '../lib/apiTracker'
 
 const EDGE_FUNCTION_NAME = 'identify-fish'
 
@@ -41,6 +42,9 @@ export async function identifyFishFromPhoto(imageBase64: string): Promise<FishId
     }
     throw error
   }
+
+  // Track API call
+  trackApiCall({ apiName: 'fish_identifier_ai', endpoint: 'identify' })
 
   return data
 }
