@@ -35,6 +35,7 @@ export function useFishingZones(options: UseFishingZonesOptions = {}) {
       let query = supabase
         .from('fishing_zones')
         .select('*')
+        .is('lake_id', null) // Exclude zones that overlap with lakes
         .gte('total_catches', minCatches)
         .order('total_catches', { ascending: false })
         .limit(200)

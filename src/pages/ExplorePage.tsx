@@ -22,9 +22,10 @@ import { MyLakesCard } from '../components/explore/MyLakesCard'
 import { ZoneCatchesPanel } from '../components/explore/ZoneCatchesPanel'
 import { useLakes } from '../hooks/useLakes'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
+import { useSavedLakes } from '../hooks/useSavedLakes'
 import { useFishingZones } from '../hooks/useFishingZones'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
-import { MapPin, Navigation, Store, X, UserPlus, Loader2, Search, Layers, Maximize2, Minimize2 } from 'lucide-react'
+import { MapPin, Navigation, Store, X, UserPlus, Loader2, Search, Layers, Maximize2, Minimize2, Crown, BadgeCheck, Heart } from 'lucide-react'
 // import { ExploreSearch } from '../components/explore/ExploreSearch' // Parked for now
 import { Link } from 'react-router-dom'
 import type { Lake } from '../types'
@@ -50,6 +51,7 @@ export default function ExplorePage() {
   const { user } = useAuth()
   const { data: profile, refetch: refetchProfile } = useProfile()
   const { isAdmin } = useAdminAuth()
+  const { isLakeSaved, toggleSave, isPending: isSavePending } = useSavedLakes()
   
   // URL params for deep-linking from search (business/charter)
   const deepLinkBusinessId = searchParams.get('business')
@@ -712,60 +714,130 @@ export default function ExplorePage() {
                   {selectedMarker.id.startsWith('session-') ? 'View session' : 'View catch'}
                 </button>
               )}
-              {selectedMarker.id.startsWith('lake-') && (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-center text-xs font-medium text-foreground hover:bg-muted"
-                    >
-                      📍 Directions
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const lakeId = selectedMarker.id.replace('lake-', '')
-                        navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
-                      }}
-                      className="flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:bg-primary/60"
-                    >
-                      🎣 Log Session
-                    </button>
-                  </div>
-                  {(() => {
-                    const lakeId = selectedMarker.id.replace('lake-', '')
-                    if (lakeId.startsWith('osm-')) return null
-                    return (
+              {selectedMarker.id.startsWith('lake-') && (() => {
+                const lakeId = selectedMarker.id.replace('lake-', '')
+                const lake = lakes?.find(l => l.id === lakeId)
+                const isOsm = lakeId.startsWith('osm-')
+                const isSaved = lake && !isOsm ? isLakeSaved(lake.id) : false
+                
+                return (
+                  <div className="space-y-2">
+                    {/* Lake info badges */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {lake?.is_premium && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                          <Crown size={10} /> Premium
+                        </span>
+                      )}
+                      {lake?.claimed_by && !lake?.is_premium && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                          <BadgeCheck size={10} /> Verified
+                        </span>
+                      )}
+                      {lake?.lake_type && (
+                        <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-medium text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
+                          {lake.lake_type}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Verified lake info */}
+                    {lake?.claimed_by && (
+                      <div className="space-y-1 text-[10px] text-muted-foreground">
+                        {lake.total_sessions && lake.total_sessions > 0 && (
+                          <p>📊 {lake.total_sessions} sessions logged</p>
+                        )}
+                        {lake.day_ticket_price && (
+                          <p>💷 Day ticket: £{lake.day_ticket_price}</p>
+                        )}
+                        {lake.website && (
+                          <a 
+                            href={lake.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline block"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            🌐 Visit website
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Action buttons */}
+                    <div className="flex gap-2">
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-center text-xs font-medium text-foreground hover:bg-muted"
+                      >
+                        <Navigation size={12} className="inline mr-1" />
+                        Directions
+                      </a>
                       <button
                         type="button"
                         onClick={() => {
-                          navigate(`/lakes/${lakeId}`)
+                          navigate('/sessions/new', { state: { lakeId, lakeName: selectedMarker.title } })
                         }}
-                        className="w-full rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary/90"
+                        className="flex-1 rounded-lg bg-navy-800 px-3 py-2 text-xs font-medium text-white hover:bg-navy-900"
                       >
-                        View lake page
+                        🎣 Log Session
                       </button>
-                    )
-                  })()}
-                  {/* Admin: Quick assign owner */}
-                  {isAdmin && !selectedMarker.id.startsWith('lake-osm-') && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const lakeId = selectedMarker.id.replace('lake-', '')
-                        setAssignOwnerLakeId(lakeId)
-                        setAssignOwnerLakeName(selectedMarker.title)
-                      }}
-                      className="w-full rounded-lg border border-purple-300 bg-purple-50 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100 dark:border-purple-500/40 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
-                    >
-                      <UserPlus size={12} className="inline mr-1" />
-                      Assign Owner
-                    </button>
-                  )}
-                </div>
-              )}
+                    </div>
+                    
+                    {/* Save / View details */}
+                    <div className="flex gap-2">
+                      {!isOsm && lake && (
+                        <button
+                          type="button"
+                          onClick={() => toggleSave(lake.id)}
+                          disabled={isSavePending}
+                          className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                            isSaved 
+                              ? 'border-pink-300 bg-pink-50 text-pink-700 dark:border-pink-500/40 dark:bg-pink-900/30 dark:text-pink-300' 
+                              : 'border-border bg-background text-foreground hover:bg-muted'
+                          }`}
+                        >
+                          <Heart size={12} className="inline mr-1" fill={isSaved ? 'currentColor' : 'none'} />
+                          {isSaved ? 'Saved' : 'Save'}
+                        </button>
+                      )}
+                      {!isOsm && (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/lakes/${lakeId}`)}
+                          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-foreground hover:bg-muted"
+                        >
+                          View details
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* Claim CTA for unclaimed lakes */}
+                    {!isOsm && lake && !lake.claimed_by && user && (
+                      <p className="text-center text-[10px] text-muted-foreground">
+                        Own this venue? <button type="button" onClick={() => navigate(`/lakes/${lakeId}`)} className="text-primary hover:underline">Claim it</button>
+                      </p>
+                    )}
+                    
+                    {/* Admin: Quick assign owner */}
+                    {isAdmin && !isOsm && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAssignOwnerLakeId(lakeId)
+                          setAssignOwnerLakeName(selectedMarker.title)
+                        }}
+                        className="w-full rounded-lg border border-purple-300 bg-purple-50 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100 dark:border-purple-500/40 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
+                      >
+                        <UserPlus size={12} className="inline mr-1" />
+                        Assign Owner
+                      </button>
+                    )}
+                  </div>
+                )
+              })()}
               {(selectedMarker.type === 'mark' || selectedMarker.type === 'shared-mark') && (
                 <div className="space-y-2">
                   <div className="flex gap-2">

@@ -11,7 +11,9 @@ export interface LocalIntelData {
   topBaits: { bait: string; count: number }[]
   catchesByTimeOfDay: { period: string; count: number; percentage: number }[]
   avgCatchWeight: number | null
-  biggestCatch: { species: string; weight: number; date: string } | null
+  biggestCatch: { id: string; species: string; weight: number; date: string } | null
+  biggestSeaCatch: { id: string; species: string; weight: number; date: string } | null
+  biggestFreshwaterCatch: { id: string; species: string; weight: number; date: string } | null
   // New engagement features
   speciesBaitCorrelation: { species: string; topBaits: { bait: string; count: number }[] }[]
   timeSpeciesCorrelation: { period: string; topSpecies: { species: string; count: number }[] }[]
@@ -83,6 +85,8 @@ export async function getLocalIntel(
     catchesByTimeOfDay: [],
     avgCatchWeight: null,
     biggestCatch: null,
+    biggestSeaCatch: null,
+    biggestFreshwaterCatch: null,
     speciesBaitCorrelation: [],
     timeSpeciesCorrelation: [],
     recentActivity: { catchesLast24h: 0, lastCatchTime: null },
@@ -218,14 +222,75 @@ export async function getLocalIntel(
       : null
 
   let biggestCatch: LocalIntelData['biggestCatch'] = null
+  let biggestSeaCatch: LocalIntelData['biggestSeaCatch'] = null
+  let biggestFreshwaterCatch: LocalIntelData['biggestFreshwaterCatch'] = null
+  
   if (catchesWithWeight.length > 0) {
     const biggest = catchesWithWeight.reduce((max, c) =>
       (c.weight_kg || 0) > (max.weight_kg || 0) ? c : max
     )
     biggestCatch = {
+      id: biggest.id,
       species: biggest.species || 'Unknown',
       weight: biggest.weight_kg || 0,
       date: biggest.caught_at,
+    }
+    
+    // Water type categories based on WaterType enum
+    const SEA_TYPES = ['Sea/Coastal']
+    const FRESHWATER_TYPES = ['River', 'Lake/Reservoir', 'Canal', 'Pond', 'Other']
+    
+    // Common sea species patterns for fallback detection
+    const SEA_SPECIES_PATTERNS = ['(Sea)', 'Bass (Sea)', 'Cod', 'Mackerel', 'Pollock', 'Whiting', 'Flounder', 'Plaice', 'Sole', 'Ray', 'Shark', 'Tope', 'Dogfish', 'Conger', 'Wrasse', 'Mullet']
+    
+    // Helper to determine if a catch is sea fishing
+    const isSeaCatch = (c: typeof catchesWithWeight[0]) => {
+      const waterType = (c.session as any)?.water_type
+      if (waterType && SEA_TYPES.includes(waterType)) return true
+      // Fallback: check species name for sea indicators
+      const species = c.species?.toLowerCase() || ''
+      return SEA_SPECIES_PATTERNS.some(p => species.includes(p.toLowerCase()))
+    }
+    
+    // Helper to determine if a catch is freshwater fishing
+    const isFreshwaterCatch = (c: typeof catchesWithWeight[0]) => {
+      const waterType = (c.session as any)?.water_type
+      if (waterType && FRESHWATER_TYPES.includes(waterType)) return true
+      // If has session with sea water type, it's not freshwater
+      if (waterType && SEA_TYPES.includes(waterType)) return false
+      // If species looks like sea fish, it's not freshwater
+      const species = c.species?.toLowerCase() || ''
+      if (SEA_SPECIES_PATTERNS.some(p => species.includes(p.toLowerCase()))) return false
+      // Default to freshwater if no water type and not a sea species
+      return !isSeaCatch(c)
+    }
+    
+    // Find biggest sea catch
+    const seaCatches = catchesWithWeight.filter(isSeaCatch)
+    if (seaCatches.length > 0) {
+      const biggestSea = seaCatches.reduce((max, c) =>
+        (c.weight_kg || 0) > (max.weight_kg || 0) ? c : max
+      )
+      biggestSeaCatch = {
+        id: biggestSea.id,
+        species: biggestSea.species || 'Unknown',
+        weight: biggestSea.weight_kg || 0,
+        date: biggestSea.caught_at,
+      }
+    }
+    
+    // Find biggest freshwater catch
+    const freshwaterCatches = catchesWithWeight.filter(isFreshwaterCatch)
+    if (freshwaterCatches.length > 0) {
+      const biggestFreshwater = freshwaterCatches.reduce((max, c) =>
+        (c.weight_kg || 0) > (max.weight_kg || 0) ? c : max
+      )
+      biggestFreshwaterCatch = {
+        id: biggestFreshwater.id,
+        species: biggestFreshwater.species || 'Unknown',
+        weight: biggestFreshwater.weight_kg || 0,
+        date: biggestFreshwater.caught_at,
+      }
     }
   }
 
@@ -304,6 +369,8 @@ export async function getLocalIntel(
     catchesByTimeOfDay,
     avgCatchWeight,
     biggestCatch,
+    biggestSeaCatch,
+    biggestFreshwaterCatch,
     speciesBaitCorrelation,
     timeSpeciesCorrelation,
     recentActivity: {

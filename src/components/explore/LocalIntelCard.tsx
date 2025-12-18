@@ -4,6 +4,7 @@ import { useLocalIntel } from '../../hooks/useLocalIntel'
 import { formatDistanceToNow } from 'date-fns'
 import type { FishingPreference } from '../../types'
 import { useWeightFormatter } from '../../hooks/useWeightFormatter'
+import { useNavigate } from 'react-router-dom'
 
 interface LocalIntelCardProps {
   lat: number | null
@@ -15,6 +16,7 @@ interface LocalIntelCardProps {
 export function LocalIntelCard({ lat, lng, bounds, waterPreference }: LocalIntelCardProps) {
   const [expanded, setExpanded] = useState(false)
   const { formatWeight } = useWeightFormatter()
+  const navigate = useNavigate()
   const { data: intel, isLoading, error } = useLocalIntel(lat, lng, bounds, 30, lat !== null && lng !== null, waterPreference)
 
   if (!lat || !lng) {
@@ -315,9 +317,62 @@ export function LocalIntelCard({ lat, lng, bounds, waterPreference }: LocalIntel
                 </div>
               )}
 
-              {/* Biggest Catch */}
-              {intel.biggestCatch && (
-                <div className="mt-4 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/20 p-3">
+              {/* Biggest Catches - Show by water type if both exist */}
+              {(intel.biggestSeaCatch || intel.biggestFreshwaterCatch) ? (
+                <div className={`mt-4 grid gap-2 ${intel.biggestSeaCatch && intel.biggestFreshwaterCatch ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  {intel.biggestSeaCatch && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/catches/${intel.biggestSeaCatch!.id}`)}
+                      className="rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/20 p-3 text-left hover:from-amber-100 hover:to-yellow-100 dark:hover:from-amber-900/50 dark:hover:to-yellow-900/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Trophy size={14} className="text-amber-400" />
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-400">
+                          Biggest Sea
+                        </p>
+                      </div>
+                      <div className="mt-1">
+                        <span className="text-lg font-bold text-amber-400">
+                          {formatWeight(intel.biggestSeaCatch.weight, { precision: 1 })}
+                        </span>
+                        <p className="text-xs text-amber-500 truncate">{intel.biggestSeaCatch.species}</p>
+                      </div>
+                      <p className="mt-0.5 text-[10px] text-amber-500">
+                        {formatDistanceToNow(new Date(intel.biggestSeaCatch.date), { addSuffix: true })}
+                      </p>
+                    </button>
+                  )}
+                  {intel.biggestFreshwaterCatch && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/catches/${intel.biggestFreshwaterCatch!.id}`)}
+                      className="rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/20 p-3 text-left hover:from-amber-100 hover:to-yellow-100 dark:hover:from-amber-900/50 dark:hover:to-yellow-900/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Trophy size={14} className="text-amber-400" />
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-400">
+                          Biggest Freshwater
+                        </p>
+                      </div>
+                      <div className="mt-1">
+                        <span className="text-lg font-bold text-amber-400">
+                          {formatWeight(intel.biggestFreshwaterCatch.weight, { precision: 1 })}
+                        </span>
+                        <p className="text-xs text-amber-500 truncate">{intel.biggestFreshwaterCatch.species}</p>
+                      </div>
+                      <p className="mt-0.5 text-[10px] text-amber-500">
+                        {formatDistanceToNow(new Date(intel.biggestFreshwaterCatch.date), { addSuffix: true })}
+                      </p>
+                    </button>
+                  )}
+                </div>
+              ) : intel.biggestCatch && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/catches/${intel.biggestCatch!.id}`)}
+                  className="mt-4 w-full rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/20 p-3 text-left hover:from-amber-100 hover:to-yellow-100 dark:hover:from-amber-900/50 dark:hover:to-yellow-900/30 transition-colors"
+                >
                   <div className="flex items-center gap-2">
                     <Trophy size={16} className="text-amber-400" />
                     <p className="text-xs font-semibold uppercase tracking-wide text-amber-400">
@@ -333,7 +388,7 @@ export function LocalIntelCard({ lat, lng, bounds, waterPreference }: LocalIntel
                   <p className="mt-0.5 text-[10px] text-amber-500">
                     {formatDistanceToNow(new Date(intel.biggestCatch.date), { addSuffix: true })}
                   </p>
-                </div>
+                </button>
               )}
 
               {/* Footer */}

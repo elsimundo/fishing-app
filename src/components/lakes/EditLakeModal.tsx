@@ -40,6 +40,9 @@ export function EditLakeModal({ lake, onClose }: EditLakeModalProps) {
   const [rules, setRules] = useState(lake.rules || '')
   const [dayTicketPrice, setDayTicketPrice] = useState(lake.day_ticket_price?.toString() || '')
   const [nightTicketPrice, setNightTicketPrice] = useState(lake.night_ticket_price?.toString() || '')
+  const [seasonTicketPrice, setSeasonTicketPrice] = useState(lake.season_ticket_price?.toString() || '')
+  const [openingHours, setOpeningHours] = useState((lake as any).opening_hours || '')
+  const [specialOffers, setSpecialOffers] = useState((lake as any).special_offers || '')
   const [phone, setPhone] = useState(lake.phone || '')
   const [email, setEmail] = useState(lake.email || '')
   const [website, setWebsite] = useState(lake.website || '')
@@ -71,6 +74,9 @@ export function EditLakeModal({ lake, onClose }: EditLakeModalProps) {
         rules: rules.trim() || null,
         day_ticket_price: dayTicketPrice ? parseFloat(dayTicketPrice) : null,
         night_ticket_price: nightTicketPrice ? parseFloat(nightTicketPrice) : null,
+        season_ticket_price: seasonTicketPrice ? parseFloat(seasonTicketPrice) : null,
+        opening_hours: openingHours.trim() || null,
+        special_offers: specialOffers.trim() || null,
         phone: phone.trim() || null,
         email: email.trim() || null,
         website: website.trim() || null,
@@ -175,31 +181,58 @@ export function EditLakeModal({ lake, onClose }: EditLakeModalProps) {
           </div>
 
           {/* Pricing */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">Day Ticket (£)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={dayTicketPrice}
-                onChange={(e) => setDayTicketPrice(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-                placeholder="10.00"
-              />
+          <div>
+            <p className="text-xs font-semibold text-foreground mb-2">Pricing</p>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[10px] text-muted-foreground mb-1">Day Ticket (£)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={dayTicketPrice}
+                  onChange={(e) => setDayTicketPrice(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                  placeholder="10.00"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] text-muted-foreground mb-1">Night Ticket (£)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={nightTicketPrice}
+                  onChange={(e) => setNightTicketPrice(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                  placeholder="20.00"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] text-muted-foreground mb-1">Season (£)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={seasonTicketPrice}
+                  onChange={(e) => setSeasonTicketPrice(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                  placeholder="150.00"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">Night Ticket (£)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={nightTicketPrice}
-                onChange={(e) => setNightTicketPrice(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-                placeholder="20.00"
-              />
-            </div>
+          </div>
+
+          {/* Opening Hours */}
+          <div>
+            <label className="block text-xs font-semibold text-foreground mb-1">Opening Hours</label>
+            <input
+              type="text"
+              value={openingHours}
+              onChange={(e) => setOpeningHours(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+              placeholder="e.g. Dawn to Dusk, 7am-7pm, 24 hours"
+            />
           </div>
 
           {/* Contact */}
@@ -234,6 +267,23 @@ export function EditLakeModal({ lake, onClose }: EditLakeModalProps) {
               placeholder="Online booking URL"
             />
           </div>
+
+          {/* Special Offers (Premium feature) */}
+          {lake.is_premium && (
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1">
+                Special Offers <span className="text-amber-500">(Premium)</span>
+              </label>
+              <textarea
+                value={specialOffers}
+                onChange={(e) => setSpecialOffers(e.target.value)}
+                rows={2}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none"
+                placeholder="e.g. 10% off for new members, Free night session with day booking..."
+                maxLength={500}
+              />
+            </div>
+          )}
 
           {/* Facilities */}
           <div>
