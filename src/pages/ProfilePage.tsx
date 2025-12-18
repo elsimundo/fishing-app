@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Loader2, Settings, Share2, MessageCircle, Fish, Calendar, Trophy, Swords, Pencil, BookOpen } from 'lucide-react'
+import { Loader2, Fish, Calendar, Trophy, Swords, Pencil, BookOpen, MessageCircle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useFollowCounts } from '../hooks/useFollows'
 import { useOwnPosts, useTogglePostVisibility } from '../hooks/usePosts'
-import { useUnreadCount } from '../hooks/useMessages'
 import { useCatches } from '../hooks/useCatches'
 import { useMySessions } from '../hooks/useSessions'
 import { useMyEnteredCompetitions } from '../hooks/useCompetitions'
@@ -52,8 +51,7 @@ export default function ProfilePage() {
     const tab = params.get('tab')
     return isValidLogbookTab(tab) ? tab : 'sessions'
   })
-  const unreadCount = useUnreadCount()
-
+  
   const setTab = (tab: LogbookTab) => {
     setActiveTab(tab)
     const params = new URLSearchParams(location.search)
@@ -168,39 +166,10 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="hidden md:flex items-center justify-between border-b border-border bg-card px-5 pt-4 pb-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Profile</p>
-          <p className="text-lg font-bold text-foreground">@{profile.username || profile.full_name || 'angler'}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/messages')}
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground hover:bg-muted/80"
-          >
-            <MessageCircle size={18} />
-            {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </button>
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground hover:bg-muted/80"
-          >
-            <Share2 size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowEditModal(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground hover:bg-muted/80"
-          >
-            <Settings size={18} />
-          </button>
-        </div>
+      {/* Page Title (desktop only) */}
+      <div className="hidden md:block border-b border-border bg-card px-5 pt-4 pb-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Profile</p>
+        <p className="text-lg font-bold text-foreground">@{profile.username || profile.full_name || 'angler'}</p>
       </div>
 
       {/* Profile hero & gamification */}
@@ -352,7 +321,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Tab content */}
-      <div className="px-5 pb-6 pt-4">
+      <div className="px-3 pb-6 pt-4">
         {/* Posts tab */}
         {activeTab === 'posts' && (
           <div>

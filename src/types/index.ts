@@ -242,10 +242,19 @@ export interface Post {
   catch_id?: string
   caption?: string
   photo_url?: string
+  media?: PostMedia[]
   location_privacy?: LocationPrivacy
   is_public: boolean
   created_at: string
   updated_at: string
+}
+
+export interface PostMedia {
+  id: string
+  post_id: string
+  url: string
+  position: number
+  created_at: string
 }
 
 export interface PostLike {

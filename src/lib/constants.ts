@@ -47,6 +47,8 @@ export const FISH_SPECIES = {
     'Trigger Fish',
     'John Dory',
     'Sea Trout',
+    'Weever (Greater)',
+    'Weever (Lesser)',
   ],
 
   COARSE: [

@@ -1,5 +1,6 @@
 import type { TideStation, TideReading, TideGaugeData, TidePrediction, TideData } from '../types/tides'
 import { calculateDistance } from '../utils/distance'
+import { trackApiCall } from '../lib/apiTracker'
 
 const UK_EA_BASE_URL = 'https://environment.data.gov.uk/flood-monitoring'
 
@@ -34,6 +35,9 @@ async function getAllUKTideStations(): Promise<TideStation[]> {
   }
 
   const response = await fetch(`${UK_EA_BASE_URL}/id/stations?type=TideGauge&_limit=200`)
+
+  // Track API call
+  trackApiCall({ apiName: 'environment_agency_tides', endpoint: 'stations' })
 
   if (!response.ok) {
     throw new Error(`UK-EA API error: ${response.status}`)
@@ -94,6 +98,9 @@ export async function findNearestUKStation(
 async function getLatestReading(stationId: string): Promise<TideReading | null> {
   const response = await fetch(`${UK_EA_BASE_URL}/id/stations/${stationId}/readings?latest`)
 
+  // Track API call
+  trackApiCall({ apiName: 'environment_agency_tides', endpoint: 'readings_latest' })
+
   if (!response.ok) {
     throw new Error(`UK-EA API error: ${response.status}`)
   }
@@ -119,6 +126,9 @@ async function getHistoricalReadings(stationId: string): Promise<TideReading[]> 
   const response = await fetch(
     `${UK_EA_BASE_URL}/id/stations/${stationId}/readings?_sorted&since=${since}&_limit=200`
   )
+
+  // Track API call
+  trackApiCall({ apiName: 'environment_agency_tides', endpoint: 'readings_historical' })
 
   if (!response.ok) {
     throw new Error(`UK-EA API error: ${response.status}`)

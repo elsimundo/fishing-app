@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     // For development: use live reload from your dev server
-    url: 'http://192.168.0.34:5173',
+    url: 'http://192.168.0.37:5173',
     cleartext: true,
   },
   ios: {

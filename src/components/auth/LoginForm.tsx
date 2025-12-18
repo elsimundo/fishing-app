@@ -62,7 +62,18 @@ export function LoginForm() {
 
   return (
     <div className="mx-auto w-full max-w-md rounded-xl bg-card p-6 shadow-lg border border-border">
-      <h1 className="mb-1 text-center text-2xl font-semibold text-primary">{APP_NAME}</h1>
+      <div className="mb-2 flex justify-center">
+        <img 
+          src="/catchi-logo-dark.png" 
+          alt={APP_NAME} 
+          className="h-16 w-auto dark:block hidden"
+        />
+        <img 
+          src="/catchi-logo-light.png" 
+          alt={APP_NAME} 
+          className="h-16 w-auto dark:hidden"
+        />
+      </div>
       <p className="mb-6 text-center text-sm text-muted-foreground">Sign in to your account</p>
 
       {formError ? (

@@ -1,11 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { Shield, Save, CreditCard, Eye, EyeOff, ToggleLeft, Fish, Store, Users, Swords, Camera, Loader2, Zap } from 'lucide-react'
 import { useFeatureFlags, useUpdateFeatureFlag } from '../../hooks/useFeatureFlags'
 import { ThemeSettingsSection } from '../../components/admin/ThemeSettingsSection'
+import { BrandingSettingsSection } from '../../components/admin/BrandingSettingsSection'
 import { useAppSettings, useUpdateAppSetting, useSpeciesTiers, useUpdateSpeciesTier } from '../../hooks/useAppSettings'
 import { XP_SETTING_KEYS, XP_SETTING_LABELS, DEFAULT_XP_VALUES } from '../../types/appSettings'
 import type { SpeciesTier } from '../../types/appSettings'
+import { toast } from 'sonner'
+
+const ADMIN_SETTING_KEYS = {
+  AUTO_APPROVE_PREMIUM: 'admin_auto_approve_premium',
+  NOTIFY_ON_SUBMISSIONS: 'admin_notify_on_submissions',
+  PUBLIC_MODE: 'admin_public_mode',
+} as const
 
 export default function AdminSettingsPage() {
   const [autoApprovePremium, setAutoApprovePremium] = useState(false)
@@ -14,7 +22,17 @@ export default function AdminSettingsPage() {
   
   // Feature flags
   const { data: featureFlags, isLoading: flagsLoading } = useFeatureFlags()
-  const { mutate: updateFlag, isPending: isUpdating } = useUpdateFeatureFlag()
+  const { mutateAsync: updateFlagAsync, isPending: isUpdating } = useUpdateFeatureFlag()
+
+  const handleFlagChange = async (key: string, value: boolean) => {
+    try {
+      await updateFlagAsync({ key: key as any, value })
+      toast.success('Feature flag updated')
+    } catch (err) {
+      toast.error('Failed to update feature flag')
+      console.error('Feature flag update error:', err)
+    }
+  }
 
   // Stripe settings
   const [stripeSandboxMode, setStripeSandboxMode] = useState(true)
@@ -26,7 +44,7 @@ export default function AdminSettingsPage() {
 
   // XP Settings
   const { data: appSettings, isLoading: settingsLoading } = useAppSettings()
-  const { mutate: updateSetting, isPending: isSettingUpdating } = useUpdateAppSetting()
+  const { mutate: updateSetting, mutateAsync: updateSettingAsync, isPending: isSettingUpdating } = useUpdateAppSetting()
   const { data: speciesTiers, isLoading: tiersLoading } = useSpeciesTiers()
   const { mutate: updateTier, isPending: isTierUpdating } = useUpdateSpeciesTier()
   const [editingTier, setEditingTier] = useState<string | null>(null)
@@ -40,15 +58,51 @@ export default function AdminSettingsPage() {
     return defaultVal !== undefined ? String(defaultVal) : ''
   }
 
+  useEffect(() => {
+    if (!appSettings) return
+
+    const findBool = (key: string, defaultValue: boolean): boolean => {
+      const setting = appSettings.find((s) => s.key === key)
+      if (!setting) return defaultValue
+
+      const raw = setting.value
+      if (typeof raw === 'boolean') return raw
+      if (typeof raw === 'string') return raw === 'true'
+      return defaultValue
+    }
+
+    setAutoApprovePremium(findBool(ADMIN_SETTING_KEYS.AUTO_APPROVE_PREMIUM, false))
+    setNotifyOnSubmissions(findBool(ADMIN_SETTING_KEYS.NOTIFY_ON_SUBMISSIONS, true))
+    setPublicMode(findBool(ADMIN_SETTING_KEYS.PUBLIC_MODE, true))
+  }, [appSettings])
+
   const handleSettingChange = (key: string, value: string | boolean) => {
     updateSetting({ key, value })
+  }
+
+  const setAdminSetting = async (params: {
+    key: string
+    value: boolean
+    setLocal: (val: boolean) => void
+    prevValue: boolean
+  }) => {
+    const { key, value, setLocal, prevValue } = params
+    setLocal(value)
+
+    try {
+      await updateSettingAsync({ key, value, category: 'system' })
+      toast.success('Saved')
+    } catch {
+      setLocal(prevValue)
+      toast.error('Failed to save setting')
+    }
   }
 
   return (
     <AdminLayout>
       <div className="p-4 lg:p-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-900/10 text-navy-900">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-400/15 dark:text-yellow-300">
             <Shield size={24} />
           </div>
           <div>
@@ -65,7 +119,15 @@ export default function AdminSettingsPage() {
             <Toggle
               label="Auto-approve premium"
               checked={autoApprovePremium}
-              onChange={setAutoApprovePremium}
+              onChange={(val) => {
+                setAdminSetting({
+                  key: ADMIN_SETTING_KEYS.AUTO_APPROVE_PREMIUM,
+                  value: val,
+                  setLocal: setAutoApprovePremium,
+                  prevValue: autoApprovePremium,
+                })
+              }}
+              disabled={isSettingUpdating}
             />
           </SettingCard>
 
@@ -76,7 +138,15 @@ export default function AdminSettingsPage() {
             <Toggle
               label="Notify on new submissions"
               checked={notifyOnSubmissions}
-              onChange={setNotifyOnSubmissions}
+              onChange={(val) => {
+                setAdminSetting({
+                  key: ADMIN_SETTING_KEYS.NOTIFY_ON_SUBMISSIONS,
+                  value: val,
+                  setLocal: setNotifyOnSubmissions,
+                  prevValue: notifyOnSubmissions,
+                })
+              }}
+              disabled={isSettingUpdating}
             />
           </SettingCard>
 
@@ -84,19 +154,32 @@ export default function AdminSettingsPage() {
             title="Public Visibility"
             description="Temporarily disable public access for maintenance windows."
           >
-            <Toggle label="Site is public" checked={publicMode} onChange={setPublicMode} />
+            <Toggle
+              label="Site is public"
+              checked={publicMode}
+              onChange={(val) => {
+                setAdminSetting({
+                  key: ADMIN_SETTING_KEYS.PUBLIC_MODE,
+                  value: val,
+                  setLocal: setPublicMode,
+                  prevValue: publicMode,
+                })
+              }}
+              disabled={isSettingUpdating}
+            />
           </SettingCard>
 
           <SettingCard
             title="Save Changes"
-            description="Settings are local-only for now. Hook up to Supabase to persist."
+            description="Settings are saved automatically."
           >
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-navy-900"
+              disabled
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:bg-primary/60"
             >
               <Save size={16} />
-              Save (coming soon)
+              Saved automatically
             </button>
           </SettingCard>
         </div>
@@ -104,7 +187,7 @@ export default function AdminSettingsPage() {
         {/* Feature Flags */}
         <div className="mt-8">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 text-cyan-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-200">
               <ToggleLeft size={20} />
             </div>
             <div>
@@ -124,7 +207,7 @@ export default function AdminSettingsPage() {
                 title="Freshwater Fishing"
                 description="Enable freshwater species, challenges, and filters. Currently sea fishing only."
                 enabled={featureFlags?.find(f => f.key === 'feature_freshwater_enabled')?.value ?? false}
-                onChange={(val) => updateFlag({ key: 'feature_freshwater_enabled', value: val })}
+                onChange={(val) => handleFlagChange('feature_freshwater_enabled', val)}
                 isUpdating={isUpdating}
                 color="blue"
               />
@@ -133,7 +216,7 @@ export default function AdminSettingsPage() {
                 title="Tackle Shops"
                 description="Enable tackle shop listings and directory features."
                 enabled={featureFlags?.find(f => f.key === 'feature_tackle_shops_enabled')?.value ?? false}
-                onChange={(val) => updateFlag({ key: 'feature_tackle_shops_enabled', value: val })}
+                onChange={(val) => handleFlagChange('feature_tackle_shops_enabled', val)}
                 isUpdating={isUpdating}
                 color="green"
               />
@@ -142,7 +225,7 @@ export default function AdminSettingsPage() {
                 title="Fishing Clubs"
                 description="Enable fishing club listings and membership features."
                 enabled={featureFlags?.find(f => f.key === 'feature_clubs_enabled')?.value ?? false}
-                onChange={(val) => updateFlag({ key: 'feature_clubs_enabled', value: val })}
+                onChange={(val) => handleFlagChange('feature_clubs_enabled', val)}
                 isUpdating={isUpdating}
                 color="amber"
               />
@@ -151,7 +234,7 @@ export default function AdminSettingsPage() {
                 title="Competitions"
                 description="Enable fishing competitions and leaderboards."
                 enabled={featureFlags?.find(f => f.key === 'feature_competitions_enabled')?.value ?? false}
-                onChange={(val) => updateFlag({ key: 'feature_competitions_enabled', value: val })}
+                onChange={(val) => handleFlagChange('feature_competitions_enabled', val)}
                 isUpdating={isUpdating}
                 color="purple"
               />
@@ -160,7 +243,7 @@ export default function AdminSettingsPage() {
                 title="AI Fish Identifier"
                 description="Enable AI-powered fish species identification from photos."
                 enabled={featureFlags?.find(f => f.key === 'feature_ai_identifier_enabled')?.value ?? false}
-                onChange={(val) => updateFlag({ key: 'feature_ai_identifier_enabled', value: val })}
+                onChange={(val) => handleFlagChange('feature_ai_identifier_enabled', val)}
                 isUpdating={isUpdating}
                 color="rose"
               />
@@ -173,10 +256,15 @@ export default function AdminSettingsPage() {
           <ThemeSettingsSection />
         </div>
 
+        {/* Branding Settings */}
+        <div className="mt-8">
+          <BrandingSettingsSection />
+        </div>
+
         {/* XP & Gamification Settings */}
         <div className="mt-8">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
               <Zap size={20} />
             </div>
             <div>
@@ -196,10 +284,10 @@ export default function AdminSettingsPage() {
                 <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Species Tier XP Values</h3>
                 <div className="grid gap-4 lg:grid-cols-4">
                   {[
-                    { key: XP_SETTING_KEYS.TIER_COMMON, color: 'bg-slate-100 text-slate-700' },
-                    { key: XP_SETTING_KEYS.TIER_STANDARD, color: 'bg-blue-100 text-blue-700' },
-                    { key: XP_SETTING_KEYS.TIER_TROPHY, color: 'bg-amber-100 text-amber-700' },
-                    { key: XP_SETTING_KEYS.TIER_RARE, color: 'bg-purple-100 text-purple-700' },
+                    { key: XP_SETTING_KEYS.TIER_COMMON, color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200' },
+                    { key: XP_SETTING_KEYS.TIER_STANDARD, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200' },
+                    { key: XP_SETTING_KEYS.TIER_TROPHY, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200' },
+                    { key: XP_SETTING_KEYS.TIER_RARE, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200' },
                   ].map(({ key, color }) => (
                     <div key={key} className="rounded-xl border border-border bg-card p-4">
                       <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${color} mb-2`}>
@@ -350,10 +438,10 @@ export default function AdminSettingsPage() {
                                     type="button"
                                     onClick={() => setEditingTier(tier.species)}
                                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                      tier.tier === 'common' ? 'bg-slate-100 text-slate-700' :
-                                      tier.tier === 'standard' ? 'bg-blue-100 text-blue-700' :
-                                      tier.tier === 'trophy' ? 'bg-amber-100 text-amber-700' :
-                                      'bg-purple-100 text-purple-700'
+                                      tier.tier === 'common' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200' :
+                                      tier.tier === 'standard' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200' :
+                                      tier.tier === 'trophy' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200' :
+                                      'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200'
                                     }`}
                                   >
                                     {tier.tier.charAt(0).toUpperCase() + tier.tier.slice(1)}
@@ -379,7 +467,7 @@ export default function AdminSettingsPage() {
         {/* Stripe Integration */}
         <div className="mt-8">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200">
               <CreditCard size={20} />
             </div>
             <div>
@@ -510,9 +598,9 @@ export default function AdminSettingsPage() {
             </SettingCard>
           </div>
 
-          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-            <h3 className="text-sm font-semibold text-blue-900">Setup Instructions</h3>
-            <ol className="mt-2 space-y-1 text-xs text-blue-800">
+          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-200">Setup Instructions</h3>
+            <ol className="mt-2 space-y-1 text-xs text-blue-800 dark:text-blue-200/90">
               <li>1. Create a Stripe account at stripe.com</li>
               <li>2. Get your API keys from the Stripe dashboard</li>
               <li>3. Enable Stripe Connect for partner payouts</li>
@@ -549,16 +637,18 @@ function Toggle({
   label,
   checked,
   onChange,
+  disabled,
 }: {
   label: string
   checked: boolean
   onChange: (val: boolean) => void
+  disabled?: boolean
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3">
+    <label className={`flex items-center gap-3 ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
       <div
         className={`relative h-6 w-11 rounded-full transition-colors ${
-          checked ? 'bg-navy-800' : 'bg-muted'
+          checked ? 'bg-yellow-400' : 'bg-muted'
         }`}
       >
         <span
@@ -571,6 +661,7 @@ function Toggle({
         type="checkbox"
         className="hidden"
         checked={checked}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
       />
       <span className="text-sm text-foreground">{label}</span>
@@ -596,11 +687,11 @@ function FeatureFlagCard({
   color: 'blue' | 'green' | 'amber' | 'purple' | 'rose'
 }) {
   const colorClasses = {
-    blue: enabled ? 'bg-blue-100 text-blue-700' : 'bg-muted text-muted-foreground',
-    green: enabled ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground',
-    amber: enabled ? 'bg-amber-100 text-amber-700' : 'bg-muted text-muted-foreground',
-    purple: enabled ? 'bg-purple-100 text-purple-700' : 'bg-muted text-muted-foreground',
-    rose: enabled ? 'bg-rose-100 text-rose-700' : 'bg-muted text-muted-foreground',
+    blue: enabled ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200' : 'bg-muted text-muted-foreground',
+    green: enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200' : 'bg-muted text-muted-foreground',
+    amber: enabled ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200' : 'bg-muted text-muted-foreground',
+    purple: enabled ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200' : 'bg-muted text-muted-foreground',
+    rose: enabled ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200' : 'bg-muted text-muted-foreground',
   }
 
   return (

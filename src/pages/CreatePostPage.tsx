@@ -5,63 +5,85 @@ import { Image, X, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { compressPhoto } from '../utils/imageCompression'
+import { useCreatePost } from '../hooks/usePosts'
 
 export default function CreatePostPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [content, setContent] = useState('')
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const { mutateAsync: createPost } = useCreatePost()
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files ?? [])
+    if (files.length === 0) return
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file')
-      return
+    const validFiles: File[] = []
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select image files only')
+        continue
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        alert('Each image must be less than 50MB')
+        continue
+      }
+      validFiles.push(file)
     }
 
-    if (file.size > 50 * 1024 * 1024) {
-      alert('Image must be less than 50MB')
-      return
-    }
+    if (validFiles.length === 0) return
 
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+    const nextFiles = [...imageFiles, ...validFiles].slice(0, 10)
+    setImageFiles(nextFiles)
+
+    const nextPreviews = [...imagePreviews]
+    for (const f of validFiles) {
+      if (nextPreviews.length >= 10) break
+      nextPreviews.push(URL.createObjectURL(f))
+    }
+    setImagePreviews(nextPreviews)
   }
 
-  const removeImage = () => {
-    setImageFile(null)
-    setImagePreview(null)
-    if (fileInputRef.current) {
+  const removeImageAt = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index))
+    setImagePreviews((prev) => {
+      const url = prev[index]
+      if (url) URL.revokeObjectURL(url)
+      return prev.filter((_, i) => i !== index)
+    })
+    if (fileInputRef.current && imageFiles.length <= 1) {
       fileInputRef.current.value = ''
     }
   }
 
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile || !user) return null
+  const uploadImages = async (): Promise<string[]> => {
+    if (!user || imageFiles.length === 0) return []
 
-    // Compress the image before upload
-    const compressedFile = await compressPhoto(imageFile)
-    
-    const fileName = `${user.id}-${Date.now()}.jpg`
-    const filePath = `posts/${fileName}`
+    const urls: string[] = []
+    for (const file of imageFiles) {
+      const compressedFile = await compressPhoto(file)
+      const fileName = `${user.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+      const filePath = `posts/${fileName}`
 
-    const { error: uploadError } = await supabase.storage
-      .from('posts')
-      .upload(filePath, compressedFile)
+      const { error: uploadError } = await supabase.storage
+        .from('posts')
+        .upload(filePath, compressedFile)
 
-    if (uploadError) throw uploadError
+      if (uploadError) throw uploadError
 
-    const { data } = supabase.storage.from('posts').getPublicUrl(filePath)
-    return data.publicUrl
+      const { data } = supabase.storage.from('posts').getPublicUrl(filePath)
+      urls.push(data.publicUrl)
+    }
+
+    return urls
   }
 
   const handleSubmit = async () => {
-    if (!content.trim() && !imageFile) {
+    if (!content.trim() && imageFiles.length === 0) {
       alert('Please add some text or an image')
       return
     }
@@ -73,20 +95,15 @@ export default function CreatePostPage() {
 
     setIsSubmitting(true)
     try {
-      let imageUrl: string | null = null
-      if (imageFile) {
-        imageUrl = await uploadImage()
-      }
+      const mediaUrls = await uploadImages()
 
-      const { error } = await supabase.from('posts').insert({
-        user_id: user.id,
-        caption: content.trim() || null,
-        photo_url: imageUrl,
+      await createPost({
         type: 'photo',
-        is_public: true,
+        caption: content.trim() || undefined,
+        photo_url: mediaUrls[0],
+        media_urls: mediaUrls,
+        isPublic: true,
       })
-
-      if (error) throw error
 
       navigate('/feed')
     } catch (error) {
@@ -97,7 +114,7 @@ export default function CreatePostPage() {
     }
   }
 
-  const canPost = content.trim().length > 0 || imageFile !== null
+  const canPost = content.trim().length > 0 || imageFiles.length > 0
 
   return (
     <Layout>
@@ -154,21 +171,25 @@ export default function CreatePostPage() {
             </div>
 
             {/* Image Preview */}
-            {imagePreview && (
-              <div className="relative px-4 pb-4">
-                <div className="relative overflow-hidden rounded-2xl">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="max-h-96 w-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black/80"
-                  >
-                    <X size={18} />
-                  </button>
+            {imagePreviews.length > 0 && (
+              <div className="px-4 pb-4">
+                <div className="flex gap-3 overflow-x-auto">
+                  {imagePreviews.map((src, idx) => (
+                    <div key={src} className="relative flex-shrink-0">
+                      <img
+                        src={src}
+                        alt={`Preview ${idx + 1}`}
+                        className="h-40 w-40 rounded-2xl object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImageAt(idx)}
+                        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black/80"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -180,18 +201,19 @@ export default function CreatePostPage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    imagePreview
+                    imagePreviews.length > 0
                       ? 'bg-emerald-900/30 text-emerald-400'
                       : 'text-muted-foreground hover:bg-muted'
                   }`}
                 >
                   <Image size={20} />
-                  <span>{imagePreview ? 'Change' : 'Photo'}</span>
+                  <span>{imagePreviews.length > 0 ? 'Add Photos' : 'Photos'}</span>
                 </button>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleImageChange}
                   className="hidden"
                 />

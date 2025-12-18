@@ -23,6 +23,7 @@ import LakeOwnerDashboard from './pages/LakeOwnerDashboard'
 import MarkDetailPage from './pages/MarkDetailPage'
 import SpeciesDetailPage from './pages/SpeciesDetailPage'
 import SettingsPage from './pages/SettingsPage'
+import NotificationsPage from './pages/NotificationsPage'
 import PartnerApplicationPage from './pages/PartnerApplicationPage'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 // Admin pages
@@ -95,6 +96,7 @@ function App() {
         <Route path="/marks/:markId" element={<MarkDetailPage />} />
         <Route path="/species/:speciesId" element={<SpeciesDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/partner/apply" element={<PartnerApplicationPage />} />
         <Route path="/logbook" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<UserProfilePage />} />

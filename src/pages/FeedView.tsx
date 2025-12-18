@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Search } from 'lucide-react'
 import PullToRefresh from 'react-simple-pull-to-refresh'
 import { useAuth } from '../hooks/useAuth'
 import { useFeed, useGlobalFeed } from '../hooks/usePosts'
@@ -73,17 +72,7 @@ export default function FeedView() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-border bg-background px-5 pt-4 pb-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">Feed</h1>
-          <button
-            type="button"
-            onClick={() => navigate('/discover')}
-            className="flex items-center gap-2 rounded-full bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-          >
-            <Search size={16} />
-            <span className="hidden sm:inline">Find Anglers</span>
-          </button>
-        </div>
+        <h1 className="text-xl font-bold text-foreground">Feed</h1>
 
         {/* Tabs: Me / Friends / Global */}
         <div className="mt-3 inline-flex rounded-full bg-card p-1 text-xs font-medium text-muted-foreground">

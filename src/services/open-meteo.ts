@@ -5,6 +5,7 @@ import type {
   DailyForecast,
   MarineConditions,
 } from '../types/weather'
+import { trackApiCall } from '../lib/apiTracker'
 
 const OPEN_METEO_BASE_URL = 'https://api.open-meteo.com/v1'
 const MARINE_API_URL = 'https://marine-api.open-meteo.com/v1'
@@ -56,6 +57,9 @@ export async function getWeatherData(lat: number, lng: number): Promise<WeatherD
     })
 
     const response = await fetch(`${OPEN_METEO_BASE_URL}/forecast?${params}`)
+
+    // Track API call
+    trackApiCall({ apiName: 'open_meteo_weather', endpoint: '/forecast' })
 
     if (!response.ok) {
       throw new Error(`Open-Meteo API error: ${response.status}`)
@@ -131,6 +135,9 @@ export async function getMarineConditions(
     })
 
     const response = await fetch(`${MARINE_API_URL}/marine?${params}`)
+
+    // Track API call
+    trackApiCall({ apiName: 'open_meteo_marine', endpoint: '/marine' })
 
     if (!response.ok) {
       // Marine data not available for all locations (inland areas)

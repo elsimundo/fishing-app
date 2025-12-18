@@ -1,5 +1,6 @@
 import type { TideStation, TidePrediction, TideData } from '../types/tides'
 import { calculateDistance } from '../utils/distance'
+import { trackApiCall } from '../lib/apiTracker'
 
 const NOAA_BASE_URL = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
 
@@ -117,6 +118,9 @@ export async function getNOAATidePredictions(
   })
 
   const response = await fetch(`${NOAA_BASE_URL}?${params}`)
+
+  // Track API call
+  trackApiCall({ apiName: 'noaa_tides', endpoint: 'predictions' })
 
   if (!response.ok) {
     throw new Error(`NOAA API error: ${response.status}`)

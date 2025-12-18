@@ -8,6 +8,10 @@ export interface Message {
   conversation_id: string
   sender_id: string
   content: string
+  message_type: 'text' | 'image' | 'gif'
+  image_url: string | null
+  gif_url: string | null
+  deleted_at: string | null
   created_at: string
   sender?: {
     id: string
@@ -15,6 +19,15 @@ export interface Message {
     full_name: string | null
     avatar_url: string | null
   }
+  reactions?: MessageReaction[]
+}
+
+export interface MessageReaction {
+  id: string
+  message_id: string
+  user_id: string
+  emoji: string
+  created_at: string
 }
 
 export interface Conversation {
@@ -87,9 +100,14 @@ export function useConversations() {
           conversation_id,
           sender_id,
           content,
+          message_type,
+          image_url,
+          gif_url,
+          deleted_at,
           created_at
         `)
         .in('conversation_id', conversationIds)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
 
       if (msgError) throw msgError
@@ -121,7 +139,7 @@ export function useConversations() {
         return {
           ...conv,
           participants,
-          last_message: lastMessage,
+          last_message: lastMessage as Message | undefined,
           unread_count: unreadCounts.get(conv.id) || 0
         }
       })
@@ -147,6 +165,10 @@ export function useConversationMessages(conversationId: string | null) {
           conversation_id,
           sender_id,
           content,
+          message_type,
+          image_url,
+          gif_url,
+          deleted_at,
           created_at,
           sender:profiles!sender_id(id, username, full_name, avatar_url)
         `)
@@ -154,24 +176,44 @@ export function useConversationMessages(conversationId: string | null) {
         .order('created_at', { ascending: true })
 
       if (error) throw error
+
+      // Get reactions for all messages
+      const messageIds = (data || []).map(m => m.id)
+      const { data: reactions } = await supabase
+        .from('message_reactions')
+        .select('*')
+        .in('message_id', messageIds)
       
-      // Transform sender from array to single object
+      // Transform sender from array to single object and attach reactions
       return (data || []).map(msg => ({
         ...msg,
-        sender: Array.isArray(msg.sender) ? msg.sender[0] : msg.sender
+        sender: Array.isArray(msg.sender) ? msg.sender[0] : msg.sender,
+        reactions: (reactions || []).filter(r => r.message_id === msg.id)
       })) as Message[]
     },
     enabled: !!conversationId,
   })
 }
 
-// Send a message
+// Send a message (text, image, or GIF)
 export function useSendMessage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: async ({ conversationId, content }: { conversationId: string; content: string }) => {
+    mutationFn: async ({ 
+      conversationId, 
+      content, 
+      messageType = 'text',
+      imageUrl,
+      gifUrl 
+    }: { 
+      conversationId: string
+      content: string
+      messageType?: 'text' | 'image' | 'gif'
+      imageUrl?: string
+      gifUrl?: string
+    }) => {
       if (!user) throw new Error('Not authenticated')
 
       const { data, error } = await supabase
@@ -179,7 +221,10 @@ export function useSendMessage() {
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
-          content: content.trim()
+          content: content.trim(),
+          message_type: messageType,
+          image_url: imageUrl || null,
+          gif_url: gifUrl || null
         })
         .select()
         .single()
@@ -191,6 +236,166 @@ export function useSendMessage() {
       queryClient.invalidateQueries({ queryKey: ['messages', variables.conversationId] })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
     }
+  })
+}
+
+// Delete a message (soft delete)
+export function useDeleteMessage() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  return useMutation({
+    mutationFn: async ({ messageId, conversationId }: { messageId: string; conversationId: string }) => {
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('messages')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', messageId)
+        .eq('sender_id', user.id)
+
+      if (error) throw error
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', variables.conversationId] })
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    }
+  })
+}
+
+// Add reaction to a message
+export function useAddReaction() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  return useMutation({
+    mutationFn: async ({ messageId, emoji, conversationId }: { messageId: string; emoji: string; conversationId: string }) => {
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('message_reactions')
+        .upsert({
+          message_id: messageId,
+          user_id: user.id,
+          emoji
+        }, { onConflict: 'message_id,user_id,emoji' })
+
+      if (error) throw error
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', variables.conversationId] })
+    }
+  })
+}
+
+// Remove reaction from a message
+export function useRemoveReaction() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  return useMutation({
+    mutationFn: async ({ messageId, emoji, conversationId }: { messageId: string; emoji: string; conversationId: string }) => {
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('message_reactions')
+        .delete()
+        .eq('message_id', messageId)
+        .eq('user_id', user.id)
+        .eq('emoji', emoji)
+
+      if (error) throw error
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', variables.conversationId] })
+    }
+  })
+}
+
+// Set typing indicator
+export function useTypingIndicator() {
+  const { user } = useAuth()
+
+  const setTyping = async (conversationId: string) => {
+    if (!user) return
+
+    await supabase
+      .from('typing_indicators')
+      .upsert({
+        conversation_id: conversationId,
+        user_id: user.id,
+        started_at: new Date().toISOString()
+      }, { onConflict: 'conversation_id,user_id' })
+  }
+
+  const clearTyping = async (conversationId: string) => {
+    if (!user) return
+
+    await supabase
+      .from('typing_indicators')
+      .delete()
+      .eq('conversation_id', conversationId)
+      .eq('user_id', user.id)
+  }
+
+  return { setTyping, clearTyping }
+}
+
+// Subscribe to typing indicators
+export function useTypingSubscription(conversationId: string | null) {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (!conversationId || !user) return
+
+    const channel = supabase
+      .channel(`typing:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'typing_indicators',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['typing', conversationId] })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [conversationId, user, queryClient])
+}
+
+// Get typing users in a conversation
+export function useTypingUsers(conversationId: string | null) {
+  const { user } = useAuth()
+
+  return useQuery({
+    queryKey: ['typing', conversationId],
+    queryFn: async () => {
+      if (!conversationId) return []
+
+      const { data, error } = await supabase
+        .from('typing_indicators')
+        .select(`
+          user_id,
+          started_at,
+          profile:profiles!user_id(id, username, full_name)
+        `)
+        .eq('conversation_id', conversationId)
+        .neq('user_id', user?.id || '')
+        .gt('started_at', new Date(Date.now() - 10000).toISOString())
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!conversationId && !!user,
+    refetchInterval: 3000, // Check every 3 seconds
   })
 }
 
@@ -294,7 +499,7 @@ export function useMessageSubscription(conversationId: string | null) {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*', // Listen to INSERT, UPDATE (for soft deletes), DELETE
           schema: 'public',
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
@@ -303,6 +508,18 @@ export function useMessageSubscription(conversationId: string | null) {
           // Invalidate queries to refetch messages
           queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
           queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'message_reactions'
+        },
+        () => {
+          // Refetch messages when reactions change
+          queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
         }
       )
       .subscribe()

@@ -35,6 +35,11 @@ html,
 body,
 #root {
   height: 100%;
+  min-height: 100%;
+}
+
+html {
+  background-color: #1A2D3D;
 }
 
 body {
@@ -42,6 +47,22 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-background);
   color: var(--color-text);
+  /* Prevent white overscroll on iOS */
+  overscroll-behavior: none;
+}
+
+/* iOS overscroll background fix */
+@supports (-webkit-touch-callout: none) {
+  html {
+    background-color: #1A2D3D;
+  }
+  body {
+    background-color: #1A2D3D;
+  }
+  .light html,
+  .light body {
+    background-color: #F8FAFC;
+  }
 }
 
 a {

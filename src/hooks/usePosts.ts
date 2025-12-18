@@ -1,8 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import type { Post, PostWithUser, Session, Catch } from '../types'
+import type { Post, PostMedia, PostWithUser, Session, Catch } from '../types'
 
 async function enrichPosts(basePosts: Post[]): Promise<PostWithUser[]> {
+  const postIds = basePosts.map((p) => p.id)
+
+  const mediaByPostId = new Map<string, PostMedia[]>()
+  if (postIds.length > 0) {
+    const { data: mediaRows, error: mediaError } = await supabase
+      .from('post_media')
+      .select('*')
+      .in('post_id', postIds)
+      .order('position', { ascending: true })
+
+    if (mediaError) throw new Error(mediaError.message)
+
+    for (const row of (mediaRows ?? []) as PostMedia[]) {
+      const existing = mediaByPostId.get(row.post_id) ?? []
+      existing.push(row)
+      mediaByPostId.set(row.post_id, existing)
+    }
+  }
+
   const enrichedPosts = await Promise.all(
     basePosts.map(async (post): Promise<PostWithUser | null> => {
       const { data: userData, error: userError } = await supabase
@@ -45,6 +64,7 @@ async function enrichPosts(basePosts: Post[]): Promise<PostWithUser[]> {
 
       return {
         ...post,
+        media: mediaByPostId.get(post.id) ?? [],
         user: {
           id: userData.id,
           username: userData.username,
@@ -329,6 +349,7 @@ export function useCreatePost() {
       session_id?: string
       catch_id?: string
       photo_url?: string
+      media_urls?: string[]
       caption?: string
       location_privacy?: 'private' | 'general' | 'exact'
       isPublic?: boolean
@@ -340,6 +361,8 @@ export function useCreatePost() {
       if (authError) throw new Error(authError.message)
       if (!user) throw new Error('Not authenticated')
 
+      const photoUrlForPost = newPost.photo_url ?? newPost.media_urls?.[0] ?? null
+
       const { data, error } = await supabase
         .from('posts')
         .insert({
@@ -347,7 +370,7 @@ export function useCreatePost() {
           type: newPost.type,
           session_id: newPost.session_id ?? null,
           catch_id: newPost.catch_id ?? null,
-          photo_url: newPost.photo_url ?? null,
+          photo_url: photoUrlForPost,
           caption: newPost.caption ?? null,
           location_privacy: newPost.location_privacy ?? null,
           is_public: newPost.isPublic ?? true,
@@ -359,7 +382,24 @@ export function useCreatePost() {
         console.error('Post creation error:', error)
         throw new Error(error.message)
       }
-      return data as Post
+
+      const createdPost = data as Post
+
+      if (newPost.media_urls && newPost.media_urls.length > 0) {
+        const mediaPayload = newPost.media_urls.map((url, idx) => ({
+          post_id: createdPost.id,
+          url,
+          position: idx,
+        }))
+
+        const { error: mediaInsertError } = await supabase.from('post_media').insert(mediaPayload)
+        if (mediaInsertError) {
+          console.error('Post media insert error:', mediaInsertError)
+          throw new Error(mediaInsertError.message)
+        }
+      }
+
+      return createdPost
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] })

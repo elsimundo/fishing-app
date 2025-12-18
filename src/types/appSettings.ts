@@ -4,7 +4,7 @@ export interface AppSetting {
   key: string
   value: string | number | boolean
   description?: string
-  category: 'xp' | 'rules' | 'system' | 'general'
+  category: 'xp' | 'rules' | 'system' | 'general' | 'branding' | 'admin'
   updated_at: string
 }
 

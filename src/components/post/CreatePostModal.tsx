@@ -90,7 +90,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full overflow-hidden rounded-t-3xl bg-card md:max-w-md md:rounded-2xl border border-border"
+        className="w-full max-h-[85vh] overflow-hidden rounded-t-3xl bg-card md:max-w-md md:rounded-2xl border border-border flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle bar (mobile) */}
@@ -111,7 +111,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
         </div>
 
         {/* Options */}
-        <div className="space-y-3 p-5">
+        <div className="space-y-3 p-5 overflow-y-auto flex-1">
           {options.map((option) => (
             <button
               key={option.id}
@@ -138,7 +138,8 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
           ))}
         </div>
 
-        <div className="h-6 md:h-4" />
+        {/* Safe area padding for mobile home indicator */}
+        <div className="h-6 pb-safe md:h-4" />
       </div>
     </div>
   )

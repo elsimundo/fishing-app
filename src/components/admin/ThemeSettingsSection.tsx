@@ -267,13 +267,13 @@ export function ThemeSettingsSection() {
               Dark Card
             </div>
             <div
-              className="flex h-16 w-24 items-center justify-center rounded-lg border border-border text-xs font-medium"
+              className="flex h-16 w-24 items-center justify-center rounded-lg border border-border text-xs font-medium text-slate-900"
               style={{ backgroundColor: localColors.background_light || DEFAULT_COLORS.background_light }}
             >
               Light BG
             </div>
             <div
-              className="flex h-16 w-24 items-center justify-center rounded-lg border border-border text-xs font-medium"
+              className="flex h-16 w-24 items-center justify-center rounded-lg border border-border text-xs font-medium text-slate-900"
               style={{ backgroundColor: localColors.card_light || DEFAULT_COLORS.card_light }}
             >
               Light Card

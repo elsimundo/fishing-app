@@ -61,22 +61,21 @@ export function useUpdateFeatureFlag() {
     mutationFn: async ({ key, value }: { key: FeatureFlag; value: boolean }) => {
       const { data, error } = await supabase
         .from('app_settings')
-        .update({ 
-          value: value,
+        .upsert({
+          key,
+          value,
+          category: 'system',
           updated_at: new Date().toISOString(),
         })
-        .eq('key', key)
         .select()
+        .single()
       
       if (error) throw new Error(error.message)
-      if (!data || data.length === 0) {
-        throw new Error('Update failed - check admin permissions')
-      }
-      
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] })
+      queryClient.invalidateQueries({ queryKey: ['app-settings'] })
     },
   })
 }

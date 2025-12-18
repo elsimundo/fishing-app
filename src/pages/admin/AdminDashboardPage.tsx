@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { Users, Store, TrendingUp, Clock, AlertCircle, EyeOff, Eye, MapPin, Loader2 } from 'lucide-react'
+import { Users, Store, TrendingUp, Clock, AlertCircle, EyeOff, Eye, MapPin, Loader2, Activity, DollarSign } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'react-hot-toast'
+import { useApiUsageSummary, API_COST_ESTIMATES } from '../../hooks/useApiUsage'
 
 export default function AdminDashboardPage() {
   // Fetch stats
@@ -72,6 +73,9 @@ export default function AdminDashboardPage() {
           />
         </div>
 
+        {/* API Usage Tracking */}
+        <ApiUsageSection />
+
         {/* Hidden Lakes */}
         <HiddenLakesSection />
 
@@ -99,10 +103,10 @@ function StatCard({
   loading?: boolean
 }) {
   const colors = {
-    blue: 'bg-[#DBEAFE] text-[#2563EB]',
-    green: 'bg-[#DCFCE7] text-[#16A34A]',
-    yellow: 'bg-[#FEF9C3] text-[#CA8A04]',
-    purple: 'bg-[#F3E8FF] text-[#7C3AED]',
+    blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200',
+    green: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200',
+    yellow: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200',
+    purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200',
   }
 
   return (
@@ -228,7 +232,7 @@ function HiddenLakesSection() {
         <EyeOff size={20} className="text-red-500" />
         <h2 className="text-lg font-bold text-foreground lg:text-xl">Hidden Lakes</h2>
         {hiddenLakes && hiddenLakes.length > 0 && (
-          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-200">
             {hiddenLakes.length}
           </span>
         )}
@@ -266,7 +270,7 @@ function HiddenLakesSection() {
                 type="button"
                 onClick={() => unhideMutation.mutate(lake.id)}
                 disabled={unhideMutation.isPending}
-                className="flex items-center gap-1 rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-200 disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:hover:bg-emerald-900/40 disabled:opacity-50"
               >
                 <Eye size={12} />
                 Show on map
@@ -278,6 +282,85 @@ function HiddenLakesSection() {
         <div className="flex items-center gap-2 rounded-lg bg-muted p-4 text-sm text-muted-foreground">
           <Eye size={16} className="text-green-500" />
           <span>All lakes are visible. Hidden lakes will appear here.</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ApiUsageSection() {
+  const { data: apiUsage, isLoading } = useApiUsageSummary(30)
+
+  // Calculate estimated monthly cost
+  const estimatedMonthlyCost = apiUsage?.reduce((total, api) => {
+    const costInfo = API_COST_ESTIMATES[api.api_name] || API_COST_ESTIMATES.other
+    return total + (api.calls_this_month * costInfo.perCall)
+  }, 0) || 0
+
+  const formatApiName = (name: string) => {
+    return name
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
+  return (
+    <div className="mb-8 rounded-xl border border-border bg-card p-4 shadow-sm lg:p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Activity size={20} className="text-blue-500" />
+          <h2 className="text-lg font-bold text-foreground lg:text-xl">API Usage</h2>
+        </div>
+        {estimatedMonthlyCost > 0 && (
+          <div className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
+            <DollarSign size={12} />
+            ~${estimatedMonthlyCost.toFixed(2)}/mo
+          </div>
+        )}
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 size={24} className="animate-spin text-muted-foreground" />
+        </div>
+      ) : apiUsage && apiUsage.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                <th className="pb-2 font-medium">API</th>
+                <th className="pb-2 text-right font-medium">Today</th>
+                <th className="pb-2 text-right font-medium">7 Days</th>
+                <th className="pb-2 text-right font-medium">30 Days</th>
+                <th className="pb-2 text-right font-medium">Est. Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apiUsage.map((api) => {
+                const costInfo = API_COST_ESTIMATES[api.api_name] || API_COST_ESTIMATES.other
+                const monthlyCost = api.calls_this_month * costInfo.perCall
+                return (
+                  <tr key={api.api_name} className="border-b border-border last:border-0">
+                    <td className="py-2">
+                      <span className="font-medium text-foreground">{formatApiName(api.api_name)}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">{costInfo.notes}</span>
+                    </td>
+                    <td className="py-2 text-right font-mono text-foreground">{api.calls_today.toLocaleString()}</td>
+                    <td className="py-2 text-right font-mono text-foreground">{api.calls_this_week.toLocaleString()}</td>
+                    <td className="py-2 text-right font-mono text-foreground">{api.calls_this_month.toLocaleString()}</td>
+                    <td className="py-2 text-right font-mono text-foreground">
+                      {monthlyCost > 0 ? `$${monthlyCost.toFixed(2)}` : 'Free'}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 rounded-lg bg-muted p-4 text-sm text-muted-foreground">
+          <AlertCircle size={16} />
+          <span>No API calls tracked yet. Usage will appear here once tracking is integrated.</span>
         </div>
       )}
     </div>
@@ -330,10 +413,10 @@ function QuickActionButton({
   color: 'blue' | 'green' | 'yellow' | 'purple'
 }) {
   const colors = {
-    blue: 'bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]',
-    green: 'bg-[#F0FDF4] text-[#15803D] hover:bg-[#DCFCE7]',
-    yellow: 'bg-[#FFFBEB] text-[#B45309] hover:bg-[#FEF3C7]',
-    purple: 'bg-[#FAF5FF] text-[#6D28D9] hover:bg-[#F3E8FF]',
+    blue: 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-200 dark:hover:bg-blue-900/30',
+    green: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-200 dark:hover:bg-emerald-900/30',
+    yellow: 'bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-200 dark:hover:bg-amber-900/30',
+    purple: 'bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-200 dark:hover:bg-purple-900/30',
   }
 
   return (

@@ -1,4 +1,5 @@
 import type { TideStation, TidePrediction, TideData } from '../types/tides'
+import { trackApiCall } from '../lib/apiTracker'
 
 const WORLDTIDES_BASE_URL = 'https://www.worldtides.info/api/v3'
 
@@ -43,6 +44,9 @@ export async function findNearestWorldTidesStation(
   })
 
   const response = await fetch(`${WORLDTIDES_BASE_URL}?${params}`)
+
+  // Track API call
+  trackApiCall({ apiName: 'worldtides', endpoint: 'stations' })
 
   if (!response.ok) {
     throw new Error(`WorldTides API error: ${response.status}`)
@@ -105,6 +109,9 @@ export async function getWorldTidesPredictions(
   const url = `${WORLDTIDES_BASE_URL}?extremes&${params}`
   const response = await fetch(url)
 
+  // Track API call
+  trackApiCall({ apiName: 'worldtides', endpoint: 'extremes' })
+
   if (!response.ok) {
     console.error(`[WorldTides] API error: ${response.status}`)
     throw new Error(`WorldTides API error: ${response.status}`)
@@ -157,6 +164,9 @@ export async function getWorldTidesPredictionsForDate(
 
   const url = `${WORLDTIDES_BASE_URL}?extremes&${params}`
   const response = await fetch(url)
+
+  // Track API call
+  trackApiCall({ apiName: 'worldtides', endpoint: 'extremes_date' })
 
   if (!response.ok) {
     console.error(`[WorldTides] API error: ${response.status}`)

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { useCreatePost } from '../../hooks/usePosts'
 import { useSession } from '../../hooks/useSession'
 import { supabase } from '../../lib/supabase'
 import { toast } from 'react-hot-toast'
+import { compressPhoto } from '../../utils/imageCompression'
 
 interface AddSessionPostModalProps {
   sessionId: string
@@ -12,9 +13,10 @@ interface AddSessionPostModalProps {
 
 export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalProps) {
   const [caption, setCaption] = useState('')
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { data: session } = useSession(sessionId)
   const { mutateAsync: createPost, isPending } = useCreatePost()
@@ -23,31 +25,74 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
   const allowComments = session?.allow_comments ?? true
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files ?? [])
+    if (files.length === 0) return
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
-      return
+    const validFiles: File[] = []
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select image files only')
+        continue
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error('Each image must be less than 50MB')
+        continue
+      }
+      validFiles.push(file)
     }
 
-    setPhotoFile(file)
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setPhotoPreview(reader.result as string)
+    if (validFiles.length === 0) return
+
+    const nextFiles = [...photoFiles, ...validFiles].slice(0, 10)
+    setPhotoFiles(nextFiles)
+
+    const nextPreviews = [...photoPreviews]
+    for (const f of validFiles) {
+      if (nextPreviews.length >= 10) break
+      nextPreviews.push(URL.createObjectURL(f))
     }
-    reader.readAsDataURL(file)
+    setPhotoPreviews(nextPreviews)
   }
 
-  const handleRemovePhoto = () => {
-    setPhotoFile(null)
-    setPhotoPreview(null)
+  const handleRemovePhotoAt = (index: number) => {
+    setPhotoFiles((prev) => prev.filter((_, i) => i !== index))
+    setPhotoPreviews((prev) => {
+      const url = prev[index]
+      if (url) URL.revokeObjectURL(url)
+      return prev.filter((_, i) => i !== index)
+    })
+    if (fileInputRef.current && photoFiles.length <= 1) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const uploadPhotos = async (): Promise<string[]> => {
+    if (photoFiles.length === 0) return []
+
+    const urls: string[] = []
+    for (const file of photoFiles) {
+      const compressedFile = await compressPhoto(file)
+      const fileExt = 'jpg'
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+      const filePath = `session-posts/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('posts')
+        .upload(filePath, compressedFile)
+
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage.from('posts').getPublicUrl(filePath)
+      urls.push(urlData.publicUrl)
+    }
+
+    return urls
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!caption.trim() && !photoFile) {
+    if (!caption.trim() && photoFiles.length === 0) {
       toast.error('Please add a caption or photo')
       return
     }
@@ -55,30 +100,15 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
     try {
       setUploading(true)
 
-      let photoUrl: string | undefined
-
-      // Upload photo if present
-      if (photoFile) {
-        const fileExt = photoFile.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-        const filePath = `session-posts/${fileName}`
-
-        const { error: uploadError } = await supabase.storage
-          .from('posts')
-          .upload(filePath, photoFile)
-
-        if (uploadError) throw uploadError
-
-        const { data: urlData } = supabase.storage.from('posts').getPublicUrl(filePath)
-        photoUrl = urlData.publicUrl
-      }
+      const mediaUrls = await uploadPhotos()
 
       // Create post
       await createPost({
         type: 'photo',
         session_id: sessionId,
         caption: caption.trim() || undefined,
-        photo_url: photoUrl,
+        photo_url: mediaUrls[0],
+        media_urls: mediaUrls,
         isPublic: true,
       })
 
@@ -132,22 +162,25 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
               )}
 
           {/* Photo preview */}
-          {photoPreview && (
-            <div className="relative mb-4">
-              <img
-                src={photoPreview}
-                alt="Preview"
-                className="w-full rounded-lg object-cover"
-                style={{ maxHeight: '300px' }}
-              />
-              <button
-                type="button"
-                onClick={handleRemovePhoto}
-                className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
-                disabled={uploading || isPending}
-              >
-                <X size={16} />
-              </button>
+          {photoPreviews.length > 0 && (
+            <div className="mb-4 flex gap-3 overflow-x-auto">
+              {photoPreviews.map((src, idx) => (
+                <div key={src} className="relative flex-shrink-0">
+                  <img
+                    src={src}
+                    alt={`Preview ${idx + 1}`}
+                    className="h-40 w-40 rounded-2xl object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePhotoAt(idx)}
+                    className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+                    disabled={uploading || isPending}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
@@ -156,10 +189,12 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
                 {allowPosts && (
                   <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted">
                     <ImageIcon size={18} />
-                    <span>Add photo</span>
+                    <span>{photoPreviews.length > 0 ? 'Add photos' : 'Add photo'}</span>
                     <input
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handlePhotoChange}
                       className="hidden"
                       disabled={uploading || isPending}
@@ -169,7 +204,7 @@ export function AddSessionPostModal({ sessionId, onClose }: AddSessionPostModalP
 
                 <button
                   type="submit"
-                  disabled={uploading || isPending || (!caption.trim() && !photoFile)}
+                  disabled={uploading || isPending || (!caption.trim() && photoFiles.length === 0)}
                   className="flex items-center gap-2 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
                 >
                   {uploading || isPending ? (

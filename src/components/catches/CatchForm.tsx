@@ -110,6 +110,12 @@ function mapAiSpeciesToOption(aiSpecies: string): string {
     'atlantic salmon': 'Salmon (Atlantic)',
     'brown trout': 'Trout (Brown)',
     'rainbow trout': 'Trout (Rainbow)',
+    weever: 'Weever (Greater)',
+    'weever fish': 'Weever (Greater)',
+    'greater weever': 'Weever (Greater)',
+    'greater weever fish': 'Weever (Greater)',
+    'lesser weever': 'Weever (Lesser)',
+    'lesser weever fish': 'Weever (Lesser)',
   }
 
   if (manualMap[aiNorm]) {
@@ -369,6 +375,20 @@ export function CatchForm({
     region: REGION_FOR_RULES,
     lengthCm: lengthNumber,
   })
+
+  // Auto-check released toggle when fish is undersized (soft nudge)
+  // Also auto-set for freshwater sessions (mandatory release)
+  useEffect(() => {
+    if (legalStatus.status === 'undersized' && !returned) {
+      setReturned(true)
+    }
+  }, [legalStatus.status])
+
+  useEffect(() => {
+    if (isFreshwaterSession) {
+      setReturned(true)
+    }
+  }, [isFreshwaterSession])
 
   const onSubmit = async (values: CatchFormValues) => {
     if (!user) {
@@ -669,6 +689,7 @@ export function CatchForm({
         windSpeed: data.wind_speed,
         moonPhase: data.moon_phase,
         countryCode: payload.country_code,
+        released: returned,
       }).then((result) => {
         if (result.challengesCompleted.length > 0) {
           celebrateChallenges(result.challengesCompleted, {
@@ -1120,19 +1141,11 @@ export function CatchForm({
               
               {/* Legal size status */}
               {legalStatus.status === 'undersized' && legalStatus.rule?.minLengthCm ? (
-                <div className="mt-2 space-y-2">
-                  <p className="text-[11px] text-red-600 font-medium">
-                    ⚠️ Undersized for this region (minimum {legalStatus.rule.minLengthCm} cm). Please return this fish.
+                <div className="mt-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-3">
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    This {watchedSpecies || 'fish'} is below the minimum size of {legalStatus.rule.minLengthCm}cm. 
+                    Most anglers return undersized fish to help stocks recover.
                   </p>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={returned}
-                      onChange={(e) => setReturned(e.target.checked)}
-                      className="h-4 w-4 rounded border-border bg-background text-navy-800 focus:ring-navy-800"
-                    />
-                    <span className="text-xs text-muted-foreground">I returned this fish to the water</span>
-                  </label>
                 </div>
               ) : legalStatus.status === 'legal' ? (
                 <p className="mt-1 text-[11px] text-emerald-600">
@@ -1141,6 +1154,38 @@ export function CatchForm({
               ) : null}
             </div>
           </>
+        )}
+
+        {/* Released toggle - only show for saltwater (freshwater is mandatory release) */}
+        {!isFreshwaterSession && (
+          <div className="rounded-lg border border-border bg-card p-3">
+            <label className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🐟</span>
+                <div>
+                  <span className="text-sm font-medium text-foreground">Released</span>
+                  <p className="text-[11px] text-muted-foreground">I returned this fish to the water</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {returned && (
+                  <span className="text-[10px] font-medium text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded">
+                    +5 XP
+                  </span>
+                )}
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={returned}
+                    onChange={(e) => setReturned(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:bg-emerald-500 transition-colors"></div>
+                  <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+                </div>
+              </div>
+            </label>
+          </div>
         )}
 
         <div>

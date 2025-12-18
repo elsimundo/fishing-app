@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Settings, X, MessageCircle, Search } from 'lucide-react'
+import { useTheme } from '../../hooks/useTheme'
+import { useBranding } from '../../hooks/useBranding'
 import { NotificationBell } from '../notifications/NotificationBell'
 import { useAuth } from '../../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
@@ -14,6 +16,8 @@ export function MobileHeader() {
   const { signOut } = useAuth()
   const navigate = useNavigate()
   const unreadCount = useUnreadCount()
+  const { theme } = useTheme()
+  const { logoLight, logoDark } = useBranding()
 
   // Track scroll direction to hide/show header
   useEffect(() => {
@@ -52,7 +56,11 @@ export function MobileHeader() {
         <div className="px-5 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/catchi-logo.svg" alt="Catchi" className="h-7 w-auto" />
+            <img 
+              src={theme === 'dark' ? logoDark : logoLight} 
+              alt="Catchi" 
+              className="h-7 w-auto" 
+            />
           </div>
           <div className="flex items-center gap-1">
             {/* Search button */}
@@ -96,9 +104,10 @@ export function MobileHeader() {
 
       {/* Dropdown Menu */}
       {showMenu && (
-        <div className="fixed inset-0 z-30 bg-black/40" onClick={() => setShowMenu(false)}>
+        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShowMenu(false)}>
           <div 
-            className="absolute right-4 top-16 w-48 rounded-xl bg-card shadow-lg ring-1 ring-border"
+            className="absolute right-4 w-48 rounded-xl bg-card shadow-lg ring-1 ring-border"
+            style={{ top: 'calc(env(safe-area-inset-top) + 56px)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-2">

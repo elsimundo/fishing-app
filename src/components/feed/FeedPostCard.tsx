@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { PostWithUser } from '../../types'
 import { PostHeader } from './PostHeader'
@@ -20,6 +20,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
   const { user } = useAuth()
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost()
   const [showMenu, setShowMenu] = useState(false)
+  const [carouselIndex, setCarouselIndex] = useState(0)
   const { formatWeight } = useWeightFormatter()
 
   type StatTile = { label: string; value: string }
@@ -81,6 +82,12 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
 
   const coverImage = getCoverImage()
 
+  const carouselImages = useMemo(() => {
+    const mediaUrls = (post.media ?? []).map((m) => m.url).filter(Boolean)
+    if (mediaUrls.length > 0) return mediaUrls
+    return coverImage ? [coverImage] : []
+  }, [coverImage, post.media])
+
   const handleCardClick = () => {
     if (post.type === 'session' && post.session_id) {
       navigate(`/sessions/${post.session_id}`)
@@ -93,7 +100,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
   }
 
   return (
-    <article className="relative bg-card px-5 py-4 border-b border-border">
+    <article className="relative bg-card py-4 border-b border-border">
       {/* Post Menu for own posts */}
       {isOwnPost && (
         <div className="absolute right-4 top-4">
@@ -127,20 +134,22 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
         </div>
       )}
 
-      <PostHeader
-        user={post.user}
-        createdAt={post.created_at}
-        onUserClick={() => {
+      <div className="px-3">
+        <PostHeader
+          user={post.user}
+          createdAt={post.created_at}
+          onUserClick={() => {
           if (post.user.username) {
             navigate(`/${post.user.username}`)
           } else {
             navigate(`/profile/${post.user.id}`)
           }
-        }}
-      />
+          }}
+        />
+      </div>
 
       {showVisibility ? (
-        <div className="mt-1 flex justify-end">
+        <div className="mt-1 flex justify-end px-3">
           {onToggleVisibility ? (
             <button
               type="button"
@@ -163,22 +172,64 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
         </div>
       ) : null}
 
-      {coverImage && (
-        <div className="-mx-5 my-3 cursor-pointer" onClick={handleCardClick}>
-          <img
-            src={coverImage}
-            alt="Post cover"
-            className="aspect-[4/3] w-full object-cover"
-          />
+      {carouselImages.length > 0 && (
+        <div className="my-3">
+          {carouselImages.length === 1 ? (
+            <div className="cursor-pointer" onClick={handleCardClick}>
+              <img
+                src={carouselImages[0]}
+                alt="Post cover"
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </div>
+          ) : (
+            <>
+              <div
+                className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth"
+                style={{ scrollbarWidth: 'none' }}
+                onScroll={(e) => {
+                  const el = e.currentTarget
+                  const width = el.clientWidth || 1
+                  const nextIndex = Math.round(el.scrollLeft / width)
+                  if (nextIndex !== carouselIndex) setCarouselIndex(nextIndex)
+                }}
+              >
+                {carouselImages.map((src, idx) => (
+                  <button
+                    key={`${post.id}-${idx}`}
+                    type="button"
+                    onClick={handleCardClick}
+                    className="relative w-full flex-shrink-0 snap-center"
+                    aria-label={`View post (${idx + 1} of ${carouselImages.length})`}
+                  >
+                    <img
+                      src={src}
+                      alt={`Post image ${idx + 1}`}
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-2 flex justify-center gap-1.5">
+                {carouselImages.map((_, idx) => (
+                  <div
+                    key={`${post.id}-dot-${idx}`}
+                    className={`h-1.5 w-1.5 rounded-full ${idx === carouselIndex ? 'bg-foreground' : 'bg-muted-foreground/40'}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
       {post.caption && (
-        <p className="text-[15px] leading-relaxed text-foreground">{post.caption}</p>
+        <p className="px-3 text-[15px] leading-relaxed text-foreground">{post.caption}</p>
       )}
 
       {post.type === 'catch' && post.catch && catchStatTiles.length > 0 ? (
-        <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4 sm:text-xs">
+        <div className="mx-3 mt-3 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4 sm:text-xs">
           {catchStatTiles.map((tile) => (
             <div key={tile.label} className="rounded-xl bg-background px-2 py-2">
               <p className="text-[10px] text-muted-foreground">{tile.label}</p>
@@ -190,7 +241,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
 
       {post.type === 'session' && post.session && (
         <div
-          className="mt-3 cursor-pointer rounded-xl bg-background p-3 transition-colors hover:bg-muted"
+          className="mx-3 mt-3 cursor-pointer rounded-xl bg-background p-3 transition-colors hover:bg-muted"
           onClick={handleCardClick}
         >
           <div className="flex items-center justify-between">
@@ -210,7 +261,7 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
 
       {post.type === 'catch' && post.catch && (
         <div
-          className="mt-3 cursor-pointer rounded-xl bg-background p-3 transition-colors hover:bg-muted"
+          className="mx-3 mt-3 cursor-pointer rounded-xl bg-background p-3 transition-colors hover:bg-muted"
           onClick={handleCardClick}
         >
           <div className="flex items-center justify-between gap-3">
@@ -228,12 +279,14 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
         </div>
       )}
 
-      <PostActions
-        postId={post.id}
-        likeCount={post.like_count}
-        commentCount={post.comment_count}
-        isLiked={post.is_liked_by_user}
-      />
+      <div className="px-3">
+        <PostActions
+          postId={post.id}
+          likeCount={post.like_count}
+          commentCount={post.comment_count}
+          isLiked={post.is_liked_by_user}
+        />
+      </div>
     </article>
   )
 }

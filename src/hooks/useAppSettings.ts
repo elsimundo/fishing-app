@@ -88,12 +88,21 @@ export function useUpdateAppSetting() {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async ({ key, value }: { key: string; value: string | number | boolean }) => {
+    mutationFn: async ({
+      key,
+      value,
+      category = 'general',
+    }: {
+      key: string
+      value: unknown
+      category?: string
+    }) => {
       const { data, error } = await supabase
         .from('app_settings')
         .upsert({
           key,
-          value: String(value),
+          value,
+          category,
           updated_at: new Date().toISOString(),
         })
         .select()

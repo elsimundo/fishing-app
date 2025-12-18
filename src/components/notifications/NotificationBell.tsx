@@ -6,9 +6,10 @@ import { Link } from 'react-router-dom'
 
 interface NotificationBellProps {
   align?: 'left' | 'right'
+  variant?: 'icon' | 'sidebar'
 }
 
-export function NotificationBell({ align = 'right' }: NotificationBellProps) {
+export function NotificationBell({ align = 'right', variant = 'icon' }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { data: notifications = [] } = useNotifications()
@@ -39,21 +40,37 @@ export function NotificationBell({ align = 'right' }: NotificationBellProps) {
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Bell Button */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-2 text-muted-foreground hover:bg-muted transition-colors"
-        aria-label="Notifications"
-      >
-        <Bell size={20} />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
+    <div className={variant === 'sidebar' ? 'relative w-full' : 'relative'} ref={dropdownRef}>
+      {variant === 'sidebar' ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex w-full items-center gap-4 rounded-xl px-4 py-3 transition-all text-foreground font-medium hover:bg-card"
+          aria-label="Notifications"
+        >
+          <Bell size={28} className="text-foreground" />
+          <span className="text-base">Notifications</span>
+          {unreadCount > 0 ? (
+            <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          ) : null}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative rounded-full p-2 text-muted-foreground hover:bg-muted transition-colors"
+          aria-label="Notifications"
+        >
+          <Bell size={20} />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Dropdown */}
       {isOpen && (
