@@ -1,4 +1,4 @@
-import { ArrowLeft, Camera, MapPin, Clock, Trophy, Shield, Zap, Fish, Sun, Moon, Cloud, Wind, Loader2 } from 'lucide-react'
+import { ArrowLeft, Camera, MapPin, Clock, Trophy, Shield, Zap, Fish, Sun, Moon, Cloud, Wind, Loader2, ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useXPSettings } from '../hooks/useAppSettings'
 
@@ -98,6 +98,113 @@ export function ChallengeRulesPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Verification System */}
+        <section className="rounded-2xl bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-900/50">
+              <ShieldCheck size={20} className="text-cyan-600 dark:text-cyan-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Catch Verification</h3>
+              <p className="text-xs text-muted-foreground">How catches are verified for XP & badges</p>
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground mb-4">
+            Catches are automatically verified using photo metadata, GPS, timestamps, and AI species recognition. 
+            Higher verification = more XP and badge eligibility.
+          </p>
+          
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between items-center py-2 border-b border-border">
+              <div className="flex items-center gap-2">
+                <span>💎</span>
+                <span className="font-medium text-foreground">Platinum</span>
+                <span className="text-xs text-muted-foreground">(85+ pts)</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold text-cyan-400">100% XP</span>
+                <span className="text-xs text-muted-foreground ml-2">+ Badges + Competitions</span>
+              </div>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border">
+              <div className="flex items-center gap-2">
+                <span>🥇</span>
+                <span className="font-medium text-foreground">Gold</span>
+                <span className="text-xs text-muted-foreground">(70-84 pts)</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold text-yellow-400">100% XP</span>
+                <span className="text-xs text-muted-foreground ml-2">+ Badges</span>
+              </div>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border">
+              <div className="flex items-center gap-2">
+                <span>🥈</span>
+                <span className="font-medium text-foreground">Silver</span>
+                <span className="text-xs text-muted-foreground">(50-69 pts)</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold text-gray-300">100% XP</span>
+              </div>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border">
+              <div className="flex items-center gap-2">
+                <span>🥉</span>
+                <span className="font-medium text-foreground">Bronze</span>
+                <span className="text-xs text-muted-foreground">(30-49 pts)</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold text-orange-400">50% XP</span>
+              </div>
+            </div>
+            <div className="flex justify-between items-center py-2">
+              <div className="flex items-center gap-2">
+                <span>❌</span>
+                <span className="font-medium text-foreground">Unverified</span>
+                <span className="text-xs text-muted-foreground">(0-29 pts)</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold text-red-400">0% XP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 rounded-lg bg-background border border-border p-3">
+            <p className="text-xs font-medium text-foreground mb-2">How to earn verification points:</p>
+            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+15</span> Photo attached
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+20</span> Photo has GPS
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+25</span> GPS within 100m
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+15</span> Photo timestamp
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+15</span> Time within 15min
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+10</span> AI species match
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+10</span> During session
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-emerald-400">+5</span> Camera metadata
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-3 text-xs text-muted-foreground">
+            <strong className="text-foreground">Tip:</strong> Enable GPS on your camera and take photos right when you catch the fish for the highest verification score.
           </div>
         </section>
 

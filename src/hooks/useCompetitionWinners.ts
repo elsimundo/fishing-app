@@ -76,18 +76,107 @@ export function useDeclareWinner() {
       })
 
       if (error) throw error
+      
+      // Check winner/podium challenges for the winner
+      await checkCompetitionWinnerChallenges(winnerUserId, competitionId)
+      
       return data
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['competition-winners', variables.competitionId],
       })
+      queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
       toast.success('Winner declared!')
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to declare winner')
     },
   })
+}
+
+/**
+ * Check and complete competition winner/podium challenges
+ */
+async function checkCompetitionWinnerChallenges(userId: string, competitionId: string) {
+  // Get all winners for this competition to determine placement
+  const { data: winners } = await supabase
+    .from('competition_winners')
+    .select('user_id, category')
+    .eq('competition_id', competitionId)
+    .order('declared_at', { ascending: true })
+  
+  if (!winners) return
+  
+  // Check if this user won (1st place in any category)
+  const userWins = winners.filter(w => w.user_id === userId)
+  const isWinner = userWins.length > 0
+  
+  // Count total wins across all competitions
+  const { count: totalWins } = await supabase
+    .from('competition_winners')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+  
+  // Check podium (top 3) - for this we check leaderboard position
+  const { data: leaderboard } = await supabase
+    .rpc('get_competition_leaderboard', { p_competition_id: competitionId })
+  
+  const userRank = leaderboard?.findIndex((entry: any) => entry.user_id === userId) ?? -1
+  const isPodium = userRank >= 0 && userRank < 3
+  
+  // Count total podium finishes
+  // This is simplified - in production you'd track this more accurately
+  const podiumCount = isPodium ? 1 : 0
+  
+  const challenges = [
+    { slug: 'comp_winner', check: isWinner, value: totalWins || 1, target: 1 },
+    { slug: 'comp_podium', check: isPodium, value: podiumCount, target: 1 },
+  ]
+  
+  for (const c of challenges) {
+    if (!c.check) continue
+    
+    // Get challenge
+    const { data: challenge } = await supabase
+      .from('challenges')
+      .select('id, xp_reward')
+      .eq('slug', c.slug)
+      .maybeSingle()
+    
+    if (!challenge) continue
+    
+    // Check if already completed
+    const { data: existing } = await supabase
+      .from('user_challenges')
+      .select('completed_at')
+      .eq('user_id', userId)
+      .eq('challenge_id', challenge.id)
+      .maybeSingle()
+    
+    if (existing?.completed_at) continue
+    
+    // Complete the challenge
+    await supabase
+      .from('user_challenges')
+      .upsert({
+        user_id: userId,
+        challenge_id: challenge.id,
+        progress: c.value,
+        target: c.target,
+        completed_at: new Date().toISOString(),
+        xp_awarded: challenge.xp_reward,
+      }, { onConflict: 'user_id,challenge_id' })
+    
+    // Award XP
+    await supabase.rpc('award_xp', {
+      p_user_id: userId,
+      p_amount: challenge.xp_reward,
+      p_reason: 'challenge_completed',
+      p_reference_type: 'challenge',
+      p_reference_id: challenge.id,
+    })
+  }
 }
 
 /**

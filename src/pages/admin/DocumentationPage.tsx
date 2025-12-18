@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { FileText, ChevronDown, ChevronRight, MapPin, Store, CheckCircle } from 'lucide-react'
+import { FileText, ChevronDown, ChevronRight, MapPin, Store, CheckCircle, Trophy } from 'lucide-react'
 
-type DocSection = 'lakes' | 'businesses' | null
+type DocSection = 'lakes' | 'businesses' | 'competitions' | null
 
 export default function DocumentationPage() {
   const [expandedSection, setExpandedSection] = useState<DocSection>('lakes')
@@ -81,6 +81,36 @@ export default function DocumentationPage() {
             {expandedSection === 'businesses' && (
               <div className="border-t border-border p-5">
                 <BusinessesDocumentation />
+              </div>
+            )}
+          </div>
+
+          {/* Competitions Documentation */}
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection('competitions')}
+              className="flex w-full items-center justify-between p-5 text-left hover:bg-muted/50"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20">
+                  <Trophy size={20} className="text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Competitions</h2>
+                  <p className="text-sm text-muted-foreground">How competitions work</p>
+                </div>
+              </div>
+              {expandedSection === 'competitions' ? (
+                <ChevronDown size={20} className="text-muted-foreground" />
+              ) : (
+                <ChevronRight size={20} className="text-muted-foreground" />
+              )}
+            </button>
+
+            {expandedSection === 'competitions' && (
+              <div className="border-t border-border p-5">
+                <CompetitionsDocumentation />
               </div>
             )}
           </div>
@@ -415,6 +445,176 @@ function BusinessesDocumentation() {
           <div className="rounded-lg bg-background border border-border p-3">
             <p className="font-mono text-xs text-primary">src/hooks/useBusinessClaims.ts</p>
             <p className="text-muted-foreground mt-1">useMyBusinessClaims, useMyBusinessSubmissions hooks</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CompetitionsDocumentation() {
+  return (
+    <div className="space-y-6">
+      {/* Overview */}
+      <div>
+        <h3 className="text-base font-semibold text-foreground mb-2">Overview</h3>
+        <p className="text-sm text-muted-foreground">
+          Competitions are collaborative fishing events where multiple anglers participate together.
+          <strong className="text-foreground"> Key concept: A Competition IS a Session.</strong> Users join
+          by becoming participants on the competition's backing session.
+        </p>
+      </div>
+
+      {/* How It Works */}
+      <div>
+        <h3 className="text-base font-semibold text-foreground mb-3">How Competitions Work</h3>
+        <div className="space-y-3">
+          <StepCard
+            number={1}
+            title="Organizer Creates Competition"
+            description="Creates competition with title, type, dates, and restrictions. A backing session is automatically created and linked."
+            status="info"
+          />
+          <StepCard
+            number={2}
+            title="Users Join"
+            description="Users click 'Join Competition' which adds them as a participant to the competition's session (session_participants table)."
+            status="info"
+          />
+          <StepCard
+            number={3}
+            title="Log Catches"
+            description="Participants log catches to the shared competition session. All catches from all participants are visible."
+            status="info"
+          />
+          <StepCard
+            number={4}
+            title="Leaderboard Updates"
+            description="Leaderboard automatically calculates rankings based on competition type (heaviest fish, most catches, species diversity)."
+            status="pending"
+          />
+          <StepCard
+            number={5}
+            title="Winners Declared"
+            description="When competition ends, organizer declares winners for each award category. Winners receive XP and unlock challenges."
+            status="success"
+          />
+        </div>
+      </div>
+
+      {/* Competition Types */}
+      <div>
+        <h3 className="text-base font-semibold text-foreground mb-3">Competition Types</h3>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="rounded-lg bg-background border border-border p-2">
+            <span className="font-medium text-foreground">heaviest_fish</span>
+            <p className="text-xs text-muted-foreground">Biggest single catch wins</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-2">
+            <span className="font-medium text-foreground">most_catches</span>
+            <p className="text-xs text-muted-foreground">Most fish caught wins</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-2">
+            <span className="font-medium text-foreground">species_diversity</span>
+            <p className="text-xs text-muted-foreground">Most unique species wins</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-2">
+            <span className="font-medium text-foreground">photo_contest</span>
+            <p className="text-xs text-muted-foreground">Best photo (judged)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Challenges Integration */}
+      <div>
+        <h3 className="text-base font-semibold text-foreground mb-3">Challenge Integration</h3>
+        <div className="rounded-xl bg-background border border-border p-4">
+          <p className="text-sm text-muted-foreground mb-3">Competition-related challenges that award XP:</p>
+          <ul className="grid gap-2 text-sm">
+            <li className="flex items-center gap-2">
+              <CheckCircle size={14} className="text-emerald-400" />
+              <span className="text-foreground"><strong>comp_entered</strong> - Join your first competition</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle size={14} className="text-emerald-400" />
+              <span className="text-foreground"><strong>comp_5_entered</strong> - Join 5 competitions</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle size={14} className="text-emerald-400" />
+              <span className="text-foreground"><strong>comp_winner</strong> - Win a competition</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle size={14} className="text-emerald-400" />
+              <span className="text-foreground"><strong>comp_podium</strong> - Finish in top 3</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Database Tables */}
+      <div>
+        <h3 className="text-base font-semibold text-foreground mb-3">Database Tables</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="py-2 px-3 text-left font-medium text-muted-foreground">Table</th>
+                <th className="py-2 px-3 text-left font-medium text-muted-foreground">Purpose</th>
+              </tr>
+            </thead>
+            <tbody className="text-foreground">
+              <tr className="border-b border-border">
+                <td className="py-2 px-3 font-mono text-xs">competitions</td>
+                <td className="py-2 px-3">Competition metadata (title, type, dates, session_id)</td>
+              </tr>
+              <tr className="border-b border-border">
+                <td className="py-2 px-3 font-mono text-xs">session_participants</td>
+                <td className="py-2 px-3">How users join (links to competition's session)</td>
+              </tr>
+              <tr className="border-b border-border">
+                <td className="py-2 px-3 font-mono text-xs">competition_winners</td>
+                <td className="py-2 px-3">Winner declarations per category</td>
+              </tr>
+              <tr className="border-b border-border">
+                <td className="py-2 px-3 font-mono text-xs">competition_invites</td>
+                <td className="py-2 px-3">Invite-only competition invitations</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-3 font-mono text-xs">catches</td>
+                <td className="py-2 px-3">Catches linked to competition's session_id</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Key Files */}
+      <div>
+        <h3 className="text-base font-semibold text-foreground mb-3">Key Files</h3>
+        <div className="space-y-2 text-sm">
+          <div className="rounded-lg bg-background border border-border p-3">
+            <p className="font-mono text-xs text-primary">src/pages/CompetePage.tsx</p>
+            <p className="text-muted-foreground mt-1">Main competitions list (your comps + available)</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-3">
+            <p className="font-mono text-xs text-primary">src/pages/CompetitionDetailPage.tsx</p>
+            <p className="text-muted-foreground mt-1">Competition detail with leaderboard, catches, winners</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-3">
+            <p className="font-mono text-xs text-primary">src/pages/CreateCompetitionPage.tsx</p>
+            <p className="text-muted-foreground mt-1">Multi-step competition creation wizard</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-3">
+            <p className="font-mono text-xs text-primary">src/components/compete/EnterSessionButton.tsx</p>
+            <p className="text-muted-foreground mt-1">Join button (adds to session_participants + triggers challenges)</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-3">
+            <p className="font-mono text-xs text-primary">src/hooks/useCompetitions.ts</p>
+            <p className="text-muted-foreground mt-1">Competition CRUD hooks</p>
+          </div>
+          <div className="rounded-lg bg-background border border-border p-3">
+            <p className="font-mono text-xs text-primary">src/hooks/useCompetitionWinners.ts</p>
+            <p className="text-muted-foreground mt-1">Winner declaration (triggers winner/podium challenges)</p>
           </div>
         </div>
       </div>

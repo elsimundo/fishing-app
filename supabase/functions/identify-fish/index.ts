@@ -54,7 +54,8 @@ serve(async (req) => {
       '- Focus on UK fish species (saltwater and freshwater)\n' +
       '- Consider common confusion species (e.g., Sea Bass vs European Bass)\n' +
       '- If photo quality is poor, acknowledge it in confidence level\n' +
-      '- List 2-3 alternatives if confidence is below 80%\n\n' +
+      '- List 2-3 alternatives if confidence is below 80%\n' +
+      '- If you cannot see a fish in the image, return species as "unknown" with confidence 0\n\n' +
       'Return response as JSON only (no markdown, no backticks):\n' +
       '{\n' +
       '  "species": "Sea Bass",\n' +
@@ -62,6 +63,14 @@ serve(async (req) => {
       '  "confidence": 85,\n' +
       '  "keyFeatures": ["Silver body", "Black spot on gill cover", "Spiny dorsal fin", "Forked tail"],\n' +
       '  "alternatives": ["European Bass", "Striped Bass"]\n' +
+      '}\n\n' +
+      'If no fish is visible, return:\n' +
+      '{\n' +
+      '  "species": "unknown",\n' +
+      '  "scientificName": "",\n' +
+      '  "confidence": 0,\n' +
+      '  "keyFeatures": [],\n' +
+      '  "alternatives": []\n' +
       '}'
 
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {

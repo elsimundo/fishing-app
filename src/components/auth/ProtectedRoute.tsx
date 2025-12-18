@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useProfile } from '../../hooks/useProfile'
+import { useAutoSync } from '../../hooks/useAutoSync'
 import { ResponsiveLayout } from '../../components/layout/ResponsiveLayout'
 import { DefaultLocationModal } from '../onboarding/DefaultLocationModal'
 import { ZombieSessionChecker } from '../sessions/ZombieSessionChecker'
@@ -14,6 +15,9 @@ export function ProtectedRoute() {
   const { user, loading } = useAuth()
   const { data: profile, isLoading: profileLoading, refetch } = useProfile()
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(null)
+  
+  // Auto-sync offline data when network reconnects
+  useAutoSync()
 
   useEffect(() => {
     if (!profile || !user) return

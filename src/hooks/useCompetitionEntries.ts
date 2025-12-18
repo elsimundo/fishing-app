@@ -49,6 +49,10 @@ export function useUserEntry(competitionId: string) {
   })
 }
 
+/**
+ * Legacy entry submission - kept for backwards compatibility
+ * Note: The primary way to join competitions is via EnterSessionButton (session_participants)
+ */
 export function useSubmitEntry() {
   const { user } = useAuth()
   const queryClient = useQueryClient()

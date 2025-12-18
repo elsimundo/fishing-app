@@ -238,7 +238,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setShowEditModal(true)}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400"
+            className="flex-1 inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
           >
             <Pencil size={16} className="mr-1.5" />
             Edit profile
@@ -246,7 +246,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => navigate('/catches/new')}
-            className="flex-1 inline-flex items-center justify-center rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
+            className="flex-1 inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
           >
             <Fish size={16} className="mr-1.5" />
             Log catch

@@ -51,6 +51,38 @@ export function useFishIdentification() {
       const base64 = await resizeImageToBase64(file)
       const base64Data = base64.split(',')[1] ?? ''
       const res = await identifyFishFromPhoto(base64Data)
+      
+      // Handle "no fish detected" case - but still show alternatives if available
+      if (res.species === 'unknown' || res.confidence === 0) {
+        // If we have alternatives, show them as suggestions
+        if (res.alternatives && res.alternatives.length > 0) {
+          // Set result with low confidence so UI can show suggestions
+          setResult({
+            ...res,
+            species: res.alternatives[0] || 'Unknown',
+            confidence: 10, // Low confidence marker
+          })
+          toast('Low confidence - please confirm the species', { icon: '🤔', duration: 4000 })
+          return res
+        }
+        
+        // No alternatives either - truly can't identify
+        const noFishError: FishIdentificationError = {
+          type: 'no_fish',
+          message: 'Could not identify fish. Please take a clearer photo showing the whole fish.',
+        }
+        setError(noFishError)
+        toast.error(noFishError.message, { icon: '🐟' })
+        return null
+      }
+      
+      // Low confidence but has a guess - show it with warning
+      if (res.confidence < 50) {
+        setResult(res)
+        toast(`AI is ${res.confidence}% confident - please verify`, { icon: '🤔', duration: 4000 })
+        return res
+      }
+      
       setResult(res)
       return res
     } catch (err) {

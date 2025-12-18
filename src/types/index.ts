@@ -124,13 +124,13 @@ export type Catch = {
   wind_speed: number | null
   moon_phase: string | null
   released?: boolean | null
+  returned?: boolean | null // DB column name (alias for released)
   created_at: string
   updated_at: string
 
   // Legal size tracking
   species_id?: string | null
   region?: string | null
-  returned?: boolean
 
   // EXIF metadata from photo (for verification)
   photo_exif_latitude?: number | null
@@ -163,6 +163,22 @@ export type Catch = {
   // Backlog catches (logged retroactively, no XP/badges)
   is_backlog?: boolean
   backlog_note?: string | null
+
+  // Verification fields
+  verification_score?: number | null
+  verification_level?: 'pending' | 'unverified' | 'bronze' | 'silver' | 'gold' | 'platinum' | 'rejected' | null
+  verification_details?: Record<string, unknown> | null
+  verified_at?: string | null
+  xp_awarded?: number | null
+
+  // AI species match
+  ai_species_match?: string | null
+  ai_confidence?: number | null
+
+  // Competition catch approval
+  competition_approved?: boolean | null
+  competition_approved_at?: string | null
+  competition_approved_by?: string | null
 }
 
 export type SessionStats = {

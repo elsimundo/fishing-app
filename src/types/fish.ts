@@ -4,6 +4,7 @@ export type FishIdentificationErrorType =
   | 'rate_limit'
   | 'parse'
   | 'invalid_image'
+  | 'no_fish'
   | 'unknown'
 
 export interface FishIdentificationResult {

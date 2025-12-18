@@ -4,13 +4,14 @@ import { useCatch } from '../hooks/useCatch'
 import { useDeleteCatch } from '../hooks/useDeleteCatch'
 import { useAuth } from '../hooks/useAuth'
 import type { Catch } from '../types'
-import { Share2, Trash2, MoreHorizontal, Pencil, Bookmark, ArrowLeft } from 'lucide-react'
+import { Share2, Trash2, MoreHorizontal, Pencil, Bookmark, ArrowLeft, Zap, Fish, Camera, RotateCcw, Scale, Trophy, Star, Clock, MapPin, Calendar, FileText, Lightbulb, Thermometer, Cloud, Wind, Target, Anchor, ShieldCheck, ShieldAlert, ShieldQuestion, Shield } from 'lucide-react'
 import { ShareCatchToFeedModal } from '../components/catch/ShareCatchToFeedModal'
 import { ErrorState } from '../components/ui/ErrorState'
 import { useSavedMarks } from '../hooks/useSavedMarks'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
 import { useWeightFormatter } from '../hooks/useWeightFormatter'
+import { useSpeciesTiers, useXPSettings } from '../hooks/useAppSettings'
 
 export function CatchDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,6 +25,8 @@ export function CatchDetailPage() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const { formatWeight } = useWeightFormatter()
+  const { data: speciesTiers } = useSpeciesTiers()
+  const xpSettings = useXPSettings()
 
   useEffect(() => {
     if (data) setCatchItem(data)
@@ -82,12 +85,12 @@ export function CatchDetailPage() {
   const locationLabel = catchItem.location_name || 'Unknown location'
   
   // Build stats array - only include stats that have values
-  type StatItem = { label: string; value: string; icon: string }
+  type StatItem = { label: string; value: string; icon: React.ReactNode }
   const stats: StatItem[] = [
-    hasWeight ? { label: 'Weight', value: weightLabel!, icon: '⚖️' } : null,
-    hasLength ? { label: 'Length', value: lengthLabel!, icon: '📏' } : null,
-    timeLabel ? { label: 'Time', value: timeLabel, icon: '🕐' } : null,
-  ].filter((s): s is StatItem => s !== null)
+    hasWeight ? { label: 'Weight', value: weightLabel!, icon: <Scale size={20} className="text-muted-foreground" /> } : null,
+    hasLength ? { label: 'Length', value: lengthLabel!, icon: <Scale size={20} className="text-muted-foreground" /> } : null,
+    timeLabel ? { label: 'Time', value: timeLabel, icon: <Clock size={20} className="text-muted-foreground" /> } : null,
+  ].filter((s): s is NonNullable<typeof s> => s !== null)
   
   // Method items - only show if they have values
   const hasBait = catchItem.bait && catchItem.bait !== '0'
@@ -123,8 +126,8 @@ export function CatchDetailPage() {
             />
           </div>
         ) : (
-          <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-emerald-500 text-6xl">
-            🐟
+          <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-emerald-500">
+            <Fish size={80} className="text-white/80" />
           </div>
         )}
 
@@ -142,14 +145,14 @@ export function CatchDetailPage() {
                   </span>
                 )}
                 {catchItem.is_backlog && (
-                  <span className="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-[11px] font-medium text-slate-400">
-                    📜 Backlog
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-2.5 py-0.5 text-[11px] font-medium text-slate-400">
+                    <FileText size={10} /> Backlog
                   </span>
                 )}
               </div>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                📍 {locationLabel}
-                {dateLabel && <span className="ml-2">📅 {dateLabel}</span>}
+              <p className="mt-1.5 text-sm text-muted-foreground flex items-center flex-wrap gap-x-3 gap-y-1">
+                <span className="inline-flex items-center gap-1"><MapPin size={12} /> {locationLabel}</span>
+                {dateLabel && <span className="inline-flex items-center gap-1"><Calendar size={12} /> {dateLabel}</span>}
               </p>
               {catchItem.is_backlog && (
                 <p className="mt-3 rounded-lg bg-amber-900/20 border border-amber-800 px-3 py-2 text-xs text-amber-300">
@@ -246,14 +249,160 @@ export function CatchDetailPage() {
         {stats.length > 0 && (
           <section className="grid gap-3" style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}>
             {stats.map((stat) => (
-              <div key={stat.label} className="rounded-2xl bg-card border border-border p-4 text-center">
-                <p className="text-2xl mb-1">{stat.icon}</p>
+              <div key={stat.label} className="rounded-2xl bg-card border border-border p-4 text-center flex flex-col items-center">
+                <div className="mb-1">{stat.icon}</div>
                 <p className="text-lg font-bold text-foreground">{stat.value}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
               </div>
             ))}
           </section>
         )}
+
+        {/* XP & Verification card - only show for owner and non-backlog catches */}
+        {user && catchItem.user_id === user.id && !catchItem.is_backlog && (() => {
+          // Find species tier
+          const tierRecord = speciesTiers?.find(t => 
+            t.species.toLowerCase() === catchItem.species.toLowerCase()
+          )
+          const speciesTier = tierRecord?.tier || 'standard'
+          const tierXP = tierRecord?.base_xp || xpSettings.tierStandard
+          
+          // Tier display config with Lucide icons - all muted gray for consistency
+          const tierConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+            common: { label: 'Common', icon: <Fish size={14} className="text-muted-foreground" />, color: 'text-foreground' },
+            standard: { label: 'Standard', icon: <Fish size={14} className="text-muted-foreground" />, color: 'text-foreground' },
+            trophy: { label: 'Trophy', icon: <Trophy size={14} className="text-muted-foreground" />, color: 'text-foreground' },
+            rare: { label: 'Rare', icon: <Star size={14} className="text-muted-foreground" />, color: 'text-foreground' },
+          }
+          const tierInfo = tierConfig[speciesTier] || tierConfig.standard
+          
+          // Calculate XP breakdown
+          const baseXP = catchItem.photo_url ? tierXP : Math.floor(tierXP * 0.3) // 30% without photo
+          const photoBonus = catchItem.photo_url ? 5 : 0
+          // DB column is 'returned', type alias is 'released'
+          const isReleased = catchItem.returned ?? catchItem.released
+          const releaseBonus = isReleased ? 5 : 0
+          const weightBonus = hasWeight ? Math.floor((catchItem.weight_kg || 0) * 2.205 / 5) * 5 : 0
+          const rawTotal = baseXP + photoBonus + releaseBonus + weightBonus
+          
+          // Apply verification multiplier
+          const level = catchItem.verification_level || 'pending'
+          const multiplier = level === 'platinum' || level === 'gold' || level === 'silver' ? 1.0 
+                           : level === 'bronze' ? 0.5 
+                           : 0
+          const totalXP = Math.floor(rawTotal * multiplier)
+          
+          return (
+          <section className="rounded-2xl bg-card border border-border p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap size={16} className="text-yellow-400" />
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">XP & Verification</h2>
+            </div>
+            
+            {/* Verification Level */}
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center">
+                  {level === 'platinum' ? <ShieldCheck size={20} className="text-cyan-400" /> :
+                   level === 'gold' ? <ShieldCheck size={20} className="text-yellow-400" /> :
+                   level === 'silver' ? <ShieldCheck size={20} className="text-gray-300" /> :
+                   level === 'bronze' ? <Shield size={20} className="text-orange-400" /> :
+                   level === 'pending' ? <ShieldQuestion size={20} className="text-muted-foreground" /> : 
+                   <ShieldAlert size={20} className="text-red-400" />}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground capitalize">
+                    {level} Verified
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Score: {catchItem.verification_score || 0}/100
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-yellow-400">
+                  +{totalXP} XP
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {level === 'bronze' ? '50% multiplier' :
+                   level === 'unverified' ? 'No XP (unverified)' :
+                   level === 'pending' ? 'Pending verification' : '100% multiplier'}
+                </p>
+              </div>
+            </div>
+            
+            {/* XP Breakdown */}
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  {tierInfo.icon}
+                  <span>{tierInfo.label} species</span>
+                </span>
+                <span className={tierInfo.color}>+{baseXP}</span>
+              </div>
+              {photoBonus > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Camera size={14} />
+                    <span>Photo bonus</span>
+                  </span>
+                  <span className="text-foreground">+{photoBonus}</span>
+                </div>
+              )}
+              {releaseBonus > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <RotateCcw size={14} />
+                    <span>Catch & release</span>
+                  </span>
+                  <span className="text-foreground">+{releaseBonus}</span>
+                </div>
+              )}
+              {weightBonus > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Scale size={14} />
+                    <span>Weight bonus</span>
+                  </span>
+                  <span className="text-foreground">+{weightBonus}</span>
+                </div>
+              )}
+              {multiplier < 1 && (
+                <div className="flex justify-between text-muted-foreground border-t border-border pt-2 mt-2">
+                  <span>Subtotal</span>
+                  <span className="text-foreground">{rawTotal}</span>
+                </div>
+              )}
+              {multiplier < 1 && multiplier > 0 && (
+                <div className="flex justify-between text-amber-400">
+                  <span>× {multiplier * 100}% verification</span>
+                  <span className="font-medium">= {totalXP} XP</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Verification signals hint */}
+            {(catchItem.verification_level === 'unverified' || catchItem.verification_level === 'bronze' || catchItem.verification_level === 'pending') && (
+              <div className="mt-3 rounded-lg bg-amber-900/20 border border-amber-800 px-3 py-2 text-xs text-amber-300">
+                <p className="font-medium mb-1 flex items-center gap-1"><Lightbulb size={12} /> Increase your verification score:</p>
+                <ul className="space-y-0.5 text-amber-400">
+                  {!catchItem.photo_url && <li>• Add a photo (+15 pts)</li>}
+                  <li>• Enable GPS on camera (+20 pts)</li>
+                  <li>• Take photo within 15 mins of catch (+15 pts)</li>
+                  <li>• Use AI species identifier (+10 pts)</li>
+                </ul>
+              </div>
+            )}
+            
+            {/* Badge eligibility */}
+            {(catchItem.verification_level === 'gold' || catchItem.verification_level === 'platinum') && (
+              <div className="mt-3 rounded-lg bg-emerald-900/20 border border-emerald-800 px-3 py-2 text-xs text-emerald-300">
+                ✓ This catch is eligible for badges and challenges
+              </div>
+            )}
+          </section>
+          )
+        })()}
 
         {/* Method card - only show if any method info exists */}
         {hasMethod && (
@@ -262,7 +411,7 @@ export function CatchDetailPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               {hasBait && (
                 <div className="flex items-center gap-3 rounded-xl bg-background p-3">
-                  <span className="text-xl">🎣</span>
+                  <Anchor size={20} className="text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Bait</p>
                     <p className="text-sm font-medium text-foreground">{catchItem.bait}</p>
@@ -271,7 +420,7 @@ export function CatchDetailPage() {
               )}
               {hasRig && (
                 <div className="flex items-center gap-3 rounded-xl bg-background p-3">
-                  <span className="text-xl">🪝</span>
+                  <Anchor size={20} className="text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Rig</p>
                     <p className="text-sm font-medium text-foreground">{catchItem.rig}</p>
@@ -280,7 +429,7 @@ export function CatchDetailPage() {
               )}
               {hasStyle && (
                 <div className="flex items-center gap-3 rounded-xl bg-background p-3">
-                  <span className="text-xl">🎯</span>
+                  <Target size={20} className="text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Style</p>
                     <p className="text-sm font-medium text-foreground">{catchItem.fishing_style}</p>
@@ -298,7 +447,7 @@ export function CatchDetailPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               {catchItem.weather_temp != null && (
                 <div className="flex items-center gap-3 rounded-xl bg-background p-3">
-                  <span className="text-xl">🌡️</span>
+                  <Thermometer size={20} className="text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Temperature</p>
                     <p className="text-sm font-medium text-foreground">{catchItem.weather_temp.toFixed(1)}°C</p>
@@ -307,7 +456,7 @@ export function CatchDetailPage() {
               )}
               {catchItem.weather_condition && (
                 <div className="flex items-center gap-3 rounded-xl bg-background p-3">
-                  <span className="text-xl">☁️</span>
+                  <Cloud size={20} className="text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Weather</p>
                     <p className="text-sm font-medium text-foreground">{catchItem.weather_condition}</p>
@@ -316,7 +465,7 @@ export function CatchDetailPage() {
               )}
               {catchItem.wind_speed != null && (
                 <div className="flex items-center gap-3 rounded-xl bg-background p-3">
-                  <span className="text-xl">💨</span>
+                  <Wind size={20} className="text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Wind</p>
                     <p className="text-sm font-medium text-foreground">{catchItem.wind_speed.toFixed(1)} mph</p>

@@ -66,6 +66,9 @@ interface CatchXPResult {
   leveledUp: boolean
   challengesCompleted: string[]
   weeklySpeciesPoints: number
+  verificationLevel: string
+  verificationScore: number
+  xpMultiplier: number
 }
 
 const XP_VALUES = {
@@ -123,6 +126,55 @@ export function useCatchXP() {
           leveledUp: false,
           challengesCompleted: [],
           weeklySpeciesPoints: 0,
+          verificationLevel: 'unverified',
+          verificationScore: 0,
+          xpMultiplier: 0,
+        }
+      }
+      
+      // ============================================
+      // VERIFICATION: Calculate verification score first
+      // ============================================
+      let verificationLevel = 'pending'
+      let verificationScore = 0
+      let xpMultiplier = 1.0
+      
+      const { data: verificationResult } = await supabase.rpc('calculate_catch_verification', {
+        p_catch_id: input.catchId,
+      })
+      
+      if (verificationResult && !verificationResult.error) {
+        verificationLevel = verificationResult.level || 'pending'
+        verificationScore = verificationResult.score || 0
+        
+        // XP multiplier based on verification level
+        switch (verificationLevel) {
+          case 'platinum':
+          case 'gold':
+          case 'silver':
+            xpMultiplier = 1.0
+            break
+          case 'bronze':
+            xpMultiplier = 0.5
+            break
+          default:
+            xpMultiplier = 0
+        }
+      }
+      
+      // If unverified, return early with no XP
+      if (xpMultiplier === 0) {
+        return {
+          xpAwarded: 0,
+          breakdown: { base: 0, speciesBonus: 0, weightBonus: 0, photoBonus: 0, releasedBonus: 0, weeklySpeciesBonus: 0, total: 0 },
+          newXP: 0,
+          newLevel: 1,
+          leveledUp: false,
+          challengesCompleted: [],
+          weeklySpeciesPoints: 0,
+          verificationLevel,
+          verificationScore,
+          xpMultiplier,
         }
       }
       
@@ -189,9 +241,12 @@ export function useCatchXP() {
         breakdown.weeklySpeciesBonus = weeklyPoints.points
       }
       
-      // Calculate total
-      breakdown.total = breakdown.base + breakdown.speciesBonus + breakdown.weightBonus + 
-                        breakdown.photoBonus + breakdown.releasedBonus + breakdown.weeklySpeciesBonus
+      // Calculate total (before multiplier)
+      const rawTotal = breakdown.base + breakdown.speciesBonus + breakdown.weightBonus + 
+                       breakdown.photoBonus + breakdown.releasedBonus + breakdown.weeklySpeciesBonus
+      
+      // Apply verification multiplier
+      breakdown.total = Math.floor(rawTotal * xpMultiplier)
       
       // Award XP via database function
       const { data: xpResult, error: xpError } = await supabase.rpc('award_xp', {
@@ -208,11 +263,10 @@ export function useCatchXP() {
       }
       
       // Check and update challenges
-      // Anti-cheat: Only process challenges if catch has a photo
-      // This prevents gaming the system with fake catches
-      if (input.hasPhoto) {
+      // Only process challenges if verification is Gold or Platinum (badge-eligible)
+      const isBadgeEligible = verificationLevel === 'gold' || verificationLevel === 'platinum'
+      if (isBadgeEligible && input.hasPhoto) {
         await checkChallenges(user.id, input, challengesCompleted)
-      } else {
       }
       
       const result = xpResult?.[0] || { new_xp: 0, new_level: 1, leveled_up: false }
@@ -225,6 +279,9 @@ export function useCatchXP() {
         leveledUp: result.leveled_up,
         challengesCompleted,
         weeklySpeciesPoints,
+        verificationLevel,
+        verificationScore,
+        xpMultiplier,
       }
     },
     onSuccess: (data) => {
@@ -232,12 +289,18 @@ export function useCatchXP() {
       queryClient.invalidateQueries({ queryKey: ['user-challenges'] })
       queryClient.invalidateQueries({ queryKey: ['user-weekly-stats'] })
       
-      // Show XP toast
+      // Show XP toast with verification info
       if (data.xpAwarded > 0) {
         const bonusText = data.weeklySpeciesPoints > 0 
           ? ` (includes +${data.weeklySpeciesPoints} bonus XP for weekly species)` 
           : ''
-        toast.success(`+${data.xpAwarded} XP${bonusText}`, { icon: '⭐', duration: 3000 })
+        const verificationIcon = data.verificationLevel === 'platinum' ? '💎' : 
+                                 data.verificationLevel === 'gold' ? '🥇' : 
+                                 data.verificationLevel === 'silver' ? '🥈' : 
+                                 data.verificationLevel === 'bronze' ? '🥉' : '⭐'
+        toast.success(`+${data.xpAwarded} XP${bonusText}`, { icon: verificationIcon, duration: 3000 })
+      } else if (data.verificationLevel === 'unverified' || data.verificationLevel === 'pending') {
+        toast('Catch logged - add a photo to earn XP', { icon: '📸', duration: 4000 })
       }
       
       // Level up celebration + auto-post
