@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { useSession } from '../hooks/useSession'
 import { useUpdateSession } from '../hooks/useUpdateSession'
 import { useSessionParticipants, useMySessionRole, useLeaveSession, useChangeParticipantRole, useRemoveParticipant, useAcceptInvitation } from '../hooks/useSessionParticipants'
+import { useRequestToJoinSession } from '../hooks/useRequestToJoinSession'
 import { useMarkSessionViewed } from '../hooks/useMarkSessionViewed'
 import { useSessionPosts, useDeletePost } from '../hooks/usePosts'
 import { Map } from '../components/map'
@@ -82,6 +83,7 @@ export function SessionDetailPage() {
   const { mutateAsync: changeParticipantRole } = useChangeParticipantRole()
   const { mutateAsync: removeParticipant } = useRemoveParticipant()
   const { mutateAsync: deleteSession, isPending: isDeleting } = useDeleteSession()
+  const { mutateAsync: requestToJoin, isPending: isRequesting } = useRequestToJoinSession()
   const sessionXP = useSessionXP()
   const { celebrateChallenges } = useCelebrateChallenges()
   const { formatWeight } = useWeightFormatter()
@@ -162,6 +164,35 @@ export function SessionDetailPage() {
 
   return (
     <main className="min-h-screen bg-background pb-24">
+      {/* Ask to Join banner for non-participants */}
+      {!isOwner && !myParticipant && isActive && (
+        <div className="border-b border-cyan-500/40 bg-cyan-900/30">
+          <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3 text-xs">
+            <div className="text-cyan-200">
+              <p className="font-semibold">Want to join this session?</p>
+              <p className="text-[11px] text-cyan-200/80">Request to join and the session owner will be notified.</p>
+            </div>
+            <button
+              type="button"
+              disabled={isRequesting}
+              onClick={async () => {
+                try {
+                  await requestToJoin({ session_id: session.id })
+                  toast.success('Join request sent to session owner')
+                  await refetch()
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : 'Failed to send request'
+                  toast.error(message)
+                }
+              }}
+              className="flex-shrink-0 rounded-full bg-navy-800 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+            >
+              {isRequesting ? 'Sending...' : 'Ask to Join'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Pending invite banner for invited users */}
       {!isOwner && myParticipant && myParticipant.status === 'pending' && (
         <div className="border-b border-amber-500/40 bg-amber-900/30">
