@@ -24,7 +24,7 @@ async function fetchSessionParticipants(sessionId: string): Promise<SessionParti
     .from('session_participants')
     .select('*, user:profiles(*)')
     .eq('session_id', sessionId)
-    .order('invited_at', { ascending: true })
+    .order('joined_at', { ascending: true })
 
   if (error) throw new Error(error.message)
 
@@ -109,24 +109,21 @@ export function useInviteToSession() {
             user_id: input.user_id,
             role: input.role,
             status: 'pending',
-            invited_at: new Date().toISOString(),
-            joined_at: null,
-            left_at: null,
           },
           { onConflict: 'session_id,user_id' },
         )
-        .select('*, user:profiles(*)')
+        .select()
         .single()
 
       if (error) throw new Error(error.message)
-      return data as SessionParticipant
+      return { ...data, session_id: input.session_id }
     },
-    onSuccess: (participant) => {
+    onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['session_participants', participant.session_id],
+        queryKey: ['session_participants', variables.session_id],
       })
       void queryClient.invalidateQueries({
-        queryKey: ['session_my_role', participant.session_id],
+        queryKey: ['session_my_role', variables.session_id],
       })
     },
   })
@@ -137,22 +134,20 @@ export function useAcceptInvitation() {
 
   return useMutation({
     mutationFn: async (input: { participant_id: string; session_id: string }) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('session_participants')
-        .update({ status: 'active', joined_at: new Date().toISOString() })
+        .update({ status: 'active' })
         .eq('id', input.participant_id)
-        .select('*, user:profiles(*)')
-        .single()
 
       if (error) throw new Error(error.message)
-      return data as SessionParticipant
+      return input
     },
-    onSuccess: (participant) => {
+    onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['session_participants', participant.session_id],
+        queryKey: ['session_participants', variables.session_id],
       })
       void queryClient.invalidateQueries({
-        queryKey: ['session_my_role', participant.session_id],
+        queryKey: ['session_my_role', variables.session_id],
       })
     },
   })
@@ -163,22 +158,20 @@ export function useLeaveSession() {
 
   return useMutation({
     mutationFn: async (input: { participant_id: string; session_id: string }) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('session_participants')
         .update({ status: 'left' })
         .eq('id', input.participant_id)
-        .select('*, user:profiles(*)')
-        .single()
 
       if (error) throw new Error(error.message)
-      return data as SessionParticipant
+      return input
     },
-    onSuccess: (participant) => {
+    onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['session_participants', participant.session_id],
+        queryKey: ['session_participants', variables.session_id],
       })
       void queryClient.invalidateQueries({
-        queryKey: ['session_my_role', participant.session_id],
+        queryKey: ['session_my_role', variables.session_id],
       })
     },
   })
@@ -193,22 +186,20 @@ export function useChangeParticipantRole() {
       session_id: string
       role: ParticipantRole
     }) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('session_participants')
         .update({ role: input.role })
         .eq('id', input.participant_id)
-        .select('*, user:profiles(*)')
-        .single()
 
       if (error) throw new Error(error.message)
-      return data as SessionParticipant
+      return input
     },
-    onSuccess: (participant) => {
+    onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['session_participants', participant.session_id],
+        queryKey: ['session_participants', variables.session_id],
       })
       void queryClient.invalidateQueries({
-        queryKey: ['session_my_role', participant.session_id],
+        queryKey: ['session_my_role', variables.session_id],
       })
     },
   })
@@ -219,22 +210,20 @@ export function useRemoveParticipant() {
 
   return useMutation({
     mutationFn: async (input: { participant_id: string; session_id: string }) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('session_participants')
         .update({ status: 'left' })
         .eq('id', input.participant_id)
-        .select('*, user:profiles(*)')
-        .single()
 
       if (error) throw new Error(error.message)
-      return data as SessionParticipant
+      return input
     },
-    onSuccess: (participant) => {
+    onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: ['session_participants', participant.session_id],
+        queryKey: ['session_participants', variables.session_id],
       })
       void queryClient.invalidateQueries({
-        queryKey: ['session_my_role', participant.session_id],
+        queryKey: ['session_my_role', variables.session_id],
       })
     },
   })

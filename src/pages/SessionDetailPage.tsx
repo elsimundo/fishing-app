@@ -12,7 +12,10 @@ import { BottomSheet } from '../components/ui/BottomSheet'
 import { QuickLogForm } from '../components/catches/QuickLogForm'
 import type { ViewerRole } from '../lib/privacy'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Share2, Fish, MapPin, MessageSquare, Plus, MoreHorizontal, Pencil, Bookmark, Trash2, LogOut, X, Square } from 'lucide-react'
+import { ArrowLeft, Share2, Fish, MapPin, MessageSquare, Plus, MoreHorizontal, Pencil, Bookmark, Trash2, LogOut, X, Square, RefreshCw } from 'lucide-react'
+import { getCompleteWeatherData } from '../services/open-meteo'
+import { getTideData } from '../services/tides'
+import { WEATHER_CODES } from '../types/weather'
 import { ShareToFeedModal } from '../components/session/ShareToFeedModal'
 import { EditSessionModal } from '../components/session/EditSessionModal'
 import { CompletedSessionSummary } from '../components/session/CompletedSessionSummary'
@@ -39,6 +42,7 @@ export function SessionDetailPage() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const [showActions, setShowActions] = useState(false)
   const [showAddPostModal, setShowAddPostModal] = useState(false)
+  const [isRefreshingWeather, setIsRefreshingWeather] = useState(false)
 
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -154,6 +158,48 @@ export function SessionDetailPage() {
     })
     
     await refetch()
+  }
+
+  const handleRefreshWeather = async () => {
+    if (!session || session.latitude === 0 || session.longitude === 0) {
+      toast.error('No location data available for this session')
+      return
+    }
+
+    setIsRefreshingWeather(true)
+    try {
+      const [weatherData, tideData] = await Promise.all([
+        getCompleteWeatherData(session.latitude, session.longitude).catch(() => null),
+        getTideData(session.latitude, session.longitude).catch(() => null),
+      ])
+
+      const updates: Record<string, unknown> = {}
+
+      if (weatherData?.current) {
+        updates.weather_temp = weatherData.current.temperature
+        updates.wind_speed = weatherData.current.windSpeed
+        const code = weatherData.current.weatherCode
+        updates.weather_condition = WEATHER_CODES[code]?.description || null
+      }
+
+      if (tideData?.current?.type) {
+        const t = tideData.current.type
+        updates.tide_state = t.charAt(0).toUpperCase() + t.slice(1)
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await updateSession({ id: session.id, ...updates })
+        await refetch()
+        toast.success('Weather conditions updated!')
+      } else {
+        toast.error('Could not fetch weather data')
+      }
+    } catch (e) {
+      console.error('Failed to refresh weather:', e)
+      toast.error('Failed to refresh weather')
+    } finally {
+      setIsRefreshingWeather(false)
+    }
   }
 
   const sessionDate = session.started_at ? format(new Date(session.started_at), 'EEEE, MMMM d, yyyy') : null
@@ -521,41 +567,56 @@ export function SessionDetailPage() {
         )}
 
         {/* Environmental conditions card */}
-        {(session.weather_temp != null || session.wind_speed != null || session.tide_state || session.moon_phase) && (
-          <div className="mt-4 rounded-2xl bg-gradient-to-br from-navy-900 to-blue-700 p-4 text-xs text-white">
-            <p className="mb-3 text-[13px] font-semibold opacity-90">📊 Conditions during session</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-white/10 p-3">
-                <p className="text-[11px] opacity-80">Temperature</p>
-                <p className="mt-1 text-base font-semibold">
-                  {session.weather_temp != null ? `${session.weather_temp.toFixed(1)}°C` : '—'}
-                </p>
-              </div>
-              <div className="rounded-xl bg-white/10 p-3">
-                <p className="text-[11px] opacity-80">Wind</p>
-                <p className="mt-1 text-base font-semibold">
-                  {session.wind_speed != null ? `${session.wind_speed.toFixed(1)} mph` : '—'}
-                </p>
-              </div>
-              <div className="rounded-xl bg-white/10 p-3">
-                <p className="text-[11px] opacity-80">Tide</p>
-                <p className="mt-1 text-base font-semibold">{session.tide_state || '—'}</p>
-              </div>
-              <div className="rounded-xl bg-white/10 p-3">
-                <p className="text-[11px] opacity-80">Weather</p>
-                <p className="mt-1 text-base font-semibold">
-                  {session.weather_condition || '—'}
-                </p>
-              </div>
-              {session.moon_phase && (
-                <div className="col-span-2 rounded-xl bg-white/10 p-3">
-                  <p className="text-[11px] opacity-80">Moon Phase</p>
-                  <p className="mt-1 text-base font-semibold">{session.moon_phase}</p>
-                </div>
-              )}
-            </div>
+        <div className="mt-4 rounded-2xl bg-gradient-to-br from-navy-900 to-blue-700 p-4 text-xs text-white">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[13px] font-semibold opacity-90">📊 Conditions during session</p>
+            {isOwner && (session.weather_temp == null || session.wind_speed == null) && (
+              session.latitude !== 0 ? (
+                <button
+                  type="button"
+                  onClick={() => void handleRefreshWeather()}
+                  disabled={isRefreshingWeather}
+                  className="flex items-center gap-1 rounded-lg bg-white/20 px-2 py-1 text-[11px] font-medium hover:bg-white/30 disabled:opacity-50"
+                >
+                  <RefreshCw size={12} className={isRefreshingWeather ? 'animate-spin' : ''} />
+                  {isRefreshingWeather ? 'Updating...' : 'Fetch Weather'}
+                </button>
+              ) : (
+                <p className="text-[10px] text-white/60">No location set</p>
+              )
+            )}
           </div>
-        )}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-white/10 p-3">
+              <p className="text-[11px] opacity-80">Temperature</p>
+              <p className="mt-1 text-base font-semibold">
+                {session.weather_temp != null ? `${session.weather_temp.toFixed(1)}°C` : '—'}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-3">
+              <p className="text-[11px] opacity-80">Wind</p>
+              <p className="mt-1 text-base font-semibold">
+                {session.wind_speed != null ? `${session.wind_speed.toFixed(1)} mph` : '—'}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-3">
+              <p className="text-[11px] opacity-80">Tide</p>
+              <p className="mt-1 text-base font-semibold">{session.tide_state || '—'}</p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-3">
+              <p className="text-[11px] opacity-80">Weather</p>
+              <p className="mt-1 text-base font-semibold">
+                {session.weather_condition || '—'}
+              </p>
+            </div>
+            {session.moon_phase && (
+              <div className="col-span-2 rounded-xl bg-white/10 p-3">
+                <p className="text-[11px] opacity-80">Moon Phase</p>
+                <p className="mt-1 text-base font-semibold">{session.moon_phase}</p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Active session banner + quick stats + timeline */}
         {isActive && (

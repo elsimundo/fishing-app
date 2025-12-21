@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Loader2, ChevronRight } from 'lucide-react'
+import { Loader2, ChevronRight, MapPin, Search } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { Layout } from '../components/layout/Layout'
 import { LocationPicker } from '../components/map/LocationPicker'
 import { useLakes } from '../hooks/useLakes'
+import { useNearbyLake } from '../hooks/useNearbyLake'
 import { useSavedMarks, useSharedMarks } from '../hooks/useSavedMarks'
 import { useUpsertSessionParticipant } from '../hooks/useSessionParticipant'
 import { getCompleteWeatherData } from '../services/open-meteo'
@@ -39,7 +40,7 @@ export default function StartSessionPage() {
 
   const isCreatingSessionRef = useRef(false)
 
-  const [step, setStep] = useState(0) // 0 = choice, 1-4 = full setup
+  const [step, setStep] = useState(0) // 0 = GPS detection, 1 = water type, 2 = lake search (optional), 3 = privacy, 4 = details
   const [loading, setLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
@@ -50,6 +51,8 @@ export default function StartSessionPage() {
     lng: null,
   })
   const [locationError, setLocationError] = useState<string | null>(null)
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
+  const [lakeSearchQuery, setLakeSearchQuery] = useState('')
 
   const [formData, setFormData] = useState<FormState>({
     title: '',
@@ -76,6 +79,13 @@ export default function StartSessionPage() {
     radiusKm: 30,
     enabled: formData.waterType === 'freshwater' && formData.latitude !== null,
   })
+
+  // Auto-detect if user is at a lake (within 500m)
+  const { data: autoDetectedLake, isLoading: isDetectingLake } = useNearbyLake(
+    locationCoords.lat,
+    locationCoords.lng,
+    0.5 // 500m radius
+  )
 
   // Pre-select lake or mark if navigated from Explore page or via URL params
   useEffect(() => {
@@ -274,21 +284,68 @@ export default function StartSessionPage() {
         moon_phase: getMoonPhase().phase,
       }
     } else {
-      // Default - no specific location
+      // No pre-selected location - need GPS first
+      // If we already have location coords from the new GPS-first flow, use them
+      const gpsLat = locationCoords.lat ?? formData.latitude ?? 0
+      const gpsLng = locationCoords.lng ?? formData.longitude ?? 0
+      
+      // If no GPS, we shouldn't be here - redirect to step 0
+      if (gpsLat === 0 && gpsLng === 0) {
+        setLoading(false)
+        isCreatingSessionRef.current = false
+        // The GPS-first flow in step 0 will handle getting location
+        return
+      }
+
+      // Re-fetch weather with GPS coords
+      let gpsWeatherTemp: number | null = null
+      let gpsWeatherCondition: string | null = null
+      let gpsWindSpeed: number | null = null
+      let gpsTideState: string | null = null
+
+      setLoadingMessage('Fetching weather conditions...')
+      try {
+        const [weatherData, tideData] = await Promise.all([
+          getCompleteWeatherData(gpsLat, gpsLng).catch(() => null),
+          getTideData(gpsLat, gpsLng).catch(() => null),
+        ])
+
+        if (weatherData?.current) {
+          gpsWeatherTemp = weatherData.current.temperature
+          gpsWindSpeed = weatherData.current.windSpeed
+          const code = weatherData.current.weatherCode
+          gpsWeatherCondition = WEATHER_CODES[code]?.description || null
+        }
+
+        if (tideData?.current?.type) {
+          const t = tideData.current.type
+          gpsTideState = t.charAt(0).toUpperCase() + t.slice(1)
+        }
+      } catch (e) {
+        console.warn('[StartSessionPage] Failed to fetch weather/tide:', e)
+      }
+
+      setLoadingMessage('Creating your session...')
+
+      // Use detected lake if available, otherwise use form data
+      const detectedLakeName = autoDetectedLake?.name || formData.locationName || 'Current Location'
+      const sessionTitle = `${detectedLakeName} - ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+
       sessionData = {
         user_id: user.id,
-        title,
-        location_name: 'Current Location',
-        water_type: 'saltwater',
+        title: sessionTitle,
+        location_name: detectedLakeName,
+        water_type: formData.waterType || (autoDetectedLake ? 'freshwater' : 'saltwater'),
         location_privacy: 'general',
-        latitude: 0,
-        longitude: 0,
+        latitude: gpsLat,
+        longitude: gpsLng,
         started_at: now.toISOString(),
         is_public: formData.isPublic ?? true,
-        weather_temp: null,
-        weather_condition: null,
-        wind_speed: null,
-        tide_state: null,
+        lake_id: formData.lakeId || autoDetectedLake?.id || null,
+        weather_temp: gpsWeatherTemp,
+        weather_condition: gpsWeatherCondition,
+        wind_speed: gpsWindSpeed,
+        tide_state: gpsTideState,
         moon_phase: getMoonPhase().phase,
       }
     }
@@ -643,118 +700,303 @@ export default function StartSessionPage() {
     )
   }
 
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by your browser')
+      return
+    }
+
+    setIsGettingLocation(true)
+    setLocationError(null)
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        setLocationCoords({ lat: latitude, lng: longitude })
+        setFormData((prev) => ({
+          ...prev,
+          latitude,
+          longitude,
+          locationName: 'Current location',
+        }))
+        setIsGettingLocation(false)
+      },
+      (err) => {
+        console.error('Geolocation error:', err)
+        setLocationError('Could not get your location. Please enable GPS and try again.')
+        setIsGettingLocation(false)
+        
+        // Fallback to default location if available
+        if (profile?.default_latitude != null && profile?.default_longitude != null) {
+          setLocationCoords({ lat: profile.default_latitude, lng: profile.default_longitude })
+          setFormData((prev) => ({
+            ...prev,
+            latitude: profile.default_latitude,
+            longitude: profile.default_longitude,
+            locationName: 'Default location',
+          }))
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
+  const handleConfirmLake = (lake: Lake) => {
+    setFormData((prev) => ({
+      ...prev,
+      lakeId: lake.id,
+      locationName: lake.name,
+      waterType: 'freshwater',
+    }))
+    setStep(3) // Skip to privacy step
+  }
+
+  const handleSkipLakeDetection = () => {
+    setFormData((prev) => ({ ...prev, lakeId: null }))
+    // Show water type selection in step 0 phase 4
+  }
+
   const renderStep0 = () => {
-    // Check if we have a pre-selected mark or lake
+    // Check if we have a pre-selected mark or lake from navigation
     const navState = location.state as { markId?: string; markName?: string } | null
     const preSelectedMark = navState?.markId ? allMarks.find(m => m.id === navState.markId) : null
     
     // Check URL params for lake
     const urlParams = new URLSearchParams(location.search)
     const urlLakeName = urlParams.get('lakeName')
-    const hasLake = urlParams.get('lakeId') && urlParams.get('lat') && urlParams.get('lng')
+    const hasPreselectedLake = urlParams.get('lakeId') && urlParams.get('lat') && urlParams.get('lng')
     const lakeName = urlLakeName ? decodeURIComponent(urlLakeName) : null
     
-    // Determine what location we have
-    const locationDisplay = hasLake ? lakeName : (preSelectedMark?.name || null)
-    
-    return (
-    <>
-      {/* Lake header banner */}
-      {hasLake && lakeName && (
-        <div className="mb-4 rounded-xl bg-gradient-to-r from-emerald-900/30 to-teal-900/20 border border-emerald-500/30 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white">
-              🏞️
+    // If we have a pre-selected lake or mark, show the original flow
+    if (hasPreselectedLake || preSelectedMark) {
+      const locationDisplay = hasPreselectedLake ? lakeName : preSelectedMark?.name
+      return (
+        <>
+          {/* Lake/Mark header banner */}
+          <div className="mb-4 rounded-xl bg-gradient-to-r from-emerald-900/30 to-teal-900/20 border border-emerald-500/30 p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                {hasPreselectedLake ? '🏞️' : '📍'}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{locationDisplay}</p>
+                <p className="text-xs text-emerald-400">Ready to start your session</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{lakeName}</p>
-              <p className="text-xs text-emerald-400">Ready to start your session</p>
+          </div>
+
+          <h2 className="mb-1 text-lg font-bold text-foreground">Start fishing!</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Tap Quick Start to begin at {locationDisplay}
+          </p>
+
+          <div className="mb-4 grid gap-3 md:grid-cols-2">
+            <button type="button" onClick={handleQuickStart}
+              className="flex items-center gap-3 rounded-2xl border-2 border-primary bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/80">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-2xl text-white">⚡</div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Quick Start</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Start at {locationDisplay}</p>
+              </div>
+              <ChevronRight size={18} className="text-primary" />
+            </button>
+
+            <button type="button" onClick={handleFullSetup}
+              className="flex items-center gap-3 rounded-2xl border-2 border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-2xl text-primary">⚙️</div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Full Setup</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Add notes or change privacy</p>
+              </div>
+              <ChevronRight size={18} className="text-muted-foreground" />
+            </button>
+          </div>
+        </>
+      )
+    }
+
+    // GPS-first flow: No pre-selected location
+    const hasLocation = locationCoords.lat !== null && locationCoords.lng !== null
+
+    // Phase 1: Get GPS location
+    if (!hasLocation) {
+      return (
+        <>
+          <div className="mb-6 flex justify-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-900/30 text-4xl">
+              <MapPin className="h-10 w-10 text-blue-400" />
             </div>
           </div>
-        </div>
-      )}
-      
-      <h2 className="mb-1 text-lg font-bold text-foreground">
-        {hasLake ? 'Start fishing!' : 'Start your session'}
-      </h2>
-      <p className="mb-4 text-sm text-muted-foreground">
-        {locationDisplay 
-          ? `Tap Quick Start to begin at ${locationDisplay}` 
-          : 'Choose how you\'d like to begin your fishing session.'}
-      </p>
 
-      <div className="mb-4 grid gap-3 md:grid-cols-2">
-        <button
-          type="button"
-          onClick={handleQuickStart}
-          className="flex items-center gap-3 rounded-2xl border-2 border-primary bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/80"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-2xl text-white">
-            ⚡
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Quick Start</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {locationDisplay ? `Start at ${locationDisplay}` : 'Use current location & smart defaults'}
-            </p>
-          </div>
-          <ChevronRight size={18} className="text-primary" />
-        </button>
+          <h2 className="mb-2 text-center text-lg font-bold text-foreground">Where are you fishing?</h2>
+          <p className="mb-6 text-center text-sm text-muted-foreground">
+            We need your location to fetch weather conditions and find nearby lakes.
+          </p>
 
-        <button
-          type="button"
-          onClick={handleFullSetup}
-          className="flex items-center gap-3 rounded-2xl border-2 border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-2xl text-primary">
-            ⚙️
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Full Setup</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {hasLake ? 'Add notes or change privacy' : 'Customize location, privacy, and details'}
-            </p>
-          </div>
-          <ChevronRight size={18} className="text-muted-foreground" />
-        </button>
-      </div>
+          {locationError && (
+            <div className="mb-4 rounded-lg bg-red-900/20 border border-red-500/30 p-3 text-xs text-red-400">
+              {locationError}
+            </div>
+          )}
 
-      {/* Session visibility toggle - show for lake sessions */}
-      {hasLake && (
-        <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-card p-4">
-          <div>
-            <p className="text-sm font-medium text-foreground">Show on lake page</p>
-            <p className="text-xs text-muted-foreground">
-              {formData.isPublic 
-                ? 'Other anglers can see you\'re fishing here' 
-                : 'Your session will be private'}
-            </p>
-          </div>
           <button
             type="button"
-            onClick={() => setFormData(prev => ({ ...prev, isPublic: !prev.isPublic }))}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              formData.isPublic ? 'bg-primary' : 'bg-muted'
-            }`}
+            onClick={handleGetLocation}
+            disabled={isGettingLocation}
+            className="mb-3 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400"
           >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
-                formData.isPublic ? 'translate-x-5' : 'translate-x-0.5'
-              }`}
-            />
+            {isGettingLocation ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Getting location...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <MapPin size={16} />
+                Use My Current Location
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsLocationPickerOpen(true)}
+            className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:border-primary"
+          >
+            📍 Pick location on map
+          </button>
+
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Your exact location is never shared publicly by default
+          </p>
+        </>
+      )
+    }
+
+    // Phase 2: Lake auto-detected or checking
+    if (isDetectingLake) {
+      return (
+        <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Checking for nearby lakes...</p>
+        </div>
+      )
+    }
+
+    // Phase 3: Lake detected - ask to confirm
+    if (autoDetectedLake) {
+      return (
+        <>
+          <div className="mb-4 rounded-xl bg-gradient-to-r from-emerald-900/30 to-teal-900/20 border border-emerald-500/30 p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-600 text-white text-2xl">
+                🏞️
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-emerald-400">Lake detected nearby</p>
+                <p className="text-base font-semibold text-foreground">{autoDetectedLake.name}</p>
+                {autoDetectedLake.distance && (
+                  <p className="text-xs text-muted-foreground">{(autoDetectedLake.distance * 1000).toFixed(0)}m away</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <h2 className="mb-2 text-lg font-bold text-foreground">Are you at this lake?</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            We detected you're near {autoDetectedLake.name}. Confirm to link your session.
+          </p>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => handleConfirmLake(autoDetectedLake)}
+              className="flex w-full items-center justify-between rounded-xl border-2 border-primary bg-card p-4 text-left transition-colors hover:bg-muted/50"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-900/30 text-xl">✓</div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Yes, I'm at {autoDetectedLake.name}</p>
+                  <p className="text-xs text-muted-foreground">Link session to this lake</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-primary" />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSkipLakeDetection}
+              className="flex w-full items-center justify-between rounded-xl border-2 border-border bg-card p-4 text-left transition-colors hover:border-primary"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-xl">✗</div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">No, different location</p>
+                  <p className="text-xs text-muted-foreground">Choose water type manually</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-muted-foreground" />
+            </button>
+          </div>
+        </>
+      )
+    }
+
+    // Phase 4: No lake detected - go to water type selection
+    return (
+      <>
+        <div className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-900/20 p-3">
+          <div className="flex items-center gap-2 text-emerald-400">
+            <MapPin size={16} />
+            <span className="text-xs font-medium">Location set</span>
+          </div>
+        </div>
+
+        <h2 className="mb-2 text-lg font-bold text-foreground">What type of water?</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          This helps us show the right species and fishing data.
+        </p>
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => {
+              setFormData((prev) => ({ ...prev, waterType: 'saltwater' }))
+              setStep(3) // Skip to privacy
+            }}
+            className="flex w-full items-center justify-between rounded-xl border-2 border-border bg-card p-4 text-left transition-colors hover:border-primary"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-900/30 text-2xl">🌊</div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Sea / Saltwater</p>
+                <p className="text-xs text-muted-foreground">Beach, pier, rocks, boat</p>
+              </div>
+            </div>
+            <ChevronRight size={18} className="text-muted-foreground" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setFormData((prev) => ({ ...prev, waterType: 'freshwater' }))
+              setStep(2) // Go to lake search step
+            }}
+            className="flex w-full items-center justify-between rounded-xl border-2 border-border bg-card p-4 text-left transition-colors hover:border-primary"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-900/30 text-2xl">🏞️</div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Freshwater</p>
+                <p className="text-xs text-muted-foreground">Lake, river, canal, pond</p>
+              </div>
+            </div>
+            <ChevronRight size={18} className="text-muted-foreground" />
           </button>
         </div>
-      )}
-
-      <p className="text-xs text-muted-foreground">
-        {hasLake 
-          ? `💡 Quick Start will create your session at ${lakeName} with weather data and smart defaults.`
-          : preSelectedMark 
-            ? `💡 Quick Start will use your saved mark "${preSelectedMark.name}" as the location.`
-            : '💡 Quick Start defaults: Uses your current GPS location, general area privacy, and auto-detects water type. You can edit everything later.'}
-      </p>
-    </>
-  )}
+      </>
+    )
+  }
 
   const renderStep1 = () => {
     const hasLocation =
@@ -881,132 +1123,83 @@ export default function StartSessionPage() {
   }
 
   const renderStep2 = () => {
-    const selected = formData.waterType
-
-    const makeCard = (type: WaterType, icon: string, title: string, description: string) => {
-      const isSelected = selected === type
-      return (
-        <button
-          key={type}
-          type="button"
-          onClick={() => setFormData((prev) => ({ ...prev, waterType: type }))}
-          className={`flex items-center justify-between rounded-xl border-2 p-4 text-left transition-colors ${
-            isSelected ? 'border-primary bg-background' : 'border-border bg-card'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl ${
-                type === 'saltwater' ? 'bg-blue-900/30' : 'bg-emerald-900/30'
-              }`}
-            >
-              {icon}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{title}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-            </div>
-          </div>
-          <div
-            className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
-              isSelected ? 'bg-primary text-white' : 'border border-border bg-card text-transparent'
-            }`}
-          >
-            ✔
-          </div>
-        </button>
-      )
-    }
+    // Step 2: Lake search for freshwater sessions
+    // Filter nearby lakes by search query
+    const filteredLakes = nearbyLakes?.filter(lake => 
+      !lakeSearchQuery || lake.name.toLowerCase().includes(lakeSearchQuery.toLowerCase())
+    ) || []
 
     return (
       <>
-        <h2 className="mb-1 text-lg font-bold text-foreground">What type of water?</h2>
+        <h2 className="mb-1 text-lg font-bold text-foreground">Are you at a lake?</h2>
         <p className="mb-4 text-sm text-muted-foreground">
-          This helps us show you the right species and fishing data.
+          Link your session to a lake for local fishing intel, or skip if you're on a river, canal, or pond.
         </p>
 
-        <div className="space-y-3">
-          {makeCard('saltwater', '🌊', 'Saltwater', 'Sea, ocean, coastal fishing')}
-          {makeCard('freshwater', '🏞️', 'Freshwater', 'Lakes, rivers, ponds, canals')}
+        {/* Search input */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={lakeSearchQuery}
+            onChange={(e) => setLakeSearchQuery(e.target.value)}
+            placeholder="Search for a lake..."
+            className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
         </div>
 
-        {/* Lake selector for freshwater */}
-        {selected === 'freshwater' && nearbyLakes && nearbyLakes.length > 0 && (
-          <div className="mt-4 rounded-xl border-2 border-border bg-card p-4">
-            <label className="mb-2 block text-sm font-semibold text-foreground">
-              🏞️ Link to a fishing venue (optional)
-            </label>
-            <select
-              value={formData.lakeId ?? ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, lakeId: e.target.value || null }))}
-              className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-            >
-              <option value="">No specific venue</option>
-              {nearbyLakes.map((lake: Lake) => (
-                <option key={lake.id} value={lake.id}>
-                  {lake.name} {lake.distance ? `(${lake.distance.toFixed(1)} km)` : ''}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Linking helps build local fishing intel
+        {/* Nearby lakes list */}
+        {filteredLakes.length > 0 ? (
+          <div className="mb-4 max-h-[300px] space-y-2 overflow-y-auto">
+            {filteredLakes.slice(0, 10).map((lake: Lake) => (
+              <button
+                key={lake.id}
+                type="button"
+                onClick={() => {
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    lakeId: lake.id,
+                    locationName: lake.name,
+                  }))
+                  setStep(3) // Go to privacy step
+                }}
+                className={`flex w-full items-center justify-between rounded-xl border-2 p-3 text-left transition-colors ${
+                  formData.lakeId === lake.id ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-900/30 text-lg">
+                    🏞️
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{lake.name}</p>
+                    {lake.distance && (
+                      <p className="text-xs text-muted-foreground">{lake.distance.toFixed(1)} km away</p>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-muted-foreground" />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="mb-4 rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              {lakeSearchQuery ? 'No lakes found matching your search' : 'No lakes found nearby'}
             </p>
           </div>
         )}
 
-        {/* Saved mark selector for saltwater */}
-        {selected === 'saltwater' && allMarks && allMarks.length > 0 && (
-          <div className="mt-4 rounded-xl border-2 border-border bg-card p-4">
-            <label className="mb-2 block text-sm font-semibold text-foreground">
-              📍 Start at a saved mark (optional)
-            </label>
-            <select
-              value={formData.markId ?? ''}
-              onChange={(e) => {
-                const markId = e.target.value || null
-                const mark = allMarks.find(m => m.id === markId)
-                setFormData(prev => ({ 
-                  ...prev, 
-                  markId,
-                  // Auto-fill location from mark
-                  ...(mark ? {
-                    latitude: mark.latitude,
-                    longitude: mark.longitude,
-                    locationName: mark.name,
-                  } : {})
-                }))
-              }}
-              className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-            >
-              <option value="">Choose a mark...</option>
-              {savedMarks.map((mark) => (
-                <option key={mark.id} value={mark.id}>
-                  {mark.name}
-                </option>
-              ))}
-              {sharedMarks && sharedMarks.length > 0 && (
-                <optgroup label="Shared with me">
-                  {sharedMarks.map((mark) => (
-                    <option key={mark.id} value={mark.id}>
-                      {mark.name}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Your saved spots and marks shared with you
-            </p>
-          </div>
-        )}
-
+        {/* Skip option */}
         <button
           type="button"
-          onClick={handleNext}
-          disabled={!selected}
-          className="mt-4 w-full rounded-xl bg-navy-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-900 disabled:bg-navy-400 disabled:cursor-not-allowed"
+          onClick={() => {
+            setFormData(prev => ({ ...prev, lakeId: null }))
+            setStep(3) // Go to privacy step
+          }}
+          className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:border-primary"
         >
-          Continue
+          Skip — I'm on a river, canal, or pond
         </button>
       </>
     )

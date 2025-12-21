@@ -39,9 +39,9 @@ export interface SessionParticipant {
   user_id: string
   role?: ParticipantRole
   status?: ParticipantStatus
-  invited_at?: string
   joined_at?: string | null
-  left_at?: string | null
+  created_at?: string
+  updated_at?: string
 
   // Per-angler spot context (where this participant is fishing)
   spot_name?: string | null
@@ -50,9 +50,6 @@ export interface SessionParticipant {
   longitude?: number | null
   water_type?: string | null
   location_privacy?: LocationPrivacy | null
-
-  created_at?: string
-  updated_at?: string
 
   // Relations
   user?: Profile
