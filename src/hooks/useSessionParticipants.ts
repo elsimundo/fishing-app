@@ -221,7 +221,7 @@ export function useRemoveParticipant() {
     mutationFn: async (input: { participant_id: string; session_id: string }) => {
       const { data, error } = await supabase
         .from('session_participants')
-        .update({ status: 'removed', left_at: new Date().toISOString() })
+        .update({ status: 'left' })
         .eq('id', input.participant_id)
         .select('*, user:profiles(*)')
         .single()
