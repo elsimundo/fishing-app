@@ -1,0 +1,26 @@
+{
+  "name": "Catchi – Fishing Tracker",
+  "short_name": "Catchi",
+  "description": "Track your fishing sessions, log catches, and compete with friends",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/catchi-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/catchi-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "sports"],
+  "prefer_related_applications": false
+}

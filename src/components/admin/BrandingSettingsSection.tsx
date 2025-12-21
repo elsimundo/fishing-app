@@ -11,6 +11,7 @@ const BRANDING_KEYS = {
   LOGO_ICON: 'branding_logo_icon_url',
   LOGO_ICON_LIGHT: 'branding_logo_icon_light_url',
   LOGO_ICON_DARK: 'branding_logo_icon_dark_url',
+  PWA_ICON: 'branding_pwa_icon_url',
   SPLASH_LOGO: 'branding_splash_logo_url',
   SPLASH_BG_TYPE: 'branding_splash_bg_type', // 'solid' | 'gradient'
   SPLASH_BG_COLOR1: 'branding_splash_bg_color1',
@@ -53,6 +54,7 @@ export function BrandingSettingsSection() {
   const logoIconRef = useRef<HTMLInputElement>(null)
   const logoIconLightRef = useRef<HTMLInputElement>(null)
   const logoIconDarkRef = useRef<HTMLInputElement>(null)
+  const pwaIconRef = useRef<HTMLInputElement>(null)
   const splashLogoRef = useRef<HTMLInputElement>(null)
 
   const getSettingValue = (key: string, defaultValue = ''): string => {
@@ -247,6 +249,35 @@ export function BrandingSettingsSection() {
             BRANDING_KEYS.LOGO_ICON_DARK,
             logoIconDarkRef
           )}
+          {renderLogoUploader(
+            'PWA Icon (512x512)',
+            'Square icon for Android/iOS home screen install',
+            BRANDING_KEYS.PWA_ICON,
+            pwaIconRef
+          )}
+        </div>
+
+        {/* PWA Icon Info */}
+        {getSettingValue(BRANDING_KEYS.PWA_ICON) && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/40 dark:bg-amber-900/30">
+            <p className="text-xs font-medium text-amber-800 dark:text-amber-200">
+              📱 To use this icon for PWA installs:
+            </p>
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+              Download this image and save it as <code className="rounded bg-amber-200 px-1 dark:bg-amber-800">catchi-icon.png</code> in the <code className="rounded bg-amber-200 px-1 dark:bg-amber-800">public</code> folder, then rebuild the app.
+            </p>
+            <a
+              href={getSettingValue(BRANDING_KEYS.PWA_ICON)}
+              download="catchi-icon.png"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
+            >
+              <Upload size={12} className="rotate-180" />
+              Download Icon
+            </a>
+          </div>
+        )}
+
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
           {renderLogoUploader(
             'Splash Logo',
             'Stacked logo for splash screen',

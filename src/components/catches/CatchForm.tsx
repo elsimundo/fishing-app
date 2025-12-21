@@ -749,6 +749,7 @@ export function CatchForm({
           <SmartCatchPhoto
             initialPhotoFile={prefilledPhotoFile}
             initialMetadata={prefilledMetadata}
+            existingPhotoUrl={initialCatch?.photo_url}
             onPhotoChange={(file: File | null) => {
               setPhotoFile(file)
               if (!file) {

@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { Clock } from 'lucide-react'
 import { useActiveSessions } from '../../hooks/useActiveSession'
 import { WARNING_THRESHOLD_HOURS } from '../../hooks/useZombieSessions'
+import { ZombieSessionModal } from './ZombieSessionModal'
+import type { ZombieSession } from '../../hooks/useZombieSessions'
 
 function formatDurationShort(startedAt: string): string {
   const start = new Date(startedAt).getTime()
@@ -21,6 +22,8 @@ function formatDurationShort(startedAt: string): string {
  */
 export function SessionDurationPill() {
   const { data: sessions } = useActiveSessions()
+  const [showModal, setShowModal] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
 
   // Find the longest running session that exceeds the warning threshold
   const longRunningSession = useMemo(() => {
@@ -39,25 +42,52 @@ export function SessionDurationPill() {
     return longSessions.reduce((longest, s) => s.hours > longest.hours ? s : longest)
   }, [sessions])
 
-  if (!longRunningSession) return null
+  if (!longRunningSession || dismissed) return null
 
   const duration = formatDurationShort(longRunningSession.started_at)
   const title = longRunningSession.title || longRunningSession.location_name || 'Session'
 
+  // Convert to ZombieSession format for the modal
+  const hoursSinceStart = (Date.now() - new Date(longRunningSession.started_at).getTime()) / (1000 * 60 * 60)
+  const zombieSession: ZombieSession = {
+    ...longRunningSession,
+    hoursSinceStart,
+    hoursSinceLastActivity: hoursSinceStart,
+    lastActivityAt: null,
+    shouldAutoEnd: hoursSinceStart >= 24,
+  }
+
   return (
-    <Link
-      to={`/sessions/${longRunningSession.id}`}
-      className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 transform"
-    >
-      <div className="flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-2.5 shadow-lg dark:border-amber-500/50 dark:bg-amber-900/90">
-        <Clock size={14} className="text-amber-600 dark:text-amber-400" />
-        <span className="text-xs font-medium text-amber-800 dark:text-amber-200">
-          {title} - {new Date(longRunningSession.started_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · {duration}
-        </span>
-        <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white dark:text-amber-950">
-          Still running
-        </span>
-      </div>
-    </Link>
+    <>
+      <button
+        type="button"
+        onClick={() => setShowModal(true)}
+        className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 transform"
+      >
+        <div className="flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-2.5 shadow-lg dark:border-amber-500/50 dark:bg-amber-900/90">
+          <Clock size={14} className="text-amber-600 dark:text-amber-400" />
+          <span className="text-xs font-medium text-amber-800 dark:text-amber-200">
+            {title} - {new Date(longRunningSession.started_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · {duration}
+          </span>
+          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white dark:text-amber-950">
+            Still running
+          </span>
+        </div>
+      </button>
+
+      {showModal && (
+        <ZombieSessionModal
+          session={zombieSession}
+          onClose={() => {
+            setShowModal(false)
+            setDismissed(true)
+          }}
+          onDismiss={() => {
+            setShowModal(false)
+            setDismissed(true)
+          }}
+        />
+      )}
+    </>
   )
 }

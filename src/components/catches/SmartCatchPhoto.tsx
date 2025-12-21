@@ -11,6 +11,7 @@ interface SmartCatchPhotoProps {
   onMetadataExtracted?: (metadata: PhotoMetadata) => void
   initialPhotoFile?: File | null
   initialMetadata?: PhotoMetadata | null
+  existingPhotoUrl?: string | null
 }
 
 export function SmartCatchPhoto({ 
@@ -19,9 +20,10 @@ export function SmartCatchPhoto({
   onMetadataExtracted,
   initialPhotoFile,
   initialMetadata,
+  existingPhotoUrl,
 }: SmartCatchPhotoProps) {
   const { identifyFish, loading, result, error, reset } = useFishIdentification()
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(existingPhotoUrl || null)
   const [metadata, setMetadata] = useState<PhotoMetadata | null>(initialMetadata || null)
 
   // Set initial photo if provided
