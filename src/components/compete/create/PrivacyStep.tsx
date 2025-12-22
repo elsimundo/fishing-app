@@ -11,21 +11,21 @@ const OPTIONS = [
     id: 'public',
     icon: '🌐',
     title: 'Public',
-    description: 'Anyone can discover and join this competition.',
+    description: 'Anyone can discover and join freely.',
     values: { is_public: true, invite_only: false },
   },
   {
     id: 'private',
     icon: '🔒',
     title: 'Private (invite only)',
-    description: 'Only people you invite can join.',
+    description: 'Only invited anglers can join. Others can request to join.',
     values: { is_public: false, invite_only: true },
   },
   {
     id: 'friends',
     icon: '👥',
     title: 'Friends only',
-    description: 'Visible only to friends (implementation TBD).',
+    description: 'Only your followers can see and join.',
     values: { is_public: false, invite_only: false },
   },
 ] as const
@@ -46,8 +46,8 @@ export function PrivacyStep({ data, onChange }: PrivacyStepProps) {
             onClick={() => onChange(option.values)}
             className={`flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
               selectedId === option.id
-                ? 'border-navy-800 bg-navy-50'
-                : 'border-border hover:border-muted-foreground'
+                ? 'border-primary bg-primary/10'
+                : 'border-border bg-background hover:border-primary/40'
             }`}
           >
             <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-muted text-2xl">
@@ -70,7 +70,7 @@ export function PrivacyStep({ data, onChange }: PrivacyStepProps) {
         ))}
       </div>
 
-      <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+      <div className="mt-6 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm text-foreground">
         <span className="mr-1">💡</span>
         Public competitions are more discoverable and can attract more anglers.
       </div>

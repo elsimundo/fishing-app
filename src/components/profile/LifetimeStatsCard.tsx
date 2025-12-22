@@ -7,6 +7,8 @@ interface LifetimeStatsCardProps {
   totalWeightKg: number
   personalBestLabel: string
   topSpeciesLabel: string
+  onSessionsClick?: () => void
+  onCatchesClick?: () => void
 }
 
 export function LifetimeStatsCard({
@@ -15,6 +17,8 @@ export function LifetimeStatsCard({
   totalWeightKg,
   personalBestLabel,
   topSpeciesLabel,
+  onSessionsClick,
+  onCatchesClick,
 }: LifetimeStatsCardProps) {
   const { formatWeight } = useWeightFormatter()
 
@@ -31,16 +35,26 @@ export function LifetimeStatsCard({
 
       {/* Primary stats - big numbers */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="text-center rounded-xl border border-border bg-background p-3">
+        <button
+          type="button"
+          onClick={onSessionsClick}
+          disabled={!onSessionsClick}
+          className="text-center rounded-xl border border-border bg-background p-3 transition-colors hover:border-primary/40 disabled:cursor-default disabled:hover:border-border"
+        >
           <Target size={16} className="mx-auto mb-1.5 text-muted-foreground" />
           <p className="text-2xl font-bold tabular-nums">{sessionCount}</p>
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Sessions</p>
-        </div>
-        <div className="text-center rounded-xl border border-border bg-background p-3">
+        </button>
+        <button
+          type="button"
+          onClick={onCatchesClick}
+          disabled={!onCatchesClick}
+          className="text-center rounded-xl border border-border bg-background p-3 transition-colors hover:border-primary/40 disabled:cursor-default disabled:hover:border-border"
+        >
           <Fish size={16} className="mx-auto mb-1.5 text-muted-foreground" />
           <p className="text-2xl font-bold tabular-nums">{catchesCount}</p>
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Catches</p>
-        </div>
+        </button>
         <div className="text-center rounded-xl border border-border bg-background p-3">
           <Scale size={16} className="mx-auto mb-1.5 text-muted-foreground" />
           <p className="text-xl font-bold tabular-nums">{formatWeight(totalWeightKg, { precision: 1 })}</p>

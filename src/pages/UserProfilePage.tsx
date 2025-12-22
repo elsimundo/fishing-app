@@ -168,6 +168,14 @@ export default function UserProfilePage() {
             totalWeightKg={lifetimeStats.totalWeightKg}
             personalBestLabel={lifetimeStats.personalBestLabel}
             topSpeciesLabel={lifetimeStats.topSpeciesLabel}
+            onSessionsClick={() => {
+              setActiveTab('sessions')
+              document.getElementById('profile-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            onCatchesClick={() => {
+              setActiveTab('catches')
+              document.getElementById('profile-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
           />
         </div>
 
@@ -200,7 +208,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* Tabs - matches ProfilePage exactly */}
-      <div className="sticky top-0 z-10 mt-2 border-b border-border bg-card">
+      <div id="profile-tabs" className="sticky top-0 z-10 mt-2 border-b border-border bg-card">
         <div className="flex text-xs font-semibold text-muted-foreground">
           <button
             type="button"

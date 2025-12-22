@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import type { SessionParticipant, ParticipantRole } from '../../types'
 
 interface ParticipantsListProps {
@@ -28,6 +29,8 @@ export function ParticipantsList({
   onChangeRole,
   onRemove,
 }: ParticipantsListProps) {
+  const navigate = useNavigate()
+
   if (!participants || participants.length === 0) {
     if (myRole === 'owner') {
       return (
@@ -48,13 +51,19 @@ export function ParticipantsList({
         const canManage = myRole === 'owner' && !isCurrentUser
         const displayName =
           p.user?.full_name || p.user?.username || (isCurrentUser ? 'You' : 'Angler')
+        const username = p.user?.username
 
         return (
           <li
             key={p.id}
             className="flex items-center justify-between rounded-md bg-background px-2 py-1 text-[10px] text-muted-foreground"
           >
-            <div className="flex items-center gap-2 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => username && navigate(`/${username}`)}
+              disabled={!username}
+              className="flex items-center gap-2 overflow-hidden text-left transition-opacity hover:opacity-70 disabled:cursor-default disabled:hover:opacity-100"
+            >
               {p.user?.avatar_url ? (
                 <img
                   src={p.user.avatar_url}
@@ -72,11 +81,11 @@ export function ParticipantsList({
                   {isCurrentUser ? ' (you)' : ''}
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  {roleLabel(p.role)}
+                  {roleLabel(p.role ?? 'viewer')}
                   {p.status === 'pending' && p.role !== 'contributor' ? ' · Invited' : null}
                 </p>
               </div>
-            </div>
+            </button>
 
             <div className="ml-2 flex items-center gap-1">
               <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${

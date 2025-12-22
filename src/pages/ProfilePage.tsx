@@ -197,6 +197,14 @@ export default function ProfilePage() {
             totalWeightKg={totalWeight}
             personalBestLabel={personalBestLabel}
             topSpeciesLabel={topSpeciesLabel}
+            onSessionsClick={() => {
+              setTab('sessions')
+              document.getElementById('profile-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            onCatchesClick={() => {
+              setTab('catches')
+              document.getElementById('profile-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
           />
         </div>
 
@@ -255,7 +263,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="sticky top-0 z-10 mt-2 border-b border-border bg-card">
+      <div id="profile-tabs" className="sticky top-0 z-10 mt-2 border-b border-border bg-card">
         <div className="flex overflow-x-auto scrollbar-hide text-xs font-semibold text-muted-foreground md:justify-center">
           <button
             type="button"

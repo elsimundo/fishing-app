@@ -72,6 +72,29 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
 
       <div className="space-y-6">
         <div>
+          <label className="mb-3 block text-sm font-semibold text-foreground">Water type</label>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Choose a water type to filter the species list.
+          </p>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            {(['saltwater', 'freshwater', 'any'] as Exclude<Competition['water_type'], null>[]).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleWaterTypeChange(type)}
+                className={`rounded-xl border-2 px-4 py-3 font-medium capitalize transition-all ${
+                  data.water_type === type
+                    ? 'border-primary bg-primary/15 text-foreground'
+                    : 'border-border bg-background text-foreground/80 hover:border-primary/40 hover:text-foreground'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
           <label className="mb-3 block text-sm font-semibold text-foreground">Allowed species</label>
           <div className="flex flex-col gap-3">
             <div className="flex gap-2">
@@ -120,26 +143,6 @@ export function RulesStep({ data, onChange }: RulesStepProps) {
           <p className="text-xs text-muted-foreground">
             Select at least 1 species. You can add as many as you like.
           </p>
-        </div>
-
-        <div>
-          <label className="mb-3 block text-sm font-semibold text-foreground">Water type</label>
-          <div className="grid grid-cols-3 gap-2 text-sm">
-            {(['saltwater', 'freshwater', 'any'] as Exclude<Competition['water_type'], null>[]).map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => handleWaterTypeChange(type)}
-                className={`rounded-xl border-2 px-4 py-3 font-medium capitalize transition-all ${
-                  data.water_type === type
-                    ? 'border-navy-800 bg-navy-50 text-navy-900'
-                    : 'border-border text-muted-foreground hover:border-muted-foreground'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div>

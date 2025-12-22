@@ -25,7 +25,7 @@ function calculateLevel(xp: number): number {
  */
 async function reverseAffectedChallenges(
   userId: string, 
-  species: string, 
+  species: string | null, 
   hadPhoto: boolean,
   challengesLost: string[]
 ) {
@@ -42,12 +42,14 @@ async function reverseAffectedChallenges(
   const speciesCount = uniqueSpecies.size
 
   // Check if user still has this species
-  const stillHasSpecies = uniqueSpecies.has(species.toLowerCase())
-  
-  // If they no longer have this species, reverse the species-specific challenge
-  if (!stillHasSpecies) {
-    const speciesSlug = `catch_${species.toLowerCase().replace(/\s+/g, '_')}`
-    await reverseChallenge(userId, speciesSlug, challengesLost)
+  if (species) {
+    const stillHasSpecies = uniqueSpecies.has(species.toLowerCase())
+    
+    // If they no longer have this species, reverse the species-specific challenge
+    if (!stillHasSpecies) {
+      const speciesSlug = `catch_${species.toLowerCase().replace(/\s+/g, '_')}`
+      await reverseChallenge(userId, speciesSlug, challengesLost)
+    }
   }
   
   // Check milestone challenges that might need reversal
@@ -299,14 +301,15 @@ export function useDeleteCatch() {
       
       if (user) {
         // Get the catch details before deleting (for challenge reversal)
+        // Use maybeSingle so we don't abort reversal if the row is already missing.
         const { data: catchData } = await supabase
           .from('catches')
           .select('species, photo_url')
           .eq('id', id)
-          .single()
+          .maybeSingle()
         
         // Find and reverse XP transaction for this catch
-        const { data: transaction, error: txError } = await supabase
+        const { data: transaction } = await supabase
           .from('xp_transactions')
           .select('id, amount')
           .eq('user_id', user.id)
@@ -327,7 +330,7 @@ export function useDeleteCatch() {
           const newXP = Math.max(0, (profile?.xp || 0) - transaction.amount)
           
           
-          const { error: updateError } = await supabase
+          await supabase
             .from('profiles')
             .update({ xp: newXP, level: calculateLevel(newXP) })
             .eq('id', user.id)
@@ -348,11 +351,20 @@ export function useDeleteCatch() {
         if (error) {
           throw new Error(error.message)
         }
+
+        // Clean up any challenge_catches rows referencing this catch (if present)
+        await supabase
+          .from('challenge_catches')
+          .delete()
+          .eq('catch_id', id)
         
         // Now check if challenges need to be reversed
-        if (catchData) {
-          await reverseAffectedChallenges(user.id, catchData.species, !!catchData.photo_url, challengesLost)
-        }
+        await reverseAffectedChallenges(
+          user.id,
+          catchData?.species ?? null,
+          Boolean(catchData?.photo_url),
+          challengesLost,
+        )
         
         return { xpReversed, challengesLost }
       }
