@@ -132,6 +132,7 @@ export function SessionDetailPage() {
   const viewerRole: ViewerRole = isOwner ? 'owner' : 'guest'
   const canSeeExactLocation = viewerRole === 'owner' || session.location_privacy === 'exact'
   const canLogCatches = isOwner || mySessionRole === 'contributor'
+  const canAddPosts = isOwner || mySessionRole === 'contributor'
   const isActive = !session.ended_at
 
   const myParticipant =
@@ -699,7 +700,7 @@ export function SessionDetailPage() {
             <div className="mt-4 rounded-2xl bg-card border border-border p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-foreground">Session timeline</h2>
-                {canLogCatches && (session.allow_posts || session.allow_comments) && (
+                {canAddPosts && (session.allow_posts || session.allow_comments) && (
                   <button
                     type="button"
                     onClick={() => setShowAddPostModal(true)}

@@ -43,9 +43,9 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
     <button
       type="button"
       onClick={handleClick}
-      className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm shadow-sm transition-colors ${
+      className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left text-sm shadow-sm transition-colors ${
         isActive
-          ? 'border-amber-500/40 bg-gradient-to-r from-amber-900/30 to-yellow-900/20 hover:from-amber-900/40 hover:to-yellow-900/30'
+          ? 'border-amber-500 bg-gradient-to-r from-amber-900/30 to-yellow-900/20 hover:from-amber-900/40 hover:to-yellow-900/30'
           : 'border-border bg-card hover:border-primary/40 hover:bg-background'
       }`}
     >

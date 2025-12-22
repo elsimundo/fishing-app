@@ -94,63 +94,93 @@ export function SessionsList() {
       {today.length > 0 && (
         <section className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Today</p>
-          {today.map((session) => (
-            <div
-              key={session.id}
-              className="group relative overflow-hidden rounded-2xl bg-card border border-border p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md"
-            >
-              <SessionCard session={session} />
-              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
-              <Link
-                to={`/sessions/${session.id}?share=1`}
-                className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
+          {today.map((session) => {
+            const isActive = !session.ended_at
+            const isCompetition = Boolean(session.competition_id)
+            return (
+              <div
+                key={session.id}
+                className={`group relative overflow-hidden rounded-2xl bg-card border-2 p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md ${
+                  isActive
+                    ? 'border-emerald-500'
+                    : isCompetition
+                      ? 'border-amber-500'
+                      : 'border-border'
+                }`}
               >
-                Share
-              </Link>
-            </div>
-          ))}
+                <SessionCard session={session} />
+                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
+                <Link
+                  to={`/sessions/${session.id}?share=1`}
+                  className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
+                >
+                  Share
+                </Link>
+              </div>
+            )
+          })}
         </section>
       )}
 
       {yesterday.length > 0 && (
         <section className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Yesterday</p>
-          {yesterday.map((session) => (
-            <div
-              key={session.id}
-              className="group relative overflow-hidden rounded-2xl bg-card border border-border p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md"
-            >
-              <SessionCard session={session} />
-              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
-              <Link
-                to={`/sessions/${session.id}?share=1`}
-                className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
+          {yesterday.map((session) => {
+            const isActive = !session.ended_at
+            const isCompetition = Boolean(session.competition_id)
+            return (
+              <div
+                key={session.id}
+                className={`group relative overflow-hidden rounded-2xl bg-card border-2 p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md ${
+                  isActive
+                    ? 'border-emerald-500'
+                    : isCompetition
+                      ? 'border-amber-500'
+                      : 'border-border'
+                }`}
               >
-                Share
-              </Link>
-            </div>
-          ))}
+                <SessionCard session={session} />
+                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
+                <Link
+                  to={`/sessions/${session.id}?share=1`}
+                  className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
+                >
+                  Share
+                </Link>
+              </div>
+            )
+          })}
         </section>
       )}
 
       {earlier.length > 0 && (
         <section className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Earlier</p>
-          {earlier.map((session) => (
-            <div
-              key={session.id}
-              className="group relative overflow-hidden rounded-2xl bg-card border border-border p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md"
-            >
-              <SessionCard session={session} />
-              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
-              <Link
-                to={`/sessions/${session.id}?share=1`}
-                className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
+          {earlier.map((session) => {
+            const isActive = !session.ended_at
+            const isCompetition = Boolean(session.competition_id)
+            return (
+              <div
+                key={session.id}
+                className={`group relative overflow-hidden rounded-2xl bg-card border-2 p-3 text-xs text-muted-foreground shadow-sm transition-shadow hover:shadow-md ${
+                  isActive
+                    ? 'border-emerald-500'
+                    : isCompetition
+                      ? 'border-amber-500'
+                      : 'border-border'
+                }`}
               >
-                Share
-              </Link>
-            </div>
-          ))}
+                <SessionCard session={session} />
+                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground" size={20} />
+                <Link
+                  to={`/sessions/${session.id}?share=1`}
+                  className="absolute bottom-3 right-3 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground shadow-sm hover:bg-muted"
+                >
+                  Share
+                </Link>
+              </div>
+            )
+          })}
         </section>
       )}
     </div>

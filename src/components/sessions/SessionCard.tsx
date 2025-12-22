@@ -59,7 +59,13 @@ export function SessionCard({ session }: SessionCardProps) {
 
   return (
     <Link to={`/sessions/${session.id}`} className="block">
-      <article className="group overflow-hidden rounded-2xl bg-card shadow-md transition-all hover:shadow-lg active:scale-[0.98] border border-border">
+      <article className={`group overflow-hidden rounded-2xl bg-card shadow-md transition-all hover:shadow-lg active:scale-[0.98] border-2 ${
+        !isCompleted 
+          ? 'border-emerald-500' 
+          : isCompetition 
+            ? 'border-amber-500' 
+            : 'border-border'
+      }`}>
         {/* Colored Header */}
         <div className={`bg-gradient-to-r ${headerGradient} px-4 py-2.5`}>
           <div className="flex items-center justify-between">

@@ -11,7 +11,7 @@ interface InviteToSessionModalProps {
 
 export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModalProps) {
   const [query, setQuery] = useState('')
-  const [role, setRole] = useState<ParticipantRole>('contributor')
+  const [role] = useState<ParticipantRole>('contributor') // Always contributor for invites
   const { data: results = [], isLoading } = useUserSearch(query)
   const { mutate, isPending } = useInviteToSession()
   const [error, setError] = useState<string | null>(null)
@@ -49,31 +49,11 @@ export function InviteToSessionModal({ sessionId, onClose }: InviteToSessionModa
           </button>
         </div>
 
-        {/* Role selection */}
-        <div className="border-b border-border px-5 py-3 text-sm text-muted-foreground">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role</p>
-          <div className="flex gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() => setRole('contributor')}
-              className={`flex-1 rounded-xl border px-3 py-2 font-medium ${role === 'contributor' ? 'border-primary bg-primary/20 text-primary' : 'border-border bg-background text-muted-foreground'}`}
-            >
-              Contributor
-              <span className="mt-0.5 block text-[10px] font-normal text-muted-foreground">
-                Can log catches in this session
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('viewer')}
-              className={`flex-1 rounded-xl border px-3 py-2 font-medium ${role === 'viewer' ? 'border-primary bg-primary/20 text-primary' : 'border-border bg-background text-muted-foreground'}`}
-            >
-              Viewer
-              <span className="mt-0.5 block text-[10px] font-normal text-muted-foreground">
-                Can view session only
-              </span>
-            </button>
-          </div>
+        {/* Info banner */}
+        <div className="border-b border-border bg-emerald-900/20 px-5 py-3">
+          <p className="text-xs text-emerald-400">
+            <span className="font-semibold">Invites create contributors.</span> Invited users can log catches and add posts to this session.
+          </p>
         </div>
 
         {/* Search input */}
