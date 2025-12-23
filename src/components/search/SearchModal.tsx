@@ -11,6 +11,7 @@ import {
   BookOpen,
   Trophy,
   Loader2,
+  Clock,
 } from 'lucide-react'
 import { useGlobalSearch, groupSearchResults, SEARCH_TYPE_CONFIG, type SearchResult, type SearchResultType } from '../../hooks/useGlobalSearch'
 
@@ -39,11 +40,67 @@ const TYPE_COLORS: Record<SearchResultType, string> = {
   challenge: 'text-amber-500 bg-amber-500/10',
 }
 
+const RECENT_SEARCHES_KEY = 'catchi_recent_searches'
+const MAX_RECENT_SEARCHES = 5
+
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
   const { data: results, isLoading } = useGlobalSearch(query)
   const grouped = results ? groupSearchResults(results) : {}
+
+  // Load recent searches from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(RECENT_SEARCHES_KEY)
+      if (stored) {
+        setRecentSearches(JSON.parse(stored))
+      }
+    } catch (e) {
+      console.error('Failed to load recent searches:', e)
+    }
+  }, [])
+
+  // Save search to recent searches
+  const saveRecentSearch = useCallback((searchQuery: string) => {
+    const trimmed = searchQuery.trim()
+    if (!trimmed || trimmed.length < 2) return
+
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((s) => s !== trimmed)
+      const updated = [trimmed, ...filtered].slice(0, MAX_RECENT_SEARCHES)
+      try {
+        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+      } catch (e) {
+        console.error('Failed to save recent search:', e)
+      }
+      return updated
+    })
+  }, [])
+
+  // Clear a single recent search
+  const clearRecentSearch = useCallback((searchQuery: string) => {
+    setRecentSearches((prev) => {
+      const updated = prev.filter((s) => s !== searchQuery)
+      try {
+        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+      } catch (e) {
+        console.error('Failed to clear recent search:', e)
+      }
+      return updated
+    })
+  }, [])
+
+  // Clear all recent searches
+  const clearAllRecentSearches = useCallback(() => {
+    setRecentSearches([])
+    try {
+      localStorage.removeItem(RECENT_SEARCHES_KEY)
+    } catch (e) {
+      console.error('Failed to clear all recent searches:', e)
+    }
+  }, [])
 
   // Close on escape
   useEffect(() => {
@@ -63,11 +120,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   const handleResultClick = useCallback(
     (result: SearchResult) => {
+      saveRecentSearch(query)
       const route = SEARCH_TYPE_CONFIG[result.type].route(result.id)
       navigate(route)
       onClose()
     },
-    [navigate, onClose]
+    [navigate, onClose, query, saveRecentSearch]
   )
 
   if (!isOpen) return null
@@ -130,11 +188,49 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             </div>
           )}
 
-          {/* Initial state */}
+          {/* Initial state - show recent searches */}
           {query.length === 0 && (
-            <div className="py-8 text-center">
-              <Search size={32} className="mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Search for anglers, lakes, businesses & more</p>
+            <div className="py-2">
+              {recentSearches.length > 0 ? (
+                <>
+                  <div className="flex items-center justify-between px-4 py-2">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Recent Searches
+                    </div>
+                    <button
+                      onClick={clearAllRecentSearches}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                  {recentSearches.map((search, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors group"
+                    >
+                      <Clock size={16} className="text-muted-foreground shrink-0" />
+                      <button
+                        onClick={() => setQuery(search)}
+                        className="flex-1 text-left text-sm text-foreground"
+                      >
+                        {search}
+                      </button>
+                      <button
+                        onClick={() => clearRecentSearch(search)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-foreground transition-all"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="py-8 text-center">
+                  <Search size={32} className="mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">Search for anglers, lakes, businesses & more</p>
+                </div>
+              )}
             </div>
           )}
 
