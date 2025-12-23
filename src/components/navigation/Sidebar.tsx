@@ -26,7 +26,7 @@ export function Sidebar({ collapsed = false, onToggleCollapsed }: SidebarProps) 
   const unreadCount = useUnreadCount()
   const { data: unreadNotifications = 0 } = useUnreadNotificationCount()
   const { theme } = useTheme()
-  const { logoLight, logoDark, logoIconLight, logoIconDark } = useBranding()
+  const { logoLight, logoDark } = useBranding()
 
   const isActive = (path: string) => location.pathname === path
 
@@ -34,15 +34,15 @@ export function Sidebar({ collapsed = false, onToggleCollapsed }: SidebarProps) 
     <>
       <aside
         className={`fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-border bg-background p-3 transition-all duration-200 ${
-          collapsed ? 'w-[84px]' : 'w-[275px]'
+          collapsed ? 'w-[100px]' : 'w-[275px]'
         }`}
       >
         {/* App logo - full width */}
-        <div className={`mb-4 px-4 py-2 ${collapsed ? 'flex justify-center' : ''}`}>
+        <div className={`mb-4 ${collapsed ? 'flex justify-center px-2 py-2' : 'px-4 py-2'}`}>
           <img
-            src={collapsed ? (theme === 'dark' ? logoIconDark : logoIconLight) : theme === 'dark' ? logoDark : logoLight}
+            src={collapsed ? (theme === 'dark' ? '/catchi-icon-dark.png' : '/catchi-icon-light.png') : theme === 'dark' ? logoDark : logoLight}
             alt="Catchi"
-            className={collapsed ? 'block h-10 w-10 object-contain' : 'block h-9 w-auto max-w-full object-contain object-left'}
+            className={collapsed ? 'block h-20 w-20 object-contain' : 'block h-9 w-auto max-w-full object-contain object-left'}
           />
         </div>
 
