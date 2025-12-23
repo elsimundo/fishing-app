@@ -237,7 +237,7 @@ export function FishIdentifierPage() {
               <label className="block">
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
                   id="fish-photo"

@@ -15,6 +15,7 @@ import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
 import { getCountryFromCoords } from '../../utils/reverseGeocode'
 import { lbsOzToKg } from '../../utils/weight'
 import { useWeightUnit } from '../../hooks/useWeightUnit'
+import { useSessionParticipants } from '../../hooks/useSessionParticipants'
 
 const quickLogSchema = z.object({
   species: z.string().min(1, 'Species is required'),
@@ -61,6 +62,23 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     pounds: '',
     ounces: '',
   })
+  
+  // Fetch session participants for "who caught this" selector
+  const { data: sessionParticipants = [] } = useSessionParticipants(session.id)
+  
+  // Who caught this fish (defaults to current user)
+  const [caughtByUserId, setCaughtByUserId] = useState<string>('')
+  
+  // Set default to current user when component mounts
+  useEffect(() => {
+    async function loadUser() {
+      const { data } = await supabase.auth.getUser()
+      if (data.user) {
+        setCaughtByUserId(data.user.id)
+      }
+    }
+    void loadUser()
+  }, [])
   
   // Get species categories based on freshwater feature flag
   const allSpeciesCategories = getSpeciesByCategory(freshwaterEnabled)
@@ -260,7 +278,10 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     }
 
     const payload = {
-      user_id: userData.user.id,
+      user_id: caughtByUserId || userData.user.id,
+      logged_by_user_id: caughtByUserId !== userData.user.id ? userData.user.id : null,
+      approval_status: (caughtByUserId && caughtByUserId !== userData.user.id) ? 'pending' : 'approved',
+      approval_requested_at: (caughtByUserId && caughtByUserId !== userData.user.id) ? new Date().toISOString() : null,
       session_id: session.id,
       species: values.species,
       caught_at: new Date(values.caught_at).toISOString(),
@@ -297,7 +318,10 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     const created = data as Catch
     
     // Award XP for the catch and trigger celebration
-    catchXP.mutateAsync({
+    // Skip XP if logging for someone else - they'll get it when they approve
+    const isLoggingForSomeoneElse = caughtByUserId && caughtByUserId !== userData.user.id
+    if (!isLoggingForSomeoneElse) {
+      catchXP.mutateAsync({
       catchId: created.id,
       species: created.species,
       weightKg: created.weight_kg,
@@ -311,16 +335,17 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       windSpeed: created.wind_speed,
       moonPhase: created.moon_phase,
       countryCode,
-    }).then((result) => {
-      if (result.challengesCompleted.length > 0) {
-        celebrateChallenges(result.challengesCompleted, {
-          newLevel: result.newLevel,
-          leveledUp: result.leveledUp,
-        })
-      }
-    }).catch((err) => {
-      console.error('[QuickLogForm] XP mutation error:', err)
-    })
+      }).then((result) => {
+        if (result.challengesCompleted.length > 0) {
+          celebrateChallenges(result.challengesCompleted, {
+            newLevel: result.newLevel,
+            leveledUp: result.leveledUp,
+          })
+        }
+      }).catch((err) => {
+        console.error('[QuickLogForm] XP mutation error:', err)
+      })
+    }
     
     onLogged(created)
     onClose()
@@ -331,6 +356,36 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       {formError ? (
         <div className="rounded-md bg-red-900/30 border border-red-500/40 px-3 py-2 text-xs text-red-400">{formError}</div>
       ) : null}
+
+      {/* Participant selector - show when there are participants */}
+      {sessionParticipants.length > 0 && (
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            Who caught this fish?
+          </label>
+          <select
+            value={caughtByUserId}
+            onChange={(e) => setCaughtByUserId(e.target.value)}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            {sessionParticipants.map((participant) => {
+              const isCurrentUser = participant.user_id === caughtByUserId
+              const displayName = participant.user?.username || participant.user?.full_name || 'Unknown'
+              const status = participant.status || 'pending'
+              const statusLabel = status === 'pending' ? ' (invited)' : ''
+              
+              return (
+                <option key={participant.id} value={participant.user_id}>
+                  {isCurrentUser ? 'Me' : displayName}{statusLabel}
+                </option>
+              )
+            })}
+          </select>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            You can log catches for other people in this session.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -476,7 +531,8 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
           <input
             id="caught_at"
             type="datetime-local"
-            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary max-w-full"
+            style={{ minWidth: 0 }}
             {...register('caught_at')}
           />
           {errors.caught_at ? (

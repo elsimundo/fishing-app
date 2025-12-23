@@ -44,6 +44,7 @@ export interface CreateCatchInput {
   fish_health_notes?: string | null
   treatment_applied?: boolean
   treatment_notes?: string | null
+  logged_by_user_id?: string | null
 }
 
 interface CreateCatchResult {

@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useActiveSession } from '../../hooks/useActiveSession'
 import { useSessionParticipant } from '../../hooks/useSessionParticipant'
+import { useSessionParticipants } from '../../hooks/useSessionParticipants'
 import type { Catch } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
@@ -213,6 +214,9 @@ export function CatchForm({
   // Fetch participant's spot for this session (per-angler location context)
   const { data: participantSpot } = useSessionParticipant(targetSessionId)
   
+  // Fetch all session participants for "who caught this" selector
+  const { data: sessionParticipants = [] } = useSessionParticipants(targetSessionId)
+  
   // Fetch saved marks for quick location selection
   const { marks: savedMarks } = useSavedMarks()
   
@@ -246,6 +250,9 @@ export function CatchForm({
   const [fishHealthNotes, setFishHealthNotes] = useState(initialCatch?.fish_health_notes ?? '')
   const [treatmentApplied, setTreatmentApplied] = useState(initialCatch?.treatment_applied ?? false)
   const [treatmentNotes, setTreatmentNotes] = useState(initialCatch?.treatment_notes ?? '')
+
+  // Who caught this fish (defaults to current user)
+  const [caughtByUserId, setCaughtByUserId] = useState<string>(initialCatch?.user_id ?? user?.id ?? '')
 
   const defaultNow = new Date().toISOString().slice(0, 16)
 
@@ -516,7 +523,8 @@ export function CatchForm({
       
       // Build payloads for each species
       const payloads = multiCatchSpecies.map((species) => ({
-        user_id: user.id,
+        user_id: caughtByUserId || user.id,
+        logged_by_user_id: caughtByUserId !== user.id ? user.id : null,
         species,
         caught_at: caughtAtIso,
         location_name: values.location_name,
@@ -620,7 +628,10 @@ export function CatchForm({
     // SINGLE CATCH MODE (existing logic)
     // ========================================
     const payload = {
-      user_id: user.id,
+      user_id: caughtByUserId || user.id,
+      logged_by_user_id: caughtByUserId !== user.id ? user.id : null,
+      approval_status: (caughtByUserId && caughtByUserId !== user.id) ? 'pending' : 'approved',
+      approval_requested_at: (caughtByUserId && caughtByUserId !== user.id) ? new Date().toISOString() : null,
       species: values.species,
       caught_at: caughtAtIso,
       location_name: values.location_name,
@@ -674,7 +685,9 @@ export function CatchForm({
     }
 
     // Award XP for new catches (not edits, not backlog)
-    if (!isEdit && data && !isBacklog) {
+    // Skip XP if logging for someone else - they'll get it when they approve
+    const isLoggingForSomeoneElse = caughtByUserId && caughtByUserId !== user.id
+    if (!isEdit && data && !isBacklog && !isLoggingForSomeoneElse) {
       catchXP.mutateAsync({
         catchId: data.id,
         species: data.species,
@@ -743,6 +756,36 @@ export function CatchForm({
           )}
         </div>
       ) : null}
+
+      {/* Participant selector - only show when in a session with multiple participants */}
+      {mode === 'create' && targetSessionId && sessionParticipants.length > 0 && (
+        <div className="sm:col-span-2">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            Who caught this fish?
+          </label>
+          <select
+            value={caughtByUserId}
+            onChange={(e) => setCaughtByUserId(e.target.value)}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            {sessionParticipants.map((participant) => {
+              const isCurrentUser = participant.user_id === user?.id
+              const displayName = participant.user?.username || participant.user?.full_name || 'Unknown'
+              const status = participant.status || 'pending'
+              const statusLabel = status === 'pending' ? ' (invited)' : ''
+              
+              return (
+                <option key={participant.id} value={participant.user_id}>
+                  {isCurrentUser ? 'Me' : displayName}{statusLabel}
+                </option>
+              )
+            })}
+          </select>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            You can log catches for other people in this session, even if they haven't joined yet.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">

@@ -154,8 +154,14 @@ export type Catch = {
   treatment_applied?: boolean
   treatment_notes?: string | null
 
-  // Optional relation for attribution
+  // Who logged this catch (may differ from user_id if logging for someone else)
+  logged_by_user_id?: string | null
   logged_by?: Profile
+  
+  // Approval system for catches logged by others
+  approval_status?: 'pending' | 'approved' | null
+  approval_requested_at?: string | null
+  approved_at?: string | null
 
   // Backlog catches (logged retroactively, no XP/badges)
   is_backlog?: boolean
