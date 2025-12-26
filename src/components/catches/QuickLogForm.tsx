@@ -98,6 +98,17 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
     coarse: isSaltwaterSession ? [] : allSpeciesCategories.coarse,
     game: isSaltwaterSession ? [] : allSpeciesCategories.game,
   }
+  
+  // If no species are available (unknown water type), show all species
+  const hasAnySpecies = speciesCategories.saltwater.length > 0 || 
+                        speciesCategories.coarse.length > 0 || 
+                        speciesCategories.game.length > 0
+  
+  if (!hasAnySpecies) {
+    speciesCategories.saltwater = allSpeciesCategories.saltwater
+    speciesCategories.coarse = allSpeciesCategories.coarse
+    speciesCategories.game = allSpeciesCategories.game
+  }
 
   // Location state
   const hasSessionLocation = !!(session.latitude && session.longitude)

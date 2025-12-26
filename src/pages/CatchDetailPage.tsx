@@ -170,8 +170,11 @@ export function CatchDetailPage() {
                 Share
               </button>
 
-              {/* More Menu - show for owner */}
-              {user && catchItem.user_id && user.id === catchItem.user_id && (
+              {/* More Menu - show for owner or logger of pending catch */}
+              {user && (
+                (catchItem.user_id && user.id === catchItem.user_id) ||
+                (catchItem.logged_by_user_id && user.id === catchItem.logged_by_user_id && catchItem.approval_status === 'pending')
+              ) && (
                 <div className="relative">
                   <button
                     type="button"

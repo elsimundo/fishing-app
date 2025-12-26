@@ -1161,7 +1161,7 @@ export default function StartSessionPage() {
                     lakeId: lake.id,
                     locationName: lake.name,
                   }))
-                  setStep(3) // Go to privacy step
+                  setTimeout(() => setStep(3), 0) // Go to privacy step
                 }}
                 className={`flex w-full items-center justify-between rounded-xl border-2 p-3 text-left transition-colors ${
                   formData.lakeId === lake.id ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary'
