@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { X, Flame } from 'lucide-react'
 import type { UserChallenge } from '../../hooks/useGamification'
 
@@ -16,6 +17,14 @@ export function BadgesModal({
   currentStreak = 0,
   longestStreak = 0,
 }: BadgesModalProps) {
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       {/* Backdrop */}
@@ -25,7 +34,10 @@ export function BadgesModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-t-2xl bg-card border border-border shadow-xl sm:rounded-2xl">
+      <div 
+        className="relative w-full max-w-md rounded-t-2xl bg-card border border-border shadow-xl sm:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
