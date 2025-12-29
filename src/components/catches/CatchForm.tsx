@@ -30,6 +30,8 @@ import { getCountryFromCoords } from '../../utils/reverseGeocode'
 import { useSavedMarks } from '../../hooks/useSavedMarks'
 import { kgToLbsOz, lbsOzToKg } from '../../utils/weight'
 import { useWeightUnit } from '../../hooks/useWeightUnit'
+import { useCreateCatch, useUpdateCatch } from '../../hooks/useCreateCatch'
+import { useNetworkStatus } from '../../hooks/useNetworkStatus'
 
 const fishingStyles = [
   'Shore fishing',
@@ -219,6 +221,11 @@ export function CatchForm({
   
   // Fetch saved marks for quick location selection
   const { marks: savedMarks } = useSavedMarks()
+  
+  // Offline-capable mutations
+  const createCatch = useCreateCatch()
+  const updateCatch = useUpdateCatch()
+  const { isOnline } = useNetworkStatus()
   
   // Debug logging
   const [formError, setFormError] = useState<string | null>(null)
@@ -674,13 +681,47 @@ export function CatchForm({
     }
 
 
-    const { data, error } = isEdit
-      ? await supabase.from('catches').update(payload).eq('id', catchId).select().single()
-      : await supabase.from('catches').insert(payload).select().single()
+    // Use offline-capable mutations
+    let data: any
+    let error: any = null
+    
+    if (isEdit) {
+      // Update existing catch
+      try {
+        const result = await updateCatch.mutateAsync({ 
+          id: catchId!, 
+          updates: payload 
+        })
+        data = result.data
+        if (result.isOffline) {
+          // Offline update queued
+          onSuccess()
+          return
+        }
+      } catch (err) {
+        error = err
+      }
+    } else {
+      // Create new catch with offline support
+      try {
+        const result = await createCatch.mutateAsync({
+          ...payload,
+          photoFile: photoFile, // Pass the File object for offline storage
+        })
+        data = result.data
+        if (result.isOffline) {
+          // Offline catch queued - skip XP and auto-post
+          onSuccess()
+          return
+        }
+      } catch (err) {
+        error = err
+      }
+    }
 
     if (error) {
-      setFormError(error.message)
-      toast.error(error.message)
+      setFormError(error instanceof Error ? error.message : 'Failed to save catch')
+      toast.error(error instanceof Error ? error.message : 'Failed to save catch')
       return
     }
 

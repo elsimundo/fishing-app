@@ -16,6 +16,16 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "**/ic_launcher.bin"
+            excludes += "**/ic_launcher_round.bin"
+            excludes += "**/ic_launcher.png"
+            excludes += "**/ic_launcher_round.png"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

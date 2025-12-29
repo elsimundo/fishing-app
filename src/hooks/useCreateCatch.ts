@@ -1,9 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { useNetworkStatus } from './useNetworkStatus'
-import { offlineQueue } from '../lib/offlineQueue'
-import { toast } from 'react-hot-toast'
 import type { Catch } from '../types'
+import { offlineQueue } from '../lib/offlineQueue'
+import type { OfflinePhoto } from '../lib/offlineQueue'
+import { useNetworkStatus } from './useNetworkStatus'
+import { toast } from 'react-hot-toast'
+import { offlinePhotoStorage } from '../lib/offlinePhotoStorage'
 
 export interface CreateCatchInput {
   user_id: string
@@ -45,6 +47,7 @@ export interface CreateCatchInput {
   treatment_applied?: boolean
   treatment_notes?: string | null
   logged_by_user_id?: string | null
+  photoFile?: File | null
 }
 
 interface CreateCatchResult {
@@ -67,9 +70,24 @@ export function useCreateCatch() {
       if (!isOnline) {
         const tempId = `temp_${crypto.randomUUID()}`
         
+        // Handle photo if present
+        let offlinePhoto: OfflinePhoto | undefined
+        if (input.photoFile) {
+          try {
+            offlinePhoto = await offlinePhotoStorage.savePhoto(input.photoFile)
+          } catch (error) {
+            console.error('Failed to save photo offline:', error)
+            toast.error('Could not save photo offline')
+          }
+        }
+
+        // Remove photoFile from payload (not serializable)
+        const { photoFile, ...payloadWithoutFile } = input
+        
         await offlineQueue.add({
           type: 'create_catch',
-          payload: input as unknown as Record<string, unknown>,
+          payload: payloadWithoutFile as unknown as Record<string, unknown>,
+          offlinePhoto,
         })
 
         toast('Catch saved offline - will sync when connected', {

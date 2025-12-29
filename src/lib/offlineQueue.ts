@@ -12,12 +12,19 @@ export type QueuedActionType =
   | 'unlike_post'
   | 'add_comment'
 
+export interface OfflinePhoto {
+  localPath: string
+  fileName: string
+  mimeType: string
+}
+
 export interface QueuedAction {
   id: string
   type: QueuedActionType
   payload: Record<string, unknown>
   createdAt: string
   retryCount: number
+  offlinePhoto?: OfflinePhoto
 }
 
 const QUEUE_KEY = 'offline_sync_queue'
@@ -30,7 +37,11 @@ export const offlineQueue = {
   /**
    * Add an action to the sync queue
    */
-  async add(action: { type: QueuedActionType; payload: Record<string, unknown> }): Promise<QueuedAction> {
+  async add(action: { 
+    type: QueuedActionType; 
+    payload: Record<string, unknown>;
+    offlinePhoto?: OfflinePhoto;
+  }): Promise<QueuedAction> {
     const queue = await this.getAll()
     const newAction: QueuedAction = {
       ...action,

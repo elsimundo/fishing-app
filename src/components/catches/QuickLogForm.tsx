@@ -16,6 +16,7 @@ import { getCountryFromCoords } from '../../utils/reverseGeocode'
 import { lbsOzToKg } from '../../utils/weight'
 import { useWeightUnit } from '../../hooks/useWeightUnit'
 import { useSessionParticipants } from '../../hooks/useSessionParticipants'
+import { useCreateCatch } from '../../hooks/useCreateCatch'
 
 const quickLogSchema = z.object({
   species: z.string().min(1, 'Species is required'),
@@ -53,6 +54,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
   const [isPublic, setIsPublic] = useState(true)
   const [hideExactLocation, setHideExactLocation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const createCatch = useCreateCatch()
   const catchXP = useCatchXP()
   const { marks = [] } = useSavedMarks()
   const { celebrateChallenges } = useCelebrateChallenges()
@@ -296,7 +298,7 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       session_id: session.id,
       species: values.species,
       caught_at: new Date(values.caught_at).toISOString(),
-      location_name: activeLocation?.name || session.location_name || null,
+      location_name: activeLocation?.name || session.location_name || 'Unknown',
       latitude: catchLat,
       longitude: catchLng,
       weight_kg: weightKgNumber,
@@ -317,16 +319,28 @@ export function QuickLogForm({ session, onLogged, onClose }: QuickLogFormProps) 
       country_code: countryCode,
     }
 
-    const { data, error } = await supabase.from('catches').insert(payload).select('*').single()
-
-    if (error || !data) {
-      const message = error?.message ?? 'Failed to log catch.'
+    // Use offline-capable mutation
+    let created: Catch
+    try {
+      const result = await createCatch.mutateAsync({
+        ...payload,
+        photoFile: photoFile, // Pass File object for offline storage
+      })
+      
+      if (result.isOffline) {
+        // Offline catch queued - skip XP and close
+        onLogged(result.data!)
+        onClose()
+        return
+      }
+      
+      created = result.data!
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to log catch.'
       setFormError(message)
       toast.error(message)
       return
     }
-
-    const created = data as Catch
     
     // Award XP for the catch and trigger celebration
     // Skip XP if logging for someone else - they'll get it when they approve

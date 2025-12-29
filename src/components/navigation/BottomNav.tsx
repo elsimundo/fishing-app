@@ -44,7 +44,10 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 safe-area-pb">
+      <nav
+        className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
+      >
         <div className="flex items-stretch h-14">
           <NavButton
             onClick={() => navigate('/feed')}

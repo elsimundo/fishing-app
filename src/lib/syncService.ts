@@ -1,6 +1,8 @@
 import { offlineQueue } from './offlineQueue'
 import type { QueuedAction } from './offlineQueue'
 import { supabase } from './supabase'
+import { offlinePhotoStorage } from './offlinePhotoStorage'
+import { uploadCatchPhoto } from '../hooks/usePhotoUpload'
 
 const MAX_RETRIES = 3
 
@@ -55,13 +57,45 @@ export const syncService = {
    * Process a single queued action
    */
   async processAction(action: QueuedAction): Promise<void> {
-    const { type, payload } = action
+    const { type, payload, offlinePhoto } = action
 
     switch (type) {
       case 'create_catch': {
+        // If there's an offline photo, upload it first
+        let photoUrl: string | null = null
+        if (offlinePhoto) {
+          try {
+            // Read the locally stored photo
+            const base64Data = await offlinePhotoStorage.readPhoto(offlinePhoto.localPath)
+            
+            // Convert back to File for upload
+            const photoFile = await offlinePhotoStorage.base64ToFile(
+              base64Data,
+              offlinePhoto.fileName,
+              offlinePhoto.mimeType
+            )
+            
+            // Upload to Supabase Storage
+            const { user_id } = payload as { user_id: string }
+            const uploadResult = await uploadCatchPhoto({ file: photoFile, userId: user_id })
+            photoUrl = uploadResult.url
+            
+            // Delete local photo after successful upload
+            await offlinePhotoStorage.deletePhoto(offlinePhoto.localPath)
+          } catch (photoError) {
+            console.error('Failed to upload offline photo:', photoError)
+            // Continue without photo rather than failing the entire catch
+          }
+        }
+
+        // Insert catch with photo URL if available
+        const catchData = photoUrl 
+          ? { ...payload, photo_url: photoUrl }
+          : payload
+
         const { error } = await supabase
           .from('catches')
-          .insert(payload as Record<string, unknown>)
+          .insert(catchData as Record<string, unknown>)
         if (error) throw new Error(error.message)
         break
       }

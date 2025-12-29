@@ -4,11 +4,15 @@ const config: CapacitorConfig = {
   appId: 'com.catchi.app',
   appName: 'Catchi',
   webDir: 'dist',
-  server: {
-    // For development: use live reload from your dev server
-    url: 'http://192.168.0.37:5173',
-    cleartext: true,
-  },
+  ...(process.env.CAPACITOR_SERVER_URL
+    ? {
+        server: {
+          // For development only (live reload). Set CAPACITOR_SERVER_URL to enable.
+          url: process.env.CAPACITOR_SERVER_URL,
+          cleartext: true,
+        },
+      }
+    : {}),
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
