@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { format, formatDistanceStrict } from 'date-fns'
 import { useWeightFormatter } from '../../hooks/useWeightFormatter'
+import { formatCatchSpecies } from '../../utils/catchDisplay'
 import { ShareToFeedModal } from './ShareToFeedModal'
 import { EditSessionModal } from './EditSessionModal'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
@@ -226,7 +227,9 @@ export function CompletedSessionSummary({ session, isOwner, onRefetch }: Complet
                 </div>
               )}
               <div className="flex-1">
-                <p className="font-semibold text-foreground">{biggestCatch.species}</p>
+                <p className="font-semibold text-foreground">
+                  {formatCatchSpecies(biggestCatch.species, biggestCatch.quantity)}
+                </p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {biggestCatch.weight_kg && (
                     <span className="flex items-center gap-1">

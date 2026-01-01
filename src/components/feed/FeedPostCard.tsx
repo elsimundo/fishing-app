@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { Trash2, MoreHorizontal } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useWeightFormatter } from '../../hooks/useWeightFormatter'
+import { formatCatchSpecies } from '../../utils/catchDisplay'
 
 interface FeedPostCardProps {
   post: PostWithUser
@@ -266,7 +267,9 @@ export function FeedPostCard({ post, showVisibility, onToggleVisibility }: FeedP
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">{post.catch.species}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {formatCatchSpecies(post.catch.species, post.catch.quantity)}
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {post.catch.weight_kg != null
                   ? formatWeight(post.catch.weight_kg, { precision: 1 })

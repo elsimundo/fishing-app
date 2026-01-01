@@ -122,6 +122,7 @@ export type Catch = {
   moon_phase: string | null
   released?: boolean | null
   returned?: boolean | null // DB column name (alias for released)
+  quantity?: number // Number of fish caught (for bulk catches like mackerel or schoolie bass)
   created_at: string
   updated_at: string
 

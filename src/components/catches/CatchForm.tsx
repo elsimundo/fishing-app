@@ -11,7 +11,7 @@ import { useSessionParticipants } from '../../hooks/useSessionParticipants'
 import type { Catch } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
-import { FISH_SPECIES, getSpeciesByCategory } from '../../lib/constants'
+import { FISH_SPECIES, getSpeciesByCategory, QUANTITY_ENABLED_SPECIES } from '../../lib/constants'
 import { useFreshwaterEnabled } from '../../hooks/useFeatureFlags'
 import { getOrCreateSessionForCatch } from '../../lib/autoSession'
 import { useCatchXP } from '../../hooks/useCatchXP'
@@ -66,6 +66,12 @@ const catchFormSchema = z.object({
     .optional()
     .refine((val) => !val || (!Number.isNaN(Number(val)) && Number(val) > 0), {
       message: 'Length must be a positive number',
+    }),
+  quantity: z
+    .string()
+    .optional()
+    .refine((val) => !val || (!Number.isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 999), {
+      message: 'Quantity must be between 1 and 999',
     }),
   bait: z.string().optional(),
   rig: z.string().optional(),
@@ -327,6 +333,10 @@ export function CatchForm({
   const watchedLng = watch('longitude')
   const watchedSpecies = watch('species')
   const watchedLength = watch('length_cm')
+  const watchedQuantity = watch('quantity')
+  
+  // Check if selected species supports quantity/bulk catches
+  const isQuantityEnabledSpecies = watchedSpecies && QUANTITY_ENABLED_SPECIES.includes(watchedSpecies as any)
 
   const latNumber =
     watchedLat === undefined || watchedLat === null || watchedLat === ''
@@ -634,6 +644,8 @@ export function CatchForm({
     // ========================================
     // SINGLE CATCH MODE (existing logic)
     // ========================================
+    const quantityNumber = values.quantity?.trim() ? Number(values.quantity) : undefined
+    
     const payload = {
       user_id: caughtByUserId || user.id,
       logged_by_user_id: caughtByUserId !== user.id ? user.id : null,
@@ -646,6 +658,7 @@ export function CatchForm({
       longitude: longitudeNumber,
       weight_kg: weightKgNumber,
       length_cm: lengthCmNumber,
+      quantity: quantityNumber && quantityNumber > 1 ? quantityNumber : undefined,
       bait: values.bait?.trim() ? values.bait.trim() : null,
       rig: values.rig?.trim() ? values.rig.trim() : null,
       fishing_style: values.fishing_style?.trim() ? values.fishing_style.trim() : null,
@@ -1036,6 +1049,31 @@ export function CatchForm({
           )}
         </div>
 
+        {/* Quantity input - only show for quantity-enabled species */}
+        {!isMultiCatch && isQuantityEnabledSpecies && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="quantity">
+              Quantity
+            </label>
+            <input
+              id="quantity"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={999}
+              placeholder="1"
+              className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              {...register('quantity')}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              How many {watchedSpecies} did you catch? Leave blank for 1.
+            </p>
+            {errors.quantity ? (
+              <p className="mt-1 text-[11px] text-red-600">{errors.quantity.message as string}</p>
+            ) : null}
+          </div>
+        )}
+
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="caught_at">
             Date & time
@@ -1143,8 +1181,8 @@ export function CatchForm({
           ) : null}
         </div>
 
-        {/* Weight/Length - hidden in multi-catch mode (can be added later per fish) */}
-        {!isMultiCatch && (
+        {/* Weight/Length - hidden in multi-catch mode or optional for quantity catches */}
+        {!isMultiCatch && !isQuantityEnabledSpecies && (
           <>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="weight_kg">
