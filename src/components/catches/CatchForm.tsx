@@ -11,7 +11,7 @@ import { useSessionParticipants } from '../../hooks/useSessionParticipants'
 import type { Catch } from '../../types'
 import { LocationPicker } from '../map/LocationPicker'
 import { uploadCatchPhoto } from '../../hooks/usePhotoUpload'
-import { FISH_SPECIES, getSpeciesByCategory, QUANTITY_ENABLED_SPECIES } from '../../lib/constants'
+import { FISH_SPECIES, getSpeciesByCategory, QUANTITY_ENABLED_SPECIES, BAIT_SUGGESTIONS, RIG_SUGGESTIONS } from '../../lib/constants'
 import { useFreshwaterEnabled } from '../../hooks/useFeatureFlags'
 import { getOrCreateSessionForCatch } from '../../lib/autoSession'
 import { useCatchXP } from '../../hooks/useCatchXP'
@@ -236,9 +236,18 @@ export function CatchForm({
   // Debug logging
   const [formError, setFormError] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(prefilledPhotoFile || null)
-  // Backlog catches default to private (no auto-post to feed)
-  const [isPublic, setIsPublic] = useState(!isBacklog)
+  // Catches are public by default (respects user's global profile privacy)
+  // Backlog catches don't auto-post to feed
+  const isPublic = !isBacklog
   const [hideExactLocation, setHideExactLocation] = useState(false)
+  
+  // Collapsible sections for better UX
+  const [showMap, setShowMap] = useState(false)
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false)
+  
+  // Mark creation
+  const [selectedMarkId, setSelectedMarkId] = useState<string>('')
+  const [isCreatingNewMark, setIsCreatingNewMark] = useState(false)
   
   // Multi-catch mode (for feathers, multi-hook rigs)
   const [isMultiCatch, setIsMultiCatch] = useState(false)
@@ -251,7 +260,11 @@ export function CatchForm({
   
   // Legal size tracking
   const [speciesId, setSpeciesId] = useState<string | null>(null)
-  const [returned, setReturned] = useState(false)
+  const [returned, setReturned] = useState<'released' | 'kept' | 'unspecified' | null>(
+    initialCatch?.returned === true ? 'released' : 
+    initialCatch?.returned === false ? 'kept' : 
+    null
+  )
   const REGION_FOR_RULES: RegionCode = 'uk_england'
   
   // EXIF metadata from photo
@@ -400,17 +413,17 @@ export function CatchForm({
     lengthCm: lengthNumber,
   })
 
-  // Auto-check released toggle when fish is undersized (soft nudge)
+  // Auto-select released when fish is undersized (soft nudge)
   // Also auto-set for freshwater sessions (mandatory release)
   useEffect(() => {
     if (legalStatus.status === 'undersized' && !returned) {
-      setReturned(true)
+      setReturned('released')
     }
   }, [legalStatus.status])
 
   useEffect(() => {
     if (isFreshwaterSession) {
-      setReturned(true)
+      setReturned('released')
     }
   }, [isFreshwaterSession])
 
@@ -674,7 +687,7 @@ export function CatchForm({
       moon_phase: getMoonPhase().phase,
       species_id: speciesId,
       region: REGION_FOR_RULES,
-      returned: returned,
+      returned: returned === 'released' ? true : returned === 'kept' ? false : undefined,
       // EXIF metadata for verification
       photo_exif_latitude: photoMetadata?.latitude ?? null,
       photo_exif_longitude: photoMetadata?.longitude ?? null,
@@ -756,7 +769,7 @@ export function CatchForm({
         windSpeed: data.wind_speed,
         moonPhase: data.moon_phase,
         countryCode: payload.country_code,
-        released: returned,
+        released: returned === 'released' ? true : returned === 'kept' ? false : undefined,
       }).then((result) => {
         if (result.challengesCompleted.length > 0) {
           celebrateChallenges(result.challengesCompleted, {
@@ -1084,95 +1097,158 @@ export function CatchForm({
             className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('caught_at')}
           />
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Defaults to now. Adjust if you caught this earlier.
+          </p>
           {errors.caught_at ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.caught_at.message}</p>
           ) : null}
         </div>
 
-        {/* Quick mark picker */}
-        {savedMarks.length > 0 && (
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">
-              Use a saved mark (optional)
-            </label>
-            <select
-              className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              onChange={(e) => {
-                const markId = e.target.value
-                if (!markId) return
-                const mark = savedMarks.find((m) => m.id === markId)
-                if (!mark) return
-                setValue('location_name', mark.name, { shouldValidate: true })
-                setValue('latitude', mark.latitude.toString(), { shouldValidate: true })
-                setValue('longitude', mark.longitude.toString(), { shouldValidate: true })
-              }}
-              defaultValue=""
-            >
-              <option value="">Select a mark to auto-fill location...</option>
-              {savedMarks.map((mark) => (
-                <option key={mark.id} value={mark.id}>
-                  {mark.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="location_name">
-            Location name
+        {/* Mark-based location selector */}
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            Fishing spot / Mark
           </label>
-          <input
-            id="location_name"
-            type="text"
-            className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="e.g. Chesil Beach, Dorset"
-            {...register('location_name')}
-          />
+          
+          {!isCreatingNewMark ? (
+            <div className="space-y-2">
+              <select
+                value={selectedMarkId}
+                onChange={(e) => {
+                  const markId = e.target.value
+                  setSelectedMarkId(markId)
+                  
+                  if (markId === 'new') {
+                    setIsCreatingNewMark(true)
+                    return
+                  }
+                  
+                  if (!markId) {
+                    setValue('location_name', '', { shouldValidate: true })
+                    return
+                  }
+                  
+                  const mark = savedMarks.find((m) => m.id === markId)
+                  if (mark) {
+                    setValue('location_name', mark.name, { shouldValidate: true })
+                    setValue('latitude', mark.latitude.toString(), { shouldValidate: true })
+                    setValue('longitude', mark.longitude.toString(), { shouldValidate: true })
+                  }
+                }}
+                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="">Select a saved mark...</option>
+                {savedMarks.map((mark) => (
+                  <option key={mark.id} value={mark.id}>
+                    📍 {mark.name}
+                  </option>
+                ))}
+                <option value="new">+ Create new mark</option>
+              </select>
+              
+              {!selectedMarkId && (
+                <input
+                  id="location_name"
+                  type="text"
+                  placeholder="Or type a location name (e.g. Chesil Beach, Dorset)"
+                  className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  {...register('location_name')}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium text-foreground">Create new mark</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCreatingNewMark(false)
+                    setSelectedMarkId('')
+                  }}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Cancel
+                </button>
+              </div>
+              <input
+                type="text"
+                placeholder="Mark name (e.g. 'My secret spot', 'North pier')"
+                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                {...register('location_name')}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                💡 Set the GPS location below, then this mark will be saved for future catches
+              </p>
+            </div>
+          )}
+          
           {errors.location_name ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.location_name.message}</p>
           ) : null}
         </div>
 
-        <div className="sm:col-span-2 space-y-1">
+        <div className="sm:col-span-2 space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-medium text-muted-foreground">Pick location on map</p>
             <button
               type="button"
-              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-muted"
+              onClick={() => setShowMap(!showMap)}
+              className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <svg className={`h-4 w-4 transition-transform ${showMap ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              {showMap ? 'Hide map' : 'Pick location on map'}
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
               onClick={() => {
                 if (!navigator.geolocation) {
                   setFormError('Geolocation is not available in this browser.')
                   return
                 }
 
+                toast.loading('Getting your location...')
                 navigator.geolocation.getCurrentPosition(
                   (pos) => {
                     const { latitude, longitude } = pos.coords
                     setValue('latitude', latitude.toString(), { shouldValidate: true })
                     setValue('longitude', longitude.toString(), { shouldValidate: true })
+                    toast.dismiss()
+                    toast.success('Location set!')
                   },
                   () => {
+                    toast.dismiss()
                     setFormError('Could not get your location. Please drag or tap on the map.')
                   },
                   { enableHighAccuracy: true, timeout: 10000 },
                 )
               }}
             >
-              Use my current location
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Use my location
             </button>
           </div>
 
-          <LocationPicker
-            value={pickerValue}
-            onChange={({ lat, lng }) => {
-              setValue('latitude', lat.toString(), { shouldValidate: true })
-              setValue('longitude', lng.toString(), { shouldValidate: true })
-            }}
-          />
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            Tap or drag the pin to your fishing spot. Coordinates are saved automatically.
-          </p>
+          {showMap && (
+            <>
+              <LocationPicker
+                value={pickerValue}
+                onChange={({ lat, lng }) => {
+                  setValue('latitude', lat.toString(), { shouldValidate: true })
+                  setValue('longitude', lng.toString(), { shouldValidate: true })
+                }}
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Tap or drag the pin to your fishing spot. Coordinates are saved automatically.
+              </p>
+            </>
+          )}
           {errors.latitude ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.latitude.message}</p>
           ) : null}
@@ -1186,7 +1262,7 @@ export function CatchForm({
           <>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="weight_kg">
-                Weight ({weightUnit === 'imperial' ? 'lb + oz' : 'kg'})
+                Weight ({weightUnit === 'imperial' ? 'lb + oz' : 'kg'}) <span className="text-muted-foreground">(optional)</span>
               </label>
               {weightUnit === 'imperial' ? (
                 <>
@@ -1248,7 +1324,7 @@ export function CatchForm({
 
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="length_cm">
-                Length (cm)
+                Length (cm) <span className="text-muted-foreground">(optional)</span>
               </label>
               <input
                 id="length_cm"
@@ -1279,49 +1355,116 @@ export function CatchForm({
           </>
         )}
 
-        {/* Released toggle - only show for saltwater (freshwater is mandatory release) */}
+        {/* What happened to this fish? - optional bonus XP */}
         {!isFreshwaterSession && (
-          <div className="rounded-lg border border-border bg-card p-3">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🐟</span>
-                <div>
-                  <span className="text-sm font-medium text-foreground">Released</span>
-                  <p className="text-[11px] text-muted-foreground">I returned this fish to the water</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {returned && (
-                  <span className="text-[10px] font-medium text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded">
-                    +5 XP
-                  </span>
-                )}
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={returned}
-                    onChange={(e) => setReturned(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:bg-emerald-500 transition-colors"></div>
-                  <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
-                </div>
-              </div>
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-muted-foreground">
+              What happened to this fish? <span className="text-xs text-muted-foreground">(optional - for bonus XP)</span>
             </label>
+            <div className="grid grid-cols-2 gap-2">
+              {/* Released */}
+              <label className={`flex flex-col items-center justify-center cursor-pointer rounded-lg border-2 p-3 transition-all ${
+                returned === 'released' 
+                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30' 
+                  : 'border-border bg-card hover:bg-muted'
+              }`}>
+                <input
+                  type="radio"
+                  name="fish-fate"
+                  checked={returned === 'released'}
+                  onChange={() => setReturned('released')}
+                  className="sr-only"
+                />
+                <span className="text-2xl mb-1">🐟</span>
+                <span className="text-sm font-medium text-foreground">Released</span>
+                <span className="text-[10px] font-medium text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded mt-1">
+                  +5 XP
+                </span>
+              </label>
+
+              {/* Kept */}
+              <label className={`flex flex-col items-center justify-center cursor-pointer rounded-lg border-2 p-3 transition-all ${
+                returned === 'kept' 
+                  ? 'border-primary bg-primary/10' 
+                  : 'border-border bg-card hover:bg-muted'
+              }`}>
+                <input
+                  type="radio"
+                  name="fish-fate"
+                  checked={returned === 'kept'}
+                  onChange={() => setReturned('kept')}
+                  className="sr-only"
+                />
+                <span className="text-2xl mb-1">🎣</span>
+                <span className="text-sm font-medium text-foreground">Kept</span>
+                <span className="text-[10px] font-medium text-primary bg-primary/20 px-2 py-0.5 rounded mt-1">
+                  +3 XP
+                </span>
+              </label>
+            </div>
+            <p className="text-[11px] text-muted-foreground text-center">
+              Leave unselected if you prefer not to say
+            </p>
           </div>
         )}
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="bait">
-            Bait
-          </label>
-          <input
+        {/* Additional Details - Collapsible */}
+        <div className="sm:col-span-2">
+          <button
+            type="button"
+            onClick={() => setShowAdditionalDetails(!showAdditionalDetails)}
+            className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mb-3"
+          >
+            <svg className={`h-4 w-4 transition-transform ${showAdditionalDetails ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            {showAdditionalDetails ? 'Hide' : 'Show'} additional details (bait, rig, notes)
+          </button>
+        </div>
+
+        {showAdditionalDetails && (
+          <>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="bait">
+                Bait <span className="text-muted-foreground">(optional)</span>
+              </label>
+          <select
             id="bait"
-            type="text"
-            placeholder="e.g. lugworm, ragworm, squid"
             className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('bait')}
-          />
+          >
+            <option value="">Select bait (optional)</option>
+            {watchedSpecies && BAIT_SUGGESTIONS[watchedSpecies] ? (
+              <>
+                <optgroup label={`Popular for ${watchedSpecies}`}>
+                  {BAIT_SUGGESTIONS[watchedSpecies].map((bait) => (
+                    <option key={bait} value={bait}>
+                      {bait}
+                    </option>
+                  ))}
+                </optgroup>
+                <option value="Other">Other / not listed</option>
+              </>
+            ) : (
+              <>
+                <optgroup label="Common Baits">
+                  <option value="Lugworm">Lugworm</option>
+                  <option value="Ragworm">Ragworm</option>
+                  <option value="Squid">Squid</option>
+                  <option value="Mackerel strip">Mackerel strip</option>
+                  <option value="Sandeels">Sandeels</option>
+                  <option value="Peeler crab">Peeler crab</option>
+                  <option value="Boilies">Boilies</option>
+                  <option value="Pellets">Pellets</option>
+                  <option value="Corn">Corn</option>
+                  <option value="Worms">Worms</option>
+                  <option value="Maggots">Maggots</option>
+                  <option value="Flies">Flies</option>
+                </optgroup>
+                <option value="Other">Other / not listed</option>
+              </>
+            )}
+          </select>
           {errors.bait ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.bait.message}</p>
           ) : null}
@@ -1329,15 +1472,40 @@ export function CatchForm({
 
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="rig">
-            Rig
+            Rig <span className="text-muted-foreground">(optional)</span>
           </label>
-          <input
+          <select
             id="rig"
-            type="text"
-            placeholder="e.g. running ledger, paternoster"
             className="block w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             {...register('rig')}
-          />
+          >
+            <option value="">Select rig (optional)</option>
+            {watchedSpecies && RIG_SUGGESTIONS[watchedSpecies] ? (
+              <>
+                <optgroup label={`Popular for ${watchedSpecies}`}>
+                  {RIG_SUGGESTIONS[watchedSpecies].map((rig) => (
+                    <option key={rig} value={rig}>
+                      {rig}
+                    </option>
+                  ))}
+                </optgroup>
+                <option value="Other">Other / not listed</option>
+              </>
+            ) : (
+              <>
+                <optgroup label="Common Rigs">
+                  <option value="Running ledger">Running ledger</option>
+                  <option value="Paternoster">Paternoster</option>
+                  <option value="Float rig">Float rig</option>
+                  <option value="Pulley rig">Pulley rig</option>
+                  <option value="Feather rig">Feather rig</option>
+                  <option value="Hair rig">Hair rig</option>
+                  <option value="Method feeder">Method feeder</option>
+                </optgroup>
+                <option value="Other">Other / not listed</option>
+              </>
+            )}
+          </select>
           {errors.rig ? (
             <p className="mt-1 text-[11px] text-red-600">{errors.rig.message}</p>
           ) : null}
@@ -1345,7 +1513,7 @@ export function CatchForm({
 
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="fishing_style">
-            Fishing style
+            Fishing style <span className="text-muted-foreground">(optional)</span>
           </label>
           <select
             id="fishing_style"
@@ -1490,7 +1658,7 @@ export function CatchForm({
 
         <div className="sm:col-span-2">
           <label className="mb-1 block text-xs font-medium text-muted-foreground" htmlFor="notes">
-            Notes
+            Notes <span className="text-muted-foreground">(optional)</span>
           </label>
           <textarea
             id="notes"
@@ -1503,72 +1671,23 @@ export function CatchForm({
             <p className="mt-1 text-[11px] text-red-600">{errors.notes.message}</p>
           ) : null}
         </div>
+          </>
+        )}
 
-        {/* Privacy Settings */}
-        <div className="sm:col-span-2 space-y-3">
-          <p className="text-xs font-medium text-muted-foreground">Sharing</p>
-          
-          {/* Public/Private Toggle */}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setIsPublic(true)}
-              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
-                isPublic
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-background text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              <Globe size={14} />
-              Public
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPublic(false)}
-              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
-                !isPublic
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-background text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              <Lock size={14} />
-              Private
-            </button>
-          </div>
-
-          {/* Hide Location Option (only if public) */}
-          {isPublic && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={hideExactLocation}
-                onChange={(e) => setHideExactLocation(e.target.checked)}
-                className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary"
-              />
-              <span className="text-xs text-muted-foreground">Hide exact location (show region only)</span>
-            </label>
-          )}
-
-          {/* Privacy Info Box */}
-          <div className="rounded-lg border border-border bg-muted p-3 text-[11px] text-muted-foreground">
-            <div className="flex items-start gap-2">
-              <Info size={14} className="mt-0.5 shrink-0 text-muted-foreground" />
-              <div className="space-y-1.5">
-                <p className="font-medium text-muted-foreground">What's shared publicly?</p>
-                <ul className="space-y-0.5 text-muted-foreground">
-                  <li>• Species, weight, and photo</li>
-                  <li>• General area (e.g. "Cornwall")</li>
-                  <li>• Date caught</li>
-                </ul>
-                <p className="pt-1 font-medium text-muted-foreground">🔒 Never shared:</p>
-                <ul className="space-y-0.5 text-muted-foreground">
-                  <li>• Exact GPS coordinates</li>
-                  <li>• Your precise fishing spot</li>
-                </ul>
-                <p className="pt-1 italic text-muted-foreground">You can hide any catch from the feed later.</p>
-              </div>
-            </div>
-          </div>
+        {/* Hide Location Option */}
+        <div className="sm:col-span-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hideExactLocation}
+              onChange={(e) => setHideExactLocation(e.target.checked)}
+              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <span className="text-xs text-foreground">Hide exact location (show region only)</span>
+          </label>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Your exact GPS coordinates are never shared publicly. This option hides the specific spot name.
+          </p>
         </div>
       </div>
 

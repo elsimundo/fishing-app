@@ -10,7 +10,7 @@ export const DEFAULT_MAP_ZOOM = 5 as const
 export const FISH_SPECIES = {
   SALTWATER: [
     'Bass (Sea)',
-    'Schoolie Bass (Undersized)',
+    'Bass (Under 25cm / Schoolie)',
     'Cod',
     'Mackerel',
     'Pollock',
@@ -107,13 +107,13 @@ export const LOCATION_PRIVACY_OPTIONS = [
 export const TIDE_STATES = ['High', 'Low', 'Rising', 'Falling', 'Unknown'] as const
 
 export const QUANTITY_ENABLED_SPECIES = [
-  'Schoolie Bass (Undersized)',
+  'Bass (Under 25cm / Schoolie)',
   'Mackerel',
 ] as const
 
 export const BAIT_SUGGESTIONS: Record<string, string[]> = {
   'Bass (Sea)': ['Lugworm', 'Ragworm', 'Sandeels', 'Mackerel strip', 'Squid', 'Peeler crab'],
-  'Schoolie Bass (Undersized)': ['Lugworm', 'Ragworm', 'Sandeels', 'Mackerel strip', 'Squid', 'Peeler crab'],
+  'Bass (Under 25cm / Schoolie)': ['Lugworm', 'Ragworm', 'Sandeels', 'Mackerel strip', 'Squid', 'Peeler crab'],
   Mackerel: ['Feathers', 'Spinners', 'Strip', 'Sabiki rig'],
   Cod: ['Lugworm', 'Squid', 'Peeler crab', 'Razorfish'],
   Plaice: ['Lugworm', 'Ragworm', 'Razorfish'],
@@ -134,7 +134,7 @@ export const BAIT_SUGGESTIONS: Record<string, string[]> = {
 
 export const RIG_SUGGESTIONS: Record<string, string[]> = {
   'Bass (Sea)': ['Running ledger', 'Paternoster', 'Float rig', 'Pulley rig'],
-  'Schoolie Bass (Undersized)': ['Running ledger', 'Paternoster', 'Float rig', 'Pulley rig'],
+  'Bass (Under 25cm / Schoolie)': ['Running ledger', 'Paternoster', 'Float rig', 'Pulley rig'],
   Mackerel: ['Feather rig', 'Sabiki rig', 'Float rig'],
   'Rays (Thornback)': ['Pulley rig', 'Clipped down rig', 'Running ledger'],
 

@@ -21,6 +21,6 @@ export function formatCatchSpecies(species: string, quantity?: number | null): s
  * @returns True if the species supports quantity logging
  */
 export function isQuantityEnabledSpecies(species: string): boolean {
-  const QUANTITY_ENABLED = ['Schoolie Bass (Undersized)', 'Mackerel']
+  const QUANTITY_ENABLED = ['Bass (Under 25cm / Schoolie)', 'Mackerel']
   return QUANTITY_ENABLED.includes(species)
 }

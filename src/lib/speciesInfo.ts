@@ -33,11 +33,11 @@ export const SPECIES_INFO: Record<string, SpeciesInfo> = {
     bestSeason: 'May to October',
     bestTime: 'Dawn and dusk, especially on rising tides',
   },
-  'Schoolie Bass (Undersized)': {
+  'Bass (Under 25cm / Schoolie)': {
     id: 'schoolie_bass',
-    commonName: 'Schoolie Bass (Undersized)',
+    commonName: 'Bass (Under 25cm / Schoolie)',
     scientificName: 'Dicentrarchus labrax',
-    description: 'Undersized European sea bass, commonly called "schoolies". These juvenile bass are abundant and provide great sport on light tackle, but must be returned to the water. Too small to weigh accurately.',
+    description: 'Small European sea bass under 25cm, commonly called "schoolies". These juvenile bass are abundant and provide great sport on light tackle, but must be returned to the water. Too small to weigh accurately.',
     waterType: 'saltwater',
     habitat: 'Shallow estuaries, harbours, and inshore waters. Often found in large schools around structures.',
     averageWeightKg: { min: 0.1, max: 0.4 },
