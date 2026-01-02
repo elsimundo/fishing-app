@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Trash2, CheckCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle, Loader2, Fish } from 'lucide-react'
 import { useChallenge, useUserChallenges, useChallengeCatches, useRemoveCatchFromChallenge } from '../hooks/useGamification'
 import { CatchCard } from '../components/catches/CatchCard'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
@@ -144,6 +144,20 @@ export function ChallengeDetailPage() {
               </p>
             )}
           </div>
+
+          {/* How to Complete Tips */}
+          {!isCompleted && (
+            <div className="mt-4 rounded-lg bg-muted/30 p-3">
+              <p className="text-xs font-medium text-foreground mb-1.5">💡 How to complete:</p>
+              <p className="text-xs text-muted-foreground">
+                {challenge.category === 'species' && 'Log catches of different species to make progress'}
+                {challenge.category === 'milestones' && 'Keep logging catches - progress tracks automatically'}
+                {challenge.category === 'exploration' && 'Visit new fishing locations to unlock progress'}
+                {challenge.category === 'skill' && 'Focus on technique and quality catches'}
+                {!['species', 'milestones', 'exploration', 'skill'].includes(challenge.category) && 'Log catches to make progress - tracking is automatic'}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Contributing Catches */}
@@ -157,11 +171,25 @@ export function ChallengeDetailPage() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : challengeCatches.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              <p>No catches recorded for this challenge yet.</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Catches logged before this feature was added won't appear here.
+            <div className="py-8 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-3">
+                <Fish size={24} className="text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium text-foreground mb-1">No catches yet</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                {isCompleted 
+                  ? 'Catches logged before tracking was added won\'t appear here' 
+                  : 'Start logging catches to track your progress'}
               </p>
+              {!isCompleted && (
+                <button
+                  onClick={() => navigate('/catches/new')}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                >
+                  <Fish size={14} />
+                  Log a catch
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-3">

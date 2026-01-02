@@ -1,5 +1,6 @@
-import { Check, Lock, Star } from 'lucide-react'
+import { Check, Lock, Star, Clock } from 'lucide-react'
 import type { Challenge, UserChallenge } from '../../hooks/useGamification'
+import { getSeasonTheme, formatCountdown } from '../../utils/seasonalChallenges'
 
 interface ChallengeCardProps {
   challenge: Challenge
@@ -13,6 +14,11 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
   const progress = userProgress?.progress || 0
   const target = userProgress?.target || (challenge.criteria as any)?.value || 1
   const progressPercent = Math.min(100, Math.round((progress / target) * 100))
+  
+  // Seasonal styling
+  const seasonTheme = challenge.season ? getSeasonTheme(challenge.season) : null
+  const countdown = challenge.ends_at ? formatCountdown(challenge.ends_at) : null
+  const isSeasonal = !!challenge.season
   
   const difficultyConfig: Record<string, { color: string; bg: string; label: string }> = {
     easy: { color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', label: 'Easy' },
@@ -54,10 +60,19 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
         relative w-full p-4 rounded-xl border-2 transition-all text-left
         ${isCompleted 
           ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-500/40 shadow-sm' 
+          : isSeasonal && seasonTheme
+          ? `${seasonTheme.bgColor} border-${seasonTheme.color}-200 dark:border-${seasonTheme.color}-500/40 hover:shadow-md`
           : 'bg-card border-border hover:border-primary hover:shadow-md'
         }
       `}
     >
+      {/* Seasonal icon badge */}
+      {isSeasonal && seasonTheme && !isCompleted && (
+        <div className="absolute -top-2 -left-2 text-2xl">
+          {seasonTheme.icon}
+        </div>
+      )}
+      
       {/* Featured badge */}
       {challenge.is_featured && (
         <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 rounded-full p-1">
@@ -95,24 +110,46 @@ export function ChallengeCard({ challenge, userProgress, onClick, compact = fals
       {/* Progress bar (if not completed and has progress) */}
       {!isCompleted && target > 1 && (
         <div className="mt-3">
-          <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+          <div className="flex justify-between items-center text-[10px] text-muted-foreground mb-1">
             <span>{progress} / {target}</span>
-            <span>{progressPercent}%</span>
+            <div className="flex items-center gap-1">
+              {progressPercent >= 80 && (
+                <span className="text-[9px] font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">
+                  Almost there!
+                </span>
+              )}
+              <span>{progressPercent}%</span>
+            </div>
           </div>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div 
-              className="h-full bg-primary rounded-full transition-all duration-300"
+              className={`h-full rounded-full transition-all duration-300 ${
+                progressPercent >= 80 ? 'bg-amber-500' : 'bg-primary'
+              }`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
+          {progress > 0 && progress < target && (
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {target - progress} more to complete!
+            </p>
+          )}
         </div>
       )}
       
       {/* Footer */}
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${difficulty.bg} ${difficulty.color}`}>
-          {difficulty.label}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${difficulty.bg} ${difficulty.color}`}>
+            {difficulty.label}
+          </span>
+          {countdown && !isCompleted && (
+            <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+              <Clock size={10} />
+              {countdown}
+            </span>
+          )}
+        </div>
         <span className={`text-xs font-semibold ${isCompleted ? 'text-emerald-400' : 'text-primary'}`}>
           {isCompleted ? 'Completed' : `+${challenge.xp_reward} XP`}
         </span>

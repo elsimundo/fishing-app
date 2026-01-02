@@ -21,6 +21,69 @@ function calculateLevel(xp: number): number {
 }
 
 /**
+ * Reverse and recalculate session XP when catches are deleted from a completed session
+ */
+async function reverseSessionXP(userId: string, sessionId: string): Promise<number> {
+  // Check if session is completed (has ended_at)
+  const { data: session } = await supabase
+    .from('sessions')
+    .select('ended_at')
+    .eq('id', sessionId)
+    .maybeSingle()
+  
+  if (!session?.ended_at) return 0 // Session not completed, no XP to reverse
+  
+  // Find the original session XP transaction
+  const { data: originalTransaction } = await supabase
+    .from('xp_transactions')
+    .select('id, amount')
+    .eq('user_id', userId)
+    .eq('reference_type', 'session')
+    .eq('reference_id', sessionId)
+    .maybeSingle()
+  
+  if (!originalTransaction || originalTransaction.amount <= 0) return 0 // No session XP awarded
+  
+  // Count remaining catches in this session
+  const { count: remainingCatches } = await supabase
+    .from('catches')
+    .select('*', { count: 'exact', head: true })
+    .eq('session_id', sessionId)
+  
+  // Recalculate session XP based on remaining catches
+  const baseXP = 15
+  const catchBonus = Math.min((remainingCatches || 0) * 2, 20)
+  const newSessionXP = baseXP + catchBonus
+  
+  // Calculate the difference
+  const xpDifference = originalTransaction.amount - newSessionXP
+  
+  if (xpDifference <= 0) return 0 // No XP to reverse (shouldn't happen but safety check)
+  
+  // Reverse the difference
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('xp')
+    .eq('id', userId)
+    .single()
+  
+  const newXP = Math.max(0, (profile?.xp || 0) - xpDifference)
+  
+  await supabase
+    .from('profiles')
+    .update({ xp: newXP, level: calculateLevel(newXP) })
+    .eq('id', userId)
+  
+  // Update the transaction to reflect new amount
+  await supabase
+    .from('xp_transactions')
+    .update({ amount: newSessionXP })
+    .eq('id', originalTransaction.id)
+  
+  return xpDifference
+}
+
+/**
  * Reverse challenges that are no longer valid after catch deletion
  */
 async function reverseAffectedChallenges(
@@ -300,11 +363,11 @@ export function useDeleteCatch() {
       const challengesLost: string[] = []
       
       if (user) {
-        // Get the catch details before deleting (for challenge reversal)
+        // Get the catch details before deleting (for challenge reversal and session XP)
         // Use maybeSingle so we don't abort reversal if the row is already missing.
         const { data: catchData } = await supabase
           .from('catches')
-          .select('species, photo_url')
+          .select('species, photo_url, session_id')
           .eq('id', id)
           .maybeSingle()
         
@@ -357,6 +420,12 @@ export function useDeleteCatch() {
           .from('challenge_catches')
           .delete()
           .eq('catch_id', id)
+        
+        // Reverse session XP if this catch was part of a completed session
+        if (catchData?.session_id) {
+          const sessionXPReversed = await reverseSessionXP(user.id, catchData.session_id)
+          xpReversed += sessionXPReversed
+        }
         
         // Now check if challenges need to be reversed
         await reverseAffectedChallenges(

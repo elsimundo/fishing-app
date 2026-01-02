@@ -8,12 +8,15 @@ import { useProfile } from '../hooks/useProfile'
 import { ChallengeCard } from '../components/gamification/ChallengeCard'
 import { XPBar } from '../components/gamification/XPBar'
 import { WeeklySpeciesBadge } from '../components/gamification/WeeklySpeciesCard'
+import { SeasonalBanner } from '../components/gamification/SeasonalBanner'
+import { SeasonalChallengesModal } from '../components/gamification/SeasonalChallengesModal'
 import { CompetitionCard } from '../components/compete/CompetitionCard'
 import { CompetitionCardSkeleton } from '../components/skeletons/CompetitionCardSkeleton'
 import { Star, Trophy, Fish, MapPin, Target, Zap, Swords, ClipboardList, Plus, Waves, Trees, HelpCircle, Globe, Flag, ChevronDown, ChevronUp, Info } from 'lucide-react'
 import type { Challenge, UserChallenge } from '../hooks/useGamification'
 import { getCountryFlag, getCountryName } from '../utils/reverseGeocode'
 import { Callout, CalloutDescription, CalloutTitle } from '../components/ui/callout'
+import { getCurrentSeason } from '../utils/seasonalChallenges'
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: Trophy },
@@ -64,6 +67,7 @@ export default function ChallengeBoardPage() {
   const [scopeTab, setScopeTab] = useState<ScopeTab>('all')
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   const [hasSetInitialWaterType, setHasSetInitialWaterType] = useState(false)
+  const [showSeasonalModal, setShowSeasonalModal] = useState(false)
 
   const setMainTab = (tab: MainTab) => {
     setActiveTab(tab)
@@ -176,6 +180,8 @@ export default function ChallengeBoardPage() {
   // Stats
   const completedCount = userChallenges?.filter(uc => uc.completed_at).length || 0
   const totalCount = challenges?.length || 0
+  const currentSeason = getCurrentSeason()
+  const seasonalChallengesCount = filteredChallenges.filter(c => c.season === currentSeason).length
   const yourCompetitions = enteredCompetitions || []
   const availableCompetitions = (allActiveCompetitions || []).filter(
     comp => !yourCompetitions.some(entered => entered.id === comp.id)
@@ -251,6 +257,29 @@ export default function ChallengeBoardPage() {
           {/* CHALLENGES TAB */}
           {activeTab === 'challenges' && (
             <div className="space-y-4">
+              {/* How Challenges Work Info Card */}
+              <Callout className="bg-primary/5 border-primary/20">
+                <Info className="text-primary" />
+                <div>
+                  <CalloutTitle>How Challenges Work</CalloutTitle>
+                  <CalloutDescription>
+                    <div className="space-y-1.5 text-xs">
+                      <p>✓ <strong>Automatic tracking</strong> - Challenges track your catches automatically, no sign-up needed</p>
+                      <p>✓ <strong>Earn XP & level up</strong> - Complete challenges to gain experience and unlock new levels</p>
+                      <p>✓ <strong>Multiple types</strong> - Milestones, species variety, exploration, and skill challenges</p>
+                      <p>⭐ <strong>Featured challenges</strong> - Yellow star badge marks recommended priority challenges</p>
+                      <p className="text-[11px] text-muted-foreground italic mt-2">Just keep fishing - we'll track your progress!</p>
+                    </div>
+                  </CalloutDescription>
+                </div>
+              </Callout>
+
+              {/* Seasonal Banner */}
+              <SeasonalBanner 
+                activeSeasonalChallenges={seasonalChallengesCount}
+                onClick={() => setShowSeasonalModal(true)}
+              />
+
               {/* Water Type Toggle - only show if user fishes both or has no preference */}
               {(!profile?.fishing_preference || profile.fishing_preference === 'both') && (
                 <div className="flex bg-card rounded-xl p-1 border border-border">
@@ -301,7 +330,7 @@ export default function ChallengeBoardPage() {
                   }`}
                 >
                   <Globe size={14} />
-                  Global
+                  Everyone
                 </button>
                 
                 {/* User's countries */}
@@ -393,7 +422,7 @@ export default function ChallengeBoardPage() {
               </div>
               
               {/* Show completed toggle */}
-              <div className="flex items-center justify-between">
+              <div id="challenges-list" className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
                   {filteredChallenges.length} challenges
                 </span>
@@ -416,16 +445,39 @@ export default function ChallengeBoardPage() {
                   ))}
                 </div>
               ) : filteredChallenges.length === 0 ? (
-                <div className="text-center py-12">
-                  <Trophy size={48} className="mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">No challenges found</p>
-                  {!showCompleted && (
-                    <button
-                      onClick={() => setShowCompleted(true)}
-                      className="mt-2 text-sm text-primary font-medium"
-                    >
-                      Show completed challenges
-                    </button>
+                <div className="text-center py-12 px-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                    <Trophy size={32} className="text-primary" />
+                  </div>
+                  {completedCount === 0 ? (
+                    <>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">🎣 Start Your Journey</h3>
+                      <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
+                        Log your first catch to begin tracking challenges! Challenges unlock automatically - no sign-up needed.
+                      </p>
+                      <button
+                        onClick={() => navigate('/catches/new')}
+                        className="inline-flex items-center gap-2 bg-navy-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-navy-900 transition-colors"
+                      >
+                        <Fish size={16} />
+                        Log Your First Catch
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">No challenges found</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {!showCompleted ? 'Try showing completed challenges or adjusting your filters' : 'Try adjusting your filters'}
+                      </p>
+                      {!showCompleted && (
+                        <button
+                          onClick={() => setShowCompleted(true)}
+                          className="text-sm text-primary font-medium hover:underline"
+                        >
+                          Show completed challenges
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               ) : (
@@ -797,6 +849,17 @@ export default function ChallengeBoardPage() {
           )}
         </div>
       </div>
+      
+      {/* Seasonal Challenges Modal */}
+      {showSeasonalModal && (
+        <SeasonalChallengesModal
+          season={currentSeason}
+          challenges={challenges?.filter(c => c.season === currentSeason) || []}
+          userProgressMap={userProgressMap}
+          onClose={() => setShowSeasonalModal(false)}
+          onChallengeClick={(slug) => navigate(`/challenges/${slug}`)}
+        />
+      )}
     </Layout>
   )
 }

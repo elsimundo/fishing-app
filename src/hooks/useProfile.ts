@@ -20,5 +20,6 @@ export function useProfile() {
     queryKey: ['profile', user?.id],
     queryFn: () => fetchProfile(user!.id),
     enabled: Boolean(user?.id),
+    staleTime: 0, // Always fetch fresh data to show updated XP/level immediately
   })
 }

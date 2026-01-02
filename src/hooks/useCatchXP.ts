@@ -39,6 +39,7 @@ interface CatchXPInput {
   latitude?: number | null
   longitude?: number | null
   // Environmental data for condition-based challenges
+  weatherTemp?: number | null
   weatherCondition?: string | null
   windSpeed?: number | null
   moonPhase?: string | null
@@ -220,7 +221,7 @@ export function useCatchXP() {
         breakdown.releasedBonus = XP_VALUES.RELEASED_BONUS
       }
       
-      // Weekly species XP bonus check
+      // Weekly species XP bonus check (with farming prevention)
       const now = new Date()
       const dayOfWeek = now.getDay()
       const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
@@ -236,9 +237,32 @@ export function useCatchXP() {
         .maybeSingle()
       
       if (weeklyPoints) {
-        // Treat points as direct XP bonus for this species this week
-        weeklySpeciesPoints = weeklyPoints.points
-        breakdown.weeklySpeciesBonus = weeklyPoints.points
+        // Check if user has already claimed this week's bonus for this species
+        const { data: existingClaim } = await supabase
+          .from('weekly_bonus_claims')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('species', input.species)
+          .eq('week_start', weekStartStr)
+          .maybeSingle()
+        
+        // Only award bonus if not already claimed this week
+        if (!existingClaim) {
+          weeklySpeciesPoints = weeklyPoints.points
+          breakdown.weeklySpeciesBonus = weeklyPoints.points
+          
+          // Record the claim to prevent re-claiming if catch is deleted and re-logged
+          await supabase
+            .from('weekly_bonus_claims')
+            .insert({
+              user_id: user.id,
+              species: input.species,
+              week_start: weekStartStr,
+              points_awarded: weeklyPoints.points,
+            })
+            .select()
+            .single()
+        }
       }
       
       // Calculate total (before multiplier)
@@ -546,7 +570,6 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
     // Only award location challenges if session >= 15 mins
     if (sessionDurationMins >= MIN_SESSION_DURATION_MINS) {
       // Get unique locations from catches with photos in sessions >= 15 mins
-      // (rounded to ~1km precision)
       const { data: locations } = await supabase
         .from('catches')
         .select('latitude, longitude')
@@ -555,23 +578,33 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
         .not('photo_url', 'is', null) // Must have photo
       
       if (locations) {
-        const uniqueLocations = new Set(
-          locations.map(l => `${Math.round(l.latitude * 100)},${Math.round(l.longitude * 100)}`)
+        // LOCAL SPOTS: ~7 mile radius (round to 1 decimal = ~11km grid)
+        // Good for different spots on same beach, different piers, etc.
+        const localSpots = new Set(
+          locations.map(l => `${Math.round(l.latitude * 10) / 10},${Math.round(l.longitude * 10) / 10}`)
         )
         
-        // New Waters: Fish at 5 different locations
-        if (uniqueLocations.size >= 5) {
-          await completeChallenge(userId, 'new_waters', uniqueLocations.size, 5, completed, input.catchId)
+        // DISTANT LOCATIONS: ~70 mile radius (round to integer = ~111km grid)
+        // Good for different towns, counties, regions
+        const distantLocations = new Set(
+          locations.map(l => `${Math.round(l.latitude)},${Math.round(l.longitude)}`)
+        )
+        
+        // LOCAL CHALLENGES (within ~10 miles)
+        // New Waters: Fish at 5 different local spots
+        if (localSpots.size >= 5) {
+          await completeChallenge(userId, 'new_waters', localSpots.size, 5, completed, input.catchId)
         }
         
-        // Explorer: Fish at 10 different locations
-        if (uniqueLocations.size >= 10) {
-          await completeChallenge(userId, 'explorer', uniqueLocations.size, 10, completed, input.catchId)
+        // Explorer: Fish at 10 different local spots
+        if (localSpots.size >= 10) {
+          await completeChallenge(userId, 'explorer', localSpots.size, 10, completed, input.catchId)
         }
         
-        // Adventurer: Fish at 25 different locations
-        if (uniqueLocations.size >= 25) {
-          await completeChallenge(userId, 'adventurer', uniqueLocations.size, 25, completed, input.catchId)
+        // REGIONAL CHALLENGES (10+ miles apart)
+        // Adventurer: Fish at 25 different regions
+        if (distantLocations.size >= 25) {
+          await completeChallenge(userId, 'adventurer', distantLocations.size, 25, completed, input.catchId)
         }
       }
     } else {
@@ -584,7 +617,96 @@ async function checkChallenges(userId: string, input: CatchXPInput, completed: s
   await checkStreakChallenges(userId, completed)
   
   // ============================================
-  // 8. WEATHER-BASED CHALLENGES
+  // 8. WEATHER-BASED CHALLENGES (seasonal)
+  // ============================================
+  
+  // Ice Breaker: Log catches in cold conditions (temp below 5°C)
+  if (input.weatherTemp !== null && input.weatherTemp !== undefined && input.weatherTemp < 5) {
+    await incrementProgressChallenge(userId, 'winter_ice_breaker_2026', 5, completed, input.catchId)
+  }
+  
+  // Winter Night Owl: Log catches after sunset in winter (Dec-Feb)
+  if (input.caughtAt) {
+    const catchDate = new Date(input.caughtAt)
+    const month = catchDate.getMonth() // 0-11
+    const isWinter = month === 11 || month === 0 || month === 1 // Dec, Jan, Feb
+    
+    if (isWinter && input.latitude && input.longitude) {
+      // Simple sunset check: after 5pm in winter is likely after sunset
+      const hour = catchDate.getHours()
+      if (hour >= 17 || hour <= 5) { // After 5pm or before 6am
+        await incrementProgressChallenge(userId, 'winter_night_owl_2026', 5, completed, input.catchId)
+      }
+    }
+  }
+  
+  // Winter Warrior: Track sessions in winter (handled separately in session tracking)
+  // Cold Water Champion: Track unique species in winter
+  if (input.caughtAt) {
+    const catchDate = new Date(input.caughtAt)
+    const month = catchDate.getMonth()
+    const isWinter = month === 11 || month === 0 || month === 1
+    
+    if (isWinter) {
+      // Get unique species caught in winter
+      const { data: winterSpecies } = await supabase
+        .from('catches')
+        .select('species')
+        .eq('user_id', userId)
+        .gte('caught_at', '2025-12-01T00:00:00Z')
+        .lte('caught_at', '2026-02-28T23:59:59Z')
+      
+      if (winterSpecies) {
+        const uniqueSpecies = new Set(winterSpecies.map(c => c.species.toLowerCase()))
+        if (uniqueSpecies.size >= 3) {
+          await completeChallenge(userId, 'winter_cold_water_champion_2026', uniqueSpecies.size, 3, completed, input.catchId)
+        }
+      }
+    }
+  }
+  
+  // Festive Fisher: Catch on Christmas or New Year
+  if (input.caughtAt) {
+    const catchDate = new Date(input.caughtAt)
+    const dateStr = catchDate.toISOString().split('T')[0]
+    if (dateStr === '2025-12-25' || dateStr === '2026-01-01') {
+      await completeChallenge(userId, 'winter_festive_fisher_2026', 1, 1, completed, input.catchId)
+    }
+  }
+  
+  // Winter Explorer: Track unique locations in winter
+  if (input.caughtAt && input.latitude && input.longitude) {
+    const catchDate = new Date(input.caughtAt)
+    const month = catchDate.getMonth()
+    const isWinter = month === 11 || month === 0 || month === 1
+    
+    if (isWinter) {
+      const { data: winterCatches } = await supabase
+        .from('catches')
+        .select('latitude, longitude, location_name')
+        .eq('user_id', userId)
+        .gte('caught_at', '2025-12-01T00:00:00Z')
+        .lte('caught_at', '2026-02-28T23:59:59Z')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+      
+      if (winterCatches) {
+        // Count unique locations (within ~100m radius)
+        const uniqueLocations = new Set<string>()
+        winterCatches.forEach(c => {
+          const key = `${Math.round(c.latitude * 100)},${Math.round(c.longitude * 100)}`
+          uniqueLocations.add(key)
+        })
+        
+        if (uniqueLocations.size >= 5) {
+          await completeChallenge(userId, 'winter_explorer_2026', uniqueLocations.size, 5, completed, input.catchId)
+        }
+      }
+    }
+  }
+  
+  // ============================================
+  // 9. WEATHER-BASED CHALLENGES
   // ============================================
   if (input.weatherCondition) {
     const condition = input.weatherCondition.toLowerCase()

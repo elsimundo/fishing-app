@@ -7,8 +7,9 @@ import { useSavedMarks, useMarkShares, useLeaveMark } from '../hooks/useSavedMar
 import { Layout } from '../components/layout/Layout'
 import { CatchCard } from '../components/catches/CatchCard'
 import { ShareMarkModal } from '../components/marks/ShareMarkModal'
+import { EditMarkForm } from '../components/explore/MyMarksCard'
 import { ExploreMap } from '../components/map/ExploreMap'
-import { ArrowLeft, Navigation, MapPin, Calendar, Fish, Clock, Share2, Trash2, Users, X, LogOut } from 'lucide-react'
+import { ArrowLeft, Navigation, MapPin, Calendar, Fish, Clock, Share2, Trash2, Users, X, LogOut, Edit2 } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Session, Catch, SavedMark } from '../types'
 
@@ -20,8 +21,9 @@ export default function MarkDetailPage() {
   const [showManageShares, setShowManageShares] = useState(false)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [isSavingCopy, setIsSavingCopy] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   
-  const { deleteMark, createMark } = useSavedMarks()
+  const { deleteMark, createMark, updateMark } = useSavedMarks()
   const { shares, removeShare } = useMarkShares(markId)
   const leaveMark = useLeaveMark()
 
@@ -156,66 +158,46 @@ export default function MarkDetailPage() {
         {/* Header */}
         <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
           <div className="flex items-start justify-between">
-            <div>
+            <div className="flex-1">
               <h1 className="text-xl font-bold text-foreground">{mark.name}</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {mark.water_type?.charAt(0).toUpperCase()}{mark.water_type?.slice(1)} fishing spot
               </p>
             </div>
-            {isOwner && (
-              <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-400">
-                Your mark
-              </span>
-            )}
-
-      {/* Leave shared mark modal */}
-      {showLeaveModal && mark && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-card border border-border p-5 shadow-xl">
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-base font-semibold text-foreground">Leave this shared mark?</h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  You&apos;ll lose access to <span className="font-semibold">{mark.name}</span>, but your
-                  own sessions and catches at this spot will stay in your logbook.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => !isSavingCopy && setShowLeaveModal(false)}
-                className="rounded-full p-1 hover:bg-muted disabled:opacity-50"
-                disabled={isSavingCopy || leaveMark.isPending}
-              >
-                <X size={16} className="text-muted-foreground" />
-              </button>
+            <div className="flex items-center gap-2">
+              {isOwner && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    title="Edit mark"
+                  >
+                    <Edit2 size={18} />
+                  </button>
+                  <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-400">
+                    Your mark
+                  </span>
+                </>
+              )}
             </div>
+          </div>
 
-            <div className="mt-3 space-y-2">
-              <button
-                type="button"
-                onClick={() => handleConfirmLeave(true)}
-                disabled={isSavingCopy || leaveMark.isPending}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
-              >
-                {isSavingCopy ? 'Saving your mark…' : 'Save as my mark & leave'}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleConfirmLeave(false)}
-                disabled={leaveMark.isPending}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
-              >
-                {leaveMark.isPending ? 'Leaving…' : 'Just leave'}
-              </button>
+          {/* Edit Form */}
+          {isEditing && isOwner && (
+            <div className="mt-4">
+              <EditMarkForm
+                mark={mark}
+                onSubmit={(input) => {
+                  updateMark.mutate(input, {
+                    onSuccess: () => setIsEditing(false),
+                  })
+                }}
+                onCancel={() => setIsEditing(false)}
+                isSubmitting={updateMark.isPending}
+              />
             </div>
-
-            <p className="mt-3 text-center text-[11px] text-muted-foreground">
-              Your existing sessions and catches at this location will not be deleted.
-            </p>
-          </div>
-        </div>
-      )}
-          </div>
+          )}
 
           {/* Coordinates */}
           <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -318,6 +300,54 @@ export default function MarkDetailPage() {
             </div>
           )}
         </div>
+
+        {/* Leave shared mark modal */}
+        {showLeaveModal && mark && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-sm rounded-2xl bg-card border border-border p-5 shadow-xl">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">Leave this shared mark?</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    You&apos;ll lose access to <span className="font-semibold">{mark.name}</span>, but your
+                    own sessions and catches at this spot will stay in your logbook.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => !isSavingCopy && setShowLeaveModal(false)}
+                  className="rounded-full p-1 hover:bg-muted disabled:opacity-50"
+                  disabled={isSavingCopy || leaveMark.isPending}
+                >
+                  <X size={16} className="text-muted-foreground" />
+                </button>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => handleConfirmLeave(true)}
+                  disabled={isSavingCopy || leaveMark.isPending}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+                >
+                  {isSavingCopy ? 'Saving your mark…' : 'Save as my mark & leave'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleConfirmLeave(false)}
+                  disabled={leaveMark.isPending}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
+                >
+                  {leaveMark.isPending ? 'Leaving…' : 'Just leave'}
+                </button>
+              </div>
+
+              <p className="mt-3 text-center text-[11px] text-muted-foreground">
+                Your existing sessions and catches at this location will not be deleted.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="mt-4 grid grid-cols-2 gap-3">

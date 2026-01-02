@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Plus, Trash2, Navigation, Loader2, X, Share2, MapPin, Crosshair, Waves, TreePine, Droplets, Ship, Flower2, Building2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Trash2, Navigation, Loader2, X, Share2, MapPin, Crosshair, Waves, TreePine, Droplets, Ship, Flower2, Building2, Edit2 } from 'lucide-react'
 import { Callout, CalloutDescription } from '../ui/callout'
 import { useSavedMarks, useSharedMarks } from '../../hooks/useSavedMarks'
 import type { CreateMarkInput } from '../../hooks/useSavedMarks'
@@ -40,7 +40,8 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
   const [showAddForm, setShowAddForm] = useState(false)
   const [activeTab, setActiveTab] = useState<'mine' | 'shared'>('mine')
   const [sharingMark, setSharingMark] = useState<SavedMark | null>(null)
-  const { marks, isLoading, createMark, deleteMark } = useSavedMarks()
+  const [editingMark, setEditingMark] = useState<SavedMark | null>(null)
+  const { marks, isLoading, createMark, deleteMark, updateMark } = useSavedMarks()
   const { data: sharedMarks, isLoading: sharedLoading } = useSharedMarks()
 
   const hasMarks = marks.length > 0
@@ -151,12 +152,27 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
                   />
                 )}
 
+                {/* Edit form */}
+                {editingMark && (
+                  <EditMarkForm
+                    mark={editingMark}
+                    onSubmit={(input) => {
+                      updateMark.mutate(input, {
+                        onSuccess: () => setEditingMark(null),
+                      })
+                    }}
+                    onCancel={() => setEditingMark(null)}
+                    isSubmitting={updateMark.isPending}
+                  />
+                )}
+
                 {/* Marks list */}
                 {marks.map((mark) => (
                   <MarkItem
                     key={mark.id}
                     mark={mark}
                     onSelect={onSelectMark}
+                    onEdit={() => setEditingMark(mark)}
                     onDelete={() => deleteMark.mutate(mark.id)}
                     isDeleting={deleteMark.isPending}
                     // Always allow sharing for your own marks (private, public, or friends)
@@ -212,6 +228,7 @@ export function MyMarksCard({ onSelectMark, onAddMark, onShowOnMap }: MyMarksCar
 interface MarkItemProps {
   mark: SavedMark
   onSelect?: (mark: SavedMark) => void
+  onEdit?: () => void
   onDelete: () => void
   isDeleting: boolean
   onShare?: () => void
@@ -220,7 +237,7 @@ interface MarkItemProps {
   onShowOnMap?: (mark: SavedMark) => void
 }
 
-function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sharedByName, onShowOnMap }: MarkItemProps) {
+function MarkItem({ mark, onSelect, onEdit, onDelete, isDeleting, onShare, isShared, sharedByName, onShowOnMap }: MarkItemProps) {
   return (
     <div
       className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-background p-3 transition-colors hover:bg-muted"
@@ -251,6 +268,19 @@ function MarkItem({ mark, onSelect, onDelete, isDeleting, onShare, isShared, sha
         )}
       </div>
       <div className="flex items-center gap-1">
+        {onEdit && !isShared && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onEdit()
+            }}
+            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+            title="Edit mark"
+          >
+            <Edit2 size={14} />
+          </button>
+        )}
         {onShare && (
           <button
             type="button"
@@ -507,4 +537,116 @@ function AddMarkForm({ onSubmit, onCancel, isSubmitting, initialLat, initialLng 
   )
 }
 
-export { AddMarkForm }
+// Edit Mark Form Component
+interface EditMarkFormProps {
+  mark: SavedMark
+  onSubmit: (input: { id: string; name?: string; water_type?: SavedMarkWaterType; notes?: string; privacy_level?: MarkPrivacyLevel }) => void
+  onCancel: () => void
+  isSubmitting: boolean
+}
+
+function EditMarkForm({ mark, onSubmit, onCancel, isSubmitting }: EditMarkFormProps) {
+  const [name, setName] = useState(mark.name)
+  const [waterType, setWaterType] = useState<SavedMarkWaterType>(mark.water_type)
+  const [notes, setNotes] = useState(mark.notes || '')
+  const [privacyLevel, setPrivacyLevel] = useState<MarkPrivacyLevel>(mark.privacy_level)
+
+  const canSubmit = name.trim()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!canSubmit) return
+
+    onSubmit({
+      id: mark.id,
+      name: name.trim(),
+      water_type: waterType,
+      notes: notes.trim() || undefined,
+      privacy_level: privacyLevel,
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border-2 border-primary/30 bg-primary/5 p-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">Edit Mark</h3>
+        <button type="button" onClick={onCancel} className="text-muted-foreground hover:text-foreground">
+          <X size={16} />
+        </button>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Name *</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. The Wreck, Bass Rock"
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Water Type</label>
+        <select
+          value={waterType}
+          onChange={(e) => setWaterType(e.target.value as SavedMarkWaterType)}
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+        >
+          {Object.entries(WATER_TYPE_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Notes (optional)</label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Any notes about this spot..."
+          rows={2}
+          className="w-full resize-none rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Privacy</label>
+        <select
+          value={privacyLevel}
+          onChange={(e) => setPrivacyLevel(e.target.value as MarkPrivacyLevel)}
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+        >
+          <option value="private">🔒 Private - Only you</option>
+          <option value="friends">👥 Friends - Share with specific people</option>
+          <option value="public">🌍 Public - Anyone can see (location offset applied)</option>
+        </select>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground">
+        💡 GPS location cannot be changed. Delete and create a new mark if needed.
+      </p>
+
+      <div className="flex gap-2 pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 rounded-lg border border-border bg-muted py-2 text-xs font-medium text-foreground hover:bg-muted/70"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={!canSubmit || isSubmitting}
+          className="flex-1 rounded-lg bg-navy-800 py-2 text-xs font-semibold text-white hover:bg-navy-900 disabled:bg-navy-400"
+        >
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+export { AddMarkForm, EditMarkForm }

@@ -23,6 +23,9 @@ export interface Challenge {
   scope_countries: string[] | null
   starts_at: string | null
   ends_at: string | null
+  // Seasonal challenge fields
+  season: 'spring' | 'summer' | 'autumn' | 'winter' | 'special' | null
+  event_type: 'seasonal' | 'monthly' | 'annual' | 'limited' | null
 }
 
 export interface UserChallenge {
@@ -166,18 +169,23 @@ export function useUserXP() {
   return useQuery({
     queryKey: ['user-xp', user?.id],
     queryFn: async () => {
-      if (!user) return null
+      if (!user) return { xp: 0, level: 1 }
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('xp, level, total_challenges_completed')
+        .select('xp, level')
         .eq('id', user.id)
         .single()
       
+      console.log('🎮 useUserXP fetched:', { data, error, userId: user.id })
+      
       if (error) throw error
-      return data as { xp: number; level: number; total_challenges_completed: number }
+      return { xp: data.xp || 0, level: data.level || 1 }
     },
     enabled: !!user,
+    staleTime: 0, // Always fetch fresh data to show updated XP/level immediately
+    gcTime: 0, // Don't cache at all
+    refetchOnMount: 'always', // Always refetch when component mounts
   })
 }
 
@@ -227,7 +235,7 @@ export function useChallenges(options: UseChallengesOptions | 'saltwater' | 'fre
       if (error) throw error
       return data as Challenge[]
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data to show new challenges immediately
   })
 }
 

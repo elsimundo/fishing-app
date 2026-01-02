@@ -9,8 +9,11 @@ import { useFreshwaterEnabled } from '../hooks/useFeatureFlags'
 import { useTheme } from '../hooks/useTheme'
 import { Switch } from '../components/ui/switch'
 import { useWeightUnit } from '../hooks/useWeightUnit'
+import { useNavigate } from 'react-router-dom'
+import { ChevronRight, History } from 'lucide-react'
 
 export default function SettingsPage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { data: profile, refetch: refetchProfile } = useProfile()
   const [showFishingPrefs, setShowFishingPrefs] = useState(false)
@@ -140,6 +143,25 @@ export default function SettingsPage() {
               />
             </div>
           </div>
+        </section>
+
+        {/* XP History */}
+        <section className="rounded-2xl bg-card shadow-sm border border-border overflow-hidden">
+          <button
+            onClick={() => navigate('/xp-history')}
+            className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <History size={20} className="text-primary" />
+              </div>
+              <div className="text-left">
+                <h2 className="text-sm font-semibold text-foreground">XP History</h2>
+                <p className="text-xs text-muted-foreground">View your XP transaction history</p>
+              </div>
+            </div>
+            <ChevronRight size={20} className="text-muted-foreground" />
+          </button>
         </section>
 
         <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
@@ -319,19 +341,25 @@ export default function SettingsPage() {
               </button>
             </div>
           </section>
+
         )}
 
-        {/* Privacy & Data Sharing */}
-        <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
-          <div className="mb-4">
-            <h2 className="text-sm font-semibold text-foreground">Privacy & Data Sharing</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Control how your fishing data is used and displayed.
-            </p>
-          </div>
+        {/* Idle session settings */}
+        {idlePrefs && (
+          <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Session idle time</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Control how long we keep a session running with no activity before warning you and then
+                  automatically ending it. Times are in <span className="font-semibold">hours</span>. We&apos;ll use
+                  sensible defaults if you leave these alone.
+                </p>
+              </div>
+            </div>
 
-          {/* Default Location Privacy */}
-          <div className="mb-4 rounded-lg border border-border bg-background p-3">
+            {/* Default Location Privacy */}
+            <div className="mb-4 rounded-lg border border-border bg-background p-3">
             <h3 className="text-xs font-semibold text-foreground mb-2">Default Location Privacy</h3>
             <p className="text-xs text-muted-foreground mb-3">
               This controls how your session locations appear on the map. You can change this per-session when creating it.
@@ -358,20 +386,20 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          {/* Data Sharing Toggle */}
-          <div className="rounded-lg border border-border bg-background p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                <h3 className="text-xs font-semibold text-foreground">Community Data Sharing</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Help other anglers by contributing anonymized data to Local Intel and fishing insights. Your exact locations are never shared - only aggregated stats like species caught, baits used, and best times.
-                </p>
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              <strong>What's shared:</strong> Species, baits, catch times, weather conditions (all anonymized)
-              <br />
-              <strong>What's NOT shared:</strong> Your exact locations, personal info, or session details
-            </p>
-              </div>
+            {/* Data Sharing Toggle */}
+            <div className="rounded-lg border border-border bg-background p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <h3 className="text-xs font-semibold text-foreground">Community Data Sharing</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Help other anglers by contributing anonymized data to Local Intel and fishing insights. Your exact locations are never shared - only aggregated stats like species caught, baits used, and best times.
+                  </p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    <strong>What's shared:</strong> Species, baits, catch times, weather conditions (all anonymized)
+                    <br />
+                    <strong>What's NOT shared:</strong> Your exact locations, personal info, or session details
+                  </p>
+                </div>
               <button
                 type="button"
                 onClick={() => updateDataSharing(!(profile?.share_data_for_insights ?? true))}
@@ -387,11 +415,12 @@ export default function SettingsPage() {
                 />
               </button>
             </div>
-            <p className="mt-3 text-[11px] rounded-lg border border-primary/30 bg-primary/10 p-2 text-primary">
-              ✅ <strong>Currently {profile?.share_data_for_insights ?? true ? 'enabled' : 'disabled'}:</strong> {profile?.share_data_for_insights ?? true ? 'Your anonymized data helps the community' : 'Your data is completely private'}
-            </p>
-          </div>
-        </section>
+              <p className="mt-3 text-[11px] rounded-lg border border-primary/30 bg-primary/10 p-2 text-primary">
+                ✅ <strong>Currently {profile?.share_data_for_insights ?? true ? 'enabled' : 'disabled'}:</strong> {profile?.share_data_for_insights ?? true ? 'Your anonymized data helps the community' : 'Your data is completely private'}
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* Account settings placeholder */}
         <section className="rounded-2xl bg-card p-4 shadow-sm border border-border">

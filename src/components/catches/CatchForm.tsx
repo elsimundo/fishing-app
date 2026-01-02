@@ -374,11 +374,18 @@ export function CatchForm({
     setValue('weight_kg', hasWeight ? lbsOzToKg(pounds, ounces).toFixed(3) : '', { shouldValidate: false })
   }, [imperialWeight, setValue, weightUnit])
 
-  // Track species changes to update speciesId
+  // Track species changes to update speciesId and clear weight for no-weight species
   useEffect(() => {
     const species = SPECIES.find((s) => s.displayName === watchedSpecies)
     setSpeciesId(species?.id ?? null)
-  }, [watchedSpecies])
+    
+    // Clear weight for species that shouldn't have weight (too small to weigh accurately)
+    const noWeightSpecies = ['Bass (Under 25cm / Schoolie)', 'Mackerel']
+    if (watchedSpecies && noWeightSpecies.includes(watchedSpecies)) {
+      setValue('weight_kg', '', { shouldValidate: false })
+      setImperialWeight({ pounds: '', ounces: '' })
+    }
+  }, [watchedSpecies, setValue])
 
   // Handle prefilled data from Fish Identifier
   useEffect(() => {
@@ -608,16 +615,17 @@ export function CatchForm({
             catchId: catchData.id,
             species: catchData.species,
             weightKg: catchData.weight_kg,
-            weightLb: catchData.weight_kg ? catchData.weight_kg * 2.205 : null,
             sessionId: catchData.session_id,
             hasPhoto: !!catchData.photo_url,
             caughtAt: catchData.caught_at,
             latitude: catchData.latitude,
             longitude: catchData.longitude,
+            weatherTemp: catchData.weather_temp,
             weatherCondition: catchData.weather_condition,
             windSpeed: catchData.wind_speed,
             moonPhase: catchData.moon_phase,
             countryCode,
+            released: catchData.returned,
           }).then((result) => {
             if (result.challengesCompleted.length > 0) {
               celebrateChallenges(result.challengesCompleted, {
@@ -759,17 +767,17 @@ export function CatchForm({
         catchId: data.id,
         species: data.species,
         weightKg: data.weight_kg,
-        weightLb: data.weight_kg ? data.weight_kg * 2.205 : null,
         sessionId: data.session_id,
         hasPhoto: !!data.photo_url,
         caughtAt: data.caught_at,
         latitude: data.latitude,
         longitude: data.longitude,
+        weatherTemp: data.weather_temp,
         weatherCondition: data.weather_condition,
         windSpeed: data.wind_speed,
         moonPhase: data.moon_phase,
         countryCode: payload.country_code,
-        released: returned === 'released' ? true : returned === 'kept' ? false : undefined,
+        released: data.returned,
       }).then((result) => {
         if (result.challengesCompleted.length > 0) {
           celebrateChallenges(result.challengesCompleted, {
@@ -1674,20 +1682,36 @@ export function CatchForm({
           </>
         )}
 
-        {/* Hide Location Option */}
-        <div className="sm:col-span-2">
-          <label className="flex items-center gap-2 cursor-pointer">
+        {/* Privacy Information */}
+        <div className="sm:col-span-2 space-y-3">
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-xs font-medium text-foreground mb-2">🔒 Your privacy is protected</p>
+            <div className="space-y-1.5 text-[11px] text-muted-foreground">
+              <p className="flex items-start gap-2">
+                <span className="text-emerald-500 font-bold">✓</span>
+                <span><strong>Always shared:</strong> Species, weight, photo, general area (e.g., "Cornwall")</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="text-red-500 font-bold">✗</span>
+                <span><strong>Never shared:</strong> Your exact GPS coordinates - we keep your secret spots secret!</span>
+              </p>
+            </div>
+          </div>
+
+          <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={hideExactLocation}
               onChange={(e) => setHideExactLocation(e.target.checked)}
-              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+              className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
             />
-            <span className="text-xs text-foreground">Hide exact location (show region only)</span>
+            <div className="flex-1">
+              <span className="text-xs font-medium text-foreground">Hide spot name too</span>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                By default, we show your spot name (e.g., "Chesil Beach"). Check this to hide it and only show the region (e.g., "Dorset").
+              </p>
+            </div>
           </label>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            Your exact GPS coordinates are never shared publicly. This option hides the specific spot name.
-          </p>
         </div>
       </div>
 
